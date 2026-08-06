@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SVA Insta-Vorlagen 6.2 (Tor Hybrid Edition)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #005f73;
+            --secondary: #000000;
+            --bg-color: #f4f4f9;
+        }
+        
+        /* APP-LAYOUT */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh; /* Dynamic Viewport Height speziell für iPhone/iOS Safari */
+            overflow: hidden; 
+        }
+
+        /* SICHTBARE SCROLLLEISTE FÜR IPHONE & MOBILE BROWSER */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #003f4d;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: row;
+            flex-grow: 1;
+            overflow: hidden; 
+        }
+
+        .sidebar {
+            width: 350px;
+            background: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; /* Smooth Scrolling auf iOS */
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            height: 100%;
+        }
+
+        .team-switch-container {
+            display: flex;
+            gap: 5px;
+            background: #eee;
+            padding: 5px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        .team-tab-btn {
+            flex: 1;
+            background: transparent;
+            color: #333;
+            border: none;
+            padding: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .team-tab-btn.active {
+            background: black;
+            color: white;
+        }
+
+        .preview-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; /* Smooth Scrolling auf iOS */
+            box-sizing: border-box;
+            height: 100%;
+            gap: 40px;
+        }
+
+        .bottom-bar {
+            flex-shrink: 0;
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .tabs { 
+            display: flex; 
+            gap: 5px; 
+            width: 100%; 
+            max-width: 650px;
+            flex-wrap: wrap; 
+        }
+        .tab-btn { 
+            flex: 1; 
+            background: #ddd; 
+            color: black; 
+            margin: 0; 
+            padding: 10px 2px;
+            font-size: 11px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            min-width: 15%; 
+        }
+        .tab-btn.active { background: var(--primary); color: white; }
+
+        .mobile-toggle-btn {
+            display: none; 
+            background-color: #2a9d8f;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid var(--primary); padding-bottom: 5px; margin-bottom: 20px;}
+        
+        .control-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        optgroup { font-weight: bold; color: var(--primary); }
+        input[type="file"] {
+            width: 100%;
+            padding: 5px 0;
+            font-size: 14px;
+        }
+        
+        .download-btn { 
+            background-color: #bb3e03; 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            width: 400px; 
+            max-width: 100%; 
+        }
+        .download-btn:hover { background-color: #9d3302; }
+
+        .editor-section { display: none; }
+        .editor-section.active { display: block; }
+
+        .template-container { display: none; width: 100%; } 
+        .template-container.active { display: flex; flex-direction: column; align-items: center; }
+
+        .preview-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .preview-label-tag {
+            background: #333;
+            color: white;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- VORLAGEN DESIGN --- */
+        .post-template {
+            width: 400px;
+            max-width: 100%;
+            height: 400px;
+            background-color: var(--primary);
+            background-image: url('Hintergrund_Ankündigung.jpg');
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #ccc;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            box-sizing: border-box;
+        }
+
+        .post-story-template {
+            width: 400px;
+            max-width: 100%;
+            height: 711px;
+            background-color: var(--primary);
+            background-image: url('Hintergrund_Ankündigung.jpg');
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #ccc;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            box-sizing: border-box;
+        }
+
+        .team-logos { display: flex; align-items: center; gap: 30px; margin: 20px 0; }
+        .logo { 
+            width: 80px; height: 80px; background-color: white; border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; color: black; 
+            font-weight: bold; text-align: center; text-shadow: none; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); font-size: 12px; word-wrap: break-word; 
+            padding: 5px; box-sizing: border-box; object-fit: contain;
+        }
+        
+        .story-template {
+            width: 400px;
+            max-width: 100%;
+            height: 711px; 
+            background-color: var(--primary);
+            background-image: url('Hintergrund_Ankündigung.jpg');
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #ccc;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .story-wappen-top-right {
+            position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; background-color: black; border-radius: 50%; padding: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.4); object-fit: contain; z-index: 5;
+        }
+
+        .story-title {
+            margin-top: 20px; margin-bottom: 0; font-size: 2.2rem; text-transform: uppercase; text-align: center; font-weight: bold; letter-spacing: 2px;
+        }
+
+        .coaches-container {
+            position: absolute;
+            bottom: 75px; 
+            left: 20px;
+            z-index: 5;
+            text-align: left;
+        }
+        .coaches-label {
+            font-size: 10px; color: var(--secondary); font-weight: bold; margin-bottom: 5px; letter-spacing: 1px;
+        }
+        .coaches-profiles {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .coaches-images {
+            display: flex; flex-direction: column; gap: 4px; 
+        }
+        .coaches-images img {
+            width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+        }
+        .coaches-names {
+            font-size: 11px; font-weight: bold; line-height: 1.4;
+        }
+
+        .pitch { width: 90%; flex-grow: 1; margin-top: 10px; margin-bottom: 15px; display: flex; flex-direction: column-reverse; justify-content: space-around; z-index: 2;}
+        .row { display: flex; gap: 15px; justify-content: center; width: 100%; }
+        .player-card { display: flex; flex-direction: column; align-items: center; width: 60px; }
+        .player-img { width: 45px; height: 45px; background-color: #ddd; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);}
+        .player-name { text-align: center; font-size: 11px; margin-top: 4px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 2px 5px; border-radius: 3px; }
+
+        .bench-container { width: 100%; background: rgba(0,0,0,0.6); padding: 10px; margin-top: auto; box-sizing: border-box; text-align: center; z-index: 3;}
+        .bench-title { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: var(--secondary); }
+        .bench-list { font-size: 11px; line-height: 1.4; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+
+        /* Tor Layout */
+        .tor-content {
+            display: flex; flex-direction: column; align-items: center; width: 100%; z-index: 2; margin-top: 50px; 
+        }
+        .tor-wappen { width: 100px; height: 100px; background-color: black; border-radius: 50%; padding: 5px; object-fit: contain; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        .tor-title { font-size: 3.2rem; font-weight: bold; color: var(--secondary); margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 2px; }
+        .tor-player-name { font-size: 1.4rem; font-weight: bold; margin: 0 0 20px 0; text-align: center; line-height: 1.3; }
+        .tor-details { background: rgba(0,0,0,0.6); padding: 12px 25px; border-radius: 10px; font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); text-shadow: none; }
+        
+        .tor-player-img-small {
+            position: absolute; 
+            bottom: 20px; 
+            right: 20px; 
+            max-width: 220px; 
+            max-height: 320px; 
+            width: auto; 
+            height: auto; 
+            border-radius: 10px; 
+            object-fit: contain; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6); 
+            z-index: 3; 
+            background-color: transparent;
+        }
+
+        /* KADER LAYOUT LINKS / RECHTE SPALTE */
+        .kader-layout {
+            display: flex; width: 100%; height: 100%; box-sizing: border-box; z-index: 2;
+        }
+        .kader-left {
+            width: 40%; height: 100%; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; border-right: 1px solid rgba(255,255,255,0.2); font-size: 11px; text-align: center;
+        }
+        .kader-right {
+            width: 60%; height: 100%; padding: 20px 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;
+        }
+        .kader-logos-big-wrap {
+            display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 15px; margin-top: 5px; width: 100%;
+        }
+        .kader-logo-big {
+            width: 72px; height: 72px; background-color: black; border-radius: 50%; object-fit: contain; box-shadow: 0 4px 10px rgba(0,0,0,0.5); padding: 4px; box-sizing: border-box;
+        }
+        .kader-grid-pitch {
+            width: 100%; display: flex; flex-wrap: wrap; gap: 10px 6px; align-content: flex-start; justify-content: center;
+        }
+        .kader-info-block {
+            width: 100%; 
+            background: rgba(255, 255, 255, 0.88); 
+            padding: 8px; 
+            border-radius: 8px; 
+            margin-bottom: 8px; 
+            box-sizing: border-box; 
+            text-align: left; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .kader-info-title { 
+            font-size: 9px; 
+            color: #0a2540; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            margin-bottom: 2px; 
+            letter-spacing: 0.5px;
+        }
+        .kader-info-value { 
+            font-size: 12px; 
+            font-weight: bold; 
+            color: #111111; 
+            word-wrap: break-word; 
+        }
+        
+        .kader-fixed-text {
+            background: rgba(187, 62, 3, 0.7); font-size: 10px; line-height: 1.3; font-weight: bold; padding: 8px; border-radius: 6px; text-align: center; box-sizing: border-box; width: 100%; margin-top: 4px;
+        }
+        
+        .kader-grid-item {
+            width: 52px; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px;
+        }
+        .kader-grid-img {
+            width: 48px; height: 48px; border-radius: 50%; border: 2px solid white; object-fit: cover; box-shadow: 0 3px 6px rgba(0,0,0,0.5); background-color: #ddd;
+        }
+        .kader-grid-name {
+            font-size: 9px; font-weight: bold; text-align: center; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); line-height: 1.1; margin-top: 3px; width: 100%; word-wrap: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+
+        /* --- ERWEITERTES ECKBALL TAKTIK SPIELFELD (800x560px) --- */
+        .eckball-board {
+            width: 800px;
+            max-width: 100%;
+            height: 560px;
+            background: #ffffff;
+            border: 3px solid #111111;
+            position: relative;
+            box-sizing: border-box;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .eckball-svg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .eckball-info-banner {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1.5px solid #000;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            z-index: 4;
+            max-width: 250px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            line-height: 1.35;
+        }
+
+        /* SEITENLEISTE RECHTS AUSSERHALB DES SPIELFELDS */
+        .eckball-legend-container {
+            position: absolute;
+            top: 15px;
+            left: 575px;
+            width: 210px;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            font-family: Arial, sans-serif;
+            text-transform: uppercase;
+        }
+
+        .eckball-main-header {
+            font-size: 26px;
+            font-weight: 900;
+            color: #111111;
+            letter-spacing: 1px;
+            line-height: 1;
+            font-family: 'Arial Black', Impact, sans-serif;
+            border-bottom: 2px solid #111111;
+            padding-bottom: 4px;
+            width: 100%;
+        }
+
+        .legend-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.2;
+            width: 100%;
+        }
+
+        .legend-title {
+            font-size: 10px;
+            font-weight: 900;
+            color: #111111;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-value {
+            font-size: 10px;
+            font-weight: 800;
+            color: #444444;
+            padding-left: 6px;
+            letter-spacing: 0.5px;
+            word-wrap: break-word;
+        }
+
+        /* DRAGGABLE SPIELER NODES & PFEIL ANKERPUNKTE */
+        .eckball-player-node {
+            position: absolute;
+            z-index: 6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .eckball-player-node:active {
+            cursor: grabbing;
+            z-index: 100 !important;
+        }
+
+        .eckball-player-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid #000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            object-fit: cover;
+            background-color: #ddd;
+            pointer-events: none;
+        }
+
+        .arrow-handle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: move;
+            z-index: 10;
+            touch-action: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            transition: transform 0.1s;
+        }
+
+        .arrow-handle.selected {
+            transform: translate(-50%, -50%) scale(1.4);
+            border-color: #f1c40f;
+            box-shadow: 0 0 10px #f1c40f;
+        }
+
+        .eckball-board.exporting .arrow-handle {
+            display: none !important;
+        }
+
+        .copy-action-btn {
+            background: #005f73;
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 5px;
+            margin-bottom: 10px;
+        }
+        .copy-action-btn:hover {
+            background: #003f4d;
+        }
+
+        .role-select-inline {
+            font-size: 11px;
+            padding: 4px;
+            margin-top: 3px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: #fafafa;
+        }
+
+        .empty-placeholder { min-height: 1.5em; }
+
+        /* --- MOBILE ANSICHT --- */
+        @media (max-width: 800px) {
+            .sidebar { width: 100%; padding-bottom: 40px; }
+            .preview-area { width: 100%; display: none; padding-top: 20px; padding-bottom: 40px;}
+            body.show-preview .sidebar { display: none; }
+            body.show-preview .preview-area { display: flex; }
+            .mobile-toggle-btn { display: block; } 
+            .post-template, .story-template, .post-story-template { transform: scale(0.85); transform-origin: top center; }
+            .eckball-board { transform: scale(0.72); transform-origin: top center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        
+        <!-- LINKE SPALTE: BEARBEITUNGSMENÜ -->
+        <div class="sidebar">
+            
+            <!-- GLOBALER TEAM SWITCHER -->
+            <div class="team-switch-container">
+                <button class="team-tab-btn active" id="btn-team-m1" onclick="switchTeam('m1')">1. Mannschaft</button>
+                <button class="team-tab-btn" id="btn-team-m2" onclick="switchTeam('m2')">2. Mannschaft</button>
+            </div>
+            
+            <!-- EDITOR: ANKÜNDIGUNG -->
+            <div id="editor-post" class="editor-section active">
+                <h2>Spielankündigung</h2>
+                <div class="control-group">
+                    <label>Spielort (Reihenfolge)</label>
+                    <select id="in-post-venue" onchange="updateMatchup()">
+                        <option value="heim">Heimspiel (Wir zuerst)</option>
+                        <option value="auswaerts">Auswärtsspiel (Gegner zuerst)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Gegner Name</label>
+                    <input type="text" id="in-post-opponent" value="Rechberg" oninput="updateMatchup()">
+                </div>
+                <div class="control-group">
+                    <label>Gegner Wappen (aus Galerie hochladen)</label>
+                    <input type="file" id="in-post-opponent-file" accept="image/*" onchange="handleFileUpload(event)">
+                </div>
+                <div class="control-group">
+                    <label>Titel (wird automatisch angepasst)</label>
+                    <input type="text" id="in-post-title" value="HEIMSPIEL" oninput="updatePostFields()">
+                </div>
+                <div class="control-group">
+                    <label>Datum</label>
+                    <input type="text" id="in-post-date" value="" placeholder="z.B. Sonntag, 07.06." oninput="updateAllDates(this.value)">
+                </div>
+                <div class="control-group">
+                    <label>Uhrzeit</label>
+                    <input type="text" id="in-post-time" value="" placeholder="z.B. 15:00 Uhr" oninput="updatePostFields()">
+                </div>
+                <div class="control-group">
+                    <label>Ort</label>
+                    <input type="text" id="in-post-loc" value="" placeholder="z.B. Sportplatz am Wald" oninput="updatePostFields()">
+                </div>
+            </div>
+
+            <!-- EDITOR: AUFSTELLUNG -->
+            <div id="editor-story" class="editor-section">
+                <h2>Aufstellung</h2>
+                <div class="control-group">
+                    <label>Coaches (Trainer)</label>
+                    <select id="in-story-coaches" onchange="updateCoaches(); saveToLocalStorage();">
+                        <option value="1. Mannschaft">1. Mannschaft</option>
+                        <option value="2. Mannschaft">2. Mannschaft</option>
+                        <option value="none">Keine</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Formation</label>
+                    <select id="formation-select" onchange="buildFormation()">
+                        <option value="4-4-2">4-4-2</option>
+                        <option value="4-2-3-1">4-2-3-1</option>
+                        <option value="3-5-2">3-5-2</option>
+                    </select>
+                </div>
+                <div id="starter-controls"></div>
+                <h2 style="margin-top: 20px;">Ersatzbank</h2>
+                <div id="bench-controls"></div>
+            </div>
+
+            <!-- EDITOR: TOR -->
+            <div id="editor-tor" class="editor-section">
+                <h2>Neues Tor</h2>
+                <div id="tor-player-container"></div>
+                <div class="control-group">
+                    <label>Neuer Spielstand (Wir : Gegner)</label>
+                    <input type="text" id="in-tor-score" value="1 : 0" oninput="updateTor()">
+                </div>
+                <div class="control-group">
+                    <label>Spielminute</label>
+                    <input type="text" id="in-tor-minute" value="12. Min" oninput="updateTor()">
+                </div>
+            </div>
+
+            <!-- EDITOR: ERGEBNIS -->
+            <div id="editor-ergebnis" class="editor-section">
+                <h2>Ergebnis / Spielstand</h2>
+                <div class="control-group">
+                    <label>Überschrift (wird automatisch angepasst)</label>
+                    <input type="text" id="in-ergebnis-title" value="ENDERGEBNIS" oninput="updateErgebnis()">
+                </div>
+                <div class="control-group">
+                    <label>Aktueller Spielstand (Wir : Gegner)</label>
+                    <input type="text" id="in-ergebnis-score" value="3 : 1" oninput="updateErgebnis()">
+                </div>
+                <div class="control-group">
+                    <label>Optionaler Zusatztext</label>
+                    <input type="text" id="in-ergebnis-text" value="Auswärtssieg!" oninput="updateErgebnis()">
+                </div>
+            </div>
+
+            <!-- EDITOR: KADER -->
+            <div id="editor-kader" class="editor-section">
+                <h2>Kader & Spieltagsdetails</h2>
+                <div class="control-group">
+                    <label>Treffpunkt</label>
+                    <input type="text" id="in-kader-meeting" value="13:45 Uhr Kabine" oninput="updateText('out-kader-meeting', this.value); saveToLocalStorage();">
+                </div>
+                <div class="control-group">
+                    <label>Trikotfarbe</label>
+                    <input type="text" id="in-kader-jersey" value="Blau / Schwarz" oninput="updateText('out-kader-jersey', this.value); saveToLocalStorage();">
+                </div>
+                <div id="kader-duty-container"></div>
+                <h3 style="margin-top:20px; border-bottom:1px solid #ccc; padding-bottom:5px;">Spieler auswählen (bis zu 20)</h3>
+                <div id="kader-controls"></div>
+            </div>
+
+            <!-- EDITOR: ECKBÄLLE (UNABHÄNGIGE SELEKTION PRO VARIANTE) -->
+            <div id="editor-eckball" class="editor-section">
+                <h2>Eckball Taktik (Rechberg)</h2>
+                <div class="control-group">
+                    <label>Variante auswählen</label>
+                    <select id="in-eckball-variant" onchange="onEckballVariantChange();">
+                        <option value="v1">Variante 1 - Schuss</option>
+                        <option value="v2">Variante 2 - Kurz kurz</option>
+                        <option value="v3">Variante 3 - Block</option>
+                        <option value="v4">Variante 4 - Abgesetzt</option>
+                    </select>
+                </div>
+
+                <!-- KOPIER BUTTONS -->
+                <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px;">
+                    <button type="button" class="copy-action-btn" onclick="copyEckballFromV1()">📋 Von Var. 1 kopieren</button>
+                    <button type="button" class="copy-action-btn" style="background:#2a9d8f;" onclick="copyEckballToAll()">🚀 Auf alle kopieren</button>
+                </div>
+
+                <!-- PFEIL WERKZEUGE -->
+                <h3 style="margin-top:15px; border-bottom:1px solid #ccc; padding-bottom:5px;">Pfeile & Werkzeuge</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
+                    <button type="button" class="copy-action-btn" style="background:#0099ff;" onclick="addArrow('blue')">➕ Blauer Pfeil</button>
+                    <button type="button" class="copy-action-btn" style="background:#cc0000;" onclick="addArrow('red')">➕ Roter Pfeil</button>
+                    <button type="button" class="copy-action-btn" style="background:#d90429;" onclick="deleteSelectedArrow()">🗑️ Pfeil löschen</button>
+                    <button type="button" class="copy-action-btn" style="background:#6c757d;" onclick="resetVariantArrows()">🔄 Pfeile zurücksetzen</button>
+                </div>
+
+                <p style="font-size:11px; color:#555; background:#eef6f8; padding:8px; border-radius:5px; margin-top:0;">
+                    💡 <b>Bedienung:</b> Verschiebe **Spieler-Icons** oder ziehe an den **Ankerpunkten der Pfeile**, um jeden Laufweg anzupassen!
+                </p>
+
+                <h3 style="margin-top:15px; border-bottom:1px solid #ccc; padding-bottom:5px;">Akteure an der Ecke</h3>
+                <div id="eckball-shooters-controls"></div>
+
+                <h3 style="margin-top:15px; border-bottom:1px solid #ccc; padding-bottom:5px;">Zentraler Spieler (11er bis 5er)</h3>
+                <div id="eckball-center-controls"></div>
+
+                <h3 style="margin-top:15px; border-bottom:1px solid #ccc; padding-bottom:5px;">Einläufer im Strafraum (4 Spieler)</h3>
+                <div id="eckball-strikers-controls"></div>
+
+                <h3 style="margin-top:15px; border-bottom:1px solid #ccc; padding-bottom:5px;">Absicherungsdreieck am Mittelkreis</h3>
+                <div id="eckball-defenders-controls"></div>
+            </div>
+
+        </div>
+
+        <!-- RECHTE SPALTE: GRAFIK-VORSCHAU -->
+        <div class="preview-area">
+            
+            <!-- VORSCHAU: ANKÜNDIGUNG (BEITRAG & STORY) -->
+            <div id="view-post" class="template-container active">
+                
+                <!-- 1:1 POST FORMAT -->
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📷 Feed-Beitrag (1:1 Quadratformat)</div>
+                    <div id="capture-post" class="post-template">
+                        <h1 id="out-post-title" style="margin-bottom: 20px;">HEIMSPIEL</h1>
+                        <div class="team-logos" id="team-logos-post-container"></div>
+                        <h3 id="out-post-date" class="empty-placeholder" style="margin-top: 20px; margin-bottom: 0;"></h3>
+                        <h3 id="out-post-time" class="empty-placeholder" style="margin-top: 5px; margin-bottom: 15px;"></h3>
+                        <p id="out-post-loc" class="empty-placeholder" style="margin-top: 0;"></p>
+                    </div>
+                    <button class="download-btn" onclick="downloadImage('capture-post', 'spielankuendigung_post.png')">📥 Post Herunterladen</button>
+                </div>
+
+                <!-- 9:16 STORY FORMAT -->
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📱 Instagram Story (9:16 Hochformat)</div>
+                    <div id="capture-post-story" class="post-story-template">
+                        <h1 id="out-post-story-title" style="margin-bottom: 30px; font-size: 2.5rem;">HEIMSPIEL</h1>
+                        <div class="team-logos" id="team-logos-post-story-container" style="transform: scale(1.2); margin: 40px 0;"></div>
+                        <h2 id="out-post-story-date" class="empty-placeholder" style="margin-top: 30px; margin-bottom: 0; font-size: 1.8rem;"></h2>
+                        <h3 id="out-post-story-time" class="empty-placeholder" style="margin-top: 10px; margin-bottom: 20px; font-size: 1.4rem;"></h3>
+                        <p id="out-post-story-loc" class="empty-placeholder" style="margin-top: 0; font-size: 1.2rem;"></p>
+                    </div>
+                    <button class="download-btn" onclick="downloadImage('capture-post-story', 'spielankuendigung_story.png')">📥 Story Herunterladen</button>
+                </div>
+
+            </div>
+
+            <!-- VORSCHAU: STORY (AUFSTELLUNG) -->
+            <div id="view-story" class="template-container">
+                <div id="capture-story" class="story-template story-bg-layout">
+                    <img src="Wappen.jpg" class="story-wappen-top-right" onerror="this.onerror=null; this.src='Wappen.png'">
+                    <h2 class="story-title">S11</h2>
+                    <div id="pitch" class="pitch"></div>
+                    
+                    <div class="coaches-container" id="out-coaches-container">
+                        <div class="coaches-label">COACHES</div>
+                        <div class="coaches-profiles">
+                            <div class="coaches-images">
+                                <img id="img-coach-1" src="" onerror="this.onerror=null; this.src='https://via.placeholder.com/35/cccccc/ffffff?text=C1'">
+                                <img id="img-coach-2" src="" onerror="this.onerror=null; this.src='https://via.placeholder.com/35/cccccc/ffffff?text=C2'">
+                            </div>
+                            <div id="out-coaches-names" class="coaches-names">Name 1<br>Name 2</div>
+                        </div>
+                    </div>
+
+                    <div class="bench-container">
+                        <div class="bench-title">ERSATZBANK</div>
+                        <div class="bench-list" id="out-bench-list"></div>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadImage('capture-story', 'aufstellung.png')">📥 Aufstellung Herunterladen</button>
+            </div>
+
+            <!-- VORSCHAU: STORY (TOR) -->
+            <div id="view-tor" class="template-container">
+                <div id="capture-tor" class="story-template tor-full-layout">
+                    <div class="tor-content">
+                        <img src="Wappen.jpg" class="tor-wappen" onerror="this.onerror=null; this.src='Wappen.png'">
+                        <h2 class="tor-title">TOOOOR!</h2>
+                        <div class="tor-player-name" id="out-tor-player-name">TORSCHÜTZE:<br>-</div>
+                        <div class="tor-details">
+                            <div id="out-tor-score" style="color: var(--secondary);">1 : 0</div>
+                            <span>|</span>
+                            <div id="out-tor-minute">12. Min</div>
+                        </div>
+                    </div>
+                    <img id="img-tor-player" class="tor-player-img-small" src="https://via.placeholder.com/160/cccccc/ffffff?text=BILD" onerror="handleTorImgError(this)">
+                </div>
+                <button class="download-btn" onclick="downloadImage('capture-tor', 'tor_update.png')">📥 Tor Story Herunterladen</button>
+            </div>
+
+            <!-- VORSCHAU: ERGEBNIS -->
+            <div id="view-ergebnis" class="template-container">
+                <div id="capture-ergebnis" class="post-template">
+                    <h1 id="out-ergebnis-title" style="margin-bottom: 20px;">ENDERGEBNIS</h1>
+                    <div class="team-logos" id="team-logos-ergebnis-container"></div>
+                    <div id="out-ergebnis-score" style="font-size: 3.5rem; font-weight: bold; margin: 10px 0; color: var(--secondary);">3 : 1</div>
+                    <p id="out-ergebnis-text" style="margin-top: 15px; font-size: 1.2rem; text-align: center; max-width: 80%;">Auswärtssieg!</p>
+                </div>
+                <button class="download-btn" onclick="downloadImage('capture-ergebnis', 'ergebnis_update.png')">📥 Ergebnis Herunterladen</button>
+            </div>
+
+            <!-- VORSCHAU: STORY (KADER) -->
+            <div id="view-kader" class="template-container">
+                <div id="capture-kader" class="story-template tor-full-layout">
+                    <div class="kader-layout">
+                        
+                        <!-- Linke Spalte (40%) -->
+                        <div class="kader-left">
+                            <div class="kader-info-block">
+                                <div class="kader-info-title">Datum</div>
+                                <div id="out-kader-date" class="kader-info-value">-</div>
+                            </div>
+                            <div class="kader-info-block">
+                                <div class="kader-info-title">Treffpunkt</div>
+                                <div id="out-kader-meeting" class="kader-info-value">-</div>
+                            </div>
+                            <div class="kader-info-block">
+                                <div class="kader-info-title">Trikotfarbe</div>
+                                <div id="out-kader-jersey" class="kader-info-value">-</div>
+                            </div>
+                            <div class="kader-info-block">
+                                <div class="kader-info-title">Spieltagsdienst</div>
+                                <div id="out-kader-duty" class="kader-info-value">-</div>
+                            </div>
+                            
+                            <div class="kader-fixed-text">
+                                12 Bälle, Hütchen, 5 Leibchen, Eis, Medi-Tasche, Taktikttafel, etc.
+                            </div>
+                        </div>
+
+                        <!-- Rechte Spalte (60%) -->
+                        <div class="kader-right">
+                            <div class="kader-logos-big-wrap" id="kader-logos-big-container"></div>
+                            <div class="kader-grid-pitch" id="kader-grid-pitch"></div>
+                        </div>
+
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadImage('capture-kader', 'spieltag_kader.png')">📥 Kader Planer Herunterladen</button>
+            </div>
+
+            <!-- VORSCHAU: ECKBÄLLE (800x560px MIT DYNAMISCHER LEGENDE RECHTS) -->
+            <div id="view-eckball" class="template-container">
+                <div id="capture-eckball" class="eckball-board">
+                    
+                    <!-- SVG VECTOR GRAFIK FÜR ERWEITERTES TAKTIKSPIELFELD -->
+                    <svg class="eckball-svg-overlay" viewBox="0 0 800 560">
+                        <!-- Rechte Seitenleisten-Hintergrund -->
+                        <rect x="560" y="0" width="240" height="560" fill="#f8f9fa" />
+                        <line x1="560" y1="0" x2="560" y2="560" stroke="#111111" stroke-width="2.5" />
+
+                        <!-- Spielfeld Außenlinie (0 bis 560px X, 0 bis 560px Y) -->
+                        <rect x="0" y="0" width="560" height="560" fill="none" stroke="#000" stroke-width="2.5" />
+                        
+                        <!-- Tor Netz oben -->
+                        <rect x="225" y="0" width="110" height="18" fill="none" stroke="#000" stroke-width="2" />
+                        <path d="M 225 0 L 335 18 M 245 0 L 245 18 M 265 0 L 265 18 M 285 0 L 285 18 M 305 0 L 305 18 M 325 0 L 325 18" stroke="#000" stroke-width="0.8" />
+
+                        <!-- Großer Strafraum (16m) -->
+                        <rect x="80" y="0" width="400" height="220" fill="none" stroke="#000" stroke-width="2.5" />
+                        <!-- Fünfmeterraum -->
+                        <rect x="180" y="0" width="200" height="70" fill="none" stroke="#000" stroke-width="2" />
+                        <!-- Elfmeterpunkt -->
+                        <circle cx="280" cy="160" r="3.5" fill="#000" />
+                        <!-- Strafraumkreis-Bogen -->
+                        <path d="M 215 220 A 75 75 0 0 0 345 220" fill="none" stroke="#000" stroke-width="2" />
+
+                        <!-- Mittellinie und Mittelkreis unten -->
+                        <line x1="0" y1="560" x2="560" y2="560" stroke="#000" stroke-width="2.5" />
+                        <path d="M 205 560 A 75 75 0 0 1 355 560" fill="none" stroke="#000" stroke-width="2" />
+                        <circle cx="280" cy="560" r="3.5" fill="#000" />
+
+                        <!-- Pfeilspitze Definitionen -->
+                        <defs>
+                            <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#cc0000" />
+                            </marker>
+                            <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#0099ff" />
+                            </marker>
+                        </defs>
+
+                        <!-- DYNAMISCHE TAKTIK-PFEILE -->
+                        <g id="svg-tactics-group"></g>
+                    </svg>
+
+                    <!-- Info-Box Oben Links (auf dem Spielfeld) -->
+                    <div id="out-eckball-title-box" class="eckball-info-banner">
+                        <b>Variante 1 - Schuss</b><br>
+                        <span id="out-eckball-notes" style="font-size:10px; font-weight:normal; color:#444;">Gegner: eher Manndeckung</span>
+                    </div>
+
+                    <!-- DEDIZIERTE LEGENDE DYNAMISCH BEFÜLLT -->
+                    <div class="eckball-legend-container">
+                        <div class="eckball-main-header">ECKBÄLLE</div>
+                        <div class="legend-block">
+                            <span class="legend-title">SCHÜTZE:</span>
+                            <span id="out-legend-schuetze" class="legend-value">-</span>
+                        </div>
+                        <div class="legend-block">
+                            <span class="legend-title">DOPPELPASS:</span>
+                            <span id="out-legend-doppelpass" class="legend-value">-</span>
+                        </div>
+                        <div class="legend-block">
+                            <span class="legend-title">ZIELSPIELER:</span>
+                            <span id="out-legend-zielspieler" class="legend-value">-</span>
+                        </div>
+                        <div class="legend-block">
+                            <span class="legend-title">BODYGUARD:</span>
+                            <span id="out-legend-bodyguard" class="legend-value">-</span>
+                        </div>
+                        <div class="legend-block">
+                            <span class="legend-title">EINLÄUFER:</span>
+                            <span id="out-legend-einlaeufer" class="legend-value">-</span>
+                        </div>
+                        <div class="legend-block">
+                            <span class="legend-title">ABSICHERUNG:</span>
+                            <span id="out-legend-absicherung" class="legend-value">-</span>
+                        </div>
+                    </div>
+
+                    <!-- 10 DYNAMISCHE SPIELER POSITIONEN AUF DEM FELD -->
+                    <div id="eckball-players-container"></div>
+
+                    <!-- BEWEGBARE ANKERPUNKTE FÜR PFEILE -->
+                    <div id="eckball-handles-container"></div>
+
+                </div>
+                <button class="download-btn" onclick="downloadImage('capture-eckball', 'eckball_taktik.png')">📥 Eckball Taktik Herunterladen</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- UNTERER BEREICH: NAVIGATION -->
+    <div class="bottom-bar">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('post')">Ankündigung</button>
+            <button class="tab-btn" onclick="switchTab('story')">Aufstellung</button>
+            <button class="tab-btn" onclick="switchTab('tor')">Tor</button>
+            <button class="tab-btn" onclick="switchTab('ergebnis')">Ergebnis</button>
+            <button class="tab-btn" onclick="switchTab('kader')">Kader</button>
+            <button class="tab-btn" onclick="switchTab('eckball')">Eckbälle</button>
+        </div>
+        <button id="mobile-toggle" class="mobile-toggle-btn" onclick="toggleMobileView()">👁️ Vorschau ansehen</button>
+    </div>
+
+    <script>
+        // === KADERLISTE GRUPPIERT UND SORTIERT ===
+        const spielerKader = {
+            "1. Mannschaft": [
+                "Benjamin Vogt", "David Domin", "Dennis Nuding", "Elias Scheftner", "Henrik Segan", 
+                "Immanuel Naumann", "Ivan Kapovic", "Jakob Hägele", "Johannes Nagel", "Jonas Domin", 
+                "Kimi Wagner", "Leon Liebeknecht", "Lorenz Schmid", "Maex Pietschmann", "Marius Hauber", 
+                "Marvin Maier", "Michael Kraus", "Moritz Wendl", "Sofain El Shiafi", "Tobias Kößer", 
+                "Yannick Waibel", "Sandro Müller", "Niklas Blessing", "Raul Martins", "Patrick Offenbecher"
+            ],
+            "2. Mannschaft": [
+                "Achim Schmid", "Felix Munz", "Janick Pilawa", "Julian Pilawa", "Julian Wolf", 
+                "Konstantin Erdmann", "Louis Taxis", "Lukas Bader", "Manuel Schmid", "Marcel Schwarzkopf", 
+                "Marvin Knödler", "Michael Höllmann", "Mitja Stariha", "Niklas Schmid", "Oliver Klaus", 
+                "Pius Mück", "Rene Zolynski", "Robin Breymaier", "Sandro Martin", "Simon Lettenmeier", 
+                "Tim Günter", "Tim Ostertag", "Maximilian Stariha", "Luis Rothaupt", "Paul Jordan", "Leon Waldenmaier", "Vasileios Kourtidis"
+            ],
+            "Kaderpool": [
+                "Ben Etzel", "Ben Ostertag", "Daniel Wurth", "Dieter Schmidt", "Dominic Zeggel", 
+                "Fabian Barth", "Felix Kübler", "Jakob Nagel", "Jan Lange", "Julian Waibel", 
+                "Kevin Strobel", "Luca Nestola", "Marcel Funk", "Marcel Koziara", "Marco Brenner", 
+                "Marco Wagenblast", "Marius Waibel", "Maximilian von Schneider", "Michael Schurr", 
+                "Niklas Von Kirchbach", "Vincent Weyersberg"
+            ]
+        };
+
+        Object.keys(spielerKader).forEach(kategorie => {
+            spielerKader[kategorie].sort((a, b) => a.localeCompare(b));
+        });
+
+        const spielerDateien = { "Felix Munz": "Felix_Munz.JPG" };
+        const formations = { "4-4-2": [1, 4, 4, 2], "4-2-3-1": [1, 4, 2, 3, 1], "3-5-2": [1, 3, 5, 2] };
+        
+        let uploadedOpponentLogo = "";
+        let currentTeam = "m1"; 
+        let currentEckVariantKey = "v1";
+        let selectedArrowId = null;
+
+        // Speicherstruktur für alle 4 Eckball-Varianten (Spieler & Rollen)
+        let eckPlayersStore = { v1: {}, v2: {}, v3: {}, v4: {} };
+
+        // DEFAULT PFEIL-DATEN FÜR DIE 4 VARIANTEN
+        const defaultVariantArrows = {
+            v1: [
+                { id: 'v1_a1', type: 'blue', dashed: true, x1: 545, y1: 35, x2: 480, y2: 175 },
+                { id: 'v1_a2', type: 'blue', dashed: true, x1: 385, y1: 65, x2: 410, y2: 40 },
+                { id: 'v1_a3', type: 'red', dashed: false, x1: 545, y1: 20, x2: 420, y2: 35 },
+                { id: 'v1_a4', type: 'red', dashed: false, x1: 420, y1: 35, x2: 480, y2: 180 },
+                { id: 'v1_a5', type: 'red', dashed: false, x1: 480, y1: 180, x2: 240, y2: 20 },
+                { id: 'v1_a6', type: 'red', dashed: true, x1: 125, y1: 215, x2: 210, y2: 80 },
+                { id: 'v1_a7', type: 'red', dashed: true, x1: 95, y1: 240, x2: 240, y2: 100 },
+                { id: 'v1_a8', type: 'red', dashed: true, x1: 155, y1: 240, x2: 270, y2: 100 },
+                { id: 'v1_a9', type: 'red', dashed: true, x1: 125, y1: 265, x2: 300, y2: 90 }
+            ],
+            v2: [
+                { id: 'v2_a1', type: 'red', dashed: false, x1: 545, y1: 20, x2: 470, y2: 280 },
+                { id: 'v2_a2', type: 'blue', dashed: true, x1: 470, y1: 280, x2: 280, y2: 280 },
+                { id: 'v2_a3', type: 'red', dashed: false, x1: 280, y1: 280, x2: 280, y2: 180 },
+                { id: 'v2_a4', type: 'red', dashed: true, x1: 125, y1: 215, x2: 220, y2: 80 },
+                { id: 'v2_a5', type: 'red', dashed: true, x1: 95, y1: 240, x2: 255, y2: 105 },
+                { id: 'v2_a6', type: 'red', dashed: true, x1: 155, y1: 240, x2: 295, y2: 85 }
+            ],
+            v3: [
+                { id: 'v3_a1', type: 'red', dashed: false, x1: 545, y1: 20, x2: 280, y2: 110 },
+                { id: 'v3_a2', type: 'red', dashed: false, x1: 280, y1: 110, x2: 280, y2: 25 },
+                { id: 'v3_a3', type: 'red', dashed: true, x1: 125, y1: 215, x2: 265, y2: 30 },
+                { id: 'v3_a4', type: 'red', dashed: true, x1: 95, y1: 240, x2: 280, y2: 30 },
+                { id: 'v3_a5', type: 'red', dashed: true, x1: 155, y1: 240, x2: 295, y2: 30 }
+            ],
+            v4: [
+                { id: 'v4_a1', type: 'red', dashed: false, x1: 545, y1: 20, x2: 140, y2: 180 },
+                { id: 'v4_a2', type: 'red', dashed: false, x1: 140, y1: 180, x2: 260, y2: 60 },
+                { id: 'v4_a3', type: 'red', dashed: true, x1: 125, y1: 215, x2: 230, y2: 75 },
+                { id: 'v4_a4', type: 'red', dashed: true, x1: 95, y1: 240, x2: 270, y2: 105 },
+                { id: 'v4_a5', type: 'red', dashed: true, x1: 155, y1: 240, x2: 310, y2: 80 }
+            ]
+        };
+
+        let eckArrowsStore = JSON.parse(JSON.stringify(defaultVariantArrows));
+
+        // --- LOCAL STORAGE ---
+        function saveToLocalStorage() {
+            saveCurrentEckballStateToStore();
+
+            const data = {
+                venue: document.getElementById('in-post-venue').value,
+                opponent: document.getElementById('in-post-opponent').value,
+                title: document.getElementById('in-post-title').value,
+                date: document.getElementById('in-post-date').value,
+                time: document.getElementById('in-post-time').value,
+                loc: document.getElementById('in-post-loc').value,
+                storyCoaches: document.getElementById('in-story-coaches').value,
+                formation: document.getElementById('formation-select').value,
+                torScore: document.getElementById('in-tor-score').value,
+                torMinute: document.getElementById('in-tor-minute').value,
+                torPlayer: document.getElementById('in-tor-player').value,
+                ergTitle: document.getElementById('in-ergebnis-title').value,
+                ergScore: document.getElementById('in-ergebnis-score').value,
+                ergText: document.getElementById('in-ergebnis-text').value,
+                kaderMeeting: document.getElementById('in-kader-meeting').value,
+                kaderJersey: document.getElementById('in-kader-jersey').value,
+                kaderDuty1: document.getElementById('in-kader-duty-1').value,
+                kaderDuty2: document.getElementById('in-kader-duty-2').value,
+                eckVariant: currentEckVariantKey,
+                players: {}, bench: {}, kaderPlayers: {}, 
+                eckPlayersStore: eckPlayersStore,
+                eckArrowsStore: eckArrowsStore
+            };
+
+            for(let i = 1; i <= 11; i++) {
+                let el = document.getElementById(`player-${i}`);
+                if(el) data.players[`player-${i}`] = el.value;
+            }
+            for(let i = 1; i <= 7; i++) {
+                let el = document.getElementById(`bench-${i}`);
+                if(el) data.bench[`bench-${i}`] = el.value;
+            }
+            for(let i = 1; i <= 20; i++) {
+                let el = document.getElementById(`kader-player-${i}`);
+                if(el) data.kaderPlayers[`kader-player-${i}`] = el.value;
+            }
+
+            try {
+                data.uploadedLogo = uploadedOpponentLogo; 
+                localStorage.setItem('sva_insta_data_' + currentTeam, JSON.stringify(data));
+            } catch(e) {
+                data.uploadedLogo = "";
+                localStorage.setItem('sva_insta_data_' + currentTeam, JSON.stringify(data));
+            }
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('sva_insta_data_' + currentTeam);
+            
+            document.getElementById('in-post-venue').value = "heim";
+            document.getElementById('in-post-opponent').value = "Rechberg";
+            document.getElementById('in-post-title').value = "HEIMSPIEL";
+            document.getElementById('in-post-date').value = "";
+            document.getElementById('in-post-time').value = "";
+            document.getElementById('in-post-loc').value = "";
+            document.getElementById('in-story-coaches').value = (currentTeam === "m1" ? "1. Mannschaft" : "2. Mannschaft");
+            document.getElementById('formation-select').value = "4-4-2";
+            document.getElementById('in-tor-score').value = "1 : 0";
+            document.getElementById('in-tor-minute').value = "12. Min";
+            document.getElementById('in-tor-player').value = "Keiner";
+            document.getElementById('in-ergebnis-title').value = "ENDERGEBNIS";
+            document.getElementById('in-ergebnis-score').value = "3 : 1";
+            document.getElementById('in-ergebnis-text').value = "Auswärtssieg!";
+            document.getElementById('in-kader-meeting').value = "13:45 Uhr Kabine";
+            document.getElementById('in-kader-jersey').value = "Blau / Schwarz";
+            document.getElementById('in-kader-duty-1').value = "Keiner";
+            document.getElementById('in-kader-duty-2').value = "Keiner";
+            document.getElementById('in-eckball-variant').value = "v1";
+            currentEckVariantKey = "v1";
+            uploadedOpponentLogo = ""; 
+
+            for(let i = 1; i <= 11; i++) document.getElementById(`player-${i}`).value = "Keiner";
+            for(let i = 1; i <= 7; i++) document.getElementById(`bench-${i}`).value = "Keiner";
+            for(let i = 1; i <= 20; i++) document.getElementById(`kader-player-${i}`).value = "Keiner";
+            
+            eckPlayersStore = { v1: {}, v2: {}, v3: {}, v4: {} };
+            eckArrowsStore = JSON.parse(JSON.stringify(defaultVariantArrows));
+
+            if(saved) {
+                const data = JSON.parse(saved);
+                if(data.venue) document.getElementById('in-post-venue').value = data.venue;
+                if(data.opponent) document.getElementById('in-post-opponent').value = data.opponent;
+                if(data.title) document.getElementById('in-post-title').value = data.title;
+                if(data.date !== undefined) document.getElementById('in-post-date').value = data.date;
+                if(data.time !== undefined) document.getElementById('in-post-time').value = data.time;
+                if(data.loc !== undefined) document.getElementById('in-post-loc').value = data.loc;
+                if(data.storyCoaches !== undefined) document.getElementById('in-story-coaches').value = data.storyCoaches;
+                if(data.formation) document.getElementById('formation-select').value = data.formation;
+                if(data.torScore !== undefined) document.getElementById('in-tor-score').value = data.torScore;
+                if(data.torMinute !== undefined) document.getElementById('in-tor-minute').value = data.torMinute;
+                if(data.torPlayer) document.getElementById('in-tor-player').value = data.torPlayer;
+                if(data.ergTitle !== undefined) document.getElementById('in-ergebnis-title').value = data.ergTitle;
+                if(data.ergScore !== undefined) document.getElementById('in-ergebnis-score').value = data.ergScore;
+                if(data.ergText !== undefined) document.getElementById('in-ergebnis-text').value = data.ergText;
+                if(data.kaderMeeting !== undefined) document.getElementById('in-kader-meeting').value = data.kaderMeeting;
+                if(data.kaderJersey !== undefined) document.getElementById('in-kader-jersey').value = data.kaderJersey;
+                if(data.kaderDuty1) document.getElementById('in-kader-duty-1').value = data.kaderDuty1;
+                if(data.kaderDuty2) document.getElementById('in-kader-duty-2').value = data.kaderDuty2;
+                if(data.eckVariant) {
+                    document.getElementById('in-eckball-variant').value = data.eckVariant;
+                    currentEckVariantKey = data.eckVariant;
+                }
+
+                for(let i = 1; i <= 11; i++) {
+                    if(data.players && data.players[`player-${i}`]) document.getElementById(`player-${i}`).value = data.players[`player-${i}`];
+                }
+                for(let i = 1; i <= 7; i++) {
+                    if(data.bench && data.bench[`bench-${i}`]) document.getElementById(`bench-${i}`).value = data.bench[`bench-${i}`];
+                }
+                for(let i = 1; i <= 20; i++) {
+                    if(data.kaderPlayers && data.kaderPlayers[`kader-player-${i}`]) document.getElementById(`kader-player-${i}`).value = data.kaderPlayers[`kader-player-${i}`];
+                }
+                if(data.eckPlayersStore) eckPlayersStore = data.eckPlayersStore;
+                if(data.eckArrowsStore) eckArrowsStore = data.eckArrowsStore;
+                if(data.uploadedLogo) uploadedOpponentLogo = data.uploadedLogo;
+            }
+
+            loadEckballStateForVariant(currentEckVariantKey);
+        }
+
+        function switchTeam(team) {
+            saveToLocalStorage(); 
+            currentTeam = team;   
+            document.querySelectorAll('.team-tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`btn-team-${team}`).classList.add('active');
+            
+            loadFromLocalStorage(); 
+            
+            buildFormation(); 
+            updateMatchup(); 
+            updateCoaches(); 
+            updateTor(); 
+            updateBench(); 
+            updateErgebnis();
+            updateKader();
+            updateEckballVariant();
+            
+            updatePostFields();
+            updateAllDates(document.getElementById('in-post-date').value);
+            updateText('out-kader-meeting', document.getElementById('in-kader-meeting').value);
+            updateText('out-kader-jersey', document.getElementById('in-kader-jersey').value);
+        }
+
+        function toggleMobileView() {
+            const isPreview = document.body.classList.toggle('show-preview');
+            const btn = document.getElementById('mobile-toggle');
+            btn.innerHTML = isPreview ? "✏️ Zurück zum Bearbeiten" : "👁️ Vorschau ansehen";
+            btn.style.backgroundColor = isPreview ? "#005f73" : "#2a9d8f";
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.editor-section, .template-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`editor-${tab}`).classList.add('active');
+            document.getElementById(`view-${tab}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function updateText(id, value) { 
+            const el = document.getElementById(id);
+            if(el) el.innerText = value; 
+        }
+
+        function updatePostFields() {
+            const title = document.getElementById('in-post-title').value;
+            const time = document.getElementById('in-post-time').value;
+            const loc = document.getElementById('in-post-loc').value;
+
+            updateText('out-post-title', title);
+            updateText('out-post-story-title', title);
+
+            updateText('out-post-time', time);
+            updateText('out-post-story-time', time);
+
+            updateText('out-post-loc', loc);
+            updateText('out-post-story-loc', loc);
+        }
+
+        function updateAllDates(val) { 
+            updateText('out-post-date', val); 
+            updateText('out-post-story-date', val);
+            updateText('out-kader-date', val || '-'); 
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedOpponentLogo = e.target.result;
+                    updateMatchup(); saveToLocalStorage();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadedOpponentLogo = "";
+                updateMatchup(); saveToLocalStorage();
+            }
+        }
+
+        function updateMatchup() {
+            const isHome = document.getElementById('in-post-venue').value === 'heim';
+            const opponentName = document.getElementById('in-post-opponent').value || 'GEGNER';
+            const containerPost = document.getElementById('team-logos-post-container');
+            const containerPostStory = document.getElementById('team-logos-post-story-container');
+            const containerErg = document.getElementById('team-logos-ergebnis-container');
+            const containerKaderLogos = document.getElementById('kader-logos-big-container');
+            const vsSpan = '<span style="font-size: 24px; font-weight: bold;">VS</span>';
+            const ourTeam = `<img src="Wappen.jpg" class="logo" style="background-color: black;" onerror="this.onerror=null; this.src='Wappen.png'">`;
+            
+            let theirTeam = '';
+            if (uploadedOpponentLogo !== "") {
+                theirTeam = `<img src="${uploadedOpponentLogo}" class="logo" style="background-color: white;">`;
+            } else {
+                let fontSize = opponentName.length > 8 ? "10px" : "12px";
+                theirTeam = `<div class="logo" style="font-size: ${fontSize}; background-color: white; color: black;">${opponentName}</div>`;
+            }
+
+            const dynamicTitle = isHome ? "HEIMSPIEL" : "AUSWÄRTSSPIEL";
+            document.getElementById('in-post-title').value = dynamicTitle;
+            updatePostFields();
+
+            if (isHome) {
+                if(containerPost) containerPost.innerHTML = `${ourTeam} ${vsSpan} ${theirTeam}`;
+                if(containerPostStory) containerPostStory.innerHTML = `${ourTeam} ${vsSpan} ${theirTeam}`;
+                if(containerErg) containerErg.innerHTML = `${ourTeam} ${vsSpan} ${theirTeam}`;
+            } else {
+                if(containerPost) containerPost.innerHTML = `${theirTeam} ${vsSpan} ${ourTeam}`;
+                if(containerPostStory) containerPostStory.innerHTML = `${theirTeam} ${vsSpan} ${ourTeam}`;
+                if(containerErg) containerErg.innerHTML = `${theirTeam} ${vsSpan} ${ourTeam}`;
+            }
+            
+            const ourBig = `<img src="Wappen.jpg" class="kader-logo-big" style="background-color: black;" onerror="this.onerror=null; this.src='Wappen.png'">`;
+            let theirBig = uploadedOpponentLogo 
+                ? `<img src="${uploadedOpponentLogo}" class="kader-logo-big" style="background-color: white;">` 
+                : `<div class="kader-logo-big" style="background-color: white; color: black; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; text-align: center;">${opponentName.substring(0,8)}</div>`;
+            
+            if (containerKaderLogos) {
+                const vsBig = '<span style="font-size: 18px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">VS</span>';
+                containerKaderLogos.innerHTML = isHome ? `${ourBig} ${vsBig} ${theirBig}` : `${theirBig} ${vsBig} ${ourBig}`;
+            }
+
+            updateErgebnis(); 
+        }
+
+        function updateCoaches() {
+            const val = document.getElementById('in-story-coaches').value;
+            const container = document.getElementById('out-coaches-container');
+            const img1 = document.getElementById('img-coach-1');
+            const img2 = document.getElementById('img-coach-2');
+            const namesOut = document.getElementById('out-coaches-names');
+
+            if (val === 'none') {
+                container.style.display = 'none';
+            } else {
+                container.style.display = 'block';
+                if (val === '1. Mannschaft') {
+                    namesOut.innerHTML = 'Benjamin Vogt<br>Benjamin Silva';
+                    img1.src = 'Benjamin_Vogt.jpg'; img2.src = 'Benjamin_Silva.jpg';
+                } else if (val === '2. Mannschaft') {
+                    namesOut.innerHTML = 'Felix Munz<br>Julian Wolf';
+                    img1.src = spielerDateien['Felix Munz'] ? spielerDateien['Felix Munz'] : 'Felix_Munz.jpg';
+                    img2.src = 'Julian_Wolf.jpg';
+                }
+            }
+        }
+
+        function updateKader() {
+            const pitch = document.getElementById('kader-grid-pitch');
+            pitch.innerHTML = ''; 
+
+            for (let i = 1; i <= 20; i++) {
+                let name = document.getElementById(`kader-player-${i}`).value;
+                if (name !== "Keiner") {
+                    let formatName = name.split(' ').join('_');
+                    let bildName = spielerDateien[name] ? spielerDateien[name] : `${formatName}.jpg`;
+                    
+                    let parts = name.split(' ');
+                    let displayName = parts.length > 1 ? parts[0][0] + '. ' + parts.slice(1).join(' ') : name;
+
+                    pitch.innerHTML += `
+                        <div class="kader-grid-item">
+                            <img class="kader-grid-img" src="${bildName}" onerror="if(!this.hasAttribute('data-fallback')){ this.setAttribute('data-fallback','true'); this.src=this.src.replace('.jpg', '.png'); } else { this.onerror=null; this.src='https://via.placeholder.com/48/cccccc/ffffff?text=?'; }">
+                            <div class="kader-grid-name">${displayName}</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            let duty1 = document.getElementById('in-kader-duty-1').value;
+            let duty2 = document.getElementById('in-kader-duty-2').value;
+            let list = [];
+            if(duty1 !== "Keiner") list.push(duty1);
+            if(duty2 !== "Keiner") list.push(duty2);
+            document.getElementById('out-kader-duty').innerText = list.length > 0 ? list.join(' & ') : "-";
+        }
+
+        // --- ECKBALL TAKTIK LOGIK ---
+        const eckballConfigs = {
+            v1: {
+                title: "Variante 1 - Schuss",
+                notes: "Gegner: eher Manndeckung<br>• Sprint erzeugt Winkel für Doppelpass<br>• Spann auf's Tor",
+                coords: [
+                    {top: "20px", left: "545px"},  // Pos 1: Eckball-Schütze
+                    {top: "65px", left: "385px"},  // Pos 2: Doppelpass-Partner
+                    {top: "115px", left: "280px"}, // Pos 3: Zentraler Spieler (11er bis 5er)
+                    {top: "215px", left: "125px"}, // Pos 4: Raute Oben
+                    {top: "240px", left: "95px"},  // Pos 5: Raute Links
+                    {top: "240px", left: "155px"}, // Pos 6: Raute Rechts
+                    {top: "265px", left: "125px"}, // Pos 7: Raute Unten
+                    {top: "490px", left: "280px"}, // Pos 8: Absicherung Spitze
+                    {top: "535px", left: "225px"}, // Pos 9: Absicherung Links
+                    {top: "535px", left: "335px"}  // Pos 10: Absicherung Rechts
+                ]
+            },
+            v2: {
+                title: "Variante 2 - Kurz kurz",
+                notes: "Gegner: Mann- & Raumdeckung<br>• Durchlaufen & spekulieren<br>• Rückraum von hinten kommend!",
+                coords: [
+                    {top: "20px", left: "545px"},
+                    {top: "280px", left: "470px"},
+                    {top: "115px", left: "280px"},
+                    {top: "215px", left: "125px"},
+                    {top: "240px", left: "95px"},
+                    {top: "240px", left: "155px"},
+                    {top: "265px", left: "125px"},
+                    {top: "490px", left: "280px"},
+                    {top: "535px", left: "225px"},
+                    {top: "535px", left: "335px"}
+                ]
+            },
+            v3: {
+                title: "Variante 3 - Block",
+                notes: "Gegner: Manndeckung<br>• Am Block eng abstreifen<br>• Zum Tor einschwenken",
+                coords: [
+                    {top: "20px", left: "545px"},
+                    {top: "220px", left: "440px"},
+                    {top: "115px", left: "280px"},
+                    {top: "215px", left: "125px"},
+                    {top: "240px", left: "95px"},
+                    {top: "240px", left: "155px"},
+                    {top: "265px", left: "125px"},
+                    {top: "490px", left: "280px"},
+                    {top: "535px", left: "225px"},
+                    {top: "535px", left: "335px"}
+                ]
+            },
+            v4: {
+                title: "Variante 4 - Abgesetzt",
+                notes: "Gegner: Manndeckung<br>• Raum freiziehen<br>• Abgesetzter Spieler verwertet",
+                coords: [
+                    {top: "20px", left: "545px"},
+                    {top: "220px", left: "440px"},
+                    {top: "115px", left: "280px"},
+                    {top: "215px", left: "125px"},
+                    {top: "240px", left: "95px"},
+                    {top: "240px", left: "155px"},
+                    {top: "265px", left: "125px"},
+                    {top: "490px", left: "280px"},
+                    {top: "535px", left: "225px"},
+                    {top: "535px", left: "335px"}
+                ]
+            }
+        };
+
+        function formatLegendName(name) {
+            if (!name || name === "Keiner") return "-";
+            let parts = name.trim().split(" ");
+            let display = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+            return "- " + display.toUpperCase();
+        }
+
+        function saveCurrentEckballStateToStore() {
+            if (!eckPlayersStore[currentEckVariantKey]) {
+                eckPlayersStore[currentEckVariantKey] = {};
+            }
+            for (let i = 1; i <= 10; i++) {
+                let el = document.getElementById(`eck-player-${i}`);
+                if (el) {
+                    eckPlayersStore[currentEckVariantKey][`eck-player-${i}`] = el.value;
+                }
+                let roleEl = document.getElementById(`eck-role-${i}`);
+                if (roleEl) {
+                    eckPlayersStore[currentEckVariantKey][`eck-role-${i}`] = roleEl.value;
+                }
+            }
+        }
+
+        function loadEckballStateForVariant(vKey) {
+            currentEckVariantKey = vKey;
+            const currentStore = eckPlayersStore[vKey] || {};
+            for (let i = 1; i <= 10; i++) {
+                let el = document.getElementById(`eck-player-${i}`);
+                if (el) {
+                    el.value = currentStore[`eck-player-${i}`] || "Keiner";
+                }
+                let roleEl = document.getElementById(`eck-role-${i}`);
+                if (roleEl) {
+                    roleEl.value = currentStore[`eck-role-${i}`] || "normal";
+                }
+            }
+        }
+
+        function onEckballVariantChange() {
+            saveCurrentEckballStateToStore();
+            const newKey = document.getElementById('in-eckball-variant').value;
+            loadEckballStateForVariant(newKey);
+            selectedArrowId = null;
+            updateEckballVariant();
+            saveToLocalStorage();
+        }
+
+        function copyEckballFromV1() {
+            saveCurrentEckballStateToStore();
+            const v1Store = eckPlayersStore.v1 || {};
+            eckPlayersStore[currentEckVariantKey] = { ...v1Store };
+            const v1Arrows = eckArrowsStore.v1 || [];
+            eckArrowsStore[currentEckVariantKey] = JSON.parse(JSON.stringify(v1Arrows));
+            
+            loadEckballStateForVariant(currentEckVariantKey);
+            updateEckballVariant();
+            saveToLocalStorage();
+            alert("📋 Belegung von Variante 1 wurde erfolgreich übernommen!");
+        }
+
+        function copyEckballToAll() {
+            saveCurrentEckballStateToStore();
+            const currentStore = eckPlayersStore[currentEckVariantKey] || {};
+            const currentArrows = eckArrowsStore[currentEckVariantKey] || [];
+            
+            ['v1','v2','v3','v4'].forEach(v => {
+                eckPlayersStore[v] = { ...currentStore };
+                eckArrowsStore[v] = JSON.parse(JSON.stringify(currentArrows));
+            });
+            
+            saveToLocalStorage();
+            alert("🚀 Aktuelle Belegung & Pfeile wurden auf alle 4 Varianten kopiert!");
+        }
+
+        function addArrow(color) {
+            const newArrow = {
+                id: 'arr_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+                type: color,
+                dashed: color === 'blue',
+                x1: 280, y1: 260,
+                x2: 280, y2: 120
+            };
+            if (!eckArrowsStore[currentEckVariantKey]) {
+                eckArrowsStore[currentEckVariantKey] = [];
+            }
+            eckArrowsStore[currentEckVariantKey].push(newArrow);
+            selectedArrowId = newArrow.id;
+            updateEckballVariant();
+            saveToLocalStorage();
+        }
+
+        function deleteSelectedArrow() {
+            if (!selectedArrowId) {
+                alert("Bitte klicke zuerst auf einen Pfeil oder seine Ankerpunkte, um ihn auszuwählen!");
+                return;
+            }
+            let list = eckArrowsStore[currentEckVariantKey] || [];
+            eckArrowsStore[currentEckVariantKey] = list.filter(a => a.id !== selectedArrowId);
+            selectedArrowId = null;
+            updateEckballVariant();
+            saveToLocalStorage();
+        }
+
+        function resetVariantArrows() {
+            if (confirm("Möchtest du die Pfeile dieser Variante auf den Standard zurücksetzen?")) {
+                eckArrowsStore[currentEckVariantKey] = JSON.parse(JSON.stringify(defaultVariantArrows[currentEckVariantKey] || []));
+                selectedArrowId = null;
+                updateEckballVariant();
+                saveToLocalStorage();
+            }
+        }
+
+        function selectArrow(id, event) {
+            if (event) event.stopPropagation();
+            selectedArrowId = id;
+            updateEckballVariant();
+        }
+
+        function updateEckballVariant() {
+            const vKey = document.getElementById('in-eckball-variant').value;
+            currentEckVariantKey = vKey;
+            const config = eckballConfigs[vKey] || eckballConfigs['v1'];
+
+            // Texte updaten
+            document.getElementById('out-eckball-title-box').querySelector('b').innerText = config.title;
+            document.getElementById('out-eckball-notes').innerHTML = config.notes;
+
+            // Legende unten rechts (Seitenleiste) dynamisch befüllen
+            const schuetze1Val = document.getElementById('eck-player-1') ? document.getElementById('eck-player-1').value : "Keiner";
+            const doppelpassVal = document.getElementById('eck-player-2') ? document.getElementById('eck-player-2').value : "Keiner";
+            const centralVal = document.getElementById('eck-player-3') ? document.getElementById('eck-player-3').value : "Keiner";
+
+            document.getElementById('out-legend-schuetze').innerText = formatLegendName(schuetze1Val);
+            document.getElementById('out-legend-doppelpass').innerText = formatLegendName(doppelpassVal);
+
+            // Auswerten der 4 Raute-Einläufer (Pos 4 bis 7) & Rollen (Zielspieler / Bodyguard)
+            let zielspielerName = "-";
+            let bodyguardName = "-";
+            let einlaeuferList = [];
+
+            if (centralVal !== "Keiner") {
+                einlaeuferList.push(formatLegendName(centralVal));
+            }
+
+            for (let i = 4; i <= 7; i++) {
+                let name = document.getElementById(`eck-player-${i}`) ? document.getElementById(`eck-player-${i}`).value : "Keiner";
+                let role = document.getElementById(`eck-role-${i}`) ? document.getElementById(`eck-role-${i}`).value : "normal";
+
+                if (role === "zielspieler" && name !== "Keiner") {
+                    zielspielerName = formatLegendName(name);
+                } else if (role === "bodyguard" && name !== "Keiner") {
+                    bodyguardName = formatLegendName(name);
+                }
+
+                if (name !== "Keiner") {
+                    einlaeuferList.push(formatLegendName(name));
+                }
+            }
+
+            document.getElementById('out-legend-zielspieler').innerText = zielspielerName;
+            document.getElementById('out-legend-bodyguard').innerText = bodyguardName;
+            document.getElementById('out-legend-einlaeufer').innerHTML = einlaeuferList.length > 0 ? einlaeuferList.join('<br>') : "-";
+
+            // Auswerten der Absicherung (Pos 8, 9, 10)
+            let absicherungList = [];
+            for (let i = 8; i <= 10; i++) {
+                let name = document.getElementById(`eck-player-${i}`) ? document.getElementById(`eck-player-${i}`).value : "Keiner";
+                if (name !== "Keiner") {
+                    absicherungList.push(formatLegendName(name));
+                }
+            }
+            document.getElementById('out-legend-absicherung').innerHTML = absicherungList.length > 0 ? absicherungList.join('<br>') : "-";
+
+            // 1. RENDERN DER DYNAMISCHEN PFEILE UND ANKERPUNKTE
+            const arrows = eckArrowsStore[vKey] || [];
+            let svgHtml = '';
+            let handlesHtml = '';
+
+            arrows.forEach(arr => {
+                const strokeColor = arr.type === 'blue' ? '#0099ff' : '#cc0000';
+                const marker = arr.type === 'blue' ? 'url(#arrow-blue)' : 'url(#arrow-red)';
+                const dashAttr = arr.dashed ? 'stroke-dasharray="4,4"' : '';
+                const isSelected = (arr.id === selectedArrowId);
+                const strokeWidth = isSelected ? 4 : 2.5;
+
+                svgHtml += `<line id="svg_line_${arr.id}" x1="${arr.x1}" y1="${arr.y1}" x2="${arr.x2}" y2="${arr.y2}" stroke="${strokeColor}" stroke-width="${strokeWidth}" ${dashAttr} marker-end="${marker}" style="cursor:pointer;" onclick="selectArrow('${arr.id}', event)" />`;
+
+                handlesHtml += `
+                    <div class="arrow-handle ${isSelected ? 'selected' : ''}" id="handle_start_${arr.id}" style="top: ${arr.y1}px; left: ${arr.x1}px; background: ${strokeColor};"></div>
+                    <div class="arrow-handle ${isSelected ? 'selected' : ''}" id="handle_end_${arr.id}" style="top: ${arr.y2}px; left: ${arr.x2}px; background: ${strokeColor};"></div>
+                `;
+            });
+
+            document.getElementById('svg-tactics-group').innerHTML = svgHtml;
+            document.getElementById('eckball-handles-container').innerHTML = handlesHtml;
+
+            // 2. SPIELER NODES RENDERN
+            const container = document.getElementById('eckball-players-container');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 10; i++) {
+                let name = document.getElementById(`eck-player-${i}`) ? document.getElementById(`eck-player-${i}`).value : "Keiner";
+                let formatName = name.split(' ').join('_');
+                let bildName = (name !== "Keiner") ? (spielerDateien[name] ? spielerDateien[name] : `${formatName}.jpg`) : `https://via.placeholder.com/44/cccccc/ffffff?text=${i}`;
+                let pos = config.coords[i-1] || {top: "50%", left: "50%"};
+
+                container.innerHTML += `
+                    <div class="eckball-player-node" id="node-eck-${i}" style="top: ${pos.top}; left: ${pos.left};">
+                        <img class="eckball-player-circle" src="${bildName}" onerror="if(!this.hasAttribute('data-fallback')){ this.setAttribute('data-fallback','true'); this.src=this.src.replace('.jpg', '.png'); } else { this.onerror=null; this.src='https://via.placeholder.com/44/cccccc/ffffff?text=${i}'; }">
+                    </div>
+                `;
+            }
+
+            // Drag and Drop Events registrieren
+            makeNodesDraggable();
+            makeArrowHandlesDraggable();
+        }
+
+        // DRAGGABLE ANKERPUNKTE FÜR PFEILE
+        function makeArrowHandlesDraggable() {
+            const container = document.getElementById('capture-eckball');
+            if (!container) return;
+
+            document.querySelectorAll('.arrow-handle').forEach(handle => {
+                let isDragging = false;
+                let startX, startY, initialLeft, initialTop;
+
+                const onPointerDown = (e) => {
+                    e.stopPropagation();
+                    isDragging = true;
+                    try { handle.setPointerCapture(e.pointerId); } catch(err) {}
+
+                    startX = e.clientX;
+                    startY = e.clientY;
+
+                    initialLeft = parseFloat(handle.style.left) || handle.offsetLeft;
+                    initialTop = parseFloat(handle.style.top) || handle.offsetTop;
+
+                    const parts = handle.id.split('_');
+                    const arrowId = parts.slice(2).join('_');
+                    selectedArrowId = arrowId;
+                    updateEckballVariant();
+                };
+
+                const onPointerMove = (e) => {
+                    if (!isDragging) return;
+
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+
+                    let newLeft = Math.max(10, Math.min(550, initialLeft + dx));
+                    let newTop = Math.max(10, Math.min(550, initialTop + dy));
+
+                    handle.style.left = newLeft + 'px';
+                    handle.style.top = newTop + 'px';
+
+                    const parts = handle.id.split('_');
+                    const pointType = parts[1];
+                    const arrowId = parts.slice(2).join('_');
+
+                    const arrowList = eckArrowsStore[currentEckVariantKey] || [];
+                    const arrow = arrowList.find(a => a.id == arrowId);
+                    if (arrow) {
+                        if (pointType === 'start') {
+                            arrow.x1 = Math.round(newLeft);
+                            arrow.y1 = Math.round(newTop);
+                        } else {
+                            arrow.x2 = Math.round(newLeft);
+                            arrow.y2 = Math.round(newTop);
+                        }
+                        
+                        const lineEl = document.getElementById(`svg_line_${arrowId}`);
+                        if (lineEl) {
+                            lineEl.setAttribute(pointType === 'start' ? 'x1' : 'x2', Math.round(newLeft));
+                            lineEl.setAttribute(pointType === 'start' ? 'y1' : 'y2', Math.round(newTop));
+                        }
+                    }
+                };
+
+                const onPointerUp = (e) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
+                    saveToLocalStorage();
+                };
+
+                handle.onpointerdown = onPointerDown;
+                handle.onpointermove = onPointerMove;
+                handle.onpointerup = onPointerUp;
+            });
+        }
+
+        // DRAGGABLE SPIELER NODES
+        function makeNodesDraggable() {
+            const container = document.getElementById('capture-eckball');
+            if (!container) return;
+
+            document.querySelectorAll('.eckball-player-node').forEach(node => {
+                let isDragging = false;
+                let startX, startY, initialLeft, initialTop;
+
+                const onPointerDown = (e) => {
+                    isDragging = true;
+                    try { node.setPointerCapture(e.pointerId); } catch(err) {}
+
+                    startX = e.clientX;
+                    startY = e.clientY;
+
+                    initialLeft = parseFloat(node.style.left) || node.offsetLeft;
+                    initialTop = parseFloat(node.style.top) || node.offsetTop;
+                };
+
+                const onPointerMove = (e) => {
+                    if (!isDragging) return;
+
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+
+                    let newLeft = Math.max(15, Math.min(545, initialLeft + dx));
+                    let newTop = Math.max(15, Math.min(545, initialTop + dy));
+
+                    node.style.left = newLeft + 'px';
+                    node.style.top = newTop + 'px';
+                };
+
+                const onPointerUp = (e) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    try { node.releasePointerCapture(e.pointerId); } catch(err) {}
+                };
+
+                node.onpointerdown = onPointerDown;
+                node.onpointermove = onPointerMove;
+                node.onpointerup = onPointerUp;
+            });
+        }
+
+        function updateEckball() {
+            saveCurrentEckballStateToStore();
+            updateEckballVariant();
+        }
+
+        function initDropdowns() {
+            let starterHtml = '';
+            for (let i = 1; i <= 11; i++) { starterHtml += createSelectHTML(`player-${i}`, `Spieler ${i}`, updateStarter); }
+            document.getElementById('starter-controls').innerHTML = starterHtml;
+
+            let benchHtml = '';
+            for (let i = 1; i <= 7; i++) { benchHtml += createSelectHTML(`bench-${i}`, `Bank ${i}`, updateBench); }
+            document.getElementById('bench-controls').innerHTML = benchHtml;
+
+            document.getElementById('tor-player-container').innerHTML = createSelectHTML('in-tor-player', 'Torschütze', updateTor);
+
+            let kaderHtml = '';
+            for (let i = 1; i <= 20; i++) { kaderHtml += createSelectHTML(`kader-player-${i}`, `Slot ${i}`, updateKader); }
+            document.getElementById('kader-controls').innerHTML = kaderHtml;
+
+            document.getElementById('kader-duty-container').innerHTML = 
+                createSelectHTML('in-kader-duty-1', 'Spieltagsdienst 1', updateKader) +
+                createSelectHTML('in-kader-duty-2', 'Spieltagsdienst 2', updateKader);
+
+            // Eckball Steuerung (1 Schütze + 1 Doppelpass + 1 Zentral + 4 Raute-Einläufer mit Rollenauswahl + 3 Absicherung)
+            let eckShooters = createSelectHTML('eck-player-1', 'Eckball-Schütze (1 Person)', updateEckball) +
+                              createSelectHTML('eck-player-2', 'Doppelpass / Anspielstation (1 Person)', updateEckball);
+            document.getElementById('eckball-shooters-controls').innerHTML = eckShooters;
+
+            let eckCenter = createSelectHTML('eck-player-3', 'Zentraler Spieler (11er bis 5er)', updateEckball);
+            document.getElementById('eckball-center-controls').innerHTML = eckCenter;
+
+            let eckStrikers = '';
+            for(let i = 4; i <= 7; i++) {
+                eckStrikers += createSelectHTML(`eck-player-${i}`, `Raute Einläufer ${i-3}`, updateEckball);
+                eckStrikers += `
+                    <select id="eck-role-${i}" class="role-select-inline" onchange="updateEckball(); saveToLocalStorage();">
+                        <option value="normal">Rolle: Normaler Einläufer</option>
+                        <option value="zielspieler">🎯 Rolle: Zielspieler</option>
+                        <option value="bodyguard">🛡️ Rolle: Bodyguard</option>
+                    </select>
+                `;
+            }
+            document.getElementById('eckball-strikers-controls').innerHTML = eckStrikers;
+
+            let eckDefenders = createSelectHTML('eck-player-8', 'Absicherung Spitze', updateEckball) +
+                               createSelectHTML('eck-player-9', 'Absicherung Links', updateEckball) +
+                               createSelectHTML('eck-player-10', 'Absicherung Rechts', updateEckball);
+            document.getElementById('eckball-defenders-controls').innerHTML = eckDefenders;
+        }
+
+        function createSelectHTML(id, label, onChangeFunction) {
+            let options = `<option value="Keiner">Keiner</option>`;
+            for (const [kategorie, spieler] of Object.entries(spielerKader)) {
+                options += `<optgroup label="${kategorie}">`;
+                spieler.forEach(name => { options += `<option value="${name}">${name}</option>`; });
+                options += `</optgroup>`;
+            }
+            return `
+                <div class="control-group" style="margin-bottom: 5px;">
+                    <label>${label}</label>
+                    <select id="${id}" onchange="${onChangeFunction.name}(); saveToLocalStorage();">
+                        ${options}
+                    </select>
+                </div>
+            `;
+        }
+
+        function buildFormation() {
+            const formType = document.getElementById('formation-select').value;
+            const rows = formations[formType];
+            const pitch = document.getElementById('pitch');
+            pitch.innerHTML = '';
+            let playerIndex = 1;
+
+            rows.forEach(playerCount => {
+                let rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+                for(let i = 0; i < playerCount; i++) {
+                    let selectedName = document.getElementById(`player-${playerIndex}`).value;
+                    let display = selectedName === "Keiner" ? "" : selectedName;
+                    let formatName = selectedName.split(' ').join('_');
+                    let bildName = spielerDateien[selectedName] ? spielerDateien[selectedName] : `${formatName}.jpg`;
+                    
+                    rowDiv.innerHTML += `
+                        <div class="player-card">
+                            <img class="player-img" id="img-player-${playerIndex}" src="${bildName}" onerror="if(!this.hasAttribute('data-fallback')){ this.setAttribute('data-fallback','true'); this.src=this.src.replace('.jpg', '.png'); } else { this.onerror=null; this.src='https://via.placeholder.com/45/cccccc/ffffff?text=IMG'; }">
+                            <div class="player-name" id="out-player-${playerIndex}">${display}</div>
+                        </div>
+                    `;
+                    playerIndex++;
+                }
+                pitch.appendChild(rowDiv);
+            });
+        }
+
+        function updateStarter() {
+            for (let i = 1; i <= 11; i++) {
+                let name = document.getElementById(`player-${i}`).value;
+                let outName = document.getElementById(`out-player-${i}`);
+                let outImg = document.getElementById(`img-player-${i}`);
+                if(outName && outImg) {
+                    outImg.removeAttribute('data-fallback');
+                    if (name === "Keiner") {
+                        outName.innerText = ""; outImg.src = "https://via.placeholder.com/45/cccccc/ffffff?text=IMG";
+                    } else {
+                        outName.innerText = name;
+                        let formatName = name.split(' ').join('_');
+                        outImg.src = spielerDateien[name] ? spielerDateien[name] : `${formatName}.jpg`;
+                    }
+                }
+            }
+        }
+
+        function updateBench() {
+            let benchNames = [];
+            for (let i = 1; i <= 7; i++) {
+                let name = document.getElementById(`bench-${i}`).value;
+                if (name !== "Keiner") benchNames.push(name);
+            }
+            document.getElementById('out-bench-list').innerText = benchNames.join(' • ');
+        }
+
+        function updateTor() {
+            let name = document.getElementById('in-tor-player').value;
+            let score = document.getElementById('in-tor-score').value;
+            let minute = document.getElementById('in-tor-minute').value;
+            document.getElementById('out-tor-score').innerText = score;
+            document.getElementById('out-tor-minute').innerText = minute;
+
+            let outName = document.getElementById('out-tor-player-name');
+            let outImg = document.getElementById('img-tor-player');
+            
+            outImg.removeAttribute('data-step');
+            outImg.removeAttribute('data-base-name');
+            outImg.removeAttribute('data-override');
+
+            if (name === "Keiner") {
+                outName.innerHTML = "TORSCHÜTZE:<br>-"; 
+                outImg.src = "https://via.placeholder.com/160/cccccc/ffffff?text=BILD";
+            } else {
+                outName.innerHTML = "TORSCHÜTZE:<br>" + name;
+                let formatName = name.split(' ').join('_');
+                
+                outImg.setAttribute('data-step', '0');
+                outImg.setAttribute('data-base-name', formatName);
+                outImg.setAttribute('data-override', spielerDateien[name] || '');
+                
+                outImg.src = `${formatName}_TOR.jpg`;
+            }
+        }
+
+        function handleTorImgError(img) {
+            let step = parseInt(img.getAttribute('data-step') || '0');
+            let baseName = img.getAttribute('data-base-name');
+            let override = img.getAttribute('data-override');
+            
+            if (!baseName) return; 
+            
+            if (step === 0) {
+                img.setAttribute('data-step', '1');
+                img.src = override ? override : baseName + '.jpg';
+            } else if (step === 1) {
+                img.setAttribute('data-step', '2');
+                img.onerror = null; 
+                img.src = 'https://via.placeholder.com/160/cccccc/ffffff?text=FEHLT';
+            }
+        }
+
+        function updateErgebnis() {
+            document.getElementById('out-ergebnis-title').innerText = document.getElementById('in-ergebnis-title').value;
+            document.getElementById('out-ergebnis-score').innerText = document.getElementById('in-ergebnis-score').value;
+            let textInput = document.getElementById('in-ergebnis-text').value.trim();
+            let textOutput = document.getElementById('out-ergebnis-text');
+            textOutput.style.display = textInput === "" ? "none" : "block";
+            textOutput.innerText = textInput;
+        }
+
+        // --- ROBUSTE DOWNLOAD & IPHONE SPEICHER-FUNKTION ---
+        async function downloadImage(elementId, filename) {
+            const element = document.getElementById(elementId);
+            if (!element) {
+                alert("Fehler: Element nicht gefunden!");
+                return;
+            }
+
+            // Ankerpunkte während des Bild-Exports verbergen
+            element.classList.add('exporting');
+
+            try {
+                const canvas = await html2canvas(element, { 
+                    scale: 2.5, 
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false 
+                });
+
+                const dataUrl = canvas.toDataURL('image/png', 1.0);
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+                if (isMobile) {
+                    showMobileImagePreview(dataUrl, filename);
+                } else {
+                    const link = document.body.appendChild(document.createElement('a'));
+                    link.download = filename;
+                    link.href = dataUrl;
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            } catch (err) {
+                alert("Fehler beim Erstellen der Grafik: " + err.message);
+                console.error("Download Error:", err);
+            } finally {
+                element.classList.remove('exporting');
+            }
+        }
+
+        function showMobileImagePreview(dataUrl, filename) {
+            let modal = document.getElementById('image-download-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'image-download-modal';
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
+                document.body.appendChild(modal);
+            }
+
+            modal.innerHTML = `
+                <div style="background:white; padding:15px; border-radius:12px; max-width:90%; max-height:85%; display:flex; flex-direction:column; align-items:center; box-shadow:0 10px 25px rgba(0,0,0,0.5); overflow:hidden;">
+                    <p style="margin:0 0 10px 0; font-size:14px; font-weight:bold; color:#333; text-align:center; line-height:1.4;">
+                        📲 <b>Grafik bereit!</b><br>
+                        <span style="font-size:12px; font-weight:normal; color:#666;">Lange auf das Bild drücken & <b>"In Fotos sichern"</b> wählen.</span>
+                    </p>
+                    <img src="${dataUrl}" style="max-width:100%; max-height:55vh; border-radius:8px; object-fit:contain; border:1px solid #ccc;" />
+                    <button onclick="document.getElementById('image-download-modal').style.display='none'" style="margin-top:15px; background:#bb3e03; color:white; border:none; padding:12px 20px; font-size:14px; font-weight:bold; border-radius:6px; cursor:pointer; width:100%;">Fertig / Schließen</button>
+                </div>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        window.onload = () => {
+            initDropdowns(); 
+            loadFromLocalStorage(); 
+            
+            buildFormation(); 
+            updateMatchup(); 
+            updateCoaches(); 
+            updateTor(); 
+            updateBench(); 
+            updateErgebnis();
+            updateKader(); 
+            updateEckballVariant();
+            
+            updatePostFields();
+            updateAllDates(document.getElementById('in-post-date').value);
+            updateText('out-kader-meeting', document.getElementById('in-kader-meeting').value);
+            updateText('out-kader-jersey', document.getElementById('in-kader-jersey').value);
+
+            document.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('input', saveToLocalStorage);
+                el.addEventListener('change', saveToLocalStorage);
+            });
+        };
+    </script>
+</body>
+</html>
