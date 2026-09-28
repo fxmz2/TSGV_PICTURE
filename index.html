@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vereinsgrafik – Insta-Vorlagen 16.1</title>
+    <title>Vereinsgrafik – Insta-Vorlagen 17.0</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Vereinsgrafik">
@@ -163,6 +163,7 @@
         }
 
         .post-template { width: 400px; height: 400px; }
+        .post-template.fmt-45 { height: 500px; }
         .story-template { width: 400px; height: 711px; }
 
         .title-dyn { font-size: 2rem; font-weight: bold; margin: 0; text-align: center; text-transform: uppercase; width: 100%; }
@@ -384,9 +385,66 @@
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
         /* Inhalt der Feed-Vorlagen: wird verkleinert, wenn die Sponsorenleiste eingeblendet ist */
-        .tpl-content { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
+        .tpl-content { position: absolute; top: 0; left: 0; right: 0; height: 400px; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
         .corner-logo.logo-hidden { visibility: hidden; }
         .copy-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
+
+        /* Danke an Sponsor */
+        .spon-card { display: flex; align-items: center; justify-content: center; background: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.45); box-sizing: border-box; padding: 16px; overflow: hidden; }
+        .spon-card img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .spon-card-text { color: #111; font-size: 1.6rem; font-weight: 900; text-align: center; text-shadow: none; text-transform: uppercase; }
+        .spon-name { display: inline-block; font-size: 1.3rem; font-weight: bold; background: rgba(0,0,0,0.72); color: white; padding: 5px 16px; border-radius: 8px; border-bottom: 3px solid var(--jersey-color); text-shadow: none; }
+        .spon-extra { font-size: 0.85rem; font-weight: bold; color: rgba(255,255,255,0.9); margin-top: 2px; }
+
+        /* Wochenend-Ergebnisse */
+        .wk-wrap { position: absolute; left: 0; right: 0; top: 96px; display: flex; flex-direction: column; gap: 7px; padding: 0 18px; box-sizing: border-box; z-index: 2; }
+        .wk-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.58); border-radius: 10px; padding: 7px 10px; color: #fff; text-shadow: none; }
+        .wk-team { width: 92px; flex-shrink: 0; font-size: 10px; font-weight: bold; text-transform: uppercase; background: rgba(255,255,255,0.16); border-radius: 6px; padding: 5px 6px; text-align: center; line-height: 1.2; box-sizing: border-box; }
+        .wk-match { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; text-transform: uppercase; line-height: 1.2; }
+        .wk-match img { width: 28px; height: 28px; object-fit: contain; background: #fff; border-radius: 50%; padding: 2px; box-sizing: border-box; flex-shrink: 0; }
+        .wk-venue { display: block; font-size: 9px; color: rgba(255,255,255,0.75); letter-spacing: 0.5px; }
+        .wk-score { min-width: 54px; flex-shrink: 0; text-align: center; font-size: 18px; font-weight: 900; border-radius: 8px; padding: 4px 6px; background: #6c757d; box-sizing: border-box; }
+        .wk-score.win { background: #1b8a3c; }
+        .wk-score.loss { background: #c1121f; }
+        .wk-score.open { background: rgba(255,255,255,0.2); }
+        .wk-compact { gap: 5px; }
+        .wk-compact .wk-row { padding: 4px 8px; }
+        .wk-compact .wk-score { font-size: 15px; min-width: 46px; padding: 3px 4px; }
+        .wk-compact .wk-match img { width: 22px; height: 22px; }
+        .wk-story { top: 150px; gap: 12px; }
+        .wk-story .wk-row { padding: 10px 12px; }
+        .wk-story .wk-team { width: 100px; font-size: 11px; }
+        .wk-story .wk-match { font-size: 13px; }
+        .wk-story .wk-match img { width: 36px; height: 36px; }
+        .wk-story .wk-score { font-size: 22px; min-width: 64px; }
+
+        .caption-text { width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px; line-height: 1.45; padding: 8px; border: 1px solid #ccc; border-radius: 6px; resize: vertical; }
+
+        /* Einrichtungs-Assistent */
+        .wizard-card { text-align: left; }
+        .wizard-card h2, .wizard-card .license-icon { text-align: center; }
+        .wizard-card p { text-align: center; }
+        .wizard-card label { margin-top: 10px; }
+        .wizard-card input[type="text"] { font-size: 16px; }
+        .wz-step { display: none; }
+        .wz-step.active { display: block; }
+        .wz-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
+        .wz-dots span { width: 8px; height: 8px; border-radius: 50%; background: #d6d9de; }
+        .wz-dots span.active { background: #005f73; width: 22px; border-radius: 4px; }
+        .wz-preview { margin-top: 14px; height: 70px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; letter-spacing: 3px; text-shadow: 1px 1px 3px rgba(0,0,0,0.6); }
+        .wz-count { font-weight: bold; color: #005f73; min-height: 18px; }
+        .wz-option { display: flex !important; gap: 10px; align-items: flex-start; border: 1px solid #ddd; border-radius: 10px; padding: 10px; font-weight: normal !important; font-size: 13px; cursor: pointer; }
+        .wz-option input { margin-top: 2px; }
+        .wz-nav { display: flex; gap: 8px; margin-top: 18px; }
+        .wz-nav .wz-back { flex: 0 0 auto; background: #eef1f4; border: none; border-radius: 10px; padding: 0 16px; font-weight: bold; cursor: pointer; }
+        .wz-nav .wz-next { margin-top: 0; flex: 1; }
+        .wz-start-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .wz-start-grid button { border: 1px solid #ddd; background: #f7f8fa; border-radius: 10px; padding: 14px 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+
+        /* Rückgängig / Wiederholen */
+        .undo-bar { position: fixed; right: 12px; bottom: calc(var(--bottom-bar-h, 80px) + 12px); z-index: 8000; display: flex; gap: 6px; }
+        .undo-bar button { width: 44px; height: 44px; border-radius: 50%; border: none; background: white; box-shadow: 0 4px 14px rgba(0,0,0,0.22); font-size: 18px; cursor: pointer; }
+        .undo-bar button:disabled { opacity: 0.35; cursor: default; }
 
         /* Hinweis-Karten (Backup-Erinnerung, Installation) */
         .notice-card { border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 13px; line-height: 1.45; border: 1px solid; }
@@ -462,6 +520,7 @@
             body.show-preview .preview-area { display: flex; }
             .mobile-toggle-btn { display: block; }
             .post-template, .story-template { transform: scale(0.85); transform-origin: top center; margin-bottom: -80px; }
+            .post-template.fmt-45 { margin-bottom: -95px; }
 
             .eckball-container-scaler { width: 336px; height: 235px; }
             .eckball-board { transform: scale(0.42); }
@@ -469,6 +528,7 @@
 
         @media (max-width: 380px) {
             .post-template, .story-template { transform: scale(0.75); transform-origin: top center; margin-bottom: -110px; }
+            .post-template.fmt-45 { margin-bottom: -135px; }
             .eckball-container-scaler { width: 288px; height: 201px; }
             .eckball-board { transform: scale(0.36); }
             .tab-btn { min-width: 68px; padding: 6px 8px; }
@@ -489,6 +549,67 @@
             <div class="app-footer" style="margin-top:14px;">
                 <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
             </div>
+        </div>
+    </div>
+
+    <!-- EINRICHTUNGS-ASSISTENT -->
+    <div id="wizard-overlay" class="license-overlay" hidden>
+        <div class="license-card wizard-card">
+            <div class="wz-dots" id="wz-dots"></div>
+
+            <div class="wz-step" data-step="1">
+                <div class="license-icon">👋</div>
+                <h2>Willkommen<span id="wz-club-name"></span>!</h2>
+                <p>In wenigen Schritten ist deine App startklar. Alles lässt sich später jederzeit ändern.</p>
+                <label for="wz-team">Wie soll dein Verein auf den Grafiken heißen?</label>
+                <input type="text" id="wz-team" placeholder="z.B. TSGV Rechberg" oninput="wizardSync()">
+            </div>
+
+            <div class="wz-step" data-step="2">
+                <div class="license-icon">🎨</div>
+                <h2>Vereinsfarben</h2>
+                <p>Die Farben werden für Hintergründe, Badges und Rahmen verwendet.</p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div><label for="wz-primary">Hauptfarbe</label><input type="color" id="wz-primary" oninput="wizardSync()"></div>
+                    <div><label for="wz-jersey">Zweitfarbe / Trikot</label><input type="color" id="wz-jersey" oninput="wizardSync()"></div>
+                </div>
+                <div class="wz-preview" id="wz-preview">VORSCHAU</div>
+            </div>
+
+            <div class="wz-step" data-step="3">
+                <div class="license-icon">👥</div>
+                <h2>Spieler anlegen</h2>
+                <p>Wähle einfach alle Spielerfotos auf einmal aus. Der Dateiname wird zum Namen, z.B. <b>Max_Mustermann.jpg</b>.</p>
+                <input type="file" id="wz-photos" accept="image/*" multiple onchange="handleBulkPhotoUpload(event).then(updateWizard)">
+                <p class="wz-count" id="wz-player-count"></p>
+                <p class="hint">Einzelne Spieler, Gegner und Sponsoren kannst du später unter „🗃️ Daten“ anlegen.</p>
+            </div>
+
+            <div class="wz-step" data-step="4">
+                <div class="license-icon">📐</div>
+                <h2>Format der Beiträge</h2>
+                <label class="wz-option"><input type="radio" name="wz-format" value="45" onchange="wizardSync()"> <span><b>Hochformat 4:5</b> – empfohlen, so zeigt Instagram Beiträge im Profil an</span></label>
+                <label class="wz-option"><input type="radio" name="wz-format" value="11" onchange="wizardSync()"> <span><b>Quadrat 1:1</b> – klassisches Format</span></label>
+                <p class="hint" id="wz-install-hint"></p>
+            </div>
+
+            <div class="wz-step" data-step="5">
+                <div class="license-icon">🚀</div>
+                <h2>Fertig!</h2>
+                <p>Womit möchtest du starten?</p>
+                <div class="wz-start-grid">
+                    <button type="button" onclick="finishWizard('post')">📣 Ankündigung</button>
+                    <button type="button" onclick="finishWizard('story')">📋 Aufstellung</button>
+                    <button type="button" onclick="finishWizard('ergebnis')">🏆 Ergebnis</button>
+                    <button type="button" onclick="finishWizard('kalender')">📅 Spielplan</button>
+                </div>
+            </div>
+
+            <div class="wz-nav">
+                <button type="button" class="wz-back" id="wz-back" onclick="wizardStep(-1)">Zurück</button>
+                <button type="button" class="license-submit wz-next" id="wz-next" onclick="wizardStep(1)">Weiter</button>
+            </div>
+            <button type="button" class="license-cancel" onclick="finishWizard()">Überspringen</button>
         </div>
     </div>
 
@@ -532,6 +653,8 @@
                     <button type="button" class="club-card-btn" onclick="showLicenseOverlay(true)">Code ändern</button>
                 </div>
 
+                <button type="button" class="copy-action-btn" style="background:#eef1f4; color:#222;" onclick="startWizard()">🧭 Einrichtungs-Assistent starten</button>
+
                 <div class="control-group">
                     <label>Vereinsname auf den Grafiken</label>
                     <input type="text" id="cfg-team-name" value="" placeholder="z.B. TSGV Rechberg" oninput="updateMatchup(); applyClubBranding();">
@@ -552,6 +675,21 @@
                 <div class="control-group">
                     <label>Kreis-/Rahmenfarbe</label>
                     <input type="color" id="cfg-color-frame" value="#ffffff" onchange="updateDesignSettings()">
+                </div>
+
+                <div class="control-group">
+                    <label>Hashtags für die Beitragstexte</label>
+                    <input type="text" id="cfg-hashtags" value="" placeholder="#TSGV #Kreisliga #Fussball">
+                    <span class="hint">Werden unter jeden automatisch erzeugten Beitragstext gesetzt („💬 Text für den Beitrag“ in jedem Reiter).</span>
+                </div>
+
+                <div class="control-group">
+                    <label>Format der Beiträge</label>
+                    <select id="cfg-feed-format" onchange="applyFeedFormat();">
+                        <option value="45">Hochformat 4:5 (1080×1350) – empfohlen</option>
+                        <option value="11">Quadrat 1:1 (1080×1080)</option>
+                    </select>
+                    <span class="hint">Instagram zeigt Beiträge im Profil inzwischen hochkant an – 4:5 wird dort nicht beschnitten.</span>
                 </div>
 
                 <div class="control-group">
@@ -666,7 +804,7 @@
                         <div class="control-group">
                             <label>Bild(er) hochladen</label>
                             <input type="file" id="new-template-img" accept="image/*" multiple onchange="handleTemplateUpload(event)">
-                            <span class="hint">Ideal: 1080×1080 px (Feed) bzw. 1080×1920 px (Story). Die Hintergründe erscheinen danach in jedem Reiter unter „🎨 Design & Hintergrund“.</span>
+                            <span class="hint">Ideal: 1080×1350 px bzw. 1080×1080 px (Beitrag) und 1080×1920 px (Story). Die Hintergründe erscheinen danach in jedem Reiter unter „🎨 Design & Hintergrund“.</span>
                         </div>
                         <div id="list-templates" class="scrollable-controls-box"></div>
                     </div>
@@ -838,6 +976,7 @@
                 </div>
 
                 <button type="button" class="copy-action-btn" onclick="resetEckballPositions()">🔄 Spieler & Pfeile auf Standard setzen</button>
+                <div id="tabcopy-host-eckball"></div>
             </div>
 
             <!-- EDITOR: POTM -->
@@ -916,6 +1055,35 @@
                 <div class="control-group"><label>Text</label><input type="text" id="in-new-text" value="Herzlich willkommen im Team!" oninput="updateNeuzugang();"></div>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('neuzugang')">🔄 Positionen & Design auf Standard setzen</button>
+            </div>
+
+            <!-- EDITOR: DANKE AN SPONSOR -->
+            <div id="editor-sponsor" class="editor-section">
+                <h2>🤝 Danke an Sponsor</h2>
+                <div id="design-controls-sponsor"></div>
+
+                <div class="control-group"><label>Sponsor</label><select id="in-spon-select" class="sponsor-select" onchange="updateSponsorPost();"></select></div>
+                <div class="control-group"><label>Titel</label><input type="text" id="in-spon-title" value="DANKE!" oninput="updateSponsorPost();"></div>
+                <div class="control-group"><label>Text</label><input type="text" id="in-spon-text" value="für die großartige Unterstützung!" oninput="updateSponsorPost();"></div>
+                <div class="control-group"><label>Zusatz (optional)</label><input type="text" id="in-spon-extra" value="" placeholder="z.B. Neue Trikots für die Saison 2026/27" oninput="updateSponsorPost();"></div>
+
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('sponsor')">🔄 Positionen & Design auf Standard setzen</button>
+            </div>
+
+            <!-- EDITOR: WOCHENEND-ERGEBNISSE -->
+            <div id="editor-wochenende" class="editor-section">
+                <h2>📊 Wochenend-Ergebnisse</h2>
+                <div id="design-controls-wochenende"></div>
+
+                <div class="control-group"><label>Titel</label><input type="text" id="in-wk-title" value="ERGEBNISSE" oninput="updateWochenende();"></div>
+                <div class="control-group"><label>Untertitel</label><input type="text" id="in-wk-sub" value="VOM WOCHENENDE" placeholder="z.B. 27./28.09." oninput="updateWochenende();"></div>
+                <button type="button" class="copy-action-btn" style="background:#2a9d8f;" onclick="fillWeekendTeams()">👥 Mannschaften aus den Versionsnamen übernehmen</button>
+
+                <label>Spiele (max. 6)</label>
+                <div id="wk-controls"></div>
+                <span class="hint" style="margin-bottom:10px;">Ergebnis immer aus eigener Sicht eintragen (eigene Tore zuerst), z.B. 3:1. Sieg, Remis und Niederlage werden automatisch farbig markiert.</span>
+
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('wochenende')">🔄 Positionen & Design auf Standard setzen</button>
             </div>
         </div>
 
@@ -1343,7 +1511,85 @@
                     </div>
                 </div>
             </div>
+
+            <!-- DANKE AN SPONSOR -->
+            <div id="view-sponsor" class="template-container">
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📷 Sponsor Beitrag (1:1)</div>
+                    <div id="capture-sponsor-feed" class="post-template">
+                        <div class="draggable-text" data-default-top="22px" data-default-left="0px" style="top:22px; left:0px;"><h1 class="title-dyn" id="out-spon-title-feed">DANKE!</h1></div>
+                        <div class="draggable-img" data-default-top="92px" data-default-left="85px" style="top:92px; left:85px;"><div class="spon-card" id="out-spon-card-feed" style="width:230px; height:150px;"></div></div>
+                        <div class="draggable-text" data-default-top="262px" data-default-left="0px" style="top:262px; left:0px;">
+                            <div class="spon-name" id="out-spon-name-feed">-</div>
+                            <p class="info-dyn" id="out-spon-text-feed"></p>
+                            <div class="spon-extra" id="out-spon-extra-feed"></div>
+                        </div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-sponsor-feed', 'sponsor_danke_feed.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">🤝 Sponsor Story (9:16)</div>
+                    <div id="capture-sponsor" class="story-template">
+                        <img class="story-wappen-top-right club-logo-img" alt="">
+                        <div class="draggable-text" data-default-top="110px" data-default-left="0px" style="top:110px; left:0px;"><h1 class="title-dyn" id="out-spon-title">DANKE!</h1></div>
+                        <div class="draggable-img" data-default-top="200px" data-default-left="45px" style="top:200px; left:45px;"><div class="spon-card" id="out-spon-card" style="width:310px; height:210px;"></div></div>
+                        <div class="draggable-text" data-default-top="440px" data-default-left="0px" style="top:440px; left:0px;">
+                            <div class="spon-name" id="out-spon-name">-</div>
+                            <p class="info-dyn" id="out-spon-text"></p>
+                            <div class="spon-extra" id="out-spon-extra"></div>
+                        </div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-sponsor', 'sponsor_danke_story.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WOCHENEND-ERGEBNISSE -->
+            <div id="view-wochenende" class="template-container">
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📷 Wochenende Beitrag (1:1)</div>
+                    <div id="capture-wochenende-feed" class="post-template">
+                        <div class="draggable-text" data-default-top="14px" data-default-left="0px" style="top:14px; left:0px;">
+                            <h2 class="title-dyn" id="out-wk-title-feed">ERGEBNISSE</h2>
+                            <div class="kal-sub" id="out-wk-sub-feed"></div>
+                        </div>
+                        <div class="wk-wrap" id="out-wk-list-feed"></div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-wochenende-feed', 'ergebnisse_wochenende_feed.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📊 Wochenende Story (9:16)</div>
+                    <div id="capture-wochenende" class="story-template">
+                        <img class="story-wappen-top-right club-logo-img" alt="">
+                        <div class="draggable-text" data-default-top="50px" data-default-left="0px" style="top:50px; left:0px;">
+                            <h2 class="title-dyn" id="out-wk-title">ERGEBNISSE</h2>
+                            <div class="kal-sub" id="out-wk-sub"></div>
+                        </div>
+                        <div class="wk-wrap wk-story" id="out-wk-list"></div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-wochenende', 'ergebnisse_wochenende_story.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <!-- RÜCKGÄNGIG / WIEDERHOLEN -->
+    <div id="undo-bar" class="undo-bar">
+        <button type="button" id="undo-btn" onclick="undoAction()" title="Rückgängig (Strg+Z)" disabled>↩️</button>
+        <button type="button" id="redo-btn" onclick="redoAction()" title="Wiederholen (Strg+Y)" disabled>↪️</button>
     </div>
 
     <!-- WERKZEUGLEISTE FÜR AUSGEWÄHLTE TEXTE/BILDER -->
@@ -1372,6 +1618,8 @@
             <button class="tab-btn" data-tab="kalender" onclick="switchTab('kalender')"><span class="tab-ico">📅</span><span>Kalender</span></button>
             <button class="tab-btn" data-tab="geburtstag" onclick="switchTab('geburtstag')"><span class="tab-ico">🎂</span><span>Geburtstag</span></button>
             <button class="tab-btn" data-tab="neuzugang" onclick="switchTab('neuzugang')"><span class="tab-ico">🆕</span><span>Neuzugang</span></button>
+            <button class="tab-btn" data-tab="sponsor" onclick="switchTab('sponsor')"><span class="tab-ico">🤝</span><span>Sponsor</span></button>
+            <button class="tab-btn" data-tab="wochenende" onclick="switchTab('wochenende')"><span class="tab-ico">📊</span><span>Wochenende</span></button>
         </nav>
         <button id="mobile-toggle" class="mobile-toggle-btn" onclick="toggleMobileView()">👁️ Vorschau ansehen</button>
     </div>
@@ -1382,7 +1630,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "16.1";
+        const APP_VERSION = "17.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei   (Hash mit code-generator.html erzeugen)
@@ -1436,8 +1684,10 @@
         const SCORER_MAX = 10;
         const OWN_GOAL = '__eigentor';
 
-        const tabList = ['start', 'stammdaten', 'post', 'story', 'tor', 'ergebnis', 'kader', 'eckball', 'potm', 'kalender', 'geburtstag', 'neuzugang'];
-        const editorTabs = ['post', 'story', 'tor', 'ergebnis', 'kader', 'potm', 'kalender', 'geburtstag', 'neuzugang'];
+        const WK_MAX = 6;
+
+        const tabList = ['start', 'stammdaten', 'post', 'story', 'tor', 'ergebnis', 'kader', 'eckball', 'potm', 'kalender', 'geburtstag', 'neuzugang', 'sponsor', 'wochenende'];
+        const editorTabs = ['post', 'story', 'tor', 'ergebnis', 'kader', 'potm', 'kalender', 'geburtstag', 'neuzugang', 'sponsor', 'wochenende'];
 
         const TAB_DESIGN = {
             post:     { frameLabel: 'Rahmenform Logos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
@@ -1448,7 +1698,9 @@
             potm:     { frameLabel: 'Rahmenform Spieler', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen', logoStory: false },
             kalender: { frameLabel: 'Rahmenform Gegner-Logos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             geburtstag: { frameLabel: 'Rahmenform Foto', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
-            neuzugang: { frameLabel: 'Rahmenform Foto', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' }
+            neuzugang: { frameLabel: 'Rahmenform Foto', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            sponsor: { frameLabel: 'Rahmenform (nicht verwendet)', sizes: true, sponsorLabel: 'Zusätzliche Sponsoren-Leiste anzeigen' },
+            wochenende: { frameLabel: 'Rahmenform Gegner-Logos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' }
         };
 
         const formations = {
@@ -1511,8 +1763,6 @@
 
         let eckArrows = JSON.parse(JSON.stringify(defaultArrows));
         let eckNodes = JSON.parse(JSON.stringify(defaultEckNodes));
-        let eckHistory = [];
-        let eckRedoStack = [];
 
         const templateUrlCache = new Map();
         let pendingImageTarget = null;
@@ -1937,6 +2187,24 @@
                     </div>`;
             }
             $('scorer-controls').innerHTML = scorerHtml;
+
+            let wkHtml = '';
+            for (let i = 1; i <= WK_MAX; i++) {
+                wkHtml += `
+                    <div class="kal-edit-row">
+                        <div class="kal-edit-head">Spiel ${i} <button type="button" class="kal-clear-btn" onclick="clearWeekendRow(${i})">✕ leeren</button></div>
+                        <div class="kal-edit-grid">
+                            <input type="text" id="wk-team-${i}" placeholder="Mannschaft" oninput="updateWochenende();">
+                            <input type="text" id="wk-score-${i}" placeholder="Ergebnis, z.B. 3:1" oninput="updateWochenende();">
+                            <select id="wk-opp-${i}" class="opp-select" onchange="updateWochenende();"></select>
+                            <select id="wk-venue-${i}" onchange="updateWochenende();">
+                                <option value="heim">🏠 Heimspiel</option>
+                                <option value="auswaerts">✈️ Auswärtsspiel</option>
+                            </select>
+                        </div>
+                    </div>`;
+            }
+            $('wk-controls').innerHTML = wkHtml;
         }
 
         function refreshPlayerOptions() {
@@ -1999,6 +2267,13 @@
         }
 
         function refreshSponsorChecklists() {
+            const selHtml = '<option value="">– Sponsor wählen –</option>' + stammdaten.sponsors.map(sp => `<option value="${esc(sp.name)}">${esc(sp.name)}</option>`).join('');
+            document.querySelectorAll('select.sponsor-select').forEach(sel => {
+                const v = sel.value;
+                sel.innerHTML = selHtml;
+                sel.value = v;
+                if (sel.value !== v) sel.value = '';
+            });
             editorTabs.forEach(t => {
                 const container = $(`sponsor-checkbox-list-${t}`);
                 if (!container) return;
@@ -2031,7 +2306,7 @@
                         <summary>🎨 Design & Hintergrund</summary>
                         <div class="details-body">
                             <div class="control-group">
-                                <label>Hintergrund Feed (1:1)</label>
+                                <label>Hintergrund Beitrag</label>
                                 <input type="hidden" id="in-bg-${tab}-feed" value="${DEFAULT_BG}">
                                 <div class="bg-thumb-grid" id="thumb-grid-${tab}-feed"></div>
                             </div>
@@ -2090,7 +2365,272 @@
                     </details>`;
                 $(`ct-list-${tab}`).addEventListener('input', onCustomTextInput);
                 $(`ct-list-${tab}`).addEventListener('change', onCustomTextInput);
+
+                $(`editor-${tab}`)?.insertAdjacentHTML('beforeend', captionHTML(tab) + tabCopyHTML(tab));
             });
+            $('tabcopy-host-eckball').innerHTML = tabCopyHTML('eckball', false);
+        }
+
+        /* =========================================================
+           TEXT FÜR DEN BEITRAG (Caption) je Reiter
+           ========================================================= */
+        const captionDirty = {};
+
+        function captionHTML(tab) {
+            return `
+                <details class="design-details" style="margin-top:12px;">
+                    <summary>💬 Text für den Beitrag</summary>
+                    <div class="details-body">
+                        <textarea id="cap-text-${tab}" rows="7" class="caption-text" oninput="captionDirty['${tab}'] = true"></textarea>
+                        <div class="notice-actions">
+                            <button type="button" class="primary" onclick="copyCaption('${tab}')">📋 Text kopieren</button>
+                            <button type="button" class="secondary" onclick="regenerateCaption('${tab}')">🔄 Neu erzeugen</button>
+                        </div>
+                        <span class="hint">Wird automatisch aus deinen Angaben erzeugt. Du kannst ihn frei ändern – dann bleibt deine Version, bis du „Neu erzeugen“ tippst.</span>
+                    </div>
+                </details>`;
+        }
+
+        function playerLabel(n) { return n && n !== 'Keiner' ? n : ''; }
+
+        /* GROSSBUCHSTABEN-Titel für den Beitragstext lesbar machen: "ERGEBNISSE VOM WOCHENENDE" → "Ergebnisse vom Wochenende" */
+        function niceCase(text) {
+            const t = normName(text);
+            if (!t || t !== t.toUpperCase()) return t;
+            const small = ['vom', 'von', 'der', 'die', 'das', 'des', 'am', 'im', 'an', 'und', 'für', 'gegen', 'zum', 'zur'];
+            return t.toLowerCase().split(' ').map((w, i) => (i > 0 && small.includes(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+
+        function getScorerGroups() {
+            const groups = [];
+            for (let i = 1; i <= SCORER_MAX; i++) {
+                const name = val(`erg-scorer-${i}`);
+                if (!name || name === 'Keiner') continue;
+                const minute = normName(val(`erg-minute-${i}`)).replace(/['´`’]+$/, '');
+                let g = groups.find(x => x.name === name);
+                if (!g) { g = { name, minutes: [] }; groups.push(g); }
+                if (minute) g.minutes.push(minute);
+            }
+            groups.forEach(g => g.minutes.sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0)));
+            return groups;
+        }
+
+        function buildCaption(tab) {
+            const own = getTeamName();
+            const oppSel = val('in-post-opponent-select');
+            const opp = oppSel || 'Gegner';
+            const home = val('in-post-venue') !== 'auswaerts';
+            const match = home ? `${own} – ${opp}` : `${opp} – ${own}`;
+            const lines = [];
+            switch (tab) {
+                case 'post': {
+                    const when = [normName(val('in-post-date')), normName(val('in-post-time'))].filter(Boolean).join(', ');
+                    lines.push(`⚽ ${home ? 'Heimspiel' : 'Auswärtsspiel'}: ${match}`);
+                    if (when) lines.push(`📅 ${when}`);
+                    lines.push('', home ? 'Kommt vorbei und unterstützt uns! 💪' : 'Wir freuen uns über jede Unterstützung vor Ort! 💪');
+                    break;
+                }
+                case 'story': {
+                    const starters = [], bench = [], coaches = [];
+                    for (let i = 1; i <= 11; i++) { const n = playerLabel(val(`player-${i}`)); if (n) starters.push(n); }
+                    for (let i = 1; i <= 7; i++) { const n = playerLabel(val(`bench-player-${i}`)); if (n) bench.push(n); }
+                    ['in-coach-1', 'in-coach-2'].forEach(id => { const n = playerLabel(val(id)); if (n) coaches.push(n); });
+                    lines.push(`📋 Unsere Aufstellung${oppSel ? ` gegen ${oppSel}` : ''}:`, '', starters.join(', ') || '–');
+                    if (bench.length) lines.push('', `🔄 Bank: ${bench.join(', ')}`);
+                    if (coaches.length) lines.push(`🧢 Trainer: ${coaches.join(', ')}`);
+                    break;
+                }
+                case 'tor': {
+                    const p = playerLabel(val('in-tor-player')), a = playerLabel(val('in-tor-assist'));
+                    const minute = normName(val('in-tor-minute')), score = normName(val('in-tor-score'));
+                    lines.push(`⚽ TOOOOR! ${p ? `${p} trifft` : 'Wir treffen'}${minute ? ` in der ${minute}` : ''}${score ? ` zum ${score}` : ''}!`);
+                    if (a) lines.push(`🅰️ Vorlage: ${a}`);
+                    break;
+                }
+                case 'ergebnis': {
+                    const scorers = getScorerGroups().map(g => (g.name === OWN_GOAL ? 'Eigentor' : g.name) + (g.minutes.length ? ` (${g.minutes.map(m => m + "'").join(', ')})` : '')).join(', ');
+                    lines.push(`🏁 ${niceCase(val('in-ergebnis-title')) || 'Endergebnis'}: ${match} ${normName(val('in-ergebnis-score'))}`);
+                    if (normName(val('in-ergebnis-text'))) lines.push(normName(val('in-ergebnis-text')));
+                    if (scorers && $('in-erg-show-scorers')?.checked) lines.push('', `⚽ Tore: ${scorers}`);
+                    break;
+                }
+                case 'kader': {
+                    const names = [];
+                    for (let i = 1; i <= KADER_MAX; i++) { const n = playerLabel(val(`kader-player-${i}`)); if (n) names.push(n); }
+                    const date = normName(val('in-post-date'));
+                    lines.push(`👥 Unser Kader${date ? ` für ${date}` : ''}${oppSel ? ` gegen ${oppSel}` : ''}:`, '', names.join(', ') || '–', '');
+                    if (normName(val('in-kader-meeting'))) lines.push(`🕐 Treffpunkt: ${normName(val('in-kader-meeting'))}`);
+                    if (normName(val('in-kader-jersey'))) lines.push(`👕 Trikots: ${normName(val('in-kader-jersey'))}`);
+                    break;
+                }
+                case 'potm': {
+                    const n = playerLabel(val('in-potm-player'));
+                    lines.push(`⭐ Player of the Match: ${n || '…'}!`);
+                    if (normName(val('in-potm-text'))) lines.push(normName(val('in-potm-text')));
+                    lines.push('', 'Glückwunsch! 👏');
+                    break;
+                }
+                case 'kalender': {
+                    const { list, title } = getKalenderSelection();
+                    const mode = val('in-kal-mode') || 'upcoming';
+                    const capTitle = normName(val('in-kal-title')) || (mode === 'month' && list.length
+                        ? `Spielplan ${title.charAt(0) + title.split(' ')[0].slice(1).toLowerCase()} ${title.split(' ')[1] || ''}`.trim()
+                        : mode === 'all' ? 'Unser Spielplan' : 'Unsere nächsten Spiele');
+                    lines.push(`📅 ${capTitle}`, '');
+                    list.forEach(e => {
+                        const d = parseISODate(e.date);
+                        const h = e.venue !== 'auswaerts';
+                        const o = e.opp || 'Gegner';
+                        lines.push(`• ${WEEKDAYS_LONG[d.getDay()].slice(0, 2)}, ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${e.time ? ` ${e.time} Uhr` : ''} – ${h ? `${own} vs ${o}` : `${o} vs ${own}`} (${h ? 'Heim' : 'Auswärts'})`);
+                    });
+                    if (!list.length) lines.push('Aktuell keine Termine.');
+                    lines.push('', 'Kommt vorbei und unterstützt uns! 💪');
+                    break;
+                }
+                case 'geburtstag': {
+                    const n = playerLabel(val('in-bday-player'));
+                    lines.push(`🎂 Alles Gute zum Geburtstag${n ? `, ${n}` : ''}! 🎉`);
+                    if (normName(val('in-bday-text'))) lines.push(normName(val('in-bday-text')));
+                    break;
+                }
+                case 'neuzugang': {
+                    const n = playerLabel(val('in-new-player'));
+                    const from = normName(val('in-new-from-text')) || val('in-new-from-select');
+                    lines.push(`🆕 Willkommen im Team${n ? `, ${n}` : ''}!`);
+                    if (normName(val('in-new-position'))) lines.push(`📍 Position: ${normName(val('in-new-position'))}`);
+                    if (normName(val('in-new-number'))) lines.push(`🔢 Rückennummer: ${normName(val('in-new-number'))}`);
+                    if (from) lines.push(`↪️ Kommt von: ${from}`);
+                    if (normName(val('in-new-text'))) lines.push('', normName(val('in-new-text')));
+                    break;
+                }
+                case 'sponsor': {
+                    const n = val('in-spon-select');
+                    const title = niceCase(val('in-spon-title') || 'Danke').replace(/[!.]+$/, '');
+                    lines.push(`🤝 ${title}${n ? ` an ${n}` : ''} ${normName(val('in-spon-text'))}`.trim());
+                    if (normName(val('in-spon-extra'))) lines.push(normName(val('in-spon-extra')));
+                    break;
+                }
+                case 'wochenende': {
+                    const emoji = { win: '✅', draw: '🤝', loss: '❌', open: '' };
+                    lines.push(`📊 ${niceCase([val('in-wk-title'), val('in-wk-sub')].map(normName).filter(Boolean).join(' '))}`, '');
+                    readWeekendRows().forEach(r => {
+                        const res = weekendResult(r.score);
+                        lines.push(`• ${r.team || own}: ${r.score || '–'} ${r.venue === 'auswaerts' ? 'bei' : 'gegen'} ${r.opp || 'Gegner'} ${emoji[res]}`.trim());
+                    });
+                    break;
+                }
+            }
+            const tags = normName(val('cfg-hashtags'));
+            return lines.join('\n').trim() + (tags ? `\n\n${tags}` : '');
+        }
+
+        function updateCaption(tab) {
+            const ta = $(`cap-text-${tab}`);
+            if (!ta || captionDirty[tab]) return;
+            ta.value = buildCaption(tab);
+        }
+
+        function regenerateCaption(tab) {
+            captionDirty[tab] = false;
+            updateCaption(tab);
+        }
+
+        async function copyCaption(tab) {
+            const ta = $(`cap-text-${tab}`);
+            if (!ta) return;
+            try {
+                await navigator.clipboard.writeText(ta.value);
+            } catch (e) {
+                ta.select();
+                document.execCommand('copy');
+            }
+            toast('📋 Text kopiert – jetzt bei Instagram einfügen');
+        }
+
+        /* =========================================================
+           EINEN REITER AUS EINER ANDEREN VERSION ÜBERNEHMEN
+           ========================================================= */
+        const TAB_CONTENT = {
+            post:       { keys: ['venue', 'opponentSelect', 'postTitle', 'postDate', 'postTime'], inputs: [] },
+            story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
+            tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute'], inputs: [] },
+            ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers'], inputs: [/^erg-/] },
+            kader:      { keys: ['kaderMeeting', 'kaderJersey', 'kaderDuty1', 'kaderDuty2', 'kaderFreetext'], inputs: [/^kader-player-/] },
+            potm:       { keys: ['potmPlayer', 'potmText'], inputs: [] },
+            kalender:   { keys: [], inputs: [/^in-kal-(mode|title)$/, /^kal-/] },
+            geburtstag: { keys: ['bdayConfetti'], inputs: [/^in-bday-/] },
+            neuzugang:  { keys: [], inputs: [/^in-new-/] },
+            sponsor:    { keys: [], inputs: [/^in-spon-/] },
+            wochenende: { keys: [], inputs: [/^in-wk-/, /^wk-/] },
+            eckball:    { keys: ['eckArrows', 'eckNodes'], inputs: [/^eck-/] }
+        };
+        const TAB_DESIGN_EXTRA = {
+            story:    { keys: ['pitchMode', 'numbersShow'], inputs: [] },
+            tor:      { keys: ['torImgSize'], inputs: [] },
+            kalender: { keys: [], inputs: [/^in-kal-color-/] }
+        };
+
+        function tabCopyHTML(tab, withWhat = true) {
+            return `
+                <details class="design-details" style="margin-top:12px;">
+                    <summary>📋 Aus anderer Version übernehmen</summary>
+                    <div class="details-body">
+                        <div style="display:grid; grid-template-columns: ${withWhat ? '1fr 1fr' : '1fr'}; gap:6px;">
+                            <select id="tabcopy-from-${tab}" class="tabcopy-from"></select>
+                            ${withWhat ? `<select id="tabcopy-what-${tab}">
+                                <option value="all">Alles</option>
+                                <option value="design">Nur Design</option>
+                                <option value="content">Nur Inhalte</option>
+                            </select>` : ''}
+                        </div>
+                        <button type="button" class="copy-action-btn" style="margin-top:6px;" onclick="copyTabFromVersion('${tab}')">📋 Diesen Reiter übernehmen</button>
+                        <span class="hint">Übernimmt nur diesen Reiter in die aktuell geöffnete Version. Mit ↩️ lässt es sich rückgängig machen.</span>
+                    </div>
+                </details>`;
+        }
+
+        function refreshTabCopySelects() {
+            const others = ['v1', 'v2', 'v3'].filter(v => v !== currentVersion);
+            const html = others.map(v => `<option value="${v}">aus ${esc(versionLabel(v))}</option>`).join('');
+            document.querySelectorAll('select.tabcopy-from').forEach(sel => {
+                const v = sel.value;
+                sel.innerHTML = html;
+                if (others.includes(v)) sel.value = v;
+            });
+        }
+
+        async function copyTabFromVersion(tab) {
+            const from = val(`tabcopy-from-${tab}`);
+            const what = $(`tabcopy-what-${tab}`) ? val(`tabcopy-what-${tab}`) : 'all';
+            if (!from || from === currentVersion) return;
+            await saveSlotNow();
+            const src = await localforage.getItem(STORE.slot(from));
+            if (!src) { alert(`In „${versionLabel(from)}“ ist noch nichts gespeichert.`); return; }
+            const copy = o => JSON.parse(JSON.stringify(o ?? null));
+            const data = collectSlotData();
+            const takeKeys = spec => {
+                (spec.keys || []).forEach(k => { if (src[k] !== undefined) data[k] = copy(src[k]); });
+                for (const k in (src.inputs || {})) if ((spec.inputs || []).some(re => re.test(k))) data.inputs[k] = src.inputs[k];
+            };
+            if (what !== 'design' && TAB_CONTENT[tab]) takeKeys(TAB_CONTENT[tab]);
+            if (what !== 'content' && tab !== 'eckball') {
+                if (src.tabSettings?.[tab]) data.tabSettings[tab] = copy(src.tabSettings[tab]);
+                data.customTexts = { ...data.customTexts, [tab]: copy(src.customTexts?.[tab] || []) };
+                data.selectedSponsors = { ...data.selectedSponsors, [tab]: copy(src.selectedSponsors?.[tab] || []) };
+                const view = $(`view-${tab}`);
+                const tplIds = Array.from(view?.querySelectorAll('.post-template, .story-template') || []).map(t => t.id);
+                for (const k in (src.positions || {})) {
+                    const inView = view?.contains($(k)) || (k.startsWith('ct-') && tplIds.some(id => k.endsWith('-' + id)));
+                    if (inView) data.positions[k] = copy(src.positions[k]);
+                }
+                if (TAB_DESIGN_EXTRA[tab]) takeKeys(TAB_DESIGN_EXTRA[tab]);
+            }
+            applySlotData(data);
+            renderAll();
+            await saveSlotNow();
+            captionDirty[tab] = false;
+            updateCaption(tab);
+            toast(`✅ Reiter aus „${versionLabel(from)}“ übernommen`);
         }
 
         /* =========================================================
@@ -2176,7 +2716,7 @@
                     wanted.add(elId);
                     let el = $(elId);
                     if (!el) {
-                        const top = Math.round(tpl.offsetHeight ? tpl.offsetHeight * 0.45 : (fmt === 'story' ? 320 : 180)) + 'px';
+                        const top = Math.round(fmt === 'story' ? (tpl.offsetHeight || 711) * 0.45 : 180) + 'px';
                         el = document.createElement('div');
                         el.id = elId;
                         el.className = 'draggable-text custom-text';
@@ -2355,13 +2895,41 @@
                 const isFeed = !!banner.closest('.post-template');
                 banner.style.display = visible ? 'flex' : 'none';
                 banner.innerHTML = buildHtml(isFeed ? size.feed : size.story);
+                banner.dataset.logoH = size.feed[0];
             });
+            $(`view-${tab}`)?.querySelectorAll('.post-template').forEach(layoutFeedContent);
+        }
 
-            // Beiträge (1:1): restlichen Inhalt verkleinern, damit nichts von der Sponsorenleiste überdeckt wird
-            const FEED_H = 400;
-            const bannerH = size.feed[0] + 12 + 8 + 6;
-            $(`view-${tab}`)?.querySelectorAll('.post-template > .tpl-content').forEach(content => {
-                content.style.transform = visible ? `scale(${((FEED_H - bannerH) / FEED_H).toFixed(3)})` : '';
+        /* Beiträge: Inhalt (400×400) wird mittig platziert (4:5) und bei Sponsorenleiste passend verkleinert */
+        function layoutFeedContent(tpl) {
+            const content = tpl.querySelector(':scope > .tpl-content');
+            if (!content) return;
+            const H = tpl.classList.contains('fmt-45') ? 500 : 400;
+            const banner = tpl.querySelector(':scope > .sponsor-banner');
+            const bannerH = banner && banner.style.display !== 'none' ? (parseFloat(banner.dataset.logoH) || 40) + 26 : 0;
+            const avail = H - bannerH;
+            const scale = Math.min(1, avail / 400);
+            const top = Math.max(0, (avail - 400 * scale) / 2);
+            content.style.transform = (scale === 1 && top === 0) ? '' : `translateY(${top.toFixed(1)}px) scale(${scale.toFixed(3)})`;
+        }
+
+        function getFeedFormat() { return val('cfg-feed-format') === '11' ? '11' : '45'; }
+
+        function applyFeedFormat() {
+            applyFeedFormatClasses();
+            scheduleSave();
+        }
+
+        function applyFeedFormatClasses() {
+            const is45 = getFeedFormat() === '45';
+            document.querySelectorAll('.post-template').forEach(tpl => {
+                tpl.classList.toggle('fmt-45', is45);
+                layoutFeedContent(tpl);
+                const tag = tpl.parentElement?.querySelector(':scope > .preview-label-tag');
+                if (tag) {
+                    if (!tag.dataset.orig) tag.dataset.orig = tag.textContent;
+                    tag.textContent = is45 ? tag.dataset.orig.replace('(1:1)', '(4:5)') : tag.dataset.orig;
+                }
             });
         }
 
@@ -2733,6 +3301,75 @@
             document.querySelectorAll('#view-geburtstag .confetti-layer').forEach(l => l.style.display = confetti ? '' : 'none');
         }
 
+        /* ---------- Danke an Sponsor ---------- */
+        function updateSponsorPost() {
+            const name = val('in-spon-select');
+            const sp = name ? findSponsor(name) : null;
+            const card = sp && sp.img
+                ? `<img src="${sp.img}" alt="">`
+                : `<div class="spon-card-text">${esc(name || 'Sponsor')}</div>`;
+            ['', '-feed'].forEach(sfx => {
+                setText(`out-spon-title${sfx}`, val('in-spon-title'));
+                setText(`out-spon-name${sfx}`, name || '-');
+                setText(`out-spon-text${sfx}`, val('in-spon-text'));
+                const extra = $(`out-spon-extra${sfx}`);
+                if (extra) { extra.innerText = val('in-spon-extra'); extra.style.display = val('in-spon-extra') ? '' : 'none'; }
+                const c = $(`out-spon-card${sfx}`);
+                if (c && c.dataset.key !== (name + '|' + !!sp?.img)) { c.innerHTML = card; c.dataset.key = name + '|' + !!sp?.img; }
+            });
+        }
+
+        /* ---------- Wochenend-Ergebnisse ---------- */
+        function readWeekendRows() {
+            const rows = [];
+            for (let i = 1; i <= WK_MAX; i++) {
+                const team = normName(val(`wk-team-${i}`)), score = normName(val(`wk-score-${i}`)), opp = val(`wk-opp-${i}`);
+                if (!team && !score && !opp) continue;
+                rows.push({ team, score, opp, venue: val(`wk-venue-${i}`) || 'heim' });
+            }
+            return rows;
+        }
+
+        function weekendResult(score) {
+            const m = /(\d+)\s*[:\-–]\s*(\d+)/.exec(score || '');
+            if (!m) return 'open';
+            const a = +m[1], b = +m[2];
+            return a > b ? 'win' : a < b ? 'loss' : 'draw';
+        }
+
+        function updateWochenende() {
+            const rows = readWeekendRows();
+            ['', '-feed'].forEach(sfx => {
+                setText(`out-wk-title${sfx}`, val('in-wk-title'));
+                setText(`out-wk-sub${sfx}`, val('in-wk-sub'));
+            });
+            const html = rows.length ? rows.map(r => `
+                <div class="wk-row">
+                    <div class="wk-team">${esc(r.team || getTeamName())}</div>
+                    <div class="wk-match">
+                        <img src="${getOpponentLogoSrc(r.opp || 'Gegner')}" alt="">
+                        <div>vs ${esc(r.opp || 'Gegner')}<span class="wk-venue">${r.venue === 'auswaerts' ? 'AUSWÄRTS' : 'HEIM'}</span></div>
+                    </div>
+                    <div class="wk-score ${weekendResult(r.score)}">${esc(r.score || '–')}</div>
+                </div>`).join('') : '<div class="kal-empty">Noch keine Ergebnisse eingetragen</div>';
+            const feed = $('out-wk-list-feed');
+            if (feed) { feed.innerHTML = html; feed.classList.toggle('wk-compact', rows.length > 4); }
+            const story = $('out-wk-list');
+            if (story) story.innerHTML = html;
+        }
+
+        function clearWeekendRow(i) {
+            setVal(`wk-team-${i}`, ''); setVal(`wk-score-${i}`, ''); setVal(`wk-opp-${i}`, ''); setVal(`wk-venue-${i}`, 'heim');
+            updateWochenende();
+            scheduleSave();
+        }
+
+        function fillWeekendTeams() {
+            ['v1', 'v2', 'v3'].forEach((v, idx) => setVal(`wk-team-${idx + 1}`, versionLabel(v)));
+            updateWochenende();
+            scheduleSave();
+        }
+
         /* ---------- Neuzugang ---------- */
         function updateNeuzugang() {
             const name = val('in-new-player') || 'Keiner';
@@ -2958,58 +3595,73 @@
         /* =========================================================
            ECKBALL
            ========================================================= */
-        function eckSnapshot() {
-            const sel = {};
-            for (let i = 1; i <= 11; i++) sel[`eck-player-${i}`] = val(`eck-player-${i}`);
-            for (let i = 4; i <= 7; i++) sel[`eck-role-${i}`] = val(`eck-role-${i}`);
-            return JSON.stringify({ eckArrows, eckNodes, sel });
-        }
+        /* =========================================================
+           RÜCKGÄNGIG / WIEDERHOLEN (für alle Reiter)
+           Jeder gespeicherte Zustand der aktuellen Version landet im Verlauf.
+           ========================================================= */
+        let undoStack = [];
+        let redoStack = [];
+        let restoringHistory = false;
+        const HISTORY_MAX = 60;
 
         function updateUndoButtons() {
-            const u = $('eck-undo-btn'), r = $('eck-redo-btn');
-            if (u) u.disabled = eckHistory.length <= 1;
-            if (r) r.disabled = eckRedoStack.length === 0;
+            const canUndo = undoStack.length > 1, canRedo = redoStack.length > 0;
+            ['eck-undo-btn', 'undo-btn'].forEach(id => { const b = $(id); if (b) b.disabled = !canUndo; });
+            ['eck-redo-btn', 'redo-btn'].forEach(id => { const b = $(id); if (b) b.disabled = !canRedo; });
         }
 
-        function resetEckHistory() {
-            eckHistory = [eckSnapshot()];
-            eckRedoStack = [];
+        function resetHistory() {
+            undoStack = [JSON.stringify(collectSlotData())];
+            redoStack = [];
             updateUndoButtons();
         }
 
-        /* Wird NACH jeder Änderung aufgerufen – so ist der erste Undo-Schritt nie leer */
-        function commitEckHistory() {
-            const s = eckSnapshot();
-            if (eckHistory[eckHistory.length - 1] === s) return;
-            eckHistory.push(s);
-            if (eckHistory.length > 30) eckHistory.shift();
-            eckRedoStack = [];
+        function recordHistory(json) {
+            if (restoringHistory || undoStack[undoStack.length - 1] === json) return;
+            undoStack.push(json);
+            if (undoStack.length > HISTORY_MAX) undoStack.shift();
+            redoStack = [];
             updateUndoButtons();
-            scheduleSave();
         }
 
-        function restoreEckSnapshot(s) {
-            const st = JSON.parse(s);
-            eckArrows = st.eckArrows;
-            eckNodes = st.eckNodes;
-            for (const k in st.sel) setVal(k, st.sel[k]);
-            updateEckball();
+        function restoreHistory(json) {
+            restoringHistory = true;
+            try {
+                selectElement(null);
+                applySlotData(JSON.parse(json));
+                renderAll();
+            } finally {
+                restoringHistory = false;
+            }
+            // Zustand nach dem Wiederherstellen als aktuellen Stand übernehmen und speichern
+            const data = collectSlotData();
+            undoStack[undoStack.length - 1] = JSON.stringify(data);
+            localforage.setItem(STORE.slot(currentVersion), data).catch(() => {});
             updateUndoButtons();
-            scheduleSave();
         }
 
-        function undoEckball() {
-            if (eckHistory.length <= 1) return;
-            eckRedoStack.push(eckHistory.pop());
-            restoreEckSnapshot(eckHistory[eckHistory.length - 1]);
+        function undoAction() {
+            clearTimeout(saveTimer);
+            recordHistory(JSON.stringify(collectSlotData()));   // noch nicht gespeicherte Änderung zuerst sichern
+            if (undoStack.length <= 1) return;
+            redoStack.push(undoStack.pop());
+            restoreHistory(undoStack[undoStack.length - 1]);
+            toast('↩️ Rückgängig');
         }
 
-        function redoEckball() {
-            if (eckRedoStack.length === 0) return;
-            const s = eckRedoStack.pop();
-            eckHistory.push(s);
-            restoreEckSnapshot(s);
+        function redoAction() {
+            if (!redoStack.length) return;
+            const s = redoStack.pop();
+            undoStack.push(s);
+            restoreHistory(s);
+            toast('↪️ Wiederholt');
         }
+
+        // Namen für die Eckball-Buttons beibehalten
+        function undoEckball() { undoAction(); }
+        function redoEckball() { redoAction(); }
+        function commitEckHistory() { scheduleSave(); }
+        function resetEckHistory() { resetHistory(); }
 
         function resetEckballPositions() {
             eckArrows = JSON.parse(JSON.stringify(defaultArrows));
@@ -3192,6 +3844,7 @@
            ANSICHTEN / TABS
            ========================================================= */
         function renderAll() {
+            applyFeedFormatClasses();
             updateDesignSettings();
             editorTabs.forEach(t => { updateTabDesign(t); renderSelectedSponsors(t); });
             updatePostFields();
@@ -3207,6 +3860,8 @@
             updateKalender();
             updateGeburtstag();
             updateNeuzugang();
+            updateSponsorPost();
+            updateWochenende();
             updateEckball();
         }
 
@@ -3227,7 +3882,10 @@
                 case 'potm': updatePotm(); break;
                 case 'geburtstag': updateGeburtstag(); break;
                 case 'neuzugang': updateNeuzugang(); break;
+                case 'sponsor': updateSponsorPost(); break;
+                case 'wochenende': updateWochenende(); break;
             }
+            if (editorTabs.includes(activeTab)) updateCaption(activeTab);
         }
 
         function switchTab(tab) {
@@ -3287,6 +3945,8 @@
             const data = await localforage.getItem(STORE.slot(currentVersion));
             if (data) applySlotData(data);
             renderAll();
+            refreshTabCopySelects();
+            Object.keys(captionDirty).forEach(k => captionDirty[k] = false);
             resetEckHistory();
             scheduleSave();
         }
@@ -3304,7 +3964,9 @@
             clearTimeout(saveTimer);
             if (!appReady) return;
             try {
-                await localforage.setItem(STORE.slot(currentVersion), collectSlotData());
+                const data = collectSlotData();
+                recordHistory(JSON.stringify(data));
+                await localforage.setItem(STORE.slot(currentVersion), data);
             } catch (e) {
                 console.warn("Speichern fehlgeschlagen:", e);
             }
@@ -3352,6 +4014,8 @@
 
                 ergShowScorers: $('in-erg-show-scorers')?.checked ?? true,
                 lineupKaderOnly: !!$('in-lineup-kader-only')?.checked,
+                feedFormat: getFeedFormat(),
+                hashtags: val('cfg-hashtags'),
                 bdayConfetti: $('in-bday-confetti')?.checked ?? true,
                 customTexts: customTexts,
 
@@ -3364,7 +4028,9 @@
 
             const inputIds = ['in-kal-mode', 'in-kal-title', 'in-kal-color-home', 'in-kal-color-away',
                 'in-bday-player', 'in-bday-title', 'in-bday-text',
-                'in-new-player', 'in-new-title', 'in-new-position', 'in-new-number', 'in-new-from-select', 'in-new-from-text', 'in-new-text'];
+                'in-new-player', 'in-new-title', 'in-new-position', 'in-new-number', 'in-new-from-select', 'in-new-from-text', 'in-new-text',
+                'in-spon-select', 'in-spon-title', 'in-spon-text', 'in-spon-extra', 'in-wk-title', 'in-wk-sub'];
+            for (let i = 1; i <= WK_MAX; i++) inputIds.push(`wk-team-${i}`, `wk-score-${i}`, `wk-opp-${i}`, `wk-venue-${i}`);
             for (let i = 1; i <= SCORER_MAX; i++) inputIds.push(`erg-scorer-${i}`, `erg-minute-${i}`);
             for (let i = 1; i <= 11; i++) inputIds.push(`player-${i}`, `num-player-${i}`, `eck-player-${i}`);
             for (let i = 1; i <= 7; i++) inputIds.push(`bench-player-${i}`);
@@ -3425,6 +4091,8 @@
                 for (const k in data.inputs) setVal(k, data.inputs[k]);
             }
             if (data.lineupKaderOnly !== undefined && $('in-lineup-kader-only')) $('in-lineup-kader-only').checked = data.lineupKaderOnly;
+            setVal('cfg-feed-format', data.feedFormat === '11' ? '11' : '45');
+            if (data.hashtags !== undefined) setVal('cfg-hashtags', data.hashtags);
             refreshLineupOptions();
             // Auswahlfelder mit Namen, die es nicht (mehr) gibt → "Keiner"
             document.querySelectorAll('select.player-select').forEach(sel => { if (!sel.value) sel.value = 'Keiner'; });
@@ -3706,6 +4374,7 @@
                 renderAll();
                 scheduleSave();
                 toast(`✅ ${entry.name} freigeschaltet`);
+                if (!prefs.onboardingDone) startWizard();
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Freischalten';
@@ -3918,6 +4587,7 @@
                 if (input && document.activeElement !== input) input.value = name;
             });
             refreshCopySelects();
+            refreshTabCopySelects();
         }
 
         function versionLabel(v) {
@@ -3935,7 +4605,7 @@
         }
 
         /* Einstellungen einer Version in eine andere kopieren (alles, nur Design oder nur Inhalte) */
-        const DESIGN_KEYS = ['primary', 'jerseyColor', 'frameColor', 'tabSettings', 'positions', 'customTexts', 'selectedSponsors', 'torImgSize', 'pitchMode', 'numbersShow'];
+        const DESIGN_KEYS = ['primary', 'jerseyColor', 'frameColor', 'tabSettings', 'positions', 'customTexts', 'selectedSponsors', 'torImgSize', 'pitchMode', 'numbersShow', 'feedFormat'];
         const DESIGN_INPUTS = [/^in-kal-color-/];
 
         async function copyBetweenVersions() {
@@ -3969,7 +4639,7 @@
             if (to === currentVersion) {
                 applySlotData(result);
                 renderAll();
-                resetEckHistory();
+                await saveSlotNow();
             }
             toast(`✅ Nach „${versionLabel(to)}“ kopiert`);
         }
@@ -4023,6 +4693,64 @@
             prefs.backupSnoozeUntil = Date.now() + 7 * 86400000;
             savePrefs();
             updateBackupReminder();
+        }
+
+        /* ---------- Einrichtungs-Assistent ---------- */
+        const WIZARD_STEPS = 5;
+        let wizardCurrent = 1;
+
+        function startWizard() {
+            wizardCurrent = 1;
+            setText('wz-club-name', club ? `, ${club.name}` : '');
+            setVal('wz-team', val('cfg-team-name'));
+            $('wz-team').placeholder = club ? club.name : 'z.B. TSGV Rechberg';
+            setVal('wz-primary', val('cfg-color-primary') || '#005f73');
+            setVal('wz-jersey', val('cfg-color-jersey') || '#bb3e03');
+            const fmt = getFeedFormat();
+            document.querySelectorAll('input[name="wz-format"]').forEach(r => r.checked = r.value === fmt);
+            $('wz-install-hint').textContent = isStandalone() ? '' : (isIOS()
+                ? 'Tipp: Füge die App danach in Safari über „Teilen → Zum Home-Bildschirm“ hinzu – dann bleiben deine Daten dauerhaft gespeichert.'
+                : 'Tipp: Installiere die App danach über das Browser-Menü auf deinem Startbildschirm – dann bleiben deine Daten dauerhaft gespeichert.');
+            $('wizard-overlay').hidden = false;
+            updateWizard();
+        }
+
+        function updateWizard() {
+            document.querySelectorAll('#wizard-overlay .wz-step').forEach(st => st.classList.toggle('active', +st.dataset.step === wizardCurrent));
+            $('wz-dots').innerHTML = Array.from({ length: WIZARD_STEPS }, (_, i) => `<span class="${i + 1 === wizardCurrent ? 'active' : ''}"></span>`).join('');
+            $('wz-back').style.visibility = wizardCurrent > 1 ? 'visible' : 'hidden';
+            $('wz-next').style.display = wizardCurrent < WIZARD_STEPS ? '' : 'none';
+            $('wz-preview').style.background = `linear-gradient(135deg, ${val('wz-primary')} 0%, ${val('wz-primary')} 58%, ${val('wz-jersey')} 58%, ${val('wz-jersey')} 100%)`;
+            const n = stammdaten.players.length;
+            setText('wz-player-count', n ? `✅ ${n} Spieler angelegt` : '');
+        }
+
+        function wizardStep(dir) {
+            wizardCurrent = Math.min(WIZARD_STEPS, Math.max(1, wizardCurrent + dir));
+            updateWizard();
+        }
+
+        /* Übernimmt die Eingaben des Assistenten sofort in die App */
+        function wizardSync() {
+            setVal('cfg-team-name', normName(val('wz-team')));
+            setVal('cfg-color-primary', val('wz-primary'));
+            setVal('cfg-color-jersey', val('wz-jersey'));
+            const fmt = document.querySelector('input[name="wz-format"]:checked')?.value;
+            if (fmt) setVal('cfg-feed-format', fmt);
+            applyFeedFormatClasses();
+            updateDesignSettings();
+            updateMatchup();
+            updateWizard();
+            scheduleSave();
+        }
+
+        function finishWizard(tab) {
+            $('wizard-overlay').hidden = true;
+            prefs.onboardingDone = true;
+            savePrefs();
+            renderAll();
+            scheduleSave();
+            if (tab) switchTab(tab);
         }
 
         /* ---------- Installation als App ---------- */
@@ -4124,6 +4852,22 @@
 
                 $('license-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitLicenseCode(); });
 
+                // Rückgängig-Buttons sitzen immer über der unteren Leiste
+                const bottomBar = document.querySelector('.bottom-bar');
+                const syncBottomBar = () => document.documentElement.style.setProperty('--bottom-bar-h', bottomBar.offsetHeight + 'px');
+                syncBottomBar();
+                if (window.ResizeObserver) new ResizeObserver(syncBottomBar).observe(bottomBar);
+                window.addEventListener('resize', syncBottomBar);
+
+                // Tastatur: Strg/Cmd+Z = Rückgängig, Strg/Cmd+Y bzw. Strg+Umschalt+Z = Wiederholen
+                document.addEventListener('keydown', e => {
+                    if (!(e.ctrlKey || e.metaKey)) return;
+                    if (e.target.closest?.('input, textarea, select')) return;
+                    const k = e.key.toLowerCase();
+                    if (k === 'z' && !e.shiftKey) { e.preventDefault(); undoAction(); }
+                    else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redoAction(); }
+                });
+
                 // Tippen auf eine freie Stelle der Vorschau hebt die Auswahl auf
                 document.querySelector('.preview-area').addEventListener('pointerdown', e => {
                     if (!e.target.closest('.draggable-text, .draggable-img')) selectElement(null);
@@ -4136,7 +4880,10 @@
                 appReady = true;
 
                 if (!club && LICENSE_REQUIRED) showLicenseOverlay(false);
-                else verifyLicenseInBackground();
+                else {
+                    verifyLicenseInBackground();
+                    if (!prefs.onboardingDone && !stammdaten.players.length) startWizard();
+                }
             } catch (e) {
                 console.warn("InitApp Error:", e);
             }
