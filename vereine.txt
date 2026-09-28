@@ -1,0 +1,14 @@
+# Freigeschaltete Vereine (Lizenz-/Vereinscodes)
+#
+# Format pro Zeile:
+#   CODE = Vereinsname = Wappen-Datei
+#
+# - Der Code darf Buchstaben und Zahlen enthalten, Bindestriche/Leerzeichen
+#   werden ignoriert (548-962, 548962 und "548 962" sind derselbe Code).
+# - Die Wappen-Datei liegt auf dem Server (Pfad relativ zur index.html),
+#   z.B. Wappen.jpg oder Wappen/TSGV_Rechberg.png. Sie ist optional.
+# - Wird eine Zeile gelöscht, ist der Code beim nächsten Start (mit Internet)
+#   automatisch gesperrt.
+# - Zeilen mit # am Anfang sind Kommentare.
+
+548-962 = TSGV Rechberg = Wappen.jpg
