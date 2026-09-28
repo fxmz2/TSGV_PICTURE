@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Vereinscode-Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; color: #222; background: #f4f4f9; line-height: 1.5; }
+        h1 { color: #005f73; margin-bottom: 4px; }
+        .box { background: white; border-radius: 12px; padding: 18px; margin-top: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        label { display: block; font-weight: bold; font-size: 14px; margin: 10px 0 4px; }
+        input, textarea { width: 100%; box-sizing: border-box; padding: 9px; font-size: 15px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+        textarea { font-family: monospace; font-size: 13px; min-height: 110px; }
+        button { background: #005f73; color: white; border: none; border-radius: 8px; padding: 11px 16px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; }
+        button.secondary { background: #e8eaee; color: #222; }
+        .row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .result { background: #0f1720; color: #d8f3dc; font-family: monospace; font-size: 13px; padding: 12px; border-radius: 8px; word-break: break-all; margin-top: 12px; white-space: pre-wrap; }
+        .code-big { font-family: monospace; font-size: 28px; letter-spacing: 4px; font-weight: bold; color: #005f73; margin-top: 6px; }
+        .hint { font-size: 13px; color: #555; }
+        .warn { background: #fff3cd; border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-top: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Vereinscode-Generator</h1>
+    <p class="hint">Erzeugt Vereinscodes und die passende Zeile für <b>vereine.txt</b>. In der Datei steht nur ein Hash – der eigentliche Code ist daraus nicht lesbar.
+        Diese Seite läuft komplett im Browser; es wird nichts gesendet. Am besten nur lokal auf deinem PC öffnen und <b>nicht</b> mit hochladen.</p>
+
+    <div class="box">
+        <h2 style="margin-top:0;">Neuen Verein anlegen</h2>
+        <label for="club-name">Vereinsname</label>
+        <input id="club-name" placeholder="z.B. TSGV Rechberg">
+        <label for="club-logo">Wappen-Datei auf dem Server</label>
+        <input id="club-logo" placeholder="z.B. Wappen/TSGV_Rechberg.jpg">
+        <label for="club-code">Code (leer lassen = zufälligen Code erzeugen)</label>
+        <input id="club-code" placeholder="z.B. K7MX-29QF" autocapitalize="characters">
+        <div class="row">
+            <button type="button" onclick="generate()">Zeile erzeugen</button>
+        </div>
+        <div id="out" hidden>
+            <label>Diesen Code gibst du dem Verein:</label>
+            <div class="code-big" id="out-code"></div>
+            <label>Diese Zeile kommt in vereine.txt:</label>
+            <div class="result" id="out-line"></div>
+            <button type="button" class="secondary" onclick="copy('out-line')">📋 Zeile kopieren</button>
+            <div class="warn">⚠️ Notiere dir den Code! Aus der Zeile in vereine.txt lässt er sich nicht wiederherstellen.</div>
+        </div>
+    </div>
+
+    <div class="box">
+        <h2 style="margin-top:0;">Bestehende Liste umwandeln</h2>
+        <p class="hint">Füge hier deine bisherige vereine.txt mit lesbaren Codes ein (z.B. <code>548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg</code>).
+            Die Codes der Vereine bleiben gleich – nur die Datei wird unlesbar.</p>
+        <textarea id="convert-in" placeholder="548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg"></textarea>
+        <button type="button" onclick="convertList()">Umwandeln</button>
+        <div class="result" id="convert-out" hidden></div>
+        <button type="button" class="secondary" id="convert-copy" onclick="copy('convert-out')" hidden>📋 Ergebnis kopieren</button>
+    </div>
+
+    <script>
+        // Muss exakt mit index.html übereinstimmen
+        const LICENSE_SALT = 'vereinsgrafik-lizenz-v1';
+        const LICENSE_ITERATIONS = 150000;
+        // Ohne leicht verwechselbare Zeichen (0/O, 1/I/L)
+        const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+        function normalizeCode(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+        function formatCode(c) { return c.length === 8 ? `${c.slice(0, 4)}-${c.slice(4)}` : (c.length === 6 ? `${c.slice(0, 3)}-${c.slice(3)}` : c); }
+
+        async function hashLicenseCode(code) {
+            const enc = new TextEncoder();
+            const key = await crypto.subtle.importKey('raw', enc.encode(normalizeCode(code)), 'PBKDF2', false, ['deriveBits']);
+            const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(LICENSE_SALT), iterations: LICENSE_ITERATIONS, hash: 'SHA-256' }, key, 256);
+            return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function randomCode() {
+            const bytes = crypto.getRandomValues(new Uint8Array(8));
+            return Array.from(bytes, b => ALPHABET[b % ALPHABET.length]).join('');
+        }
+
+        async function generate() {
+            if (!window.crypto?.subtle) { alert('Dein Browser unterstützt die Verschlüsselung hier nicht. Bitte Chrome, Edge oder Firefox verwenden.'); return; }
+            const name = document.getElementById('club-name').value.trim();
+            const logo = document.getElementById('club-logo').value.trim();
+            if (!name) { alert('Bitte einen Vereinsname eingeben.'); return; }
+            let code = normalizeCode(document.getElementById('club-code').value);
+            if (!code) code = randomCode();
+            if (code.length < 6) { alert('Der Code sollte mindestens 6, besser 8 Zeichen haben.'); return; }
+            const hash = await hashLicenseCode(code);
+            document.getElementById('out-code').textContent = formatCode(code);
+            document.getElementById('out-line').textContent = `${hash} = ${name}${logo ? ' = ' + logo : ''}`;
+            document.getElementById('out').hidden = false;
+        }
+
+        async function convertList() {
+            if (!window.crypto?.subtle) { alert('Dein Browser unterstützt die Verschlüsselung hier nicht.'); return; }
+            const lines = document.getElementById('convert-in').value.split(/\r?\n/);
+            const out = [];
+            for (const line of lines) {
+                const t = line.trim();
+                const parts = t.split('=').map(s => s.trim());
+                if (!t || t.startsWith('#') || parts.length < 2 || /^[0-9a-f]{64}$/i.test(parts[0])) { out.push(line); continue; }
+                const hash = await hashLicenseCode(parts[0]);
+                out.push(`# ${parts[1]}\n${hash} = ${parts.slice(1).join(' = ')}`);
+            }
+            const el = document.getElementById('convert-out');
+            el.textContent = out.join('\n');
+            el.hidden = false;
+            document.getElementById('convert-copy').hidden = false;
+        }
+
+        function copy(id) {
+            const text = document.getElementById(id).textContent;
+            navigator.clipboard?.writeText(text).then(() => alert('Kopiert!'), () => prompt('Bitte manuell kopieren:', text));
+        }
+    </script>
+</body>
+</html>

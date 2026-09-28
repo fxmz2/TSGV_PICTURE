@@ -1,14 +1,18 @@
 # Freigeschaltete Vereine (Lizenz-/Vereinscodes)
 #
 # Format pro Zeile:
-#   CODE = Vereinsname = Wappen-Datei
+#   CODE-HASH = Vereinsname = Wappen-Datei
 #
-# - Der Code darf Buchstaben und Zahlen enthalten, Bindestriche/Leerzeichen
-#   werden ignoriert (548-962, 548962 und "548 962" sind derselbe Code).
+# - Den CODE-HASH (64 Zeichen) erzeugst du mit code-generator.html.
+#   So steht der eigentliche Code nicht lesbar in dieser Datei.
+# - Lesbare Codes (z.B. 548-962 = TSGV Rechberg = ...) funktionieren weiterhin,
+#   sind aber für jeden sichtbar, der diese Datei im Browser aufruft.
+#   Mit code-generator.html ("Bestehende Liste umwandeln") kannst du sie umwandeln –
+#   die Codes der Vereine bleiben dabei gleich.
 # - Die Wappen-Datei liegt auf dem Server (Pfad relativ zur index.html),
-#   z.B. Wappen.jpg oder Wappen/TSGV_Rechberg.png. Sie ist optional.
+#   z.B. Wappen/TSGV_Rechberg.jpg. Groß-/Kleinschreibung beachten, keine Umlaute.
 # - Wird eine Zeile gelöscht, ist der Code beim nächsten Start (mit Internet)
 #   automatisch gesperrt.
 # - Zeilen mit # am Anfang sind Kommentare.
 
-548-962 = TSGV Rechberg = Wappen.jpg
+548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg
