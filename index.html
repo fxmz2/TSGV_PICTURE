@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vereinsgrafik – Insta-Vorlagen 15.0</title>
+    <title>Vereinsgrafik – Insta-Vorlagen 16.1</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Vereinsgrafik">
+
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
 
     <!-- Für Android (Manifest) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#005f73">
 
-    <!-- Bibliotheken: html2canvas & localForage (IndexedDB) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@700;900&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Bibliotheken & Schriften liegen lokal im Ordner vendor/ (DSGVO: keine Anfragen an Google oder CDNs) -->
+    <script src="vendor/html2canvas.min.js"></script>
+    <script src="vendor/localforage.min.js"></script>
+    <link href="vendor/fonts.css" rel="stylesheet">
     <style>
         :root {
             --primary: #005f73;
@@ -265,7 +268,8 @@
         .kal-sub { font-size: 12px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; opacity: 0.9; margin-top: 2px; }
         .kal-wrap { position: absolute; left: 0; right: 0; top: 96px; bottom: 16px; display: flex; flex-direction: column; justify-content: flex-start; gap: 7px; padding: 0 18px; box-sizing: border-box; z-index: 2; }
         .kal-wrap.with-sponsors { bottom: 66px; }
-        .kal-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.58); border-radius: 10px; padding: 7px 10px; text-shadow: none; color: #fff; border-left: 4px solid var(--jersey-color); }
+        .kal-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.58); border-radius: 10px; padding: 7px 10px; text-shadow: none; color: #fff; border-left: 4px solid var(--kal-home, #005f73); }
+        .kal-row.auswaerts { border-left-color: var(--kal-away, #bb3e03); }
         .kal-date { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 44px; background: #fff; color: #111; border-radius: 8px; padding: 3px 4px; line-height: 1.05; flex-shrink: 0; }
         .kal-wd { font-size: 9px; font-weight: bold; color: var(--jersey-color); }
         .kal-day { font-size: 18px; font-weight: 900; }
@@ -274,8 +278,8 @@
         .kal-teams { font-size: 12px; font-weight: bold; text-transform: uppercase; line-height: 1.2; }
         .kal-vs { opacity: 0.7; font-size: 0.85em; margin: 0 4px; }
         .kal-meta { display: flex; gap: 8px; align-items: center; margin-top: 3px; font-size: 10px; font-weight: bold; }
-        .kal-badge { padding: 1px 6px; border-radius: 4px; background: var(--primary); color: #fff; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.5); }
-        .kal-badge.auswaerts { background: var(--jersey-color); }
+        .kal-badge { padding: 1px 6px; border-radius: 4px; background: var(--kal-home, #005f73); color: #fff; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.5); }
+        .kal-badge.auswaerts { background: var(--kal-away, #bb3e03); }
         .kal-logo {
             width: 38px; height: 38px; flex-shrink: 0; background-color: var(--avatar-bg, #fff);
             border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 2px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
@@ -379,6 +383,78 @@
         .toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); background: rgba(20,24,30,0.92); color: white; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: bold; z-index: 9998; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; max-width: 90%; text-align: center; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+        /* Inhalt der Feed-Vorlagen: wird verkleinert, wenn die Sponsorenleiste eingeblendet ist */
+        .tpl-content { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
+        .corner-logo.logo-hidden { visibility: hidden; }
+        .copy-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
+
+        /* Hinweis-Karten (Backup-Erinnerung, Installation) */
+        .notice-card { border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 13px; line-height: 1.45; border: 1px solid; }
+        .notice-card[hidden] { display: none; }
+        .notice-card.warn { background: #fff7e6; border-color: #f3c776; color: #5c4300; }
+        .notice-card.info { background: #eaf6f8; border-color: #a9d8e2; color: #11414d; }
+        .notice-card b { display: block; margin-bottom: 4px; font-size: 14px; }
+        .notice-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .notice-actions button { flex: 1; border: none; border-radius: 6px; padding: 9px 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .notice-actions .primary { background: #005f73; color: white; }
+        .notice-actions .secondary { background: rgba(0,0,0,0.07); color: inherit; }
+        .version-name-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .app-footer { margin-top: 24px; font-size: 11px; color: #888; text-align: center; line-height: 1.8; }
+        .app-footer a { color: #666; }
+
+        /* Instagram-Hilfslinien (Story) – werden nicht exportiert */
+        .safe-zone { position: absolute; left: 0; right: 0; height: 13%; z-index: 40; pointer-events: none; display: none; box-sizing: border-box;
+            background: repeating-linear-gradient(135deg, rgba(255,255,255,0.10) 0 8px, rgba(0,0,0,0.10) 8px 16px); }
+        .safe-zone.top { top: 0; border-bottom: 2px dashed rgba(255,255,255,0.85); }
+        .safe-zone.bottom { bottom: 0; border-top: 2px dashed rgba(255,255,255,0.85); }
+        .safe-zone span { position: absolute; left: 8px; font-size: 9px; font-weight: bold; color: white; background: rgba(0,0,0,0.55); padding: 1px 5px; border-radius: 3px; text-shadow: none; }
+        .safe-zone.top span { bottom: 4px; }
+        .safe-zone.bottom span { top: 4px; }
+        body.show-safe-zones .safe-zone { display: block; }
+
+        /* Verschieben & Skalieren von Texten/Bildern */
+        .draggable-text { transform: scale(var(--el-scale, 1)); transform-origin: center top; }
+        .draggable-img { transform: scale(var(--el-scale, 1)); transform-origin: top left; }
+        .el-selected { outline: 2px dashed #ffd60a; outline-offset: 2px; }
+        .el-toolbar { position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 9000;
+            display: flex; align-items: center; gap: 6px; background: rgba(20,24,30,0.94); color: white; padding: 6px 8px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); font-size: 12px; font-weight: bold; }
+        .el-toolbar[hidden] { display: none; }
+        .el-toolbar button { background: rgba(255,255,255,0.14); color: white; border: none; border-radius: 8px; min-width: 34px; height: 34px; font-size: 15px; font-weight: bold; cursor: pointer; padding: 0 8px; }
+        .el-toolbar button.danger { background: #c1121f; }
+        .el-toolbar .el-scale-label { min-width: 44px; text-align: center; }
+
+        /* Eigene Texte */
+        .custom-text { white-space: pre-line; line-height: 1.2; }
+        .custom-text .ct-inner { display: inline-block; max-width: 92%; }
+        .custom-text .ct-inner.ct-box { background: rgba(0,0,0,0.65); padding: 4px 10px; border-radius: 6px; text-shadow: none; }
+        .ct-item { border: 1px solid #ddd; border-radius: 8px; padding: 8px; margin-bottom: 8px; background: white; }
+        .ct-item textarea { width: 100%; box-sizing: border-box; font-family: inherit; font-size: 14px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; margin-bottom: 6px; }
+        .ct-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+        .ct-checks { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+        .ct-checks label { display: flex; align-items: center; gap: 4px; font-weight: normal; font-size: 12px; margin: 0; }
+
+        /* Ergebnis: Torschützen */
+        .scorer-box { display: block; width: fit-content; margin: 0 auto; background: rgba(0,0,0,0.6); color: white; text-shadow: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; line-height: 1.5; max-width: 88%; }
+        .scorer-box .scorer-head { font-size: 10px; letter-spacing: 1.5px; color: rgba(255,255,255,0.8); font-weight: bold; }
+        .scorer-box .scorer-line { font-weight: bold; }
+        .scorer-row { display: grid; grid-template-columns: 1fr 70px; gap: 6px; margin-bottom: 6px; }
+
+        /* Geburtstag */
+        .confetti-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+        .confetti-layer i { position: absolute; display: block; width: 7px; height: 13px; border-radius: 2px; }
+        .bday-photo, .transfer-photo {
+            display: block; object-fit: cover; background-color: var(--avatar-bg, #fff);
+            border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 4px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
+            box-shadow: var(--avatar-shadow, 0 8px 20px rgba(0,0,0,0.5)); box-sizing: border-box;
+        }
+        .bday-name, .transfer-name { display: inline-block; font-size: 1.4rem; font-weight: bold; background: rgba(0,0,0,0.72); color: white; padding: 5px 16px; border-radius: 8px; border-bottom: 3px solid var(--jersey-color); text-shadow: none; }
+
+        /* Neuzugang */
+        .transfer-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+        .transfer-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.62); color: white; text-shadow: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .transfer-chip img { width: 22px; height: 22px; object-fit: contain; background: white; border-radius: 50%; padding: 1px; box-sizing: border-box; }
+        .transfer-number { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 22px; background: var(--jersey-color); border-radius: 4px; padding: 0 4px; }
+
         @media (max-width: 850px) {
             .sidebar { width: 100%; padding-bottom: 40px; }
             .preview-area { width: 100%; display: none; padding-top: 20px; padding-bottom: 40px; }
@@ -406,10 +482,13 @@
             <div class="license-icon">🔐</div>
             <h2>Vereinscode eingeben</h2>
             <p id="license-text">Bitte gib den Code ein, den du für deinen Verein erhalten hast.</p>
-            <input type="text" id="license-input" placeholder="548-962" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <input type="text" id="license-input" placeholder="XXXX-XXXX" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false">
             <button type="button" id="license-submit" class="license-submit" onclick="submitLicenseCode()">Freischalten</button>
             <div id="license-error" class="license-error"></div>
             <button type="button" id="license-cancel" class="license-cancel" onclick="hideLicenseOverlay()" hidden>Abbrechen</button>
+            <div class="app-footer" style="margin-top:14px;">
+                <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+            </div>
         </div>
     </div>
 
@@ -422,9 +501,27 @@
                 <button class="team-tab-btn" id="btn-v3" onclick="switchVersion('v3')">Version 3</button>
             </div>
 
+            <!-- BACKUP-ERINNERUNG -->
+            <div id="backup-reminder" class="notice-card warn" hidden>
+                <b>💾 Zeit für ein Backup</b>
+                <span id="backup-reminder-text"></span>
+                <div class="notice-actions">
+                    <button type="button" class="primary" onclick="exportConfigJSON()">Jetzt sichern</button>
+                    <button type="button" class="secondary" onclick="snoozeBackupReminder()">Später</button>
+                </div>
+            </div>
+
             <!-- EDITOR: STARTSEITE (GLOBAL) -->
             <div id="editor-start" class="editor-section active">
                 <h2 style="font-size:1.3rem; margin-bottom:16px;">🏠 Globale Einstellungen</h2>
+
+                <div id="install-card" class="notice-card info" hidden>
+                    <b>📲 Als App installieren</b>
+                    <span id="install-text"></span>
+                    <div class="notice-actions" id="install-actions" hidden>
+                        <button type="button" class="primary" onclick="triggerInstall()">App installieren</button>
+                    </div>
+                </div>
 
                 <div class="club-card">
                     <img class="club-card-logo club-logo-img" alt="Wappen">
@@ -457,14 +554,51 @@
                     <input type="color" id="cfg-color-frame" value="#ffffff" onchange="updateDesignSettings()">
                 </div>
 
+                <div class="control-group">
+                    <label>Namen der 3 Versionen / Mannschaften</label>
+                    <div class="version-name-grid">
+                        <input type="text" id="cfg-version-name-v1" maxlength="18" placeholder="Version 1" oninput="updateVersionNames()">
+                        <input type="text" id="cfg-version-name-v2" maxlength="18" placeholder="Version 2" oninput="updateVersionNames()">
+                        <input type="text" id="cfg-version-name-v3" maxlength="18" placeholder="Version 3" oninput="updateVersionNames()">
+                    </div>
+                    <span class="hint">z.B. „1. Mannschaft“, „2. Mannschaft“, „A-Jugend“.</span>
+                </div>
+
+                <div class="control-group">
+                    <label>Zwischen Versionen kopieren</label>
+                    <div class="copy-grid">
+                        <select id="copy-from"></select>
+                        <span>➜</span>
+                        <select id="copy-to"></select>
+                    </div>
+                    <select id="copy-what">
+                        <option value="all">Alles kopieren</option>
+                        <option value="design">Nur Design (Farben, Hintergründe, Schriften, Positionen, eigene Texte, Sponsoren)</option>
+                        <option value="content">Nur Inhalte (Aufstellung, Kader, Kalender, Texte, Eckbälle)</option>
+                    </select>
+                    <button type="button" class="copy-action-btn" style="margin-top:6px;" onclick="copyBetweenVersions()">📋 Kopieren</button>
+                    <span class="hint">Spieler, Gegner, Sponsoren und Hintergründe gelten sowieso für alle Versionen.</span>
+                </div>
+
+                <div class="control-group">
+                    <label><input type="checkbox" id="cfg-safe-zones" onchange="updateSafeZones()"> Instagram-Hilfslinien in Storys anzeigen</label>
+                    <span class="hint">Markiert oben und unten die Bereiche, die Instagram mit Profilbild bzw. Antwortfeld überdeckt. Die Linien erscheinen nicht im gespeicherten Bild.</span>
+                </div>
+
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
 
                 <h2 style="font-size:1.1rem; margin-bottom:10px;">💾 Backup & Export (Alle Versionen)</h2>
                 <button type="button" class="copy-action-btn" style="background:#2a9d8f; font-size:14px; padding:12px;" onclick="exportConfigJSON()">📥 Alles als JSON sichern (inkl. Bilder)</button>
+                <span class="hint" id="last-backup-info" style="margin-bottom:8px;"></span>
                 <div class="control-group" style="margin-top:10px;">
                     <label>JSON Datei importieren:</label>
                     <input type="file" id="json-import-input" accept=".json,application/json" onchange="importConfigJSON(event)">
                     <span class="hint">Spieler, Gegner, Sponsoren, Hintergründe und alle 3 Versionen werden übertragen – z.B. auf ein anderes Handy.</span>
+                </div>
+
+                <div class="app-footer">
+                    Vereinsgrafik <span id="app-version-label"></span><br>
+                    <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
                 </div>
             </div>
 
@@ -602,6 +736,11 @@
                     </select>
                 </div>
 
+                <div class="control-group">
+                    <label><input type="checkbox" id="in-lineup-kader-only" onchange="refreshLineupOptions(); buildFormation();"> Nur Spieler aus dem Kader zur Auswahl anzeigen</label>
+                    <span class="hint">Zeigt bei Startelf und Ersatzbank nur die Spieler, die im Reiter „Kader“ ausgewählt sind.</span>
+                </div>
+
                 <label>Startelf & Rückennummern</label>
                 <div class="scrollable-controls-box" id="starter-controls"></div>
 
@@ -639,6 +778,12 @@
                 <div class="control-group"><label>Zusatztext</label><input type="text" id="in-ergebnis-text" value="Auswärtssieg!" oninput="updateErgebnis();"></div>
                 <span class="hint" style="margin-bottom:10px;">Gegner und Heim/Auswärts werden aus „Ankündigung“ übernommen.</span>
 
+                <div class="control-group">
+                    <label><input type="checkbox" id="in-erg-show-scorers" checked onchange="updateErgebnis();"> Torschützen anzeigen</label>
+                </div>
+                <label>Torschützen (Spieler + Minute)</label>
+                <div class="scrollable-controls-box" id="scorer-controls"></div>
+
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('ergebnis')">🔄 Positionen & Design auf Standard setzen</button>
             </div>
 
@@ -653,7 +798,7 @@
                 <div class="control-group"><label>Spieltagsdienst 2</label><select id="in-kader-duty-2" class="player-select" onchange="updateKader();"></select></div>
                 <div class="control-group"><label>Zusatz / Fließtext</label><input type="text" id="in-kader-freetext" value="12 Bälle, Hütchen, Medi-Tasche" oninput="updateKader();"></div>
 
-                <label>Spieler auswählen (Kader)</label>
+                <label>Spieler auswählen (Kader, max. 20)</label>
                 <div class="scrollable-controls-box" id="kader-controls"></div>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('kader')">🔄 Positionen & Design auf Standard setzen</button>
@@ -724,11 +869,53 @@
                     <input type="text" id="in-kal-title" value="" placeholder="automatisch, z.B. OKTOBER 2026" oninput="updateKalender();">
                 </div>
 
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div class="control-group"><label>🏠 Farbe Heim</label><input type="color" id="in-kal-color-home" value="#005f73" onchange="updateKalender();"></div>
+                    <div class="control-group"><label>✈️ Farbe Auswärts</label><input type="color" id="in-kal-color-away" value="#bb3e03" onchange="updateKalender();"></div>
+                </div>
+
                 <label>Termine (max. 6)</label>
                 <div id="kal-controls"></div>
                 <span class="hint" style="margin-bottom:10px;">Termine werden automatisch nach Datum sortiert. Gegner legst du unter „Daten“ an.</span>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('kalender')">🔄 Positionen & Design auf Standard setzen</button>
+            </div>
+
+            <!-- EDITOR: GEBURTSTAG -->
+            <div id="editor-geburtstag" class="editor-section">
+                <h2>🎂 Geburtstag</h2>
+                <div id="design-controls-geburtstag"></div>
+
+                <div class="control-group"><label>Geburtstagskind</label><select id="in-bday-player" class="player-select" onchange="updateGeburtstag();"></select></div>
+                <div class="control-group"><label>Titel</label><input type="text" id="in-bday-title" value="HAPPY BIRTHDAY" oninput="updateGeburtstag();"></div>
+                <div class="control-group"><label>Text</label><input type="text" id="in-bday-text" value="Alles Gute zum Geburtstag!" oninput="updateGeburtstag();"></div>
+                <div class="control-group"><label><input type="checkbox" id="in-bday-confetti" checked onchange="updateGeburtstag();"> Konfetti anzeigen</label></div>
+
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('geburtstag')">🔄 Positionen & Design auf Standard setzen</button>
+            </div>
+
+            <!-- EDITOR: NEUZUGANG -->
+            <div id="editor-neuzugang" class="editor-section">
+                <h2>🆕 Neuzugang</h2>
+                <div id="design-controls-neuzugang"></div>
+
+                <div class="control-group"><label>Spieler</label><select id="in-new-player" class="player-select" onchange="updateNeuzugang();"></select></div>
+                <div class="control-group"><label>Titel</label><input type="text" id="in-new-title" value="NEUZUGANG" oninput="updateNeuzugang();"></div>
+                <div style="display:grid; grid-template-columns: 1fr 90px; gap: 8px;">
+                    <div class="control-group"><label>Position</label><input type="text" id="in-new-position" value="" placeholder="z.B. Stürmer" oninput="updateNeuzugang();"></div>
+                    <div class="control-group"><label>Nummer</label><input type="text" id="in-new-number" value="" placeholder="9" oninput="updateNeuzugang();"></div>
+                </div>
+                <div class="control-group">
+                    <label>Kommt von (Gegner-Liste)</label>
+                    <select id="in-new-from-select" class="opp-select" onchange="updateNeuzugang();"></select>
+                </div>
+                <div class="control-group">
+                    <label>… oder Vereinsname eingeben</label>
+                    <input type="text" id="in-new-from-text" value="" placeholder="z.B. FC Musterstadt" oninput="updateNeuzugang();">
+                </div>
+                <div class="control-group"><label>Text</label><input type="text" id="in-new-text" value="Herzlich willkommen im Team!" oninput="updateNeuzugang();"></div>
+
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('neuzugang')">🔄 Positionen & Design auf Standard setzen</button>
             </div>
         </div>
 
@@ -904,6 +1091,7 @@
                         <div class="draggable-text" id="out-ergebnis-score-feed" data-default-top="80px" data-default-left="0px" style="font-size: 3.2rem; font-weight: bold; top:80px; left:0px;">3 : 1</div>
                         <div class="team-logos" id="team-logos-ergebnis-container-feed" style="top:170px;"></div>
                         <div class="draggable-text" data-default-top="290px" data-default-left="0px" style="top:290px; left:0px;"><p class="info-dyn" id="out-ergebnis-text-feed">Auswärtssieg!</p></div>
+                        <div class="draggable-text" id="out-erg-scorers-wrap-feed" data-fixed-id data-default-top="332px" data-default-left="0px" style="top:332px; left:0px;"><div class="scorer-box" id="out-erg-scorers-feed"></div></div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
                     <div class="btn-action-group">
@@ -918,7 +1106,8 @@
                         <div class="draggable-text" data-default-top="40px" data-default-left="0px" style="top:40px; left:0px;"><h1 class="title-dyn" id="out-ergebnis-title">ENDERGEBNIS</h1></div>
                         <div class="draggable-text" id="out-ergebnis-score" data-default-top="120px" data-default-left="0px" style="font-size: 4.5rem; font-weight: bold; top:120px; left:0px;">3 : 1</div>
                         <div class="team-logos" id="team-logos-ergebnis-container" style="top:260px;"></div>
-                        <div class="draggable-text" data-default-top="500px" data-default-left="0px" style="top:500px; left:0px;"><p class="info-dyn" id="out-ergebnis-text">Auswärtssieg!</p></div>
+                        <div class="draggable-text" data-default-top="470px" data-default-left="0px" style="top:470px; left:0px;"><p class="info-dyn" id="out-ergebnis-text">Auswärtssieg!</p></div>
+                        <div class="draggable-text" id="out-erg-scorers-wrap" data-fixed-id data-default-top="530px" data-default-left="0px" style="top:530px; left:0px;"><div class="scorer-box" id="out-erg-scorers"></div></div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
                     <div class="btn-action-group">
@@ -1078,7 +1267,94 @@
                     </div>
                 </div>
             </div>
+
+            <!-- GEBURTSTAG -->
+            <div id="view-geburtstag" class="template-container">
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📷 Geburtstag Feed (1:1)</div>
+                    <div id="capture-geburtstag-feed" class="post-template">
+                        <div class="confetti-layer"></div>
+                        <div class="draggable-text" data-default-top="18px" data-default-left="0px" style="top:18px; left:0px;"><h1 class="title-dyn" id="out-bday-title-feed">HAPPY BIRTHDAY</h1></div>
+                        <div class="draggable-img" data-default-top="88px" data-default-left="115px" style="top:88px; left:115px;"><img id="out-bday-img-feed" class="bday-photo" alt="" style="width:170px; height:170px;"></div>
+                        <div class="draggable-text" data-default-top="276px" data-default-left="0px" style="top:276px; left:0px;">
+                            <div class="bday-name" id="out-bday-name-feed">-</div>
+                            <p class="info-dyn" id="out-bday-text-feed"></p>
+                        </div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-geburtstag-feed', 'geburtstag_feed.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">🎂 Geburtstag Story (9:16)</div>
+                    <div id="capture-geburtstag" class="story-template">
+                        <div class="confetti-layer"></div>
+                        <img class="story-wappen-top-right club-logo-img" alt="">
+                        <div class="draggable-text" data-default-top="110px" data-default-left="0px" style="top:110px; left:0px;"><h1 class="title-dyn" id="out-bday-title">HAPPY BIRTHDAY</h1></div>
+                        <div class="draggable-img" data-default-top="190px" data-default-left="70px" style="top:190px; left:70px;"><img id="out-bday-img" class="bday-photo" alt="" style="width:260px; height:260px;"></div>
+                        <div class="draggable-text" data-default-top="475px" data-default-left="0px" style="top:475px; left:0px;">
+                            <div class="bday-name" id="out-bday-name">-</div>
+                            <p class="info-dyn" id="out-bday-text"></p>
+                        </div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-geburtstag', 'geburtstag_story.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEUZUGANG -->
+            <div id="view-neuzugang" class="template-container">
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📷 Neuzugang Feed (1:1)</div>
+                    <div id="capture-neuzugang-feed" class="post-template">
+                        <div class="draggable-text" data-default-top="16px" data-default-left="0px" style="top:16px; left:0px;"><h1 class="title-dyn" id="out-new-title-feed">NEUZUGANG</h1></div>
+                        <div class="draggable-img" data-default-top="78px" data-default-left="120px" style="top:78px; left:120px;"><img id="out-new-img-feed" class="transfer-photo" alt="" style="width:160px; height:160px;"></div>
+                        <div class="draggable-text" data-default-top="252px" data-default-left="0px" style="top:252px; left:0px;">
+                            <div class="transfer-name" id="out-new-name-feed">-</div>
+                            <div class="transfer-chips" id="out-new-chips-feed" style="margin-top:8px;"></div>
+                            <p class="info-dyn" id="out-new-text-feed"></p>
+                        </div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-neuzugang-feed', 'neuzugang_feed.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">🆕 Neuzugang Story (9:16)</div>
+                    <div id="capture-neuzugang" class="story-template">
+                        <img class="story-wappen-top-right club-logo-img" alt="">
+                        <div class="draggable-text" data-default-top="110px" data-default-left="0px" style="top:110px; left:0px;"><h1 class="title-dyn" id="out-new-title">NEUZUGANG</h1></div>
+                        <div class="draggable-img" data-default-top="185px" data-default-left="80px" style="top:185px; left:80px;"><img id="out-new-img" class="transfer-photo" alt="" style="width:240px; height:240px;"></div>
+                        <div class="draggable-text" data-default-top="445px" data-default-left="0px" style="top:445px; left:0px;">
+                            <div class="transfer-name" id="out-new-name">-</div>
+                            <div class="transfer-chips" id="out-new-chips" style="margin-top:10px;"></div>
+                            <p class="info-dyn" id="out-new-text"></p>
+                        </div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-neuzugang', 'neuzugang_story.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <!-- WERKZEUGLEISTE FÜR AUSGEWÄHLTE TEXTE/BILDER -->
+    <div id="el-toolbar" class="el-toolbar" hidden>
+        <span>Größe</span>
+        <button type="button" onclick="nudgeSelectedScale(-0.1)" title="Kleiner">−</button>
+        <span class="el-scale-label" id="el-scale-label">100 %</span>
+        <button type="button" onclick="nudgeSelectedScale(0.1)" title="Größer">+</button>
+        <button type="button" onclick="setSelectedScale(1)" title="Originalgröße">↺</button>
+        <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
+        <button type="button" onclick="selectElement(null)" title="Fertig">✓</button>
     </div>
 
     <!-- BOTTOM NAVBAR -->
@@ -1094,6 +1370,8 @@
             <button class="tab-btn" data-tab="eckball" onclick="switchTab('eckball')"><span class="tab-ico">📐</span><span>Eckbälle</span></button>
             <button class="tab-btn" data-tab="potm" onclick="switchTab('potm')"><span class="tab-ico">⭐</span><span>POTM</span></button>
             <button class="tab-btn" data-tab="kalender" onclick="switchTab('kalender')"><span class="tab-ico">📅</span><span>Kalender</span></button>
+            <button class="tab-btn" data-tab="geburtstag" onclick="switchTab('geburtstag')"><span class="tab-ico">🎂</span><span>Geburtstag</span></button>
+            <button class="tab-btn" data-tab="neuzugang" onclick="switchTab('neuzugang')"><span class="tab-ico">🆕</span><span>Neuzugang</span></button>
         </nav>
         <button id="mobile-toggle" class="mobile-toggle-btn" onclick="toggleMobileView()">👁️ Vorschau ansehen</button>
     </div>
@@ -1104,19 +1382,26 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "15.0";
+        const APP_VERSION = "16.1";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
-        // Format pro Zeile:  CODE = Vereinsname = Wappen-Datei
+        // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei   (Hash mit code-generator.html erzeugen)
+        // Klartext-Codes (z.B. 548-962 = …) funktionieren weiterhin, sind aber für jeden lesbar.
         const LICENSE_FILE = 'vereine.txt';
         // true = App ist erst nach Eingabe eines gültigen Vereinscodes nutzbar
         const LICENSE_REQUIRED = true;
+        // Muss mit code-generator.html übereinstimmen – NICHT mehr ändern, sonst passen die Hashes nicht mehr
+        const LICENSE_SALT = 'vereinsgrafik-lizenz-v1';
+        const LICENSE_ITERATIONS = 150000;
+
+        const BACKUP_REMIND_DAYS = 30;
 
         const STORE = {
             stammdaten: 'vg_stammdaten',
             club: 'vg_club',
             version: 'vg_current_version',
             tab: 'vg_active_tab',
+            prefs: 'vg_prefs',
             slot: v => 'vg_slot_' + v
         };
         const LEGACY_SLOT = v => 'sva_slot_' + v;
@@ -1146,9 +1431,13 @@
         const MONTHS = ['JANUAR', 'FEBRUAR', 'MÄRZ', 'APRIL', 'MAI', 'JUNI', 'JULI', 'AUGUST', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DEZEMBER'];
         const MONTHS_SHORT = ['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'];
         const KAL_MAX = 6;
+        const KADER_MAX = 20;
 
-        const tabList = ['start', 'stammdaten', 'post', 'story', 'tor', 'ergebnis', 'kader', 'eckball', 'potm', 'kalender'];
-        const editorTabs = ['post', 'story', 'tor', 'ergebnis', 'kader', 'potm', 'kalender'];
+        const SCORER_MAX = 10;
+        const OWN_GOAL = '__eigentor';
+
+        const tabList = ['start', 'stammdaten', 'post', 'story', 'tor', 'ergebnis', 'kader', 'eckball', 'potm', 'kalender', 'geburtstag', 'neuzugang'];
+        const editorTabs = ['post', 'story', 'tor', 'ergebnis', 'kader', 'potm', 'kalender', 'geburtstag', 'neuzugang'];
 
         const TAB_DESIGN = {
             post:     { frameLabel: 'Rahmenform Logos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
@@ -1156,8 +1445,10 @@
             tor:      { frameLabel: 'Rahmenform Wappen/Assist', sizes: false, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             ergebnis: { frameLabel: 'Rahmenform Logos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             kader:    { frameLabel: 'Rahmenform Spieler', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
-            potm:     { frameLabel: 'Rahmenform Spieler', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
-            kalender: { frameLabel: 'Rahmenform Gegner-Logos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' }
+            potm:     { frameLabel: 'Rahmenform Spieler', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen', logoStory: false },
+            kalender: { frameLabel: 'Rahmenform Gegner-Logos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            geburtstag: { frameLabel: 'Rahmenform Foto', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            neuzugang: { frameLabel: 'Rahmenform Foto', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' }
         };
 
         const formations = {
@@ -1208,6 +1499,11 @@
         let stammdaten = emptyStammdaten();
         let club = null;
         let selectedSponsors = {};
+        let customTexts = {};          // je Reiter: [{ id, text, target, size, color, bold, box, font }]
+        let prefs = { versionNames: {}, safeZones: true, lastBackupAt: null, backupSnoozeUntil: null };
+        let selectedEl = null;
+        let pendingPositions = {};
+        let deferredInstallPrompt = null;
         let currentVersion = "v1";
         let activeTab = 'start';
         let appReady = false;
@@ -1390,6 +1686,7 @@
             }
             if (type === 'templates') editorTabs.forEach(renderBgThumbs);
             renderStammdatenLists();
+            updateBackupReminder();
             renderAll();
             scheduleSave();
         }
@@ -1578,7 +1875,7 @@
             for (let i = 1; i <= 11; i++) {
                 starterHtml += `
                     <div class="player-input-row">
-                        <select id="player-${i}" class="player-select" onchange="buildFormation();"></select>
+                        <select id="player-${i}" class="player-select lineup-select" onchange="buildFormation();"></select>
                         <input type="text" id="num-player-${i}" class="num-input" placeholder="Nr." oninput="buildFormation();">
                     </div>`;
             }
@@ -1586,13 +1883,13 @@
 
             let benchHtml = '';
             for (let i = 1; i <= 7; i++) {
-                benchHtml += `<div class="control-group"><select id="bench-player-${i}" class="player-select" onchange="buildFormation();"></select></div>`;
+                benchHtml += `<div class="control-group"><select id="bench-player-${i}" class="player-select lineup-select" onchange="buildFormation();"></select></div>`;
             }
             $('bench-controls').innerHTML = benchHtml;
 
             let kaderHtml = '';
-            for (let i = 1; i <= 16; i++) {
-                kaderHtml += `<div class="control-group"><select id="kader-player-${i}" class="player-select" onchange="updateKader();"></select></div>`;
+            for (let i = 1; i <= KADER_MAX; i++) {
+                kaderHtml += `<div class="control-group"><select id="kader-player-${i}" class="player-select" onchange="updateKader(); refreshLineupOptions();"></select></div>`;
             }
             $('kader-controls').innerHTML = kaderHtml;
 
@@ -1630,15 +1927,63 @@
                     </div>`;
             }
             $('kal-controls').innerHTML = kalHtml;
+
+            let scorerHtml = '';
+            for (let i = 1; i <= SCORER_MAX; i++) {
+                scorerHtml += `
+                    <div class="scorer-row">
+                        <select id="erg-scorer-${i}" class="player-select scorer-select" onchange="updateErgebnis();"></select>
+                        <input type="text" id="erg-minute-${i}" placeholder="Min." oninput="updateErgebnis();">
+                    </div>`;
+            }
+            $('scorer-controls').innerHTML = scorerHtml;
         }
 
         function refreshPlayerOptions() {
             const html = getPlayersOptionsHTML();
+            const scorerHtml = html + `<option value="${OWN_GOAL}">Eigentor (Gegner)</option>`;
             document.querySelectorAll('select.player-select').forEach(sel => {
                 const v = sel.value;
-                sel.innerHTML = html;
+                sel.innerHTML = sel.classList.contains('scorer-select') ? scorerHtml : html;
                 sel.value = v;
                 if (sel.value !== v || !v) sel.value = 'Keiner';
+            });
+            refreshLineupOptions();
+        }
+
+        /* Aufstellung: optional nur Spieler anbieten, die im Reiter „Kader“ ausgewählt sind */
+        function refreshLineupOptions(forceFull = false) {
+            const only = !forceFull && !!$('in-lineup-kader-only')?.checked;
+            const selects = document.querySelectorAll('select.lineup-select');
+            if (!only) {
+                const html = getPlayersOptionsHTML();
+                selects.forEach(sel => {
+                    if (sel.dataset.filtered !== '1') return;
+                    const v = sel.value;
+                    sel.innerHTML = html;
+                    sel.value = v;
+                    if (sel.value !== v) sel.value = 'Keiner';
+                    sel.dataset.filtered = '';
+                });
+                return;
+            }
+            const kader = [];
+            for (let i = 1; i <= KADER_MAX; i++) {
+                const n = val(`kader-player-${i}`);
+                if (n && n !== 'Keiner' && findPlayer(n) && !kader.includes(n)) kader.push(n);
+            }
+            const kaderHtml = kader.length
+                ? `<optgroup label="Kader">${kader.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('')}</optgroup>`
+                : '<option value="" disabled>– erst im Reiter „Kader“ Spieler wählen –</option>';
+            selects.forEach(sel => {
+                const v = sel.value || 'Keiner';
+                let html = '<option value="Keiner">Keiner</option>' + kaderHtml;
+                // Bereits gewählte Spieler, die nicht (mehr) im Kader sind, bleiben erhalten
+                if (v !== 'Keiner' && !kader.includes(v)) html += `<optgroup label="Nicht im Kader"><option value="${esc(v)}">${esc(v)}</option></optgroup>`;
+                sel.innerHTML = html;
+                sel.value = v;
+                if (sel.value !== v) sel.value = 'Keiner';
+                sel.dataset.filtered = '1';
             });
         }
 
@@ -1715,8 +2060,8 @@
                             </div>
                             ${cfg.sizes ? `
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Titel-Größe</label><input type="range" id="in-size-title-${tab}" min="1.2" max="3.5" step="0.1" value="2.0" oninput="updateTabDesign('${tab}')"></div>
-                                <div class="control-group"><label>Text-Größe</label><input type="range" id="in-size-info-${tab}" min="0.8" max="2.0" step="0.1" value="1.1" oninput="updateTabDesign('${tab}')"></div>
+                                <div class="control-group"><label>Titel-Größe</label><input type="range" id="in-size-title-${tab}" min="0.8" max="6" step="0.1" value="2.0" oninput="updateTabDesign('${tab}')"></div>
+                                <div class="control-group"><label>Text-Größe</label><input type="range" id="in-size-info-${tab}" min="0.6" max="4" step="0.1" value="1.1" oninput="updateTabDesign('${tab}')"></div>
                             </div>` : ''}
                         </div>
                     </details>
@@ -1725,10 +2070,147 @@
                         <label><input type="checkbox" id="in-show-teamnames-${tab}" onchange="updateMatchup();" checked> Team-Namen unter Logos anzeigen</label>
                     </div>` : ''}
                     <div class="control-group">
+                        <label>Vereinslogo oben rechts</label>
+                        <div class="ct-checks">
+                            <label><input type="checkbox" id="in-logo-feed-${tab}" ${cfg.logoFeed ? 'checked' : ''} onchange="updateTabDesign('${tab}');"> im Beitrag (1:1)</label>
+                            <label><input type="checkbox" id="in-logo-story-${tab}" ${cfg.logoStory === false ? '' : 'checked'} onchange="updateTabDesign('${tab}');"> in der Story</label>
+                        </div>
+                    </div>
+                    <div class="control-group">
                         <label><input type="checkbox" id="in-show-sponsors-${tab}" onchange="renderSelectedSponsors('${tab}');"> ${cfg.sponsorLabel}</label>
                         <div class="sponsor-checkbox-list" id="sponsor-checkbox-list-${tab}"></div>
-                    </div>`;
+                    </div>
+                    <details class="design-details" id="ct-details-${tab}">
+                        <summary>✍️ Eigene Texte <span class="sd-count" id="ct-count-${tab}">0</span></summary>
+                        <div class="details-body">
+                            <div id="ct-list-${tab}" data-tab="${tab}"></div>
+                            <button type="button" class="copy-action-btn" onclick="addCustomText('${tab}')">➕ Text hinzufügen</button>
+                            <span class="hint">Tipp: In der Vorschau jeden Text antippen, verschieben und mit zwei Fingern (oder über die Leiste oben) größer/kleiner ziehen.</span>
+                        </div>
+                    </details>`;
+                $(`ct-list-${tab}`).addEventListener('input', onCustomTextInput);
+                $(`ct-list-${tab}`).addEventListener('change', onCustomTextInput);
             });
+        }
+
+        /* =========================================================
+           EIGENE TEXTE (beliebig viele je Reiter)
+           ========================================================= */
+        function fontOptionsHTML(selected) {
+            const fonts = [['', 'Wie Reiter'], ['Arial, sans-serif', 'Arial'], ["'Bebas Neue', sans-serif", 'Bebas Neue'], ["'Oswald', sans-serif", 'Oswald'], ["'Montserrat', sans-serif", 'Montserrat'], ["'Impact', sans-serif", 'Impact']];
+            return fonts.map(([v, l]) => `<option value="${esc(v)}" ${v === selected ? 'selected' : ''}>${l}</option>`).join('');
+        }
+
+        function addCustomText(tab) {
+            if (!customTexts[tab]) customTexts[tab] = [];
+            customTexts[tab].push({
+                id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+                text: 'Neuer Text', target: 'both', size: 1.4, color: '#ffffff', bold: true, box: false, font: ''
+            });
+            renderCustomTextEditors(tab);
+            renderCustomTextElements(tab);
+            scheduleSave();
+        }
+
+        function removeCustomText(tab, id) {
+            customTexts[tab] = (customTexts[tab] || []).filter(ct => ct.id !== id);
+            if (selectedEl && selectedEl.dataset.ctId === id) selectElement(null);
+            renderCustomTextEditors(tab);
+            renderCustomTextElements(tab);
+            scheduleSave();
+        }
+
+        function renderCustomTextEditors(tab) {
+            const host = $(`ct-list-${tab}`);
+            if (!host) return;
+            const list = customTexts[tab] || [];
+            setText(`ct-count-${tab}`, list.length);
+            host.innerHTML = list.map(ct => `
+                <div class="ct-item" data-id="${ct.id}">
+                    <textarea rows="2" data-field="text" placeholder="Text eingeben">${esc(ct.text)}</textarea>
+                    <div class="ct-grid">
+                        <select data-field="target">
+                            <option value="both" ${ct.target === 'both' ? 'selected' : ''}>Feed + Story</option>
+                            <option value="feed" ${ct.target === 'feed' ? 'selected' : ''}>Nur Feed</option>
+                            <option value="story" ${ct.target === 'story' ? 'selected' : ''}>Nur Story</option>
+                        </select>
+                        <input type="color" data-field="color" value="${esc(ct.color)}">
+                    </div>
+                    <div class="ct-grid">
+                        <select data-field="font">${fontOptionsHTML(ct.font)}</select>
+                        <input type="range" data-field="size" min="0.5" max="6" step="0.1" value="${ct.size}" title="Schriftgröße">
+                    </div>
+                    <div class="ct-checks">
+                        <label><input type="checkbox" data-field="bold" ${ct.bold ? 'checked' : ''}> Fett</label>
+                        <label><input type="checkbox" data-field="box" ${ct.box ? 'checked' : ''}> Hintergrund-Box</label>
+                        <button type="button" class="kal-clear-btn" style="margin-left:auto;" onclick="removeCustomText('${tab}', '${ct.id}')">🗑️ Entfernen</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function onCustomTextInput(e) {
+            const field = e.target.dataset.field;
+            const item = e.target.closest('.ct-item');
+            if (!field || !item) return;
+            const tab = e.currentTarget.dataset.tab;
+            const ct = (customTexts[tab] || []).find(c => c.id === item.dataset.id);
+            if (!ct) return;
+            if (e.target.type === 'checkbox') ct[field] = e.target.checked;
+            else if (field === 'size') ct[field] = parseFloat(e.target.value) || 1.4;
+            else ct[field] = e.target.value;
+            renderCustomTextElements(tab);
+            scheduleSave();
+        }
+
+        /* Legt die Textelemente in den Vorlagen an bzw. aktualisiert sie (Positionen bleiben erhalten) */
+        function renderCustomTextElements(tab) {
+            const view = $(`view-${tab}`);
+            if (!view) return;
+            const list = customTexts[tab] || [];
+            const wanted = new Set();
+            view.querySelectorAll('.post-template, .story-template').forEach(tpl => {
+                const fmt = tpl.classList.contains('story-template') ? 'story' : 'feed';
+                list.forEach(ct => {
+                    if (ct.target !== 'both' && ct.target !== fmt) return;
+                    const elId = `ct-${ct.id}-${tpl.id}`;
+                    wanted.add(elId);
+                    let el = $(elId);
+                    if (!el) {
+                        const top = Math.round(tpl.offsetHeight ? tpl.offsetHeight * 0.45 : (fmt === 'story' ? 320 : 180)) + 'px';
+                        el = document.createElement('div');
+                        el.id = elId;
+                        el.className = 'draggable-text custom-text';
+                        el.dataset.ctId = ct.id;
+                        el.dataset.ctTab = tab;
+                        el.setAttribute('data-default-top', top);
+                        el.setAttribute('data-default-left', '0px');
+                        el.style.top = top;
+                        el.style.left = '0px';
+                        el.innerHTML = '<span class="ct-inner"></span>';
+                        const content = tpl.querySelector(':scope > .tpl-content');
+                        if (content) content.appendChild(el);
+                        else tpl.insertBefore(el, tpl.querySelector(':scope > .sponsor-banner'));
+                        const saved = pendingPositions[elId];
+                        if (saved) applyPosition(el, saved);
+                        bindDraggable(el);
+                    }
+                    const inner = el.firstElementChild;
+                    inner.textContent = ct.text;
+                    inner.style.fontSize = ct.size + 'rem';
+                    inner.style.color = ct.color;
+                    inner.style.fontWeight = ct.bold ? 'bold' : 'normal';
+                    inner.style.fontFamily = ct.font || 'inherit';
+                    inner.classList.toggle('ct-box', !!ct.box);
+                });
+            });
+            view.querySelectorAll('.custom-text').forEach(el => {
+                if (!wanted.has(el.id)) { if (selectedEl === el) selectElement(null); el.remove(); }
+            });
+            setText(`ct-count-${tab}`, list.length);
+        }
+
+        function renderAllCustomTexts() {
+            editorTabs.forEach(tab => { renderCustomTextEditors(tab); renderCustomTextElements(tab); });
         }
 
         function isValidBg(id) {
@@ -1828,6 +2310,11 @@
                 viewContainer.style.setProperty('--avatar-clip', clip);
                 viewContainer.style.setProperty('--avatar-bg', bg);
                 viewContainer.style.setProperty('--avatar-shadow', shadow);
+
+                const logoFeed = !!$(`in-logo-feed-${tab}`)?.checked;
+                const logoStory = $(`in-logo-story-${tab}`)?.checked ?? true;
+                viewContainer.querySelectorAll('.post-template .corner-logo').forEach(l => l.classList.toggle('logo-hidden', !logoFeed));
+                viewContainer.querySelectorAll('.story-template .corner-logo').forEach(l => l.classList.toggle('logo-hidden', !logoStory));
             }
 
             ['feed', 'story'].forEach(fmt => {
@@ -1849,23 +2336,32 @@
             const tabSponsors = (selectedSponsors[tab] || []).filter(n => findSponsor(n));
             const count = tabSponsors.length;
 
-            let maxHeight = '45px';
-            let maxWidth = '100px';
-            if (count === 1) { maxHeight = '60px'; maxWidth = '200px'; }
-            else if (count === 2) { maxHeight = '52px'; maxWidth = '140px'; }
-            else if (count === 3) { maxHeight = '45px'; maxWidth = '110px'; }
-            else if (count >= 4) { maxHeight = '38px'; maxWidth = '85px'; }
+            // [Story, Beitrag] – im quadratischen Beitrag etwas kleinere Logos
+            let size = { story: [45, 100], feed: [34, 80] };
+            if (count === 1) size = { story: [60, 200], feed: [44, 150] };
+            else if (count === 2) size = { story: [52, 140], feed: [40, 115] };
+            else if (count === 3) size = { story: [45, 110], feed: [36, 95] };
+            else if (count >= 4) size = { story: [38, 85], feed: [30, 72] };
 
-            const html = tabSponsors.map(name => {
+            const buildHtml = ([h, w]) => tabSponsors.map(name => {
                 const s = findSponsor(name);
                 return s.img
-                    ? `<img src="${s.img}" class="sponsor-logo" alt="" style="max-height:${maxHeight}; max-width:${maxWidth};">`
+                    ? `<img src="${s.img}" class="sponsor-logo" alt="" style="max-height:${h}px; max-width:${w}px;">`
                     : `<span class="sponsor-text">${esc(s.name)}</span>`;
             }).join('');
+            const visible = !!show && count > 0;
 
             $(`view-${tab}`)?.querySelectorAll('.sponsor-banner').forEach(banner => {
-                banner.style.display = show && count > 0 ? 'flex' : 'none';
-                banner.innerHTML = html;
+                const isFeed = !!banner.closest('.post-template');
+                banner.style.display = visible ? 'flex' : 'none';
+                banner.innerHTML = buildHtml(isFeed ? size.feed : size.story);
+            });
+
+            // Beiträge (1:1): restlichen Inhalt verkleinern, damit nichts von der Sponsorenleiste überdeckt wird
+            const FEED_H = 400;
+            const bannerH = size.feed[0] + 12 + 8 + 6;
+            $(`view-${tab}`)?.querySelectorAll('.post-template > .tpl-content').forEach(content => {
+                content.style.transform = visible ? `scale(${((FEED_H - bannerH) / FEED_H).toFixed(3)})` : '';
             });
         }
 
@@ -1887,38 +2383,125 @@
             setText('out-story-title-feed', text);
         }
 
+        /* ---------- Verschieben (1 Finger) & Skalieren (2 Finger / Leiste / Mausrad) ---------- */
+        const SCALE_MIN = 0.3, SCALE_MAX = 4;
+
+        function getElScale(el) { return parseFloat(el.dataset.scale || '1') || 1; }
+        function setElScale(el, s) {
+            s = Math.round(Math.min(SCALE_MAX, Math.max(SCALE_MIN, s)) * 100) / 100;
+            el.dataset.scale = s;
+            if (s === 1) el.style.removeProperty('--el-scale');
+            else el.style.setProperty('--el-scale', s);
+            if (el === selectedEl) updateToolbar();
+        }
+        function applyPosition(el, pos) {
+            if (!pos) return;
+            if (pos.top) el.style.top = pos.top;
+            if (pos.left) el.style.left = pos.left;
+            setElScale(el, pos.scale || 1);
+        }
+
+        function selectElement(el) {
+            if (selectedEl && selectedEl !== el) selectedEl.classList.remove('el-selected');
+            selectedEl = el;
+            if (el) el.classList.add('el-selected');
+            updateToolbar();
+        }
+        function updateToolbar() {
+            const bar = $('el-toolbar');
+            if (!bar) return;
+            bar.hidden = !selectedEl;
+            if (!selectedEl) return;
+            setText('el-scale-label', Math.round(getElScale(selectedEl) * 100) + ' %');
+            $('el-delete-btn').hidden = !selectedEl.classList.contains('custom-text');
+        }
+        function nudgeSelectedScale(d) { if (selectedEl) { setElScale(selectedEl, getElScale(selectedEl) + d); scheduleSave(); } }
+        function setSelectedScale(s) { if (selectedEl) { setElScale(selectedEl, s); scheduleSave(); } }
+        function deleteSelectedCustomText() {
+            if (!selectedEl || !selectedEl.classList.contains('custom-text')) return;
+            const { ctTab, ctId } = selectedEl.dataset;
+            if (confirm('Diesen Text löschen?')) removeCustomText(ctTab, ctId);
+        }
+
+        function bindDraggable(el) {
+            if (el._dragBound) return;
+            el._dragBound = true;
+            const pts = new Map();
+            let start = null;
+
+            const snapshot = () => {
+                const arr = [...pts.values()];
+                const cx = arr.reduce((s, p) => s + p.x, 0) / arr.length;
+                const cy = arr.reduce((s, p) => s + p.y, 0) / arr.length;
+                const dist = arr.length > 1 ? Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y) : 0;
+                return { left: el.offsetLeft, top: el.offsetTop, cx, cy, dist, s: getElScale(el), pscale: getElementScale(el.parentElement || el) };
+            };
+
+            el.addEventListener('pointerdown', e => {
+                e.stopPropagation();
+                selectElement(el);
+                try { el.setPointerCapture(e.pointerId); } catch (err) {}
+                pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                start = snapshot();
+            });
+            el.addEventListener('pointermove', e => {
+                if (!pts.has(e.pointerId) || !start) return;
+                pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                const cur = snapshot();
+                el.style.left = (start.left + (cur.cx - start.cx) / start.pscale) + 'px';
+                el.style.top = (start.top + (cur.cy - start.cy) / start.pscale) + 'px';
+                if (pts.size > 1 && start.dist > 0) setElScale(el, start.s * (cur.dist / start.dist));
+            });
+            const end = e => {
+                if (!pts.has(e.pointerId)) return;
+                pts.delete(e.pointerId);
+                try { el.releasePointerCapture(e.pointerId); } catch (err) {}
+                start = pts.size ? snapshot() : null;
+                if (!pts.size) scheduleSave();
+            };
+            el.addEventListener('pointerup', end);
+            el.addEventListener('pointercancel', end);
+            // Desktop: Mausrad über dem ausgewählten Element ändert die Größe
+            el.addEventListener('wheel', e => {
+                if (selectedEl !== el) return;
+                e.preventDefault();
+                setElScale(el, getElScale(el) * (e.deltaY < 0 ? 1.05 : 0.95));
+                scheduleSave();
+            }, { passive: false });
+        }
+
         function makeTextsDraggable() {
-            document.querySelectorAll('.draggable-text, .draggable-img').forEach(el => {
-                el.onpointerdown = (e) => {
-                    e.stopPropagation();
-                    let startX = e.clientX, startY = e.clientY;
-                    let initialLeft = el.offsetLeft, initialTop = el.offsetTop;
-                    let scale = getElementScale(el.parentElement || el);
-                    try { el.setPointerCapture(e.pointerId); } catch(err){}
+            document.querySelectorAll('.draggable-text, .draggable-img').forEach(bindDraggable);
+        }
 
-                    el.onpointermove = (ev) => {
-                        let dx = (ev.clientX - startX) / scale;
-                        let dy = (ev.clientY - startY) / scale;
-                        el.style.left = (initialLeft + dx) + 'px';
-                        el.style.top = (initialTop + dy) + 'px';
-                    };
-
-                    el.onpointerup = (ev) => {
-                        el.onpointermove = null;
-                        el.onpointerup = null;
-                        try { el.releasePointerCapture(ev.pointerId); } catch(err){}
-                        scheduleSave();
-                    };
-                };
+        /* Jede Vorlage bekommt ein (abschaltbares) Vereinslogo oben rechts; Beiträge bekommen einen
+           Inhalts-Container, der bei eingeblendeter Sponsorenleiste verkleinert wird */
+        function prepareTemplates() {
+            editorTabs.forEach(tab => {
+                $(`view-${tab}`)?.querySelectorAll('.post-template, .story-template').forEach(tpl => {
+                    tpl.querySelectorAll('.story-wappen-top-right, .tor-wappen').forEach(l => l.classList.add('corner-logo'));
+                    if (!tpl.querySelector('.corner-logo')) {
+                        tpl.insertAdjacentHTML('afterbegin', '<img class="story-wappen-top-right club-logo-img corner-logo" alt="">');
+                    }
+                    if (tpl.classList.contains('post-template') && !tpl.querySelector(':scope > .tpl-content')) {
+                        const content = document.createElement('div');
+                        content.className = 'tpl-content';
+                        Array.from(tpl.childNodes).forEach(n => {
+                            if (n.nodeType === 1 && n.classList.contains('sponsor-banner')) return;
+                            content.appendChild(n);
+                        });
+                        tpl.insertBefore(content, tpl.firstChild);
+                    }
+                });
             });
         }
 
         /* Verschiebbare Elemente ohne eigene ID bekommen eine stabile ID, damit ihre Position gespeichert wird */
         function assignDraggableIds() {
             document.querySelectorAll('.template-container').forEach(view => {
-                view.querySelectorAll('.draggable-text, .draggable-img').forEach((el, i) => {
-                    if (!el.id) el.id = `drag-${view.id}-${i}`;
-                });
+                Array.from(view.querySelectorAll('.draggable-text, .draggable-img'))
+                    .filter(el => !el.hasAttribute('data-fixed-id') && !el.classList.contains('custom-text'))
+                    .forEach((el, i) => { if (!el.id) el.id = `drag-${view.id}-${i}`; });
             });
         }
 
@@ -1928,6 +2511,7 @@
                 const defLeft = el.getAttribute('data-default-left');
                 el.style.top = defTop !== null ? defTop : '';
                 el.style.left = defLeft !== null ? defLeft : '0px';
+                setElScale(el, 1);
             });
 
             setVal(`in-bg-${tab}-feed`, DEFAULT_BG);
@@ -1941,6 +2525,8 @@
 
             const sp = $(`in-show-sponsors-${tab}`);
             if (sp) sp.checked = false;
+            if ($(`in-logo-feed-${tab}`)) $(`in-logo-feed-${tab}`).checked = !!TAB_DESIGN[tab]?.logoFeed;
+            if ($(`in-logo-story-${tab}`)) $(`in-logo-story-${tab}`).checked = TAB_DESIGN[tab]?.logoStory !== false;
             selectedSponsors[tab] = [];
             document.querySelectorAll(`#sponsor-checkbox-list-${tab} input[type="checkbox"]`).forEach(cb => cb.checked = false);
 
@@ -2075,13 +2661,113 @@
             setText('out-ergebnis-text', text);
             setText('out-ergebnis-text-feed', text);
             updateMatchup();
+            updateScorers();
+        }
+
+        function shortName(name) {
+            const parts = name.trim().split(/\s+/);
+            return parts.length > 1 ? `${parts[0][0]}. ${parts.slice(1).join(' ')}` : name;
+        }
+
+        /* Torschützen gruppiert: "F. Munz 12', 56' · L. Bader 78'" */
+        function updateScorers() {
+            const groups = [];
+            for (let i = 1; i <= SCORER_MAX; i++) {
+                const name = val(`erg-scorer-${i}`);
+                if (!name || name === 'Keiner') continue;
+                const minute = normName(val(`erg-minute-${i}`)).replace(/['´`’]+$/, '');
+                let g = groups.find(x => x.name === name);
+                if (!g) { g = { name, minutes: [] }; groups.push(g); }
+                if (minute) g.minutes.push(minute);
+            }
+            groups.forEach(g => g.minutes.sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0)));
+            const show = $('in-erg-show-scorers')?.checked && groups.length > 0;
+            const label = g => g.name === OWN_GOAL ? 'Eigentor' : g.name;
+            const mins = g => g.minutes.length ? ' ' + g.minutes.map(m => esc(m) + "'").join(', ') : '';
+
+            const feedHtml = `<div class="scorer-head">TORSCHÜTZEN</div><div class="scorer-line">${groups.map(g => esc(g.name === OWN_GOAL ? 'Eigentor' : shortName(g.name)) + mins(g)).join(' · ')}</div>`;
+            const storyHtml = `<div class="scorer-head">TORSCHÜTZEN</div>${groups.map(g => `<div class="scorer-line">${esc(label(g))}${mins(g)}</div>`).join('')}`;
+            [['out-erg-scorers-wrap-feed', 'out-erg-scorers-feed', feedHtml], ['out-erg-scorers-wrap', 'out-erg-scorers', storyHtml]].forEach(([wrapId, boxId, html]) => {
+                const wrap = $(wrapId), box = $(boxId);
+                if (!wrap || !box) return;
+                wrap.style.display = show ? '' : 'none';
+                box.innerHTML = show ? html : '';
+            });
+        }
+
+        /* ---------- Geburtstag ---------- */
+        function seededRandom(seed) {
+            let s = seed;
+            return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+        }
+
+        function renderConfetti() {
+            const colors = ['var(--primary)', 'var(--jersey-color)', '#f1c40f', '#ffffff', '#2a9d8f'];
+            document.querySelectorAll('#view-geburtstag .confetti-layer').forEach((layer, idx) => {
+                const rnd = seededRandom(42 + idx);
+                let html = '';
+                const n = idx === 0 ? 38 : 56;
+                for (let i = 0; i < n; i++) {
+                    const x = Math.round(rnd() * 100), y = Math.round(rnd() * 100);
+                    // Mitte freilassen, damit Foto und Name gut lesbar bleiben
+                    if (x > 22 && x < 78 && y > 18 && y < 82) continue;
+                    const rot = Math.round(rnd() * 360);
+                    const w = 5 + Math.round(rnd() * 5), h = 9 + Math.round(rnd() * 8);
+                    html += `<i style="left:${x}%; top:${y}%; width:${w}px; height:${h}px; background:${colors[i % colors.length]}; transform:rotate(${rot}deg); opacity:${(0.75 + rnd() * 0.25).toFixed(2)};"></i>`;
+                }
+                layer.innerHTML = html;
+            });
+        }
+
+        function updateGeburtstag() {
+            const name = val('in-bday-player') || 'Keiner';
+            const src = getPlayerImageSrc(name);
+            ['', '-feed'].forEach(sfx => {
+                setText(`out-bday-title${sfx}`, val('in-bday-title'));
+                setText(`out-bday-name${sfx}`, name !== 'Keiner' ? name : '-');
+                setText(`out-bday-text${sfx}`, val('in-bday-text'));
+                const img = $(`out-bday-img${sfx}`);
+                if (img && img.getAttribute('src') !== src) img.src = src;
+            });
+            const confetti = $('in-bday-confetti')?.checked ?? true;
+            document.querySelectorAll('#view-geburtstag .confetti-layer').forEach(l => l.style.display = confetti ? '' : 'none');
+        }
+
+        /* ---------- Neuzugang ---------- */
+        function updateNeuzugang() {
+            const name = val('in-new-player') || 'Keiner';
+            const src = getPlayerImageSrc(name);
+            const fromOpp = val('in-new-from-select');
+            const fromName = normName(val('in-new-from-text')) || fromOpp;
+            const position = normName(val('in-new-position'));
+            const number = normName(val('in-new-number'));
+
+            let chips = '';
+            if (number || position) {
+                chips += `<span class="transfer-chip">${number ? `<span class="transfer-number">${esc(number)}</span>` : ''}${esc(position)}</span>`;
+            }
+            if (fromName) {
+                const logo = (!normName(val('in-new-from-text')) && fromOpp) ? getOpponentLogoSrc(fromOpp) : makeBadgeSvg(fromName);
+                chips += `<span class="transfer-chip">Kommt von <img src="${logo}" alt=""> ${esc(fromName)}</span>`;
+            }
+            ['', '-feed'].forEach(sfx => {
+                setText(`out-new-title${sfx}`, val('in-new-title'));
+                setText(`out-new-name${sfx}`, name !== 'Keiner' ? name : '-');
+                setText(`out-new-text${sfx}`, val('in-new-text'));
+                const chipsEl = $(`out-new-chips${sfx}`);
+                if (chipsEl) { chipsEl.innerHTML = chips; chipsEl.style.display = chips ? '' : 'none'; }
+                const img = $(`out-new-img${sfx}`);
+                if (img && img.getAttribute('src') !== src) img.src = src;
+            });
         }
 
         function updateKader() {
             let html = '';
-            for (let i = 1; i <= 16; i++) {
+            let count = 0;
+            for (let i = 1; i <= KADER_MAX; i++) {
                 let name = val(`kader-player-${i}`) || "Keiner";
                 if (name !== "Keiner") {
+                    count++;
                     html += `
                         <div style="display:flex; flex-direction:column; align-items:center;">
                             <img class="kader-grid-img" src="${getPlayerImageSrc(name)}" alt="">
@@ -2089,8 +2775,15 @@
                         </div>`;
                 }
             }
-            if ($('kader-grid-pitch')) $('kader-grid-pitch').innerHTML = html;
-            if ($('kader-grid-pitch-feed')) $('kader-grid-pitch-feed').innerHTML = html;
+            // Ab 17 Spielern 5 Spalten, damit alle 20 auf die Grafik passen
+            const cols = count > 16 ? 5 : 4;
+            ['kader-grid-pitch', 'kader-grid-pitch-feed'].forEach(id => {
+                const grid = $(id);
+                if (!grid) return;
+                grid.innerHTML = html;
+                grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                grid.style.rowGap = (id.endsWith('feed') && count > 16) ? '2px' : '';
+            });
 
             const dutyList = ['in-kader-duty-1', 'in-kader-duty-2'].map(val).filter(n => n && n !== "Keiner");
             setText('out-kader-duty', dutyList.length > 0 ? dutyList.join(' & ') : "-");
@@ -2197,7 +2890,7 @@
                 const opp = esc(e.opp || 'Gegner');
                 const teams = home ? `${own}<span class="kal-vs">vs</span>${opp}` : `${opp}<span class="kal-vs">vs</span>${own}`;
                 return `
-                    <div class="kal-row">
+                    <div class="kal-row ${home ? 'heim' : 'auswaerts'}">
                         <div class="kal-date"><span class="kal-wd">${WEEKDAYS[d.getDay()]}</span><span class="kal-day">${pad(d.getDate())}</span><span class="kal-mon">${MONTHS_SHORT[d.getMonth()]}</span></div>
                         <div class="kal-match">
                             <div class="kal-teams">${teams}</div>
@@ -2217,11 +2910,16 @@
             });
             const rows = renderKalenderRows(list);
             const withSponsors = !!$('in-show-sponsors-kalender')?.checked && (selectedSponsors.kalender || []).some(n => findSponsor(n));
+            const view = $('view-kalender');
+            if (view) {
+                view.style.setProperty('--kal-home', val('in-kal-color-home') || '#005f73');
+                view.style.setProperty('--kal-away', val('in-kal-color-away') || '#bb3e03');
+            }
             const feed = $('out-kal-list-feed');
             if (feed) {
+                // Beim Beitrag wird bei Sponsoren der ganze Inhalt verkleinert (siehe renderSelectedSponsors)
                 feed.innerHTML = rows;
-                feed.classList.toggle('kal-compact', list.length > 4 || (withSponsors && list.length > 3));
-                feed.classList.toggle('with-sponsors', withSponsors);
+                feed.classList.toggle('kal-compact', list.length > 4);
             }
             const story = $('out-kal-list');
             if (story) {
@@ -2507,6 +3205,8 @@
             updateErgebnis();
             updateKader();
             updateKalender();
+            updateGeburtstag();
+            updateNeuzugang();
             updateEckball();
         }
 
@@ -2525,12 +3225,15 @@
                 case 'kalender': updateKalender(); break;
                 case 'eckball': updateEckball(); break;
                 case 'potm': updatePotm(); break;
+                case 'geburtstag': updateGeburtstag(); break;
+                case 'neuzugang': updateNeuzugang(); break;
             }
         }
 
         function switchTab(tab) {
             if (!tabList.includes(tab)) tab = 'start';
             activeTab = tab;
+            selectElement(null);
             localforage.setItem(STORE.tab, tab).catch(() => {});
             document.querySelectorAll('.template-container, .tab-btn, .editor-section').forEach(el => el.classList.remove('active'));
 
@@ -2574,6 +3277,7 @@
         async function switchVersion(vKey) {
             if (vKey === currentVersion) return;
             await saveSlotNow();
+            selectElement(null);
             currentVersion = vKey;
             await localforage.setItem(STORE.version, currentVersion);
 
@@ -2646,6 +3350,11 @@
                 potmPlayer: val('in-potm-player') || 'Keiner',
                 potmText: val('in-potm-text'),
 
+                ergShowScorers: $('in-erg-show-scorers')?.checked ?? true,
+                lineupKaderOnly: !!$('in-lineup-kader-only')?.checked,
+                bdayConfetti: $('in-bday-confetti')?.checked ?? true,
+                customTexts: customTexts,
+
                 inputs: {},
                 positions: {},
                 tabSettings: {},
@@ -2653,16 +3362,19 @@
                 eckNodes: eckNodes
             };
 
-            const inputIds = ['in-kal-mode', 'in-kal-title'];
+            const inputIds = ['in-kal-mode', 'in-kal-title', 'in-kal-color-home', 'in-kal-color-away',
+                'in-bday-player', 'in-bday-title', 'in-bday-text',
+                'in-new-player', 'in-new-title', 'in-new-position', 'in-new-number', 'in-new-from-select', 'in-new-from-text', 'in-new-text'];
+            for (let i = 1; i <= SCORER_MAX; i++) inputIds.push(`erg-scorer-${i}`, `erg-minute-${i}`);
             for (let i = 1; i <= 11; i++) inputIds.push(`player-${i}`, `num-player-${i}`, `eck-player-${i}`);
             for (let i = 1; i <= 7; i++) inputIds.push(`bench-player-${i}`);
-            for (let i = 1; i <= 16; i++) inputIds.push(`kader-player-${i}`);
+            for (let i = 1; i <= KADER_MAX; i++) inputIds.push(`kader-player-${i}`);
             for (let i = 4; i <= 7; i++) inputIds.push(`eck-role-${i}`);
             for (let i = 1; i <= KAL_MAX; i++) inputIds.push(`kal-date-${i}`, `kal-time-${i}`, `kal-opp-${i}`, `kal-venue-${i}`);
             inputIds.forEach(id => { const el = $(id); if (el) data.inputs[id] = el.value; });
 
             document.querySelectorAll('.draggable-text, .draggable-img').forEach(el => {
-                if (el.id) data.positions[el.id] = { top: el.style.top, left: el.style.left };
+                if (el.id) data.positions[el.id] = { top: el.style.top, left: el.style.left, scale: getElScale(el) };
             });
 
             editorTabs.forEach(t => {
@@ -2676,7 +3388,9 @@
                     titleSize: val(`in-size-title-${t}`) || '2.0',
                     infoSize: val(`in-size-info-${t}`) || '1.1',
                     showTeamNames: $(`in-show-teamnames-${t}`)?.checked ?? true,
-                    showSponsors: $(`in-show-sponsors-${t}`)?.checked ?? false
+                    showSponsors: $(`in-show-sponsors-${t}`)?.checked ?? false,
+                    logoFeed: !!$(`in-logo-feed-${t}`)?.checked,
+                    logoStory: $(`in-logo-story-${t}`)?.checked ?? true
                 };
             });
             return data;
@@ -2699,24 +3413,30 @@
             // Alte Versionen hatten "SVA" als festen Standardnamen
             if (data.teamName === 'SVA' && club) setVal('cfg-team-name', '');
             if (data.numbersShow !== undefined && $('cfg-show-numbers')) $('cfg-show-numbers').checked = data.numbersShow;
+            if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
+            if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
 
             if (data.eckArrows) eckArrows = data.eckArrows;
             if (data.eckNodes) eckNodes = data.eckNodes;
 
+            // Vor dem Setzen der Werte: volle Spielerliste in der Aufstellung, sonst gehen Namen verloren
+            refreshLineupOptions(true);
             if (data.inputs) {
                 for (const k in data.inputs) setVal(k, data.inputs[k]);
             }
+            if (data.lineupKaderOnly !== undefined && $('in-lineup-kader-only')) $('in-lineup-kader-only').checked = data.lineupKaderOnly;
+            refreshLineupOptions();
             // Auswahlfelder mit Namen, die es nicht (mehr) gibt → "Keiner"
             document.querySelectorAll('select.player-select').forEach(sel => { if (!sel.value) sel.value = 'Keiner'; });
 
-            if (data.positions) {
-                for (const id in data.positions) {
-                    const el = $(id), pos = data.positions[id];
-                    if (el && pos) {
-                        if (pos.top) el.style.top = pos.top;
-                        if (pos.left) el.style.left = pos.left;
-                    }
-                }
+            // Eigene Texte zuerst anlegen, damit ihre gespeicherten Positionen greifen
+            pendingPositions = data.positions || {};
+            customTexts = data.customTexts || {};
+            renderAllCustomTexts();
+
+            for (const id in pendingPositions) {
+                const el = $(id);
+                if (el) applyPosition(el, pendingPositions[id]);
             }
 
             selectedSponsors = data.selectedSponsors || {};
@@ -2736,6 +3456,8 @@
                 if (tn && s.showTeamNames !== undefined) tn.checked = s.showTeamNames;
                 const sp = $(`in-show-sponsors-${t}`);
                 if (sp && s.showSponsors !== undefined) sp.checked = s.showSponsors;
+                if ($(`in-logo-feed-${t}`) && s.logoFeed !== undefined) $(`in-logo-feed-${t}`).checked = s.logoFeed;
+                if ($(`in-logo-story-${t}`) && s.logoStory !== undefined) $(`in-logo-story-${t}`).checked = s.logoStory;
             });
             refreshSponsorChecklists();
         }
@@ -2797,6 +3519,7 @@
                 appVersion: APP_VERSION,
                 exportedAt: new Date().toISOString(),
                 activeVersionSlot: currentVersion,
+                versionNames: prefs.versionNames,
                 stammdaten,
                 slots
             };
@@ -2808,6 +3531,10 @@
             a.click();
             a.remove();
             setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+            prefs.lastBackupAt = Date.now();
+            prefs.backupSnoozeUntil = null;
+            await savePrefs();
+            updateBackupReminder();
         }
 
         async function importConfigJSON(event) {
@@ -2843,6 +3570,11 @@
                     if (slots[v]) await localforage.setItem(STORE.slot(v), slots[v]);
                     else await localforage.removeItem(STORE.slot(v));
                 }
+                if (data.versionNames && typeof data.versionNames === 'object') {
+                    prefs.versionNames = data.versionNames;
+                    await savePrefs();
+                    applyVersionNames();
+                }
                 if (['v1', 'v2', 'v3'].includes(data.activeVersionSlot)) currentVersion = data.activeVersionSlot;
                 await localforage.setItem(STORE.version, currentVersion);
                 document.querySelectorAll('.team-tab-btn').forEach(b => b.classList.remove('active'));
@@ -2866,21 +3598,58 @@
            VEREINSCODE / LIZENZ
            ========================================================= */
         function normalizeCode(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
-        function formatCode(c) { return c && c.length === 6 ? `${c.slice(0, 3)}-${c.slice(3)}` : (c || ''); }
+        function formatCode(c) {
+            if (!c) return '';
+            if (c.length === 6) return `${c.slice(0, 3)}-${c.slice(3)}`;
+            if (c.length === 8) return `${c.slice(0, 4)}-${c.slice(4)}`;
+            return c;
+        }
+
+        /* Code → PBKDF2-Hash (identisch in code-generator.html). So stehen in vereine.txt keine lesbaren Codes. */
+        async function hashLicenseCode(code) {
+            if (!window.crypto?.subtle) return null;
+            const enc = new TextEncoder();
+            const key = await crypto.subtle.importKey('raw', enc.encode(normalizeCode(code)), 'PBKDF2', false, ['deriveBits']);
+            const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(LICENSE_SALT), iterations: LICENSE_ITERATIONS, hash: 'SHA-256' }, key, 256);
+            return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function findLicenseEntry(map, code) {
+            if (map.plain[code]) return map.plain[code];
+            if (!Object.keys(map.hashed).length) return null;
+            const hash = await hashLicenseCode(code);
+            return (hash && map.hashed[hash]) || null;
+        }
+
+        function licenseError(kind) { const e = new Error(kind); e.kind = kind; return e; }
 
         async function fetchLicenseList() {
-            const res = await fetchWithTimeout(`${LICENSE_FILE}?t=${Date.now()}`, { timeout: 6000, cache: 'no-store' });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
+            if (location.protocol === 'file:') throw licenseError('file');
+            let res;
+            try {
+                res = await fetchWithTimeout(`${LICENSE_FILE}?t=${Date.now()}`, { timeout: 6000, cache: 'no-store' });
+            } catch (e) {
+                throw licenseError('network');
+            }
+            if (res.status === 404) throw licenseError('missing');
+            if (!res.ok) throw licenseError('network');
             const text = await res.text();
-            if (text.trim().startsWith('<')) throw new Error('Codeliste nicht gefunden');
-            const map = {};
+            // Manche Hoster liefern bei fehlender Datei die index.html aus
+            if (text.trim().startsWith('<')) throw licenseError('missing');
+            const map = { plain: {}, hashed: {}, count: 0 };
             text.split(/\r?\n/).forEach(line => {
                 const t = line.trim();
                 if (!t || t.startsWith('#')) return;
                 const parts = t.split('=').map(s => s.trim());
-                const code = normalizeCode(parts[0]);
-                if (!code || !parts[1]) return;
-                map[code] = { name: parts[1], logo: parts[2] || '' };
+                if (!parts[0] || !parts[1]) return;
+                const entry = { name: parts[1], logo: parts[2] || '' };
+                if (/^[0-9a-f]{64}$/i.test(parts[0])) map.hashed[parts[0].toLowerCase()] = entry;
+                else {
+                    const code = normalizeCode(parts[0]);
+                    if (!code) return;
+                    map.plain[code] = entry;
+                }
+                map.count++;
             });
             return map;
         }
@@ -2918,8 +3687,15 @@
             try {
                 let map;
                 try { map = await fetchLicenseList(); }
-                catch (e) { errEl.textContent = 'Die Codeliste konnte nicht geladen werden. Bitte Internetverbindung prüfen.'; return; }
-                const entry = map[code];
+                catch (e) {
+                    const messages = {
+                        file: 'Die App wurde direkt als Datei geöffnet. Der Code kann nur geprüft werden, wenn die App über die Webseite (z.B. Netlify / GitHub Pages) aufgerufen wird.',
+                        missing: `Die Codeliste „${LICENSE_FILE}“ wurde auf dem Server nicht gefunden. Sie muss im selben Ordner wie die index.html liegen.`
+                    };
+                    errEl.textContent = messages[e.kind] || 'Die Codeliste konnte nicht geladen werden. Bitte Internetverbindung prüfen.';
+                    return;
+                }
+                const entry = await findLicenseEntry(map, code);
                 if (!entry) { errEl.textContent = 'Dieser Code ist unbekannt.'; return; }
                 const previousName = club ? club.name : null;
                 club = { code, name: entry.name, logoFile: entry.logo, logo: await loadClubLogo(entry.logo), checkedAt: Date.now() };
@@ -2941,7 +3717,9 @@
             if (!club) return;
             let map;
             try { map = await fetchLicenseList(); } catch (e) { return; }
-            const entry = map[club.code];
+            // Schutz: eine leere/kaputte Liste sperrt niemanden aus
+            if (!map.count) return;
+            const entry = await findLicenseEntry(map, club.code);
             if (!entry) {
                 club = null;
                 await localforage.removeItem(STORE.club);
@@ -2970,10 +3748,68 @@
             ));
         }
 
+        /* html2canvas kennt kein clip-path → Schild-Form wird für den Export vorab in ein Bild gezeichnet */
+        function parseClipPolygon(clip, w, h) {
+            const m = /^polygon\((.*)\)$/.exec((clip || '').trim());
+            if (!m) return null;
+            const conv = (v, size) => v.endsWith('%') ? parseFloat(v) / 100 * size : parseFloat(v);
+            return m[1].split(',').map(pt => {
+                const [x, y] = pt.trim().split(/\s+/);
+                return [conv(x, w), conv(y, h)];
+            });
+        }
+
+        function rasterizeClippedImage(img, cs, scale = 3) {
+            const w = img.offsetWidth, h = img.offsetHeight;
+            const pts = parseClipPolygon(cs.clipPath, w, h);
+            if (!pts || !w || !h || !img.naturalWidth) return null;
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(w * scale);
+            canvas.height = Math.round(h * scale);
+            const ctx = canvas.getContext('2d');
+            ctx.scale(scale, scale);
+            ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+            ctx.closePath();
+            ctx.clip();
+            if (cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent') {
+                ctx.fillStyle = cs.backgroundColor;
+                ctx.fillRect(0, 0, w, h);
+            }
+            const px = v => parseFloat(v) || 0;
+            const x0 = px(cs.borderLeftWidth) + px(cs.paddingLeft), y0 = px(cs.borderTopWidth) + px(cs.paddingTop);
+            const cw = w - x0 - px(cs.borderRightWidth) - px(cs.paddingRight);
+            const ch = h - y0 - px(cs.borderBottomWidth) - px(cs.paddingBottom);
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            let dw = cw, dh = ch;
+            if (cs.objectFit === 'cover' || cs.objectFit === 'contain') {
+                const r = cs.objectFit === 'cover' ? Math.max(cw / iw, ch / ih) : Math.min(cw / iw, ch / ih);
+                dw = iw * r; dh = ih * r;
+            }
+            ctx.beginPath();
+            ctx.rect(x0, y0, cw, ch);
+            ctx.clip();
+            ctx.drawImage(img, x0 + (cw - dw) / 2, y0 + (ch - dh) / 2, dw, dh);
+            try { return canvas.toDataURL('image/png'); } catch (e) { return null; }
+        }
+
         /* html2canvas kennt kein object-fit → Bilder werden für den Export durch Hintergrund-Divs ersetzt (sonst verzerrt) */
         function replaceObjectFitImages(root) {
             root.querySelectorAll('img').forEach(img => {
                 const cs = getComputedStyle(img);
+                if (cs.clipPath && cs.clipPath !== 'none') {
+                    const data = rasterizeClippedImage(img, cs);
+                    if (data) {
+                        // Als echtes Bild (kein Hintergrund), sonst zeichnet html2canvas am Rand eine Linie
+                        const w = img.offsetWidth, h = img.offsetHeight;
+                        img.src = data;
+                        Object.assign(img.style, {
+                            width: w + 'px', height: h + 'px', boxSizing: 'border-box',
+                            backgroundColor: 'transparent', border: 'none', padding: '0', boxShadow: 'none', clipPath: 'none', objectFit: 'fill'
+                        });
+                        return;
+                    }
+                }
                 const fit = cs.objectFit;
                 if ((fit !== 'cover' && fit !== 'contain') || !img.naturalWidth) return;
                 const div = document.createElement('div');
@@ -3003,12 +3839,15 @@
             const clone = element.cloneNode(true);
             clone.removeAttribute('id');
             Object.assign(clone.style, { transform: 'none', margin: '0', position: 'relative', top: '0', left: '0' });
-            clone.querySelectorAll('.tactics-arrow-handle').forEach(n => n.remove());
+            clone.querySelectorAll('.tactics-arrow-handle, .safe-zone').forEach(n => n.remove());
+            clone.classList.remove('el-selected');
+            clone.querySelectorAll('.el-selected').forEach(n => n.classList.remove('el-selected'));
             holder.appendChild(clone);
             document.body.appendChild(holder);
             try {
                 await waitForImages(clone);
                 replaceObjectFitImages(clone);
+                await waitForImages(clone);
                 return await html2canvas(clone, { scale: 3, useCORS: true, logging: false, backgroundColor: null });
             } finally {
                 holder.remove();
@@ -3064,6 +3903,170 @@
         }
 
         /* =========================================================
+           EINSTELLUNGEN FÜR DAS GERÄT (Versionsnamen, Hilfslinien, Backup)
+           ========================================================= */
+        async function savePrefs() {
+            try { await localforage.setItem(STORE.prefs, prefs); } catch (e) { console.warn(e); }
+        }
+
+        function applyVersionNames() {
+            ['v1', 'v2', 'v3'].forEach((v, i) => {
+                const name = normName(prefs.versionNames?.[v]);
+                const btn = $(`btn-${v}`);
+                if (btn) btn.textContent = name || `Version ${i + 1}`;
+                const input = $(`cfg-version-name-${v}`);
+                if (input && document.activeElement !== input) input.value = name;
+            });
+            refreshCopySelects();
+        }
+
+        function versionLabel(v) {
+            return normName(prefs.versionNames?.[v]) || `Version ${v.slice(1)}`;
+        }
+
+        function refreshCopySelects() {
+            ['copy-from', 'copy-to'].forEach((id, idx) => {
+                const sel = $(id);
+                if (!sel) return;
+                const cur = sel.value || (idx === 0 ? currentVersion : ['v1', 'v2', 'v3'].find(v => v !== currentVersion));
+                sel.innerHTML = ['v1', 'v2', 'v3'].map(v => `<option value="${v}">${esc(versionLabel(v))}</option>`).join('');
+                sel.value = cur;
+            });
+        }
+
+        /* Einstellungen einer Version in eine andere kopieren (alles, nur Design oder nur Inhalte) */
+        const DESIGN_KEYS = ['primary', 'jerseyColor', 'frameColor', 'tabSettings', 'positions', 'customTexts', 'selectedSponsors', 'torImgSize', 'pitchMode', 'numbersShow'];
+        const DESIGN_INPUTS = [/^in-kal-color-/];
+
+        async function copyBetweenVersions() {
+            const from = val('copy-from'), to = val('copy-to'), what = val('copy-what') || 'all';
+            if (!from || !to || from === to) { alert('Bitte zwei verschiedene Versionen auswählen.'); return; }
+            const whatLabel = { all: 'Alles', design: 'Das Design', content: 'Die Inhalte' }[what];
+            if (!confirm(`${whatLabel} von „${versionLabel(from)}“ nach „${versionLabel(to)}“ kopieren?\n\nDie entsprechenden Einstellungen in „${versionLabel(to)}“ werden dabei überschrieben.`)) return;
+
+            await saveSlotNow();
+            const src = await localforage.getItem(STORE.slot(from));
+            if (!src) { alert(`In „${versionLabel(from)}“ ist noch nichts gespeichert.`); return; }
+            const tgt = await localforage.getItem(STORE.slot(to)) || {};
+            const clone = o => JSON.parse(JSON.stringify(o ?? null));
+
+            let result;
+            if (what === 'all') {
+                result = clone(src);
+            } else {
+                const wantDesign = what === 'design';
+                result = clone(tgt) || {};
+                for (const k in src) {
+                    if (k === 'inputs') continue;
+                    if (DESIGN_KEYS.includes(k) === wantDesign) result[k] = clone(src[k]);
+                }
+                result.inputs = { ...(tgt.inputs || {}) };
+                for (const k in (src.inputs || {})) {
+                    if (DESIGN_INPUTS.some(re => re.test(k)) === wantDesign) result.inputs[k] = src.inputs[k];
+                }
+            }
+            await localforage.setItem(STORE.slot(to), result);
+            if (to === currentVersion) {
+                applySlotData(result);
+                renderAll();
+                resetEckHistory();
+            }
+            toast(`✅ Nach „${versionLabel(to)}“ kopiert`);
+        }
+
+        const saveVersionNamesDebounced = debounce(savePrefs, 400);
+        function updateVersionNames() {
+            prefs.versionNames = {};
+            ['v1', 'v2', 'v3'].forEach(v => { prefs.versionNames[v] = normName(val(`cfg-version-name-${v}`)); });
+            applyVersionNames();
+            saveVersionNamesDebounced();
+        }
+
+        function updateSafeZones() {
+            const cb = $('cfg-safe-zones');
+            if (cb) prefs.safeZones = cb.checked;
+            document.body.classList.toggle('show-safe-zones', !!prefs.safeZones);
+            savePrefs();
+        }
+
+        function addSafeZoneOverlays() {
+            document.querySelectorAll('.story-template').forEach(tpl => {
+                if (tpl.querySelector(':scope > .safe-zone')) return;
+                tpl.insertAdjacentHTML('beforeend', '<div class="safe-zone top"><span>Instagram: Profil</span></div><div class="safe-zone bottom"><span>Instagram: Antworten</span></div>');
+            });
+        }
+
+        function formatDate(ts) {
+            const d = new Date(ts);
+            return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+        }
+
+        function updateBackupReminder() {
+            const info = $('last-backup-info');
+            if (info) info.textContent = prefs.lastBackupAt ? `Letztes Backup: ${formatDate(prefs.lastBackupAt)}` : 'Noch kein Backup erstellt.';
+            const card = $('backup-reminder');
+            if (!card) return;
+            const hasData = stammdaten.players.length + stammdaten.opponents.length + stammdaten.sponsors.length + stammdaten.templates.length > 0;
+            const now = Date.now();
+            const days = prefs.lastBackupAt ? Math.floor((now - prefs.lastBackupAt) / 86400000) : null;
+            const due = hasData && (days === null || days >= BACKUP_REMIND_DAYS);
+            const snoozed = prefs.backupSnoozeUntil && now < prefs.backupSnoozeUntil;
+            card.hidden = !due || snoozed;
+            if (!card.hidden) {
+                $('backup-reminder-text').textContent = (days === null
+                    ? 'Du hast noch nie ein Backup erstellt.'
+                    : `Dein letztes Backup ist ${days} Tage alt.`) + ' Deine Daten liegen nur auf diesem Gerät – sichere sie, damit bei Handywechsel oder Browser-Bereinigung nichts verloren geht.';
+            }
+        }
+
+        function snoozeBackupReminder() {
+            prefs.backupSnoozeUntil = Date.now() + 7 * 86400000;
+            savePrefs();
+            updateBackupReminder();
+        }
+
+        /* ---------- Installation als App ---------- */
+        function isStandalone() {
+            return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+        function isIOS() {
+            return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+
+        function updateInstallCard() {
+            const card = $('install-card');
+            if (!card) return;
+            if (isStandalone()) { card.hidden = true; return; }
+            card.hidden = false;
+            const actions = $('install-actions');
+            if (deferredInstallPrompt) {
+                $('install-text').textContent = 'Installiere die App auf deinem Startbildschirm. So startet sie schneller, funktioniert offline und deine Daten bleiben dauerhaft gespeichert.';
+                actions.hidden = false;
+            } else if (isIOS()) {
+                $('install-text').innerHTML = 'Wichtig auf dem iPhone: Tippe in Safari unten auf <b>Teilen</b> (□↑) und dann auf <b>„Zum Home-Bildschirm“</b>. Sonst kann Safari deine Daten nach 7 Tagen ohne Nutzung löschen.';
+                actions.hidden = true;
+            } else {
+                $('install-text').textContent = 'Tipp: Füge die App über das Browser-Menü („App installieren“ bzw. „Zum Startbildschirm hinzufügen“) zu deinem Startbildschirm hinzu – dann funktioniert sie offline und die Daten bleiben dauerhaft gespeichert.';
+                actions.hidden = true;
+            }
+        }
+
+        async function triggerInstall() {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            try { await deferredInstallPrompt.userChoice; } catch (e) {}
+            deferredInstallPrompt = null;
+            updateInstallCard();
+        }
+
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            updateInstallCard();
+        });
+        window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; updateInstallCard(); });
+
+        /* =========================================================
            START
            ========================================================= */
         async function initApp() {
@@ -3077,6 +4080,11 @@
                 stammdaten = { ...emptyStammdaten(), ...(await localforage.getItem(STORE.stammdaten) || {}) };
                 sortStammdaten();
                 club = await localforage.getItem(STORE.club);
+                prefs = { ...prefs, ...(await localforage.getItem(STORE.prefs) || {}) };
+                applyVersionNames();
+                setText('app-version-label', 'Version ' + APP_VERSION);
+                if ($('cfg-safe-zones')) $('cfg-safe-zones').checked = !!prefs.safeZones;
+                document.body.classList.toggle('show-safe-zones', !!prefs.safeZones);
 
                 currentVersion = await localforage.getItem(STORE.version) || 'v1';
                 if (!['v1', 'v2', 'v3'].includes(currentVersion)) currentVersion = 'v1';
@@ -3090,14 +4098,19 @@
                 refreshSponsorChecklists();
                 renderStammdatenLists();
                 editorTabs.forEach(renderBgThumbs);
+                prepareTemplates();
                 assignDraggableIds();
                 makeTextsDraggable();
+                addSafeZoneOverlays();
+                renderConfetti();
                 setupTabBar();
 
                 applySlotData(await localforage.getItem(STORE.slot(currentVersion)));
                 renderAll();
                 resetEckHistory();
                 updateStorageInfo();
+                updateBackupReminder();
+                updateInstallCard();
 
                 switchTab(await localforage.getItem(STORE.tab) || 'start');
 
@@ -3110,6 +4123,15 @@
                 window.addEventListener('pagehide', () => saveSlotNow());
 
                 $('license-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitLicenseCode(); });
+
+                // Tippen auf eine freie Stelle der Vorschau hebt die Auswahl auf
+                document.querySelector('.preview-area').addEventListener('pointerdown', e => {
+                    if (!e.target.closest('.draggable-text, .draggable-img')) selectElement(null);
+                });
+                // Browser-eigenes Bild-Ziehen verhindern (stört das Verschieben am PC)
+                document.addEventListener('dragstart', e => {
+                    if (e.target.closest?.('.draggable-text, .draggable-img, .template-container')) e.preventDefault();
+                });
 
                 appReady = true;
 
