@@ -2868,11 +2868,21 @@
         function normalizeCode(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
         function formatCode(c) { return c && c.length === 6 ? `${c.slice(0, 3)}-${c.slice(3)}` : (c || ''); }
 
+        function licenseError(kind) { const e = new Error(kind); e.kind = kind; return e; }
+
         async function fetchLicenseList() {
-            const res = await fetchWithTimeout(`${LICENSE_FILE}?t=${Date.now()}`, { timeout: 6000, cache: 'no-store' });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
+            if (location.protocol === 'file:') throw licenseError('file');
+            let res;
+            try {
+                res = await fetchWithTimeout(`${LICENSE_FILE}?t=${Date.now()}`, { timeout: 6000, cache: 'no-store' });
+            } catch (e) {
+                throw licenseError('network');
+            }
+            if (res.status === 404) throw licenseError('missing');
+            if (!res.ok) throw licenseError('network');
             const text = await res.text();
-            if (text.trim().startsWith('<')) throw new Error('Codeliste nicht gefunden');
+            // Manche Hoster liefern bei fehlender Datei die index.html aus
+            if (text.trim().startsWith('<')) throw licenseError('missing');
             const map = {};
             text.split(/\r?\n/).forEach(line => {
                 const t = line.trim();
@@ -2918,7 +2928,14 @@
             try {
                 let map;
                 try { map = await fetchLicenseList(); }
-                catch (e) { errEl.textContent = 'Die Codeliste konnte nicht geladen werden. Bitte Internetverbindung prüfen.'; return; }
+                catch (e) {
+                    const messages = {
+                        file: 'Die App wurde direkt als Datei geöffnet. Der Code kann nur geprüft werden, wenn die App über die Webseite (z.B. Netlify / GitHub Pages) aufgerufen wird.',
+                        missing: `Die Codeliste „${LICENSE_FILE}“ wurde auf dem Server nicht gefunden. Sie muss im selben Ordner wie die index.html liegen.`
+                    };
+                    errEl.textContent = messages[e.kind] || 'Die Codeliste konnte nicht geladen werden. Bitte Internetverbindung prüfen.';
+                    return;
+                }
                 const entry = map[code];
                 if (!entry) { errEl.textContent = 'Dieser Code ist unbekannt.'; return; }
                 const previousName = club ? club.name : null;
