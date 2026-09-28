@@ -1,9 +1,16 @@
 <!DOCTYPE html>
+<!--
+    Vereinsgrafik – Insta-Vorlagen für Vereine
+    © [Jahr] [Vorname Nachname / Firma]. Alle Rechte vorbehalten.
+    Diese Software ist urheberrechtlich geschützt. Kopieren, Verändern, Weiterverbreiten oder eigenes Hosten –
+    auch in Teilen – ist ohne schriftliche Zustimmung untersagt. Nutzung nur mit gültigem Vereinscode
+    gemäß den AGB (agb.html). Verwendete Open-Source-Komponenten: siehe agb.html (Anhang).
+-->
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vereinsgrafik – Insta-Vorlagen 17.0</title>
+    <title>Vereinsgrafik – Insta-Vorlagen 17.1</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Vereinsgrafik">
@@ -380,6 +387,8 @@
         .license-error { color: #c1121f; font-size: 13px; margin-top: 10px; min-height: 18px; }
         .license-cancel { margin-top: 6px; background: none; border: none; color: #666; font-size: 13px; cursor: pointer; text-decoration: underline; }
         .license-cancel[hidden] { display: none; }
+        #license-backup, #license-demo { display: block; margin: 8px auto 0; }
+        #license-backup[hidden], #license-demo[hidden] { display: none; }
 
         .toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); background: rgba(20,24,30,0.92); color: white; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: bold; z-index: 9998; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; max-width: 90%; text-align: center; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -541,13 +550,15 @@
         <div class="license-card">
             <div class="license-icon">🔐</div>
             <h2>Vereinscode eingeben</h2>
-            <p id="license-text">Bitte gib den Code ein, den du für deinen Verein erhalten hast.</p>
+            <p id="license-text">Bitte gib den Code ein, den du für deinen Verein erhalten hast. Zum Ausprobieren gibt es den Demo-Modus.</p>
             <input type="text" id="license-input" placeholder="XXXX-XXXX" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false">
             <button type="button" id="license-submit" class="license-submit" onclick="submitLicenseCode()">Freischalten</button>
             <div id="license-error" class="license-error"></div>
             <button type="button" id="license-cancel" class="license-cancel" onclick="hideLicenseOverlay()" hidden>Abbrechen</button>
+            <button type="button" id="license-backup" class="license-cancel" onclick="exportConfigJSON()" hidden>💾 Trotzdem Backup meiner Daten sichern</button>
+            <button type="button" id="license-demo" class="license-cancel" onclick="setVal('license-input', DEMO_CODE); submitLicenseCode();">🧪 Erst einmal testen (Demo-Modus)</button>
             <div class="app-footer" style="margin-top:14px;">
-                <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+                <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a>
             </div>
         </div>
     </div>
@@ -620,6 +631,17 @@
                 <button class="team-tab-btn active" id="btn-v1" onclick="switchVersion('v1')">Version 1</button>
                 <button class="team-tab-btn" id="btn-v2" onclick="switchVersion('v2')">Version 2</button>
                 <button class="team-tab-btn" id="btn-v3" onclick="switchVersion('v3')">Version 3</button>
+            </div>
+
+            <!-- DEMO-MODUS / LIZENZ-HINWEIS -->
+            <div id="demo-banner" class="notice-card info" hidden>
+                <b>🧪 Demo-Modus</b>
+                Alle Funktionen sind freigeschaltet, gespeicherte Grafiken erhalten aber ein Wasserzeichen. Mit einem Vereinscode verschwindet es – deine Daten bleiben erhalten.
+                <div class="notice-actions"><button type="button" class="primary" onclick="showLicenseOverlay(true)">Vereinscode eingeben</button></div>
+            </div>
+            <div id="license-warning" class="notice-card warn" hidden>
+                <b>⏳ Lizenz läuft bald ab</b>
+                <span id="license-warning-text"></span>
             </div>
 
             <!-- BACKUP-ERINNERUNG -->
@@ -735,8 +757,8 @@
                 </div>
 
                 <div class="app-footer">
-                    Vereinsgrafik <span id="app-version-label"></span><br>
-                    <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+                    Vereinsgrafik <span id="app-version-label"></span> · © [Anbieter]<br>
+                    <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a>
                 </div>
             </div>
 
@@ -1630,14 +1652,18 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "17.0";
+        const APP_VERSION = "17.1";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
-        // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei   (Hash mit code-generator.html erzeugen)
+        // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
         // Klartext-Codes (z.B. 548-962 = …) funktionieren weiterhin, sind aber für jeden lesbar.
         const LICENSE_FILE = 'vereine.txt';
         // true = App ist erst nach Eingabe eines gültigen Vereinscodes nutzbar
         const LICENSE_REQUIRED = true;
+        // Demo-Code: funktioniert ohne Eintrag in vereine.txt, alle Exporte bekommen ein Wasserzeichen
+        const DEMO_CODE = 'DEMO';
+        // So viele Tage vor Ablauf der Saisonlizenz erscheint ein Hinweis
+        const LICENSE_WARN_DAYS = 30;
         // Muss mit code-generator.html übereinstimmen – NICHT mehr ändern, sonst passen die Hashes nicht mehr
         const LICENSE_SALT = 'vereinsgrafik-lizenz-v1';
         const LICENSE_ITERATIONS = 150000;
@@ -2937,7 +2963,11 @@
             const src = getClubLogoSrc();
             document.querySelectorAll('.club-logo-img').forEach(img => { if (img.getAttribute('src') !== src) img.src = src; });
             setText('club-card-name', club ? club.name : 'Kein Verein freigeschaltet');
-            setText('club-card-code', club ? `Vereinscode: ${formatCode(club.code)}` : 'Bitte Vereinscode eingeben');
+            setText('club-card-code', !club ? 'Bitte Vereinscode eingeben'
+                : club.demo ? 'Demo-Modus – Grafiken mit Wasserzeichen'
+                : `Vereinscode: ${formatCode(club.code)}${club.validUntil ? ` · gültig bis ${formatIsoDate(club.validUntil)}` : ''}`);
+            const demoBanner = $('demo-banner');
+            if (demoBanner) demoBanner.hidden = !(club && club.demo);
             const teamInput = $('cfg-team-name');
             if (teamInput) teamInput.placeholder = club ? club.name : 'z.B. TSGV Rechberg';
         }
@@ -4310,7 +4340,7 @@
                 if (!t || t.startsWith('#')) return;
                 const parts = t.split('=').map(s => s.trim());
                 if (!parts[0] || !parts[1]) return;
-                const entry = { name: parts[1], logo: parts[2] || '' };
+                const entry = { name: parts[1], logo: parts[2] || '', validUntil: parseLicenseDate(parts[3]) };
                 if (/^[0-9a-f]{64}$/i.test(parts[0])) map.hashed[parts[0].toLowerCase()] = entry;
                 else {
                     const code = normalizeCode(parts[0]);
@@ -4334,9 +4364,48 @@
             }
         }
 
-        function showLicenseOverlay(cancelable, message) {
+        /* ---------- Saisonlizenz ---------- */
+        function parseLicenseDate(s) {
+            const t = (s || '').trim();
+            let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+            if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+            m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(t);
+            if (m) return `${m[3]}-${pad(m[2])}-${pad(m[1])}`;
+            return null;   // kein Datum = unbegrenzt gültig
+        }
+        function formatIsoDate(iso) {
+            const [y, mo, d] = (iso || '').split('-');
+            return d ? `${d}.${mo}.${y}` : '';
+        }
+        function isLicenseExpired(c) {
+            return !!(c && !c.demo && c.validUntil && todayISO() > c.validUntil);
+        }
+        function daysUntil(iso) {
+            const d = parseISODate(iso), t = parseISODate(todayISO());
+            return d && t ? Math.round((d - t) / 86400000) : null;
+        }
+
+        /* Prüft das lokal gespeicherte Ablaufdatum (funktioniert auch offline) */
+        function checkLicenseValidity() {
+            const warn = $('license-warning');
+            if (warn) warn.hidden = true;
+            if (!club || club.demo || !club.validUntil) return;
+            if (isLicenseExpired(club)) {
+                showLicenseOverlay(false, `Die Saisonlizenz für ${club.name} ist am ${formatIsoDate(club.validUntil)} abgelaufen. Bitte wende dich an den Anbieter, um sie zu verlängern. Deine Daten bleiben auf diesem Gerät erhalten.`, { expired: true });
+                return;
+            }
+            const days = daysUntil(club.validUntil);
+            if (warn && days !== null && days <= LICENSE_WARN_DAYS) {
+                setText('license-warning-text', `Deine Lizenz ist noch bis ${formatIsoDate(club.validUntil)} gültig (${days === 0 ? 'heute letzter Tag' : `noch ${days} Tag${days === 1 ? '' : 'e'}`}). Bitte rechtzeitig verlängern.`);
+                warn.hidden = false;
+            }
+        }
+
+        function showLicenseOverlay(cancelable, message, opts = {}) {
             $('license-overlay').hidden = false;
-            $('license-cancel').hidden = !(cancelable && (club || !LICENSE_REQUIRED));
+            $('license-backup').hidden = !opts.expired;
+            $('license-demo').hidden = !!opts.expired || !!(club && club.demo);
+            $('license-cancel').hidden = !(cancelable && (club || !LICENSE_REQUIRED) && !isLicenseExpired(club));
             $('license-error').textContent = message || '';
             const input = $('license-input');
             input.value = '';
@@ -4349,6 +4418,20 @@
             const errEl = $('license-error');
             const btn = $('license-submit');
             if (code.length < 4) { errEl.textContent = 'Bitte einen gültigen Code eingeben.'; return; }
+
+            // Demo-Modus: ohne Server, Exporte mit Wasserzeichen
+            if (code === DEMO_CODE) {
+                if (club && !club.demo && !isLicenseExpired(club) && !confirm('Du hast bereits einen gültigen Vereinscode. Wirklich in den Demo-Modus wechseln?')) return;
+                club = { code, name: 'Demo-Verein', demo: true, logo: null, logoFile: '', validUntil: null, checkedAt: Date.now() };
+                await localforage.setItem(STORE.club, club);
+                hideLicenseOverlay();
+                renderAll();
+                checkLicenseValidity();
+                toast('🧪 Demo-Modus aktiv');
+                if (!prefs.onboardingDone) startWizard();
+                return;
+            }
+
             btn.disabled = true;
             btn.textContent = 'Prüfe Code …';
             errEl.textContent = '';
@@ -4365,13 +4448,18 @@
                 }
                 const entry = await findLicenseEntry(map, code);
                 if (!entry) { errEl.textContent = 'Dieser Code ist unbekannt.'; return; }
+                if (entry.validUntil && todayISO() > entry.validUntil) {
+                    errEl.textContent = `Die Lizenz für diesen Code ist am ${formatIsoDate(entry.validUntil)} abgelaufen. Bitte wende dich an den Anbieter.`;
+                    return;
+                }
                 const previousName = club ? club.name : null;
-                club = { code, name: entry.name, logoFile: entry.logo, logo: await loadClubLogo(entry.logo), checkedAt: Date.now() };
+                club = { code, name: entry.name, logoFile: entry.logo, logo: await loadClubLogo(entry.logo), validUntil: entry.validUntil, checkedAt: Date.now() };
                 await localforage.setItem(STORE.club, club);
                 const teamInput = $('cfg-team-name');
                 if (teamInput && (teamInput.value === previousName || teamInput.value === 'SVA')) teamInput.value = '';
                 hideLicenseOverlay();
                 renderAll();
+                checkLicenseValidity();
                 scheduleSave();
                 toast(`✅ ${entry.name} freigeschaltet`);
                 if (!prefs.onboardingDone) startWizard();
@@ -4383,7 +4471,7 @@
 
         /* Prüft beim Start im Hintergrund, ob der Code noch gültig ist (offline bleibt alles nutzbar) */
         async function verifyLicenseInBackground() {
-            if (!club) return;
+            if (!club || club.demo) return;
             let map;
             try { map = await fetchLicenseList(); } catch (e) { return; }
             // Schutz: eine leere/kaputte Liste sperrt niemanden aus
@@ -4398,6 +4486,15 @@
             }
             let changed = false;
             if (entry.name !== club.name) { club.name = entry.name; changed = true; }
+            // Verlängerung (neues Datum in vereine.txt) wird beim nächsten Start mit Internet übernommen
+            if ((entry.validUntil || null) !== (club.validUntil || null)) {
+                club.validUntil = entry.validUntil || null;
+                changed = true;
+                if (!isLicenseExpired(club) && !$('license-overlay').hidden && !$('license-backup').hidden) {
+                    hideLicenseOverlay();
+                    toast('✅ Lizenz verlängert');
+                }
+            }
             if (entry.logo !== club.logoFile || (!club.logo && entry.logo)) {
                 club.logoFile = entry.logo;
                 club.logo = await loadClubLogo(entry.logo);
@@ -4406,6 +4503,7 @@
             club.checkedAt = Date.now();
             await localforage.setItem(STORE.club, club);
             if (changed) renderAll();
+            checkLicenseValidity();
         }
 
         /* =========================================================
@@ -4499,6 +4597,44 @@
             });
         }
 
+        /* Demo-Modus: schräges Wasserzeichen + Hinweisleiste direkt ins Bild zeichnen */
+        function drawDemoWatermark(canvas) {
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            // html2canvas hinterlässt Skalierung/Verschiebung im Kontext – zurücksetzen
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.globalAlpha = 1;
+            ctx.save();
+            ctx.translate(w / 2, h / 2);
+            ctx.rotate(-Math.PI / 6);
+            ctx.font = `900 ${Math.round(w / 9)}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.lineWidth = Math.max(2, w / 400);
+            const stepY = w / 3, stepX = w * 0.75;
+            let row = 0;
+            for (let y = -h; y <= h; y += stepY, row++) {
+                for (let x = -w * 1.2; x <= w * 1.2; x += stepX) {
+                    const px = x + (row % 2 ? stepX / 2 : 0);
+                    ctx.globalAlpha = 0.14; ctx.strokeStyle = '#000000'; ctx.strokeText('DEMO', px, y);
+                    ctx.globalAlpha = 0.22; ctx.fillStyle = '#ffffff'; ctx.fillText('DEMO', px, y);
+                }
+            }
+            ctx.restore();
+            const bh = Math.round(h * 0.04);
+            ctx.save();
+            ctx.globalAlpha = 0.8;
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, h - bh, w, bh);
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.round(bh * 0.45)}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('DEMO-VERSION – mit Vereinscode ohne Wasserzeichen', w / 2, h - bh / 2);
+            ctx.restore();
+        }
+
         async function renderElementToCanvas(element) {
             if (document.fonts?.ready) await document.fonts.ready;
             const view = element.closest('.template-container');
@@ -4517,7 +4653,9 @@
                 await waitForImages(clone);
                 replaceObjectFitImages(clone);
                 await waitForImages(clone);
-                return await html2canvas(clone, { scale: 3, useCORS: true, logging: false, backgroundColor: null });
+                const canvas = await html2canvas(clone, { scale: 3, useCORS: true, logging: false, backgroundColor: null });
+                if (club && club.demo) drawDemoWatermark(canvas);
+                return canvas;
             } finally {
                 holder.remove();
             }
@@ -4881,6 +5019,7 @@
 
                 if (!club && LICENSE_REQUIRED) showLicenseOverlay(false);
                 else {
+                    checkLicenseValidity();
                     verifyLicenseInBackground();
                     if (!prefs.onboardingDone && !stammdaten.players.length) startWizard();
                 }

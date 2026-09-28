@@ -3,7 +3,7 @@
    - Bibliotheken, Schriften, Icons: aus dem Zwischenspeicher
    - vereine.txt und Wappen: immer aus dem Netz (werden nie zwischengespeichert)
    Bei jeder neuen App-Version CACHE_VERSION erhöhen. */
-const CACHE_VERSION = 'vereinsgrafik-v17.0';
+const CACHE_VERSION = 'vereinsgrafik-v17.1';
 
 const CORE_FILES = [
     './',
@@ -21,7 +21,8 @@ const CORE_FILES = [
     './icons/icon-512.png',
     './icons/apple-touch-icon.png',
     './impressum.html',
-    './datenschutz.html'
+    './datenschutz.html',
+    './agb.html'
 ];
 
 self.addEventListener('install', event => {

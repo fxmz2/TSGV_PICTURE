@@ -32,6 +32,8 @@
         <input id="club-name" placeholder="z.B. TSGV Rechberg">
         <label for="club-logo">Wappen-Datei auf dem Server</label>
         <input id="club-logo" placeholder="z.B. Wappen/TSGV_Rechberg.jpg">
+        <label for="club-valid">Lizenz gültig bis</label>
+        <input id="club-valid" type="date" value="2050-12-31">
         <label for="club-code">Code (leer lassen = zufälligen Code erzeugen)</label>
         <input id="club-code" placeholder="z.B. K7MX-29QF" autocapitalize="characters">
         <div class="row">
@@ -50,7 +52,7 @@
     <div class="box">
         <h2 style="margin-top:0;">Bestehende Liste umwandeln</h2>
         <p class="hint">Füge hier deine bisherige vereine.txt mit lesbaren Codes ein (z.B. <code>548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg</code>).
-            Die Codes der Vereine bleiben gleich – nur die Datei wird unlesbar.</p>
+            Die Codes der Vereine bleiben gleich – nur die Datei wird unlesbar. Zeilen ohne Ablaufdatum bekommen das Datum aus „Lizenz gültig bis“ (oben).</p>
         <textarea id="convert-in" placeholder="548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg"></textarea>
         <button type="button" onclick="convertList()">Umwandeln</button>
         <div class="result" id="convert-out" hidden></div>
@@ -87,9 +89,11 @@
             let code = normalizeCode(document.getElementById('club-code').value);
             if (!code) code = randomCode();
             if (code.length < 6) { alert('Der Code sollte mindestens 6, besser 8 Zeichen haben.'); return; }
+            if (code === 'DEMO') { alert('„DEMO“ ist für den Demo-Modus reserviert.'); return; }
+            const valid = document.getElementById('club-valid').value;
             const hash = await hashLicenseCode(code);
             document.getElementById('out-code').textContent = formatCode(code);
-            document.getElementById('out-line').textContent = `${hash} = ${name}${logo ? ' = ' + logo : ''}`;
+            document.getElementById('out-line').textContent = `${hash} = ${name} = ${logo}${valid ? ' = ' + valid : ''}`;
             document.getElementById('out').hidden = false;
         }
 
@@ -102,7 +106,11 @@
                 const parts = t.split('=').map(s => s.trim());
                 if (!t || t.startsWith('#') || parts.length < 2 || /^[0-9a-f]{64}$/i.test(parts[0])) { out.push(line); continue; }
                 const hash = await hashLicenseCode(parts[0]);
-                out.push(`# ${parts[1]}\n${hash} = ${parts.slice(1).join(' = ')}`);
+                const rest = parts.slice(1);
+                while (rest.length < 2) rest.push('');
+                // Ohne Ablaufdatum wird das Datum aus dem Feld "Lizenz gültig bis" ergänzt
+                if (!rest[2] && document.getElementById('club-valid').value) rest[2] = document.getElementById('club-valid').value;
+                out.push(`# ${parts[1]}\n${hash} = ${rest.join(' = ')}`);
             }
             const el = document.getElementById('convert-out');
             el.textContent = out.join('\n');
