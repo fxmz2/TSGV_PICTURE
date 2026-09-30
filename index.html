@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vereinsgrafik – Insta-Vorlagen 17.2</title>
+    <title>Vereinsgrafik – Insta-Vorlagen 17.3</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -497,6 +497,10 @@
         /* Verschieben & Skalieren von Texten/Bildern */
         .draggable-text { transform: scale(var(--el-scale, 1)); transform-origin: center top; }
         .draggable-img { transform: scale(var(--el-scale, 1)); transform-origin: top left; }
+        /* Feste Blöcke (Logos, Spielfeld, Listen, Bilder …): per Versatz verschiebbar, Layout bleibt unverändert */
+        .movable { transform: translate(var(--el-x, 0px), var(--el-y, 0px)) scale(var(--el-scale, 1)); transform-origin: center top; cursor: move; touch-action: pan-y; user-select: none; }
+        /* Handy: große Blöcke erst antippen (auswählen), dann ziehen – so bleibt die Vorschau scrollbar */
+        .movable.el-selected { touch-action: none; }
         .el-selected { outline: 2px dashed #ffd60a; outline-offset: 2px; }
         .el-toolbar { position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 9000;
             display: flex; align-items: center; gap: 6px; background: rgba(20,24,30,0.94); color: white; padding: 6px 8px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); font-size: 12px; font-weight: bold; }
@@ -1158,7 +1162,7 @@
                     <div class="preview-label-tag">📷 Feed-Beitrag (1:1)</div>
                     <div id="capture-post-feed" class="post-template">
                         <div id="txt-post-title" class="draggable-text" data-default-top="30px" data-default-left="0px" style="top: 30px; left: 0px;"><h1 class="title-dyn" id="out-post-title">HEIMSPIEL</h1></div>
-                        <div class="team-logos" id="team-logos-post-container"></div>
+                        <div class="team-logos movable" id="team-logos-post-container"></div>
                         <div id="txt-post-info" class="draggable-text" data-default-top="280px" data-default-left="0px" style="top: 280px; left: 0px;">
                             <h3 class="info-dyn" id="out-post-date"></h3>
                             <h3 class="info-dyn" id="out-post-time"></h3>
@@ -1175,7 +1179,7 @@
                     <div id="capture-post-story" class="story-template">
                         <img class="story-wappen-top-right club-logo-img" alt="">
                         <div class="draggable-text" data-default-top="40px" data-default-left="0px" style="top: 40px; left: 0px;"><h1 class="title-dyn" id="out-post-title-story">HEIMSPIEL</h1></div>
-                        <div class="team-logos" id="team-logos-post-story-container" style="top: 250px;"></div>
+                        <div class="team-logos movable" id="team-logos-post-story-container" style="top: 250px;"></div>
                         <div class="draggable-text" data-default-top="530px" data-default-left="0px" style="top: 530px; left: 0px;">
                             <h3 class="info-dyn" id="out-post-date-story"></h3>
                             <h3 class="info-dyn" id="out-post-time-story"></h3>
@@ -1194,7 +1198,7 @@
                     <div class="preview-label-tag">📷 Spielfeld Feed (1:1)</div>
                     <div id="capture-story-feed" class="post-template">
                         <div class="draggable-text" data-default-top="10px" data-default-left="0px" style="top: 10px; left: 0px;"><h2 class="title-dyn" id="out-story-title-feed">S11</h2></div>
-                        <div id="pitch-feed" class="pitch" style="margin-top: 40px; margin-bottom: 15px;"></div>
+                        <div id="pitch-feed" class="pitch movable" style="margin-top: 40px; margin-bottom: 15px;"></div>
                     </div>
                     <div class="btn-action-group">
                         <button class="download-btn" onclick="shareImage('capture-story-feed', 'aufstellung_spielfeld_feed.png', this)">📲 In Fotos / Teilen</button>
@@ -1206,7 +1210,7 @@
                     <div id="capture-story" class="story-template">
                         <img class="story-wappen-top-right club-logo-img" alt="">
                         <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top: 20px; left: 0px;"><h2 class="title-dyn" id="out-story-title">S11</h2></div>
-                        <div id="pitch" class="pitch"></div>
+                        <div id="pitch" class="pitch movable"></div>
                     </div>
                     <div class="btn-action-group">
                         <button class="download-btn" onclick="shareImage('capture-story', 'aufstellung_spielfeld_story.png', this)">📲 In Fotos / Teilen</button>
@@ -1217,16 +1221,16 @@
                     <div class="preview-label-tag">📋 Aufstellung als Liste (9:16)</div>
                     <div id="capture-story-list" class="story-template">
                         <img class="story-wappen-top-right club-logo-img" alt="">
-                        <div class="draggable-text" data-default-top="25px" data-default-left="0px" style="top: 25px; left: 0px;"><h2 class="title-dyn">AUFSTELLUNG</h2></div>
+                        <div class="draggable-text" data-default-top="25px" data-default-left="0px" style="top: 25px; left: 0px;"><h2 class="title-dyn" data-label="story:listTitle">AUFSTELLUNG</h2></div>
 
-                        <div class="list-layout-wrap">
-                            <div class="list-section-title">STARTELF</div>
+                        <div class="list-layout-wrap movable">
+                            <div class="list-section-title" data-label="story:starters">STARTELF</div>
                             <div class="list-grid" id="out-list-starter"></div>
 
-                            <div class="list-section-title" style="margin-top:8px;">ERSATZBANK</div>
+                            <div class="list-section-title" style="margin-top:8px;" data-label="story:bench">ERSATZBANK</div>
                             <div class="bench-list-flex" id="out-list-bench"></div>
 
-                            <div class="list-section-title" style="margin-top:8px;">TRAINER</div>
+                            <div class="list-section-title" style="margin-top:8px;" data-label="story:coaches">TRAINER</div>
                             <div class="list-grid" id="out-list-coaches"></div>
                         </div>
 
@@ -1243,10 +1247,10 @@
                 <div class="preview-wrapper">
                     <div class="preview-label-tag">📷 Tor Feed (1:1)</div>
                     <div id="capture-tor-feed" class="post-template">
-                        <div class="draggable-text" data-default-top="15px" data-default-left="0px" style="top:15px; left:0px;"><h2 class="title-dyn">TOOOOR!</h2></div>
+                        <div class="draggable-text" data-default-top="15px" data-default-left="0px" style="top:15px; left:0px;"><h2 class="title-dyn" data-label="tor:title">TOOOOR!</h2></div>
                         <div class="tor-container-story" style="padding-top:15px;">
-                            <div class="tor-player-name info-dyn" id="out-tor-player-name-feed" style="margin-top: 45px;">TORSCHÜTZE:<br>-</div>
-                            <div class="tor-details">
+                            <div class="tor-player-name info-dyn movable" id="out-tor-player-name-feed" style="margin-top: 45px;">TORSCHÜTZE:<br>-</div>
+                            <div class="tor-details movable">
                                 <div id="out-tor-score-feed">1 : 0</div>|
                                 <div id="out-tor-minute-feed">12. Min</div>
                             </div>
@@ -1254,7 +1258,7 @@
                         <img id="img-tor-player-feed" class="tor-player-img-feed draggable-img" data-default-top="180px" data-default-left="140px" style="top:180px; left:140px;" alt="">
                         <div id="out-tor-assist-wrap-feed" class="draggable-img" data-default-top="270px" data-default-left="15px" style="top:270px; left:15px; display:none; flex-direction:column; align-items:center; width:auto;">
                             <div class="assist-wrapper">
-                                <div style="font-size:9px; margin-bottom:2px; color:white;">Vorlage von:</div>
+                                <div style="font-size:9px; margin-bottom:2px; color:white;" data-label="tor:assist">Vorlage von:</div>
                                 <img id="img-tor-assist-feed" alt="" style="width:55px; height:55px; border-radius:50%; border:2px solid white; object-fit:cover;">
                                 <div id="out-tor-assist-name-feed" style="font-size:9px; font-weight:bold; margin-top:2px; color:white;"></div>
                             </div>
@@ -1271,9 +1275,9 @@
                     <div id="capture-tor" class="story-template">
                         <div class="tor-container-story">
                             <img class="tor-wappen club-logo-img" alt="">
-                            <div class="draggable-text" data-default-top="100px" data-default-left="0px" style="top:100px; left:0px; position:absolute;"><h2 class="title-dyn">TOOOOR!</h2></div>
-                            <div class="tor-player-name info-dyn" id="out-tor-player-name" style="margin-top: 140px;">TORSCHÜTZE:<br>-</div>
-                            <div class="tor-details">
+                            <div class="draggable-text" data-default-top="100px" data-default-left="0px" style="top:100px; left:0px; position:absolute;"><h2 class="title-dyn" data-label="tor:title">TOOOOR!</h2></div>
+                            <div class="tor-player-name info-dyn movable" id="out-tor-player-name" style="margin-top: 140px;">TORSCHÜTZE:<br>-</div>
+                            <div class="tor-details movable">
                                 <div id="out-tor-score">1 : 0</div>|
                                 <div id="out-tor-minute">12. Min</div>
                             </div>
@@ -1281,7 +1285,7 @@
                         <img id="img-tor-player" class="tor-player-img-story draggable-img" data-default-top="380px" data-default-left="115px" style="top:380px; left:115px;" alt="">
                         <div id="out-tor-assist-wrap" class="draggable-img" data-default-top="540px" data-default-left="20px" style="top:540px; left:20px; display:none; flex-direction:column; align-items:center; width:auto;">
                             <div class="assist-wrapper">
-                                <div style="font-size:11px; margin-bottom:2px; color:white;">Vorlage von:</div>
+                                <div style="font-size:11px; margin-bottom:2px; color:white;" data-label="tor:assist">Vorlage von:</div>
                                 <img id="img-tor-assist" alt="" style="width:65px; height:65px; border-radius:50%; border:2px solid white; object-fit:cover;">
                                 <div id="out-tor-assist-name" style="font-size:11px; font-weight:bold; margin-top:2px; color:white;"></div>
                             </div>
@@ -1301,7 +1305,7 @@
                     <div id="capture-ergebnis-feed" class="post-template">
                         <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top:20px; left:0px;"><h1 class="title-dyn" id="out-ergebnis-title-feed">ENDERGEBNIS</h1></div>
                         <div class="draggable-text" id="out-ergebnis-score-feed" data-default-top="80px" data-default-left="0px" style="font-size: 3.2rem; font-weight: bold; top:80px; left:0px;">3 : 1</div>
-                        <div class="team-logos" id="team-logos-ergebnis-container-feed" style="top:170px;"></div>
+                        <div class="team-logos movable" id="team-logos-ergebnis-container-feed" style="top:170px;"></div>
                         <div class="draggable-text" data-default-top="290px" data-default-left="0px" style="top:290px; left:0px;"><p class="info-dyn" id="out-ergebnis-text-feed">Auswärtssieg!</p></div>
                         <div class="draggable-text" id="out-erg-scorers-wrap-feed" data-fixed-id data-default-top="332px" data-default-left="0px" style="top:332px; left:0px;"><div class="scorer-box" id="out-erg-scorers-feed"></div></div>
                         <div class="sponsor-banner" style="display:none;"></div>
@@ -1317,7 +1321,7 @@
                         <img class="story-wappen-top-right club-logo-img" alt="">
                         <div class="draggable-text" data-default-top="40px" data-default-left="0px" style="top:40px; left:0px;"><h1 class="title-dyn" id="out-ergebnis-title">ENDERGEBNIS</h1></div>
                         <div class="draggable-text" id="out-ergebnis-score" data-default-top="120px" data-default-left="0px" style="font-size: 4.5rem; font-weight: bold; top:120px; left:0px;">3 : 1</div>
-                        <div class="team-logos" id="team-logos-ergebnis-container" style="top:260px;"></div>
+                        <div class="team-logos movable" id="team-logos-ergebnis-container" style="top:260px;"></div>
                         <div class="draggable-text" data-default-top="470px" data-default-left="0px" style="top:470px; left:0px;"><p class="info-dyn" id="out-ergebnis-text">Auswärtssieg!</p></div>
                         <div class="draggable-text" id="out-erg-scorers-wrap" data-fixed-id data-default-top="530px" data-default-left="0px" style="top:530px; left:0px;"><div class="scorer-box" id="out-erg-scorers"></div></div>
                         <div class="sponsor-banner" style="display:none;"></div>
@@ -1333,8 +1337,8 @@
                 <div class="preview-wrapper">
                     <div class="preview-label-tag">📷 Kader Feed (1:1)</div>
                     <div id="capture-kader-feed" class="post-template">
-                        <div class="draggable-text" data-default-top="10px" data-default-left="0px" style="top:10px; left:0px;"><h2 class="title-dyn">KADER</h2></div>
-                        <div class="kader-grid-pitch" id="kader-grid-pitch-feed" style="margin-top:40px;"></div>
+                        <div class="draggable-text" data-default-top="10px" data-default-left="0px" style="top:10px; left:0px;"><h2 class="title-dyn" data-label="kader:title">KADER</h2></div>
+                        <div class="kader-grid-pitch movable" id="kader-grid-pitch-feed" style="margin-top:40px;"></div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
                     <div class="btn-action-group">
@@ -1346,15 +1350,15 @@
                     <div class="preview-label-tag">📋 Kader Story (9:16)</div>
                     <div id="capture-kader" class="story-template">
                         <div class="kader-layout">
-                            <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top:20px; left:0px; width:100%;"><h2 class="title-dyn">KADER</h2></div>
-                            <div class="kader-info-grid">
-                                <div class="kader-info-block"><b>Datum:</b> <span id="out-kader-date-kader">-</span></div>
-                                <div class="kader-info-block"><b>Treffpunkt:</b> <span id="out-kader-meeting">13:45 Uhr</span></div>
-                                <div class="kader-info-block"><b>Trikots:</b> <span id="out-kader-jersey">Blau / Schwarz</span></div>
-                                <div class="kader-info-block"><b>Dienst:</b> <span id="out-kader-duty">-</span></div>
+                            <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top:20px; left:0px; width:100%;"><h2 class="title-dyn" data-label="kader:title">KADER</h2></div>
+                            <div class="kader-info-grid movable">
+                                <div class="kader-info-block"><b data-label="kader:date">Datum:</b> <span id="out-kader-date-kader">-</span></div>
+                                <div class="kader-info-block"><b data-label="kader:meeting">Treffpunkt:</b> <span id="out-kader-meeting">13:45 Uhr</span></div>
+                                <div class="kader-info-block"><b data-label="kader:jersey">Trikots:</b> <span id="out-kader-jersey">Blau / Schwarz</span></div>
+                                <div class="kader-info-block"><b data-label="kader:duty">Dienst:</b> <span id="out-kader-duty">-</span></div>
                             </div>
-                            <div id="out-kader-freetext" class="kader-freetext"></div>
-                            <div class="kader-grid-pitch" id="kader-grid-pitch"></div>
+                            <div id="out-kader-freetext" class="kader-freetext movable"></div>
+                            <div class="kader-grid-pitch movable" id="kader-grid-pitch"></div>
                         </div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
@@ -1390,19 +1394,19 @@
                                 <g id="svg-tactics-group"></g>
                             </svg>
 
-                            <div class="eckball-info-banner">
-                                <b>Eckball Taktik</b><br>
-                                <span style="font-size:10px; font-weight:normal; color:#444;">• Freier Taktikablauf</span>
+                            <div class="eckball-info-banner movable">
+                                <b data-label="eckball:banner">Eckball Taktik</b><br>
+                                <span style="font-size:10px; font-weight:normal; color:#444;" data-label="eckball:bannerSub">• Freier Taktikablauf</span>
                             </div>
 
-                            <div class="eckball-legend-container">
-                                <div style="font-size: 26px; font-weight: 900; border-bottom: 2px solid #111; padding-bottom: 4px; width: 100%; color:#111;">ECKBÄLLE</div>
-                                <div style="margin-top:4px;"><b>SCHÜTZE:</b> <span id="out-legend-schuetze">-</span></div>
-                                <div><b>DOPPELPASS:</b> <span id="out-legend-doppelpass">-</span></div>
-                                <div><b>ZIELSPIELER:</b> <span id="out-legend-zielspieler">-</span></div>
-                                <div><b>BODYGUARD:</b> <span id="out-legend-bodyguard">-</span></div>
-                                <div style="margin-top:4px;"><b>EINLÄUFER:</b> <br><span id="out-legend-einlaeufer">-</span></div>
-                                <div style="margin-top:4px;"><b>ABSICHERUNG:</b> <br><span id="out-legend-absicherung">-</span></div>
+                            <div class="eckball-legend-container movable">
+                                <div style="font-size: 26px; font-weight: 900; border-bottom: 2px solid #111; padding-bottom: 4px; width: 100%; color:#111;" data-label="eckball:legend">ECKBÄLLE</div>
+                                <div style="margin-top:4px;"><b data-label="eckball:taker">SCHÜTZE:</b> <span id="out-legend-schuetze">-</span></div>
+                                <div><b data-label="eckball:onetwo">DOPPELPASS:</b> <span id="out-legend-doppelpass">-</span></div>
+                                <div><b data-label="eckball:target">ZIELSPIELER:</b> <span id="out-legend-zielspieler">-</span></div>
+                                <div><b data-label="eckball:guard">BODYGUARD:</b> <span id="out-legend-bodyguard">-</span></div>
+                                <div style="margin-top:4px;"><b data-label="eckball:runners">EINLÄUFER:</b> <br><span id="out-legend-einlaeufer">-</span></div>
+                                <div style="margin-top:4px;"><b data-label="eckball:cover">ABSICHERUNG:</b> <br><span id="out-legend-absicherung">-</span></div>
                             </div>
 
                             <div id="eckball-players-container"></div>
@@ -1420,9 +1424,9 @@
                 <div class="preview-wrapper">
                     <div class="preview-label-tag">📷 POTM Feed (1:1)</div>
                     <div id="capture-potm-feed" class="post-template">
-                        <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top:20px; left:0px;"><div class="potm-badge" style="font-size:1.3rem;">PLAYER OF THE MATCH</div></div>
-                        <img id="out-potm-img-feed" class="potm-player-img" alt="" style="width:160px; height:180px; margin-top:60px;">
-                        <div id="out-potm-name-feed" class="potm-player-name" style="font-size:1.2rem; margin-top:5px;">-</div>
+                        <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top:20px; left:0px;"><div class="potm-badge" style="font-size:1.3rem;" data-label="potm:title">PLAYER OF THE MATCH</div></div>
+                        <img id="out-potm-img-feed" class="potm-player-img movable" alt="" style="width:160px; height:180px; margin-top:60px;">
+                        <div id="out-potm-name-feed" class="potm-player-name movable" style="font-size:1.2rem; margin-top:5px;">-</div>
                         <div class="draggable-text" data-default-top="340px" data-default-left="0px" style="top:340px; left:0px;"><p class="info-dyn" id="out-potm-text-feed">3 Tore</p></div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
@@ -1434,9 +1438,9 @@
                 <div class="preview-wrapper">
                     <div class="preview-label-tag">⭐ POTM Story (9:16)</div>
                     <div id="capture-potm" class="story-template">
-                        <div class="draggable-text" data-default-top="30px" data-default-left="0px" style="top:30px; left:0px;"><div class="potm-badge">PLAYER OF THE MATCH</div></div>
-                        <img id="out-potm-img" class="potm-player-img" alt="" style="margin-top:70px;">
-                        <div id="out-potm-name" class="potm-player-name">-</div>
+                        <div class="draggable-text" data-default-top="30px" data-default-left="0px" style="top:30px; left:0px;"><div class="potm-badge" data-label="potm:title">PLAYER OF THE MATCH</div></div>
+                        <img id="out-potm-img" class="potm-player-img movable" alt="" style="margin-top:70px;">
+                        <div id="out-potm-name" class="potm-player-name movable">-</div>
                         <div class="draggable-text" data-default-top="620px" data-default-left="0px" style="top:620px; left:0px;"><p class="info-dyn" id="out-potm-text">3 Tore</p></div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
@@ -1455,7 +1459,7 @@
                             <h2 class="title-dyn" id="out-kal-title-feed">NÄCHSTE SPIELE</h2>
                             <div class="kal-sub" id="out-kal-sub-feed"></div>
                         </div>
-                        <div class="kal-wrap" id="out-kal-list-feed"></div>
+                        <div class="kal-wrap movable" id="out-kal-list-feed"></div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
                     <div class="btn-action-group">
@@ -1471,7 +1475,7 @@
                             <h2 class="title-dyn" id="out-kal-title">NÄCHSTE SPIELE</h2>
                             <div class="kal-sub" id="out-kal-sub"></div>
                         </div>
-                        <div class="kal-wrap kal-story" id="out-kal-list"></div>
+                        <div class="kal-wrap kal-story movable" id="out-kal-list"></div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
                     <div class="btn-action-group">
@@ -1603,7 +1607,7 @@
                             <h2 class="title-dyn" id="out-wk-title-feed">ERGEBNISSE</h2>
                             <div class="kal-sub" id="out-wk-sub-feed"></div>
                         </div>
-                        <div class="wk-wrap" id="out-wk-list-feed"></div>
+                        <div class="wk-wrap movable" id="out-wk-list-feed"></div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
                     <div class="btn-action-group">
@@ -1619,7 +1623,7 @@
                             <h2 class="title-dyn" id="out-wk-title">ERGEBNISSE</h2>
                             <div class="kal-sub" id="out-wk-sub"></div>
                         </div>
-                        <div class="wk-wrap wk-story" id="out-wk-list"></div>
+                        <div class="wk-wrap wk-story movable" id="out-wk-list"></div>
                         <div class="sponsor-banner" style="display:none;"></div>
                     </div>
                     <div class="btn-action-group">
@@ -1642,7 +1646,7 @@
         <button type="button" onclick="nudgeSelectedScale(-0.1)" title="Kleiner">−</button>
         <span class="el-scale-label" id="el-scale-label">100 %</span>
         <button type="button" onclick="nudgeSelectedScale(0.1)" title="Größer">+</button>
-        <button type="button" onclick="setSelectedScale(1)" title="Originalgröße">↺</button>
+        <button type="button" onclick="resetSelectedElement()" title="Größe & Position zurücksetzen">↺</button>
         <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
         <button type="button" onclick="selectElement(null)" title="Fertig">✓</button>
     </div>
@@ -1674,7 +1678,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "17.2";
+        const APP_VERSION = "17.3";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -1751,6 +1755,22 @@
             wochenende: { frameLabel: 'Rahmenform Gegner-Logos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' }
         };
 
+        /* Feste Beschriftungen in den Vorlagen – je Reiter überschreibbar (leer = Standard, „-“ = ausblenden) */
+        const LABEL_DEFS = {
+            post:       { vs: 'VS' },
+            story:      { listTitle: 'AUFSTELLUNG', starters: 'STARTELF', bench: 'ERSATZBANK', coaches: 'TRAINER',
+                          noStarters: 'Keine Spieler gewählt', noBench: 'Keine Ersatzspieler', noCoaches: 'Keine Trainer angegeben' },
+            tor:        { title: 'TOOOOR!', scorer: 'TORSCHÜTZE:', assist: 'Vorlage von:' },
+            ergebnis:   { vs: 'VS', scorers: 'TORSCHÜTZEN', ownGoal: 'Eigentor' },
+            kader:      { title: 'KADER', date: 'Datum:', meeting: 'Treffpunkt:', jersey: 'Trikots:', duty: 'Dienst:' },
+            eckball:    { banner: 'Eckball Taktik', bannerSub: '• Freier Taktikablauf', legend: 'ECKBÄLLE', taker: 'SCHÜTZE:', onetwo: 'DOPPELPASS:',
+                          target: 'ZIELSPIELER:', guard: 'BODYGUARD:', runners: 'EINLÄUFER:', cover: 'ABSICHERUNG:' },
+            potm:       { title: 'PLAYER OF THE MATCH' },
+            kalender:   { home: 'HEIM', away: 'AUSWÄRTS', vs: 'vs', time: 'UHR', empty: 'Keine kommenden Termine eingetragen' },
+            neuzugang:  { from: 'Kommt von' },
+            wochenende: { home: 'HEIM', away: 'AUSWÄRTS', vs: 'vs', empty: 'Noch keine Ergebnisse eingetragen' }
+        };
+
         const formations = {
             "4-4-2": [1, 4, 4, 2],
             "4-2-3-1": [1, 4, 2, 3, 1],
@@ -1799,6 +1819,7 @@
         let stammdaten = emptyStammdaten();
         let club = null;
         let selectedSponsors = {};
+        let labels = {};               // je Reiter: { key: eigener Text } → siehe LABEL_DEFS
         let customTexts = {};          // je Reiter: [{ id, text, target, size, color, bold, box, font }]
         let prefs = { versionNames: {}, safeZones: true, lastBackupAt: null, backupSnoozeUntil: null };
         let selectedEl = null;
@@ -2652,6 +2673,61 @@
         /* =========================================================
            DESIGN-BEREICH JE REITER
            ========================================================= */
+        /* ---------- Feste Texte (Beschriftungen) ---------- */
+        function L(tab, key) {
+            const v = labels[tab]?.[key];
+            if (v === undefined || v === null || v === '') return LABEL_DEFS[tab]?.[key] ?? '';
+            return v.trim() === '-' ? '' : v;
+        }
+        function applyLabels() {
+            document.querySelectorAll('[data-label]').forEach(el => {
+                const [tab, key] = el.dataset.label.split(':');
+                const v = L(tab, key);
+                if (el.textContent !== v) el.textContent = v;
+                el.style.display = v ? '' : 'none';
+            });
+        }
+        const LABEL_NAMES = {
+            vs: '„VS“ zwischen den Logos', listTitle: 'Überschrift Liste', starters: 'Startelf', bench: 'Ersatzbank', coaches: 'Trainer',
+            noStarters: 'Hinweis ohne Startelf', noBench: 'Hinweis ohne Ersatzbank', noCoaches: 'Hinweis ohne Trainer',
+            title: 'Überschrift', scorer: 'Torschütze', assist: 'Vorlage', scorers: 'Überschrift Torschützen', ownGoal: 'Eigentor',
+            date: 'Datum', meeting: 'Treffpunkt', jersey: 'Trikots', duty: 'Dienst',
+            banner: 'Banner', bannerSub: 'Banner-Untertitel', legend: 'Legende', taker: 'Schütze', onetwo: 'Doppelpass', target: 'Zielspieler',
+            guard: 'Bodyguard', runners: 'Einläufer', cover: 'Absicherung',
+            home: 'Heim', away: 'Auswärts', time: 'Uhrzeit-Zusatz', empty: 'Hinweis ohne Einträge', from: 'Wechsel „Kommt von“'
+        };
+        function labelEditorHTML(tab) {
+            const defs = LABEL_DEFS[tab];
+            if (!defs) return '';
+            return `
+                <details class="design-details" id="lbl-details-${tab}">
+                    <summary>🔤 Feste Texte ändern</summary>
+                    <div class="details-body lbl-grid">
+                        ${Object.entries(defs).map(([key, def]) => `
+                        <div class="control-group"><label>${LABEL_NAMES[key] || key}</label>
+                            <input type="text" id="lbl-${tab}-${key}" data-lbl="${tab}:${key}" placeholder="${esc(def)}" maxlength="60"></div>`).join('')}
+                        <span class="hint">Leer lassen = Standardtext. Nur „-“ eingeben blendet den Text aus. Alle Texte, Bilder und Blöcke kannst du in der Vorschau antippen, verschieben und größer/kleiner ziehen.</span>
+                    </div>
+                </details>`;
+        }
+        function onLabelInput(e) {
+            const inp = e.target.closest('[data-lbl]');
+            if (!inp) return;
+            const [tab, key] = inp.dataset.lbl.split(':');
+            labels[tab] = { ...(labels[tab] || {}) };
+            if (inp.value === '') delete labels[tab][key]; else labels[tab][key] = inp.value;
+            applyLabels();
+            updateAllViews();
+            scheduleSave();
+        }
+        function syncLabelInputs() {
+            document.querySelectorAll('[data-lbl]').forEach(inp => {
+                const [tab, key] = inp.dataset.lbl.split(':');
+                const v = labels[tab]?.[key] ?? '';
+                if (inp.value !== v) inp.value = v;
+            });
+        }
+
         function buildDesignControls() {
             const fontOptions = `
                 <option value="Arial, sans-serif">Standard (Arial)</option>
@@ -2729,15 +2805,17 @@
                         <div class="details-body">
                             <div id="ct-list-${tab}" data-tab="${tab}"></div>
                             <button type="button" class="copy-action-btn" onclick="addCustomText('${tab}')">➕ Text hinzufügen</button>
-                            <span class="hint">Tipp: In der Vorschau jeden Text antippen, verschieben und mit zwei Fingern (oder über die Leiste oben) größer/kleiner ziehen.</span>
+                            <span class="hint">Tipp: In der Vorschau jeden Text antippen, verschieben und mit zwei Fingern (oder über die Leiste oben) größer/kleiner ziehen. Größere Blöcke (Bilder, Logos, Listen, Spielfeld) erst antippen, dann verschieben.</span>
                         </div>
-                    </details>`;
+                    </details>
+                    ${labelEditorHTML(tab)}`;
                 $(`ct-list-${tab}`).addEventListener('input', onCustomTextInput);
                 $(`ct-list-${tab}`).addEventListener('change', onCustomTextInput);
 
                 $(`editor-${tab}`)?.insertAdjacentHTML('beforeend', captionHTML(tab) + tabCopyHTML(tab));
             });
-            $('tabcopy-host-eckball').innerHTML = tabCopyHTML('eckball', false);
+            $('tabcopy-host-eckball').innerHTML = labelEditorHTML('eckball') + tabCopyHTML('eckball', false);
+            document.querySelectorAll('[data-lbl]').forEach(inp => inp.addEventListener('input', onLabelInput));
         }
 
         /* =========================================================
@@ -2817,7 +2895,7 @@
                     break;
                 }
                 case 'ergebnis': {
-                    const scorers = getScorerGroups().map(g => (g.name === OWN_GOAL ? 'Eigentor' : g.name) + (g.minutes.length ? ` (${g.minutes.map(m => m + "'").join(', ')})` : '')).join(', ');
+                    const scorers = getScorerGroups().map(g => (g.name === OWN_GOAL ? L('ergebnis', 'ownGoal') : g.name) + (g.minutes.length ? ` (${g.minutes.map(m => m + "'").join(', ')})` : '')).join(', ');
                     lines.push(`🏁 ${niceCase(val('in-ergebnis-title')) || 'Endergebnis'}: ${match} ${normName(val('in-ergebnis-score'))}`);
                     if (normName(val('in-ergebnis-text'))) lines.push(normName(val('in-ergebnis-text')));
                     if (scorers && $('in-erg-show-scorers')?.checked) lines.push('', `⚽ Tore: ${scorers}`);
@@ -2982,12 +3060,14 @@
                 for (const k in (src.inputs || {})) if ((spec.inputs || []).some(re => re.test(k))) data.inputs[k] = src.inputs[k];
             };
             if (what !== 'design' && TAB_CONTENT[tab]) takeKeys(TAB_CONTENT[tab]);
+            if (what !== 'content' && LABEL_DEFS[tab]) data.labels = { ...data.labels, [tab]: copy(src.labels?.[tab] || {}) };
             if (what !== 'content' && tab !== 'eckball') {
                 if (src.tabSettings?.[tab]) data.tabSettings[tab] = copy(src.tabSettings[tab]);
                 data.customTexts = { ...data.customTexts, [tab]: copy(src.customTexts?.[tab] || []) };
                 data.selectedSponsors = { ...data.selectedSponsors, [tab]: copy(src.selectedSponsors?.[tab] || []) };
                 const view = $(`view-${tab}`);
                 const tplIds = Array.from(view?.querySelectorAll('.post-template, .story-template') || []).map(t => t.id);
+                view?.querySelectorAll('.movable').forEach(el => { delete data.positions[el.id]; });
                 for (const k in (src.positions || {})) {
                     const inView = view?.contains($(k)) || (k.startsWith('ct-') && tplIds.some(id => k.endsWith('-' + id)));
                     if (inView) data.positions[k] = copy(src.positions[k]);
@@ -3341,8 +3421,16 @@
             else el.style.setProperty('--el-scale', s);
             if (el === selectedEl) updateToolbar();
         }
+        function getElOffset(el) { return { x: parseFloat(el.dataset.x || '0') || 0, y: parseFloat(el.dataset.y || '0') || 0 }; }
+        function setElOffset(el, x, y) {
+            x = Math.round(x * 10) / 10; y = Math.round(y * 10) / 10;
+            el.dataset.x = x; el.dataset.y = y;
+            if (x) el.style.setProperty('--el-x', x + 'px'); else el.style.removeProperty('--el-x');
+            if (y) el.style.setProperty('--el-y', y + 'px'); else el.style.removeProperty('--el-y');
+        }
         function applyPosition(el, pos) {
             if (!pos) return;
+            if (el.classList.contains('movable')) { setElOffset(el, pos.x || 0, pos.y || 0); setElScale(el, pos.scale || 1); return; }
             if (pos.top) el.style.top = pos.top;
             if (pos.left) el.style.left = pos.left;
             setElScale(el, pos.scale || 1);
@@ -3364,6 +3452,18 @@
         }
         function nudgeSelectedScale(d) { if (selectedEl) { setElScale(selectedEl, getElScale(selectedEl) + d); scheduleSave(); } }
         function setSelectedScale(s) { if (selectedEl) { setElScale(selectedEl, s); scheduleSave(); } }
+        function resetSelectedElement() {
+            const el = selectedEl;
+            if (!el) return;
+            if (el.classList.contains('movable')) setElOffset(el, 0, 0);
+            else {
+                const defTop = el.getAttribute('data-default-top'), defLeft = el.getAttribute('data-default-left');
+                if (defTop !== null) el.style.top = defTop;
+                if (defLeft !== null) el.style.left = defLeft;
+            }
+            setElScale(el, 1);
+            scheduleSave();
+        }
         function deleteSelectedCustomText() {
             if (!selectedEl || !selectedEl.classList.contains('custom-text')) return;
             const { ctTab, ctId } = selectedEl.dataset;
@@ -3373,6 +3473,7 @@
         function bindDraggable(el) {
             if (el._dragBound) return;
             el._dragBound = true;
+            const movable = el.classList.contains('movable');
             const pts = new Map();
             let start = null;
 
@@ -3381,11 +3482,14 @@
                 const cx = arr.reduce((s, p) => s + p.x, 0) / arr.length;
                 const cy = arr.reduce((s, p) => s + p.y, 0) / arr.length;
                 const dist = arr.length > 1 ? Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y) : 0;
-                return { left: el.offsetLeft, top: el.offsetTop, cx, cy, dist, s: getElScale(el), pscale: getElementScale(el.parentElement || el) };
+                const off = getElOffset(el);
+                return { left: el.offsetLeft, top: el.offsetTop, x: off.x, y: off.y, cx, cy, dist, s: getElScale(el), pscale: getElementScale(el.parentElement || el) };
             };
 
             el.addEventListener('pointerdown', e => {
                 e.stopPropagation();
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                if (movable && e.pointerType === 'touch' && selectedEl !== el) { selectElement(el); return; }
                 selectElement(el);
                 try { el.setPointerCapture(e.pointerId); } catch (err) {}
                 pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -3395,8 +3499,12 @@
                 if (!pts.has(e.pointerId) || !start) return;
                 pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
                 const cur = snapshot();
-                el.style.left = (start.left + (cur.cx - start.cx) / start.pscale) + 'px';
-                el.style.top = (start.top + (cur.cy - start.cy) / start.pscale) + 'px';
+                const dx = (cur.cx - start.cx) / start.pscale, dy = (cur.cy - start.cy) / start.pscale;
+                if (movable) setElOffset(el, start.x + dx, start.y + dy);
+                else {
+                    el.style.left = (start.left + dx) + 'px';
+                    el.style.top = (start.top + dy) + 'px';
+                }
                 if (pts.size > 1 && start.dist > 0) setElScale(el, start.s * (cur.dist / start.dist));
             });
             const end = e => {
@@ -3417,8 +3525,9 @@
             }, { passive: false });
         }
 
+        const DRAG_SEL = '.draggable-text, .draggable-img, .movable';
         function makeTextsDraggable() {
-            document.querySelectorAll('.draggable-text, .draggable-img').forEach(bindDraggable);
+            document.querySelectorAll(DRAG_SEL).forEach(bindDraggable);
         }
 
         /* Jede Vorlage bekommt ein (abschaltbares) Vereinslogo oben rechts; Beiträge bekommen einen
@@ -3426,10 +3535,11 @@
         function prepareTemplates() {
             editorTabs.forEach(tab => {
                 $(`view-${tab}`)?.querySelectorAll('.post-template, .story-template').forEach(tpl => {
-                    tpl.querySelectorAll('.story-wappen-top-right, .tor-wappen').forEach(l => l.classList.add('corner-logo'));
+                    tpl.querySelectorAll('.story-wappen-top-right, .tor-wappen').forEach(l => l.classList.add('corner-logo', 'movable'));
                     if (!tpl.querySelector('.corner-logo')) {
-                        tpl.insertAdjacentHTML('afterbegin', '<img class="story-wappen-top-right club-logo-img corner-logo" alt="">');
+                        tpl.insertAdjacentHTML('afterbegin', '<img class="story-wappen-top-right club-logo-img corner-logo movable" alt="">');
                     }
+                    tpl.querySelectorAll('.sponsor-banner').forEach(b => b.classList.add('movable'));
                     if (tpl.classList.contains('post-template') && !tpl.querySelector(':scope > .tpl-content')) {
                         const content = document.createElement('div');
                         content.className = 'tpl-content';
@@ -3449,6 +3559,7 @@
                 Array.from(view.querySelectorAll('.draggable-text, .draggable-img'))
                     .filter(el => !el.hasAttribute('data-fixed-id') && !el.classList.contains('custom-text'))
                     .forEach((el, i) => { if (!el.id) el.id = `drag-${view.id}-${i}`; });
+                view.querySelectorAll('.movable').forEach((el, i) => { if (!el.id) el.id = `mv-${view.id}-${i}`; });
             });
         }
 
@@ -3460,6 +3571,7 @@
                 el.style.left = defLeft !== null ? defLeft : '0px';
                 setElScale(el, 1);
             });
+            $(`view-${tab}`)?.querySelectorAll('.movable').forEach(el => { setElOffset(el, 0, 0); setElScale(el, 1); });
 
             setVal(`in-bg-${tab}-feed`, DEFAULT_BG);
             setVal(`in-bg-${tab}-story`, DEFAULT_BG);
@@ -3547,21 +3659,21 @@
                 });
             });
 
-            if ($('out-list-starter')) $('out-list-starter').innerHTML = starterListHTML || 'Keine Spieler gewählt';
+            if ($('out-list-starter')) $('out-list-starter').innerHTML = starterListHTML || esc(L('story', 'noStarters'));
 
             let benchListHTML = '';
             for (let i = 1; i <= 7; i++) {
                 let name = val(`bench-player-${i}`) || "Keiner";
                 if (name !== "Keiner") benchListHTML += `<span class="bench-tag">${esc(name)}</span>`;
             }
-            if ($('out-list-bench')) $('out-list-bench').innerHTML = benchListHTML || 'Keine Ersatzspieler';
+            if ($('out-list-bench')) $('out-list-bench').innerHTML = benchListHTML || esc(L('story', 'noBench'));
 
             let coachHTML = '';
             ['in-coach-1', 'in-coach-2'].forEach(id => {
                 const c = val(id) || "Keiner";
                 if (c !== "Keiner") coachHTML += `<div class="list-item"><img class="list-item-img" src="${getPlayerImageSrc(c, 'story')}" alt="">${esc(c)}</div>`;
             });
-            if ($('out-list-coaches')) $('out-list-coaches').innerHTML = coachHTML || 'Keine Trainer angegeben';
+            if ($('out-list-coaches')) $('out-list-coaches').innerHTML = coachHTML || esc(L('story', 'noCoaches'));
         }
 
         function updateTor() {
@@ -3576,8 +3688,10 @@
             setText('out-tor-minute-feed', minute);
 
             const shownName = name !== "Keiner" ? esc(name) : '-';
-            if ($('out-tor-player-name')) $('out-tor-player-name').innerHTML = "TORSCHÜTZE:<br>" + shownName;
-            if ($('out-tor-player-name-feed')) $('out-tor-player-name-feed').innerHTML = "TORSCHÜTZE:<br>" + shownName;
+            const scorerLbl = L('tor', 'scorer');
+            const scorerHtml = (scorerLbl ? esc(scorerLbl) + '<br>' : '') + shownName;
+            if ($('out-tor-player-name')) $('out-tor-player-name').innerHTML = scorerHtml;
+            if ($('out-tor-player-name-feed')) $('out-tor-player-name-feed').innerHTML = scorerHtml;
 
             const torSrc = getPlayerTorImageSrc(name, 'tor');
             ['img-tor-player', 'img-tor-player-feed'].forEach(id => { const img = $(id); if (img) img.src = torSrc; });
@@ -3630,11 +3744,13 @@
             }
             groups.forEach(g => g.minutes.sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0)));
             const show = $('in-erg-show-scorers')?.checked && groups.length > 0;
-            const label = g => g.name === OWN_GOAL ? 'Eigentor' : g.name;
+            const label = g => g.name === OWN_GOAL ? L('ergebnis', 'ownGoal') : g.name;
+            const headLbl = L('ergebnis', 'scorers');
+            const head = headLbl ? `<div class="scorer-head">${esc(headLbl)}</div>` : '';
             const mins = g => g.minutes.length ? ' ' + g.minutes.map(m => esc(m) + "'").join(', ') : '';
 
-            const feedHtml = `<div class="scorer-head">TORSCHÜTZEN</div><div class="scorer-line">${groups.map(g => esc(g.name === OWN_GOAL ? 'Eigentor' : shortName(g.name)) + mins(g)).join(' · ')}</div>`;
-            const storyHtml = `<div class="scorer-head">TORSCHÜTZEN</div>${groups.map(g => `<div class="scorer-line">${esc(label(g))}${mins(g)}</div>`).join('')}`;
+            const feedHtml = `${head}<div class="scorer-line">${groups.map(g => esc(g.name === OWN_GOAL ? label(g) : shortName(g.name)) + mins(g)).join(' · ')}</div>`;
+            const storyHtml = `${head}${groups.map(g => `<div class="scorer-line">${esc(label(g))}${mins(g)}</div>`).join('')}`;
             [['out-erg-scorers-wrap-feed', 'out-erg-scorers-feed', feedHtml], ['out-erg-scorers-wrap', 'out-erg-scorers', storyHtml]].forEach(([wrapId, boxId, html]) => {
                 const wrap = $(wrapId), box = $(boxId);
                 if (!wrap || !box) return;
@@ -3728,10 +3844,10 @@
                     <div class="wk-team">${esc(r.team || getTeamName())}</div>
                     <div class="wk-match">
                         <img src="${getOpponentLogoSrc(r.opp || 'Gegner')}" alt="">
-                        <div>vs ${esc(r.opp || 'Gegner')}<span class="wk-venue">${r.venue === 'auswaerts' ? 'AUSWÄRTS' : 'HEIM'}</span></div>
+                        <div>${esc(L('wochenende', 'vs'))} ${esc(r.opp || 'Gegner')}${(v => v ? `<span class="wk-venue">${esc(v)}</span>` : '')(L('wochenende', r.venue === 'auswaerts' ? 'away' : 'home'))}</div>
                     </div>
                     <div class="wk-score ${weekendResult(r.score)}">${esc(r.score || '–')}</div>
-                </div>`).join('') : '<div class="kal-empty">Noch keine Ergebnisse eingetragen</div>';
+                </div>`).join('') : `<div class="kal-empty">${esc(L('wochenende', 'empty'))}</div>`;
             const feed = $('out-wk-list-feed');
             if (feed) { feed.innerHTML = html; feed.classList.toggle('wk-compact', rows.length > 4); }
             const story = $('out-wk-list');
@@ -3765,7 +3881,7 @@
             }
             if (fromName) {
                 const logo = (!normName(val('in-new-from-text')) && fromOpp) ? getOpponentLogoSrc(fromOpp) : makeBadgeSvg(fromName);
-                chips += `<span class="transfer-chip">Kommt von <img src="${logo}" alt=""> ${esc(fromName)}</span>`;
+                chips += `<span class="transfer-chip">${esc(L('neuzugang', 'from'))} <img src="${logo}" alt=""> ${esc(fromName)}</span>`;
             }
             ['', '-feed'].forEach(sfx => {
                 setText(`out-new-title${sfx}`, val('in-new-title'));
@@ -3834,18 +3950,18 @@
             const oppName = esc(opp || 'Gegner');
             const ownTeamName = esc(getTeamName());
 
-            const vsSpan = '<span>VS</span>';
             const ourLogo = `<img src="${getClubLogoSrc()}" class="logo" alt="">`;
             const oppLogo = `<img src="${getOpponentLogoSrc(opp || 'Gegner')}" class="logo" alt="">`;
 
-            function buildLogosHtml(showNames) {
+            function buildLogosHtml(showNames, tab) {
+                const vsSpan = L(tab, 'vs') ? `<span>${esc(L(tab, 'vs'))}</span>` : '';
                 const ourItem = showNames ? `<div class="logo-wrapper">${ourLogo}<div class="logo-sub-name">${ownTeamName}</div></div>` : ourLogo;
                 const oppItem = showNames ? `<div class="logo-wrapper">${oppLogo}<div class="logo-sub-name">${oppName}</div></div>` : oppLogo;
                 return isHome ? `${ourItem} ${vsSpan} ${oppItem}` : `${oppItem} ${vsSpan} ${ourItem}`;
             }
 
-            const postHtml = buildLogosHtml($('in-show-teamnames-post')?.checked);
-            const ergHtml = buildLogosHtml($('in-show-teamnames-ergebnis')?.checked);
+            const postHtml = buildLogosHtml($('in-show-teamnames-post')?.checked, 'post');
+            const ergHtml = buildLogosHtml($('in-show-teamnames-ergebnis')?.checked, 'ergebnis');
             if ($('team-logos-post-container')) $('team-logos-post-container').innerHTML = postHtml;
             if ($('team-logos-post-story-container')) $('team-logos-post-story-container').innerHTML = postHtml;
             if ($('team-logos-ergebnis-container')) $('team-logos-ergebnis-container').innerHTML = ergHtml;
@@ -3899,19 +4015,21 @@
         }
 
         function renderKalenderRows(list) {
-            if (!list.length) return '<div class="kal-empty">Keine kommenden Termine eingetragen</div>';
+            if (!list.length) return `<div class="kal-empty">${esc(L('kalender', 'empty'))}</div>`;
             const own = esc(getTeamName());
             return list.map(e => {
                 const d = parseISODate(e.date);
                 const home = e.venue !== 'auswaerts';
                 const opp = esc(e.opp || 'Gegner');
-                const teams = home ? `${own}<span class="kal-vs">vs</span>${opp}` : `${opp}<span class="kal-vs">vs</span>${own}`;
+                const vs = `<span class="kal-vs">${esc(L('kalender', 'vs'))}</span>`;
+                const teams = home ? `${own}${vs}${opp}` : `${opp}${vs}${own}`;
+                const venue = L('kalender', home ? 'home' : 'away');
                 return `
                     <div class="kal-row ${home ? 'heim' : 'auswaerts'}">
                         <div class="kal-date"><span class="kal-wd">${WEEKDAYS[d.getDay()]}</span><span class="kal-day">${pad(d.getDate())}</span><span class="kal-mon">${MONTHS_SHORT[d.getMonth()]}</span></div>
                         <div class="kal-match">
                             <div class="kal-teams">${teams}</div>
-                            <div class="kal-meta"><span class="kal-badge ${home ? 'heim' : 'auswaerts'}">${home ? 'HEIM' : 'AUSWÄRTS'}</span>${e.time ? `<span>${esc(e.time)} UHR</span>` : ''}</div>
+                            <div class="kal-meta">${venue ? `<span class="kal-badge ${home ? 'heim' : 'auswaerts'}">${esc(venue)}</span>` : ''}${e.time ? `<span>${esc((e.time + ' ' + L('kalender', 'time')).trim())}</span>` : ''}</div>
                         </div>
                         <img class="kal-logo" src="${getOpponentLogoSrc(e.opp || 'Gegner')}" alt="">
                     </div>`;
@@ -4225,6 +4343,7 @@
            ========================================================= */
         function renderAll() {
             applyFeedFormatClasses();
+            applyLabels();
             updateDesignSettings();
             editorTabs.forEach(t => { updateTabDesign(t); renderSelectedSponsors(t); });
             updatePostFields();
@@ -4246,6 +4365,7 @@
         }
 
         function updateAllViews() {
+            applyLabels();
             updateDesignSettings();
             if (editorTabs.includes(activeTab)) {
                 updateTabDesign(activeTab);
@@ -4398,6 +4518,7 @@
                 hashtags: val('cfg-hashtags'),
                 bdayConfetti: $('in-bday-confetti')?.checked ?? true,
                 customTexts: customTexts,
+                labels: labels,
 
                 inputs: {},
                 positions: {},
@@ -4421,6 +4542,11 @@
 
             document.querySelectorAll('.draggable-text, .draggable-img').forEach(el => {
                 if (el.id) data.positions[el.id] = { top: el.style.top, left: el.style.left, scale: getElScale(el) };
+            });
+            document.querySelectorAll('.movable').forEach(el => {
+                if (!el.id) return;
+                const { x, y } = getElOffset(el), sc = getElScale(el);
+                if (x || y || sc !== 1) data.positions[el.id] = { x, y, scale: sc };
             });
 
             editorTabs.forEach(t => {
@@ -4483,7 +4609,11 @@
             pendingPositions = data.positions || {};
             customTexts = data.customTexts || {};
             renderAllCustomTexts();
+            labels = data.labels || {};
+            syncLabelInputs();
+            applyLabels();
 
+            document.querySelectorAll('.movable').forEach(el => { setElOffset(el, 0, 0); setElScale(el, 1); });
             for (const id in pendingPositions) {
                 const el = $(id);
                 if (el) applyPosition(el, pendingPositions[id]);
@@ -5161,7 +5291,7 @@
         }
 
         /* Einstellungen einer Version in eine andere kopieren (alles, nur Design oder nur Inhalte) */
-        const DESIGN_KEYS = ['primary', 'jerseyColor', 'frameColor', 'tabSettings', 'positions', 'customTexts', 'selectedSponsors', 'torImgSize', 'pitchMode', 'numbersShow', 'feedFormat'];
+        const DESIGN_KEYS = ['primary', 'jerseyColor', 'frameColor', 'tabSettings', 'positions', 'customTexts', 'selectedSponsors', 'torImgSize', 'pitchMode', 'numbersShow', 'feedFormat', 'labels'];
         const DESIGN_INPUTS = [/^in-kal-color-/];
 
         async function copyBetweenVersions() {
@@ -5427,11 +5557,11 @@
 
                 // Tippen auf eine freie Stelle der Vorschau hebt die Auswahl auf
                 document.querySelector('.preview-area').addEventListener('pointerdown', e => {
-                    if (!e.target.closest('.draggable-text, .draggable-img')) selectElement(null);
+                    if (!e.target.closest(DRAG_SEL)) selectElement(null);
                 });
                 // Browser-eigenes Bild-Ziehen verhindern (stört das Verschieben am PC)
                 document.addEventListener('dragstart', e => {
-                    if (e.target.closest?.('.draggable-text, .draggable-img, .template-container')) e.preventDefault();
+                    if (e.target.closest?.(DRAG_SEL + ', .template-container')) e.preventDefault();
                 });
 
                 appReady = true;
