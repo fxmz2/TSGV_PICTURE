@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vereinsgrafik – Insta-Vorlagen 17.3</title>
+    <title>Vereinsgrafik – Insta-Vorlagen 17.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -507,6 +507,38 @@
         .el-toolbar[hidden] { display: none; }
         .el-toolbar button { background: rgba(255,255,255,0.14); color: white; border: none; border-radius: 8px; min-width: 34px; height: 34px; font-size: 15px; font-weight: bold; cursor: pointer; padding: 0 8px; }
         .el-toolbar button.danger { background: #c1121f; }
+        .el-toolbar .tb-sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.25); margin: 0 2px; }
+
+        /* Hilfslinien beim Verschieben (Einrasten in der Mitte) */
+        .snap-guide { position: absolute; z-index: 60; pointer-events: none; background: #ff2d95; box-shadow: 0 0 0 1px rgba(255,255,255,0.6); }
+        .snap-guide.v { top: 0; bottom: 0; width: 2px; margin-left: -1px; }
+        .snap-guide.h { left: 0; right: 0; height: 2px; margin-top: -1px; }
+        .snap-guide[hidden] { display: none; }
+
+        /* Dialoge: Grafik-Paket */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9990; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
+        .modal-overlay[hidden] { display: none; }
+        .modal-card { background: white; color: #222; border-radius: 14px; padding: 18px; width: 100%; max-width: 440px; max-height: 88vh; overflow: auto; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .modal-card h2 { margin: 0 0 6px; font-size: 1.15rem; }
+        .modal-card p { margin: 0 0 10px; font-size: 13px; color: #555; line-height: 1.4; }
+        .pack-quick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+        .pack-quick button { flex: 1; min-width: 90px; background: #eef2f5; color: #123; border: none; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .pack-group { border: 1px solid #e3e6ea; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
+        .pack-group > b { display: block; font-size: 13px; margin-bottom: 4px; }
+        .pack-group label { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; cursor: pointer; }
+        .pack-group label input { width: 18px; height: 18px; }
+        .pack-progress { font-size: 13px; font-weight: bold; color: #005f73; min-height: 18px; margin: 8px 0; }
+        .pack-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+        .pack-results a { display: block; text-align: center; font-size: 10px; color: #333; text-decoration: none; word-break: break-all; }
+        .pack-results img { width: 100%; border-radius: 6px; border: 1px solid #ddd; display: block; margin-bottom: 3px; }
+        .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .modal-actions button { border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .modal-actions .primary { background: #2a9d8f; color: white; }
+        .modal-actions .secondary { background: #e9ecef; color: #333; }
+        .modal-actions button:disabled { opacity: 0.6; cursor: default; }
+        .storage-status { display: block; margin-top: 6px; font-weight: bold; }
+        .storage-status.ok { color: #2a7d3f; }
+        .storage-status.warn { color: #a35a00; }
         .el-toolbar .el-scale-label { min-width: 44px; text-align: center; }
 
         /* Eigene Texte */
@@ -656,11 +688,23 @@
             <div id="demo-banner" class="notice-card info" hidden>
                 <b>🧪 Demo-Modus</b>
                 Alle Funktionen sind freigeschaltet, gespeicherte Grafiken erhalten aber ein Wasserzeichen. Mit einem Vereinscode verschwindet es – deine Daten bleiben erhalten.
-                <div class="notice-actions"><button type="button" class="primary" onclick="showLicenseOverlay(true)">Vereinscode eingeben</button></div>
+                <div class="notice-actions">
+                    <button type="button" class="primary" onclick="showLicenseOverlay(true)">Vereinscode eingeben</button>
+                    <button type="button" class="secondary" onclick="loadDemoData(true)">🎲 Beispieldaten laden</button>
+                </div>
             </div>
             <div id="license-warning" class="notice-card warn" hidden>
                 <b>⏳ Lizenz läuft bald ab</b>
                 <span id="license-warning-text"></span>
+            </div>
+
+            <!-- BEISPIELDATEN ENTFERNEN (nach Freischaltung) -->
+            <div id="demo-data-card" class="notice-card info" hidden>
+                <b>🎲 Beispieldaten vorhanden</b>
+                Aus dem Demo-Modus sind noch Beispiel-Spieler, -Gegner und -Sponsoren gespeichert.
+                <div class="notice-actions">
+                    <button type="button" class="primary" onclick="removeDemoData()">Beispieldaten entfernen</button>
+                </div>
             </div>
 
             <!-- BACKUP-ERINNERUNG -->
@@ -680,6 +724,7 @@
                 <div id="install-card" class="notice-card info" hidden>
                     <b>📲 Als App installieren</b>
                     <span id="install-text"></span>
+                    <span class="storage-status" id="install-storage-status"></span>
                     <div class="notice-actions" id="install-actions" hidden>
                         <button type="button" class="primary" onclick="triggerInstall()">App installieren</button>
                     </div>
@@ -693,6 +738,8 @@
                     </div>
                     <button type="button" class="club-card-btn" onclick="showLicenseOverlay(true)">Code ändern</button>
                 </div>
+
+                <button type="button" class="copy-action-btn pack-btn" style="background:#2a9d8f; font-size:13px; padding:10px;" onclick="openPackDialog()">📦 Spieltags-Paket: mehrere Grafiken auf einmal teilen</button>
 
                 <div class="control-group">
                     <label><input type="checkbox" id="cfg-crest-clean" onchange="updateCrestClean()"> ✨ Hintergrund des Vereinswappens entfernen</label>
@@ -1634,6 +1681,34 @@
         </div>
     </div>
 
+    <!-- GRAFIK-PAKET -->
+    <div id="pack-overlay" class="modal-overlay" hidden>
+        <div class="modal-card">
+            <div id="pack-select">
+                <h2>📦 Grafik-Paket</h2>
+                <p>Wähle alle Grafiken aus, die du auf einmal erstellen möchtest. Danach kannst du sie gemeinsam teilen oder in den Fotos speichern.</p>
+                <div class="pack-quick">
+                    <button type="button" onclick="packQuickSelect('feed')">Alle Beiträge</button>
+                    <button type="button" onclick="packQuickSelect('story')">Alle Stories</button>
+                    <button type="button" onclick="packQuickSelect('none')">Nichts</button>
+                </div>
+                <div id="pack-list"></div>
+            </div>
+            <div id="pack-result" hidden>
+                <h2>✅ Grafiken fertig</h2>
+                <p id="pack-result-text"></p>
+                <div class="pack-results" id="pack-results"></div>
+            </div>
+            <div class="pack-progress" id="pack-progress"></div>
+            <div class="modal-actions">
+                <button type="button" class="primary" id="pack-run" onclick="runPackExport()">Grafiken erstellen</button>
+                <button type="button" class="primary" id="pack-share" onclick="sharePackFiles()" hidden>📲 Alle teilen / in Fotos sichern</button>
+                <button type="button" class="primary" id="pack-download" onclick="downloadPackFiles()" hidden>💾 Alle herunterladen</button>
+                <button type="button" class="secondary" onclick="closePackDialog()">Schließen</button>
+            </div>
+        </div>
+    </div>
+
     <!-- RÜCKGÄNGIG / WIEDERHOLEN -->
     <div id="undo-bar" class="undo-bar">
         <button type="button" id="undo-btn" onclick="undoAction()" title="Rückgängig (Strg+Z)" disabled>↩️</button>
@@ -1647,6 +1722,9 @@
         <span class="el-scale-label" id="el-scale-label">100 %</span>
         <button type="button" onclick="nudgeSelectedScale(0.1)" title="Größer">+</button>
         <button type="button" onclick="resetSelectedElement()" title="Größe & Position zurücksetzen">↺</button>
+        <span class="tb-sep"></span>
+        <button type="button" onclick="layerSelected(1)" title="Nach vorne holen">⬆</button>
+        <button type="button" onclick="layerSelected(-1)" title="Nach hinten schieben">⬇</button>
         <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
         <button type="button" onclick="selectElement(null)" title="Fertig">✓</button>
     </div>
@@ -1678,7 +1756,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "17.3";
+        const APP_VERSION = "17.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -1695,6 +1773,7 @@
         const LICENSE_ITERATIONS = 150000;
 
         const BACKUP_REMIND_DAYS = 30;
+        const BACKUP_REMIND_DAYS_UNSAFE = 7;
 
         const STORE = {
             stammdaten: 'vg_stammdaten',
@@ -2246,12 +2325,40 @@
             scheduleSave();
         }
 
+        /* ---------- Dauerhafter Speicher ---------- */
+        let storagePersisted = null;   // null = unbekannt / nicht unterstützt
+        async function ensurePersistentStorage(ask) {
+            try {
+                if (navigator.storage?.persisted) storagePersisted = await navigator.storage.persisted();
+                if (!storagePersisted && ask && navigator.storage?.persist) storagePersisted = await navigator.storage.persist();
+            } catch (e) {}
+            updateStorageInfo();
+            updateInstallCard();
+            updateBackupReminder();
+            return storagePersisted;
+        }
+        /* Sicher = installierte App oder vom Browser bestätigter dauerhafter Speicher.
+           Safari (iPhone/iPad) im normalen Browser-Tab gilt immer als unsicher (Löschung nach 7 Tagen ohne Nutzung). */
+        function isStorageSafe() {
+            if (isStandalone()) return true;
+            if (isIOS()) return false;
+            return storagePersisted === true;
+        }
+        function storageStatusText() {
+            if (isStorageSafe()) return { ok: true, text: '✅ Deine Daten sind dauerhaft gespeichert.' };
+            if (isIOS()) return { ok: false, text: '⚠️ Im Safari-Tab kann das iPhone deine Daten nach 7 Tagen ohne Nutzung löschen. Füge die App zum Home-Bildschirm hinzu und mache regelmäßig Backups.' };
+            return { ok: false, text: '⚠️ Der Browser hat den dauerhaften Speicher noch nicht bestätigt und darf die Daten bei Platzmangel löschen. Installiere die App und mache regelmäßig Backups.' };
+        }
+
         function updateStorageInfo() {
             const el = $('storage-info');
-            if (!el || !navigator.storage?.estimate) return;
+            if (!el) return;
+            const st = storageStatusText();
+            const statusHtml = `<span class="storage-status ${st.ok ? 'ok' : 'warn'}">${st.text}</span>`;
+            if (!navigator.storage?.estimate) { el.innerHTML = statusHtml; return; }
             navigator.storage.estimate().then(e => {
-                el.textContent = `Lokal belegter Speicher: ${(e.usage / 1048576).toFixed(1).replace('.', ',')} MB`;
-            }).catch(() => {});
+                el.innerHTML = `Lokal belegter Speicher: ${(e.usage / 1048576).toFixed(1).replace('.', ',')} MB` + statusHtml;
+            }).catch(() => { el.innerHTML = statusHtml; });
         }
 
         async function addPlayer() {
@@ -2812,9 +2919,9 @@
                 $(`ct-list-${tab}`).addEventListener('input', onCustomTextInput);
                 $(`ct-list-${tab}`).addEventListener('change', onCustomTextInput);
 
-                $(`editor-${tab}`)?.insertAdjacentHTML('beforeend', captionHTML(tab) + tabCopyHTML(tab));
+                $(`editor-${tab}`)?.insertAdjacentHTML('beforeend', captionHTML(tab) + tabCopyHTML(tab) + packButtonHTML(tab));
             });
-            $('tabcopy-host-eckball').innerHTML = labelEditorHTML('eckball') + tabCopyHTML('eckball', false);
+            $('tabcopy-host-eckball').innerHTML = labelEditorHTML('eckball') + tabCopyHTML('eckball', false) + packButtonHTML('eckball');
             document.querySelectorAll('[data-lbl]').forEach(inp => inp.addEventListener('input', onLabelInput));
         }
 
@@ -3397,6 +3504,7 @@
                 : `Vereinscode: ${formatCode(club.code)}${club.validUntil ? ` · gültig bis ${formatIsoDate(club.validUntil)}` : ''}`);
             const demoBanner = $('demo-banner');
             if (demoBanner) demoBanner.hidden = !(club && club.demo);
+            updateDemoDataCard();
             const teamInput = $('cfg-team-name');
             if (teamInput) teamInput.placeholder = club ? club.name : 'z.B. TSGV Rechberg';
         }
@@ -3428,8 +3536,61 @@
             if (x) el.style.setProperty('--el-x', x + 'px'); else el.style.removeProperty('--el-x');
             if (y) el.style.setProperty('--el-y', y + 'px'); else el.style.removeProperty('--el-y');
         }
+        /* Ebene: 1 = vorne, -1 = hinten, 0 = Standard */
+        function getElLayer(el) { return parseInt(el.dataset.z || '0', 10) || 0; }
+        function setElLayer(el, z) {
+            z = Math.max(-1, Math.min(1, z || 0));
+            if (!z) {
+                delete el.dataset.z;
+                el.style.zIndex = '';
+                if (el.dataset.relPos) { el.style.position = ''; delete el.dataset.relPos; }
+                return;
+            }
+            el.dataset.z = z;
+            if (getComputedStyle(el).position === 'static') { el.style.position = 'relative'; el.dataset.relPos = '1'; }
+            el.style.zIndex = z > 0 ? 40 : 1;
+        }
+        function layerSelected(dir) {
+            if (!selectedEl) return;
+            const z = Math.max(-1, Math.min(1, getElLayer(selectedEl) + dir));
+            setElLayer(selectedEl, z);
+            toast(z > 0 ? '⬆ Element liegt jetzt vorne' : z < 0 ? '⬇ Element liegt jetzt hinten' : 'Element liegt wieder auf der Standard-Ebene');
+            scheduleSave();
+        }
+
+        /* Einrasten an der Mitte der Vorlage (waagerecht & senkrecht) mit Hilfslinie */
+        const SNAP_PX = 6;
+        function snapInfo(el) {
+            const tpl = el.closest('.post-template, .story-template, .eckball-board');
+            if (!tpl || !tpl.offsetWidth) return null;
+            const tr = tpl.getBoundingClientRect(), er = el.getBoundingClientRect();
+            const ts = tr.width / tpl.offsetWidth || 1;
+            const W = tpl.offsetWidth, H = tpl.offsetHeight;
+            const cx = (er.left + er.width / 2 - tr.left) / ts, cy = (er.top + er.height / 2 - tr.top) / ts;
+            const info = { tpl, sx: 0, sy: 0, gx: null, gy: null };
+            if (Math.abs(W / 2 - cx) < SNAP_PX) { info.sx = (W / 2 - cx) * ts; info.gx = W / 2; }
+            if (Math.abs(H / 2 - cy) < SNAP_PX) { info.sy = (H / 2 - cy) * ts; info.gy = H / 2; }
+            return info;
+        }
+        function showSnapGuides(info) {
+            hideSnapGuides(info && info.tpl);
+            if (!info) return;
+            ['v', 'h'].forEach(dir => {
+                const pos = dir === 'v' ? info.gx : info.gy;
+                let g = info.tpl.querySelector(`:scope > .snap-guide.${dir}`);
+                if (pos === null) { if (g) g.hidden = true; return; }
+                if (!g) { g = document.createElement('div'); g.className = `snap-guide ${dir}`; info.tpl.appendChild(g); }
+                g.hidden = false;
+                if (dir === 'v') g.style.left = pos + 'px'; else g.style.top = pos + 'px';
+            });
+        }
+        function hideSnapGuides(except) {
+            document.querySelectorAll('.snap-guide').forEach(g => { if (!except || g.parentElement !== except) g.hidden = true; });
+        }
+
         function applyPosition(el, pos) {
             if (!pos) return;
+            setElLayer(el, pos.z || 0);
             if (el.classList.contains('movable')) { setElOffset(el, pos.x || 0, pos.y || 0); setElScale(el, pos.scale || 1); return; }
             if (pos.top) el.style.top = pos.top;
             if (pos.left) el.style.left = pos.left;
@@ -3462,6 +3623,7 @@
                 if (defLeft !== null) el.style.left = defLeft;
             }
             setElScale(el, 1);
+            setElLayer(el, 0);
             scheduleSave();
         }
         function deleteSelectedCustomText() {
@@ -3499,20 +3661,31 @@
                 if (!pts.has(e.pointerId) || !start) return;
                 pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
                 const cur = snapshot();
-                const dx = (cur.cx - start.cx) / start.pscale, dy = (cur.cy - start.cy) / start.pscale;
-                if (movable) setElOffset(el, start.x + dx, start.y + dy);
-                else {
-                    el.style.left = (start.left + dx) + 'px';
-                    el.style.top = (start.top + dy) + 'px';
+                let dx = (cur.cx - start.cx) / start.pscale, dy = (cur.cy - start.cy) / start.pscale;
+                const place = () => {
+                    if (movable) setElOffset(el, start.x + dx, start.y + dy);
+                    else {
+                        el.style.left = (start.left + dx) + 'px';
+                        el.style.top = (start.top + dy) + 'px';
+                    }
+                };
+                place();
+                if (pts.size > 1 && start.dist > 0) { setElScale(el, start.s * (cur.dist / start.dist)); hideSnapGuides(); return; }
+                // Einrasten (Desktop: mit gedrückter Alt-Taste frei platzieren)
+                const snap = e.altKey ? null : snapInfo(el);
+                if (snap && (snap.sx || snap.sy)) {
+                    dx += snap.sx / start.pscale;
+                    dy += snap.sy / start.pscale;
+                    place();
                 }
-                if (pts.size > 1 && start.dist > 0) setElScale(el, start.s * (cur.dist / start.dist));
+                showSnapGuides(snap && (snap.gx !== null || snap.gy !== null) ? snap : null);
             });
             const end = e => {
                 if (!pts.has(e.pointerId)) return;
                 pts.delete(e.pointerId);
                 try { el.releasePointerCapture(e.pointerId); } catch (err) {}
                 start = pts.size ? snapshot() : null;
-                if (!pts.size) scheduleSave();
+                if (!pts.size) { hideSnapGuides(); scheduleSave(); }
             };
             el.addEventListener('pointerup', end);
             el.addEventListener('pointercancel', end);
@@ -3570,8 +3743,9 @@
                 el.style.top = defTop !== null ? defTop : '';
                 el.style.left = defLeft !== null ? defLeft : '0px';
                 setElScale(el, 1);
+                setElLayer(el, 0);
             });
-            $(`view-${tab}`)?.querySelectorAll('.movable').forEach(el => { setElOffset(el, 0, 0); setElScale(el, 1); });
+            $(`view-${tab}`)?.querySelectorAll('.movable').forEach(el => { setElOffset(el, 0, 0); setElScale(el, 1); setElLayer(el, 0); });
 
             setVal(`in-bg-${tab}-feed`, DEFAULT_BG);
             setVal(`in-bg-${tab}-story`, DEFAULT_BG);
@@ -4541,12 +4715,14 @@
             inputIds.forEach(id => { const el = $(id); if (el) data.inputs[id] = el.value; });
 
             document.querySelectorAll('.draggable-text, .draggable-img').forEach(el => {
-                if (el.id) data.positions[el.id] = { top: el.style.top, left: el.style.left, scale: getElScale(el) };
+                if (!el.id) return;
+                data.positions[el.id] = { top: el.style.top, left: el.style.left, scale: getElScale(el) };
+                if (getElLayer(el)) data.positions[el.id].z = getElLayer(el);
             });
             document.querySelectorAll('.movable').forEach(el => {
                 if (!el.id) return;
-                const { x, y } = getElOffset(el), sc = getElScale(el);
-                if (x || y || sc !== 1) data.positions[el.id] = { x, y, scale: sc };
+                const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el);
+                if (x || y || sc !== 1 || z) data.positions[el.id] = z ? { x, y, scale: sc, z } : { x, y, scale: sc };
             });
 
             editorTabs.forEach(t => {
@@ -4613,7 +4789,7 @@
             syncLabelInputs();
             applyLabels();
 
-            document.querySelectorAll('.movable').forEach(el => { setElOffset(el, 0, 0); setElScale(el, 1); });
+            document.querySelectorAll('.movable').forEach(el => { setElOffset(el, 0, 0); setElScale(el, 1); setElLayer(el, 0); });
             for (const id in pendingPositions) {
                 const el = $(id);
                 if (el) applyPosition(el, pendingPositions[id]);
@@ -4906,12 +5082,16 @@
             // Demo-Modus: ohne Server, Exporte mit Wasserzeichen
             if (code === DEMO_CODE) {
                 if (club && !club.demo && !isLicenseExpired(club) && !confirm('Du hast bereits einen gültigen Vereinscode. Wirklich in den Demo-Modus wechseln?')) return;
-                club = { code, name: 'Demo-Verein', demo: true, logo: null, logoFile: '', validUntil: null, checkedAt: Date.now() };
+                club = { code, name: 'Demo-Verein', demo: true, logo: demoCrestSvg('Demo Verein', '#005f73', '#bb3e03'), logoFile: '', validUntil: null, checkedAt: Date.now() };
                 await localforage.setItem(STORE.club, club);
                 hideLicenseOverlay();
+                applyClubBranding();
                 renderAll();
                 checkLicenseValidity();
                 toast('🧪 Demo-Modus aktiv');
+                // Leere App → gleich mit Beispielen füllen, damit man sofort fertige Grafiken sieht
+                const empty = !stammdaten.players.length && !stammdaten.opponents.length && !stammdaten.sponsors.length;
+                if (empty) await loadDemoData(false);
                 if (!prefs.onboardingDone) startWizard();
                 return;
             }
@@ -5192,7 +5372,7 @@
             const clone = element.cloneNode(true);
             clone.removeAttribute('id');
             Object.assign(clone.style, { transform: 'none', margin: '0', position: 'relative', top: '0', left: '0' });
-            clone.querySelectorAll('.tactics-arrow-handle, .safe-zone').forEach(n => n.remove());
+            clone.querySelectorAll('.tactics-arrow-handle, .safe-zone, .snap-guide').forEach(n => n.remove());
             clone.classList.remove('el-selected');
             clone.querySelectorAll('.el-selected').forEach(n => n.classList.remove('el-selected'));
             holder.appendChild(clone);
@@ -5233,6 +5413,287 @@
                 alert("Teilen fehlgeschlagen: " + err.message);
             } finally {
                 if (btn) { btn.innerText = originalText; btn.disabled = false; }
+            }
+        }
+
+
+        /* =========================================================
+           BEISPIELDATEN FÜR DEN DEMO-MODUS (frei erfunden)
+           ========================================================= */
+        const svgUri = svg => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+
+        function demoPortraitSvg(number, bg, shirt, skin, hair) {
+            return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500">
+                <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bg}"/><stop offset="1" stop-color="#0b1d26"/></linearGradient></defs>
+                <rect width="400" height="500" fill="url(#g)"/>
+                <circle cx="200" cy="120" r="170" fill="#ffffff" opacity="0.06"/>
+                <path d="M40 500 C45 380 110 330 200 330 C290 330 355 380 360 500 Z" fill="${shirt}"/>
+                <path d="M165 332 L200 380 L235 332 Z" fill="#ffffff" opacity="0.85"/>
+                <text x="200" y="465" font-family="Arial, sans-serif" font-size="70" font-weight="bold" fill="#ffffff" text-anchor="middle" opacity="0.92">${number}</text>
+                <rect x="172" y="270" width="56" height="70" rx="20" fill="${skin}"/>
+                <ellipse cx="200" cy="205" rx="78" ry="92" fill="${skin}"/>
+                <path d="M122 200 C118 120 170 98 205 100 C250 102 284 130 278 200 C270 160 250 145 200 142 C155 142 132 160 122 200 Z" fill="${hair}"/>
+                <circle cx="172" cy="212" r="7" fill="#2b2b2b"/><circle cx="228" cy="212" r="7" fill="#2b2b2b"/>
+                <path d="M175 258 Q200 276 225 258" stroke="#7a3b2e" stroke-width="6" fill="none" stroke-linecap="round"/>
+            </svg>`);
+        }
+        function demoCrestSvg(name, c1, c2) {
+            const initials = name.split(/\s+/).filter(w => w.length > 2 || /^[A-Z]{2,}$/.test(w)).map(w => w[0]).join('').slice(0, 3).toUpperCase();
+            return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="460" viewBox="0 0 400 460">
+                <path d="M200 10 L380 60 L380 230 C380 340 300 410 200 450 C100 410 20 340 20 230 L20 60 Z" fill="#ffffff"/>
+                <path d="M200 30 L360 74 L360 230 C360 328 290 390 200 428 C110 390 40 328 40 230 L40 74 Z" fill="${c1}"/>
+                <path d="M200 30 L360 74 L360 230 C360 328 290 390 200 428 Z" fill="${c2}"/>
+                <rect x="40" y="150" width="320" height="110" fill="#ffffff" opacity="0.95"/>
+                <text x="200" y="232" font-family="Arial, sans-serif" font-size="84" font-weight="bold" fill="${c1}" text-anchor="middle">${initials}</text>
+                <circle cx="200" cy="340" r="34" fill="#ffffff"/><circle cx="200" cy="340" r="14" fill="${c1}"/>
+            </svg>`);
+        }
+        function demoSponsorSvg(name, sub, color) {
+            return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="720" height="240" viewBox="0 0 720 240">
+                <rect x="4" y="4" width="712" height="232" rx="28" fill="#ffffff" stroke="${color}" stroke-width="8"/>
+                <circle cx="110" cy="120" r="66" fill="${color}"/>
+                <path d="M78 136 L110 76 L142 136 Z" fill="#ffffff"/>
+                <text x="200" y="128" font-family="Arial, sans-serif" font-size="44" ${name.length > 15 ? 'textLength="480" lengthAdjust="spacingAndGlyphs"' : ''} font-weight="bold" fill="#1d1d1d">${name}</text>
+                <text x="202" y="172" font-family="Arial, sans-serif" font-size="26" fill="${color}">${sub}</text>
+            </svg>`);
+        }
+
+        const DEMO_TEAM = 'SV Demo 1920';
+        function buildDemoStammdaten() {
+            const skins = ['#f1c7a5', '#e0ac85', '#c68a62', '#8d5a3b', '#f3d2b8'];
+            const hairs = ['#3b2a20', '#1d1b1a', '#7a4b26', '#c9a15b', '#4a3222'];
+            const shirt = '#bb3e03', bg = '#005f73';
+            const names = ['Jonas Keller', 'Tim Brandt', 'Leon Wagner', 'Paul Richter', 'Felix Hartmann', 'Niklas Vogel', 'Ben Schuster', 'David Krämer',
+                'Luca Neumann', 'Simon Lang', 'Jan Seidel', 'Moritz Frank', 'Tobias Engel', 'Kevin Roth', 'Marco Albrecht', 'Fabian Winter', 'Elias Brenner', 'Noah Pfeiffer'];
+            const players = names.map((name, i) => ({ name, group: 'Spieler', img: demoPortraitSvg(i + 1, bg, shirt, skins[i % 5], hairs[(i * 2) % 5]), torImg: null, demo: true }));
+            players.push({ name: 'Thomas Berger', group: 'Trainer', img: demoPortraitSvg('', bg, '#222222', skins[0], hairs[1]), torImg: null, demo: true });
+            players.push({ name: 'Andreas Kühn', group: 'Trainer', img: demoPortraitSvg('', bg, '#222222', skins[2], hairs[4]), torImg: null, demo: true });
+            const opps = [['FC Musterstadt', '#1d4ed8', '#facc15'], ['SV Beispielhausen', '#15803d', '#ffffff'], ['TSV Demoheim', '#b91c1c', '#111111'],
+                ['SC Probstal', '#7c3aed', '#f5f5f5'], ['FV Testingen', '#0f766e', '#f59e0b'], ['SpVgg Vorlagendorf', '#1e293b', '#e11d48']];
+            const opponents = opps.map(([name, c1, c2]) => ({ name, img: demoCrestSvg(name, c1, c2), demo: true }));
+            const sponsors = [['Bäckerei Muster', 'Frisch seit 1950', '#b45309'], ['Autohaus Beispiel', 'Ihr Partner vor Ort', '#1d4ed8'], ['Musterbau GmbH', 'Bauen mit Herz', '#15803d']]
+                .map(([name, sub, c]) => ({ name, img: demoSponsorSvg(name, sub, c), demo: true }));
+            return { players, opponents, sponsors };
+        }
+
+        function hasDemoData() {
+            return ['players', 'opponents', 'sponsors'].some(t => stammdaten[t].some(e => e.demo));
+        }
+        function updateDemoDataCard() {
+            const card = $('demo-data-card');
+            if (card) card.hidden = !(club && !club.demo && hasDemoData());
+        }
+
+        function nextWeekday(dayOfWeek, weeksAhead = 0) {
+            const d = new Date();
+            d.setHours(12, 0, 0, 0);
+            d.setDate(d.getDate() + ((dayOfWeek - d.getDay() + 7) % 7 || 7) + weeksAhead * 7);
+            return d;
+        }
+        const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+        async function loadDemoData(ask) {
+            if (ask && !confirm('Beispieldaten laden?\n\nEs werden erfundene Spieler, Gegner und Sponsoren ergänzt und die aktuelle Version mit Beispielinhalten gefüllt. Deine eigenen Einträge bleiben erhalten.')) return;
+            const demo = buildDemoStammdaten();
+            ['players', 'opponents', 'sponsors'].forEach(t => {
+                demo[t].forEach(e => { if (!stammdaten[t].some(x => x.name === e.name)) stammdaten[t].push(e); });
+            });
+            sortStammdaten();
+            await saveStammdaten();
+            refreshPlayerOptions();
+            refreshOpponentDropdown();
+            refreshSponsorChecklists();
+            renderStammdatenLists();
+            if ($('in-lineup-kader-only')) $('in-lineup-kader-only').checked = false;
+            refreshLineupOptions(true);
+
+            const P = demo.players.map(p => p.name);
+            const sat = nextWeekday(6);
+            const set = (id, v) => setVal(id, v);
+            set('cfg-team-name', DEMO_TEAM);
+            // Ankündigung
+            set('in-post-venue', 'heim'); set('in-post-opponent-select', 'FC Musterstadt'); set('in-post-title', 'HEIMSPIEL');
+            set('in-post-date', `${WEEKDAYS_LONG[sat.getDay()]}, ${pad(sat.getDate())}.${pad(sat.getMonth() + 1)}.`); set('in-post-time', '15:00 Uhr');
+            // Aufstellung
+            set('formation-select', '4-2-3-1');
+            const nums = [1, 2, 4, 5, 3, 6, 8, 7, 10, 11, 9];
+            for (let i = 1; i <= 11; i++) { set(`player-${i}`, P[i - 1]); set(`num-player-${i}`, String(nums[i - 1])); }
+            for (let i = 1; i <= 7; i++) set(`bench-player-${i}`, P[10 + i] || 'Keiner');
+            set('in-coach-1', 'Thomas Berger'); set('in-coach-2', 'Andreas Kühn');
+            // Tor & Ergebnis
+            set('in-tor-player', 'Luca Neumann'); set('in-tor-assist', 'Jan Seidel'); set('in-tor-score', '2 : 1'); set('in-tor-minute', "67. Min");
+            set('in-ergebnis-title', 'ENDERGEBNIS'); set('in-ergebnis-score', '3 : 1'); set('in-ergebnis-text', 'Heimsieg!');
+            [['Luca Neumann', '23'], ['Jan Seidel', '58'], ['Luca Neumann', '81']].forEach(([n, m], i) => { set(`erg-scorer-${i + 1}`, n); set(`erg-minute-${i + 1}`, m); });
+            // Kader
+            for (let i = 1; i <= KADER_MAX; i++) set(`kader-player-${i}`, P[i - 1] || 'Keiner');
+            set('in-kader-meeting', '13:45 Uhr'); set('in-kader-jersey', 'Rot / Weiß'); set('in-kader-duty-1', 'Ben Schuster'); set('in-kader-duty-2', 'Kevin Roth');
+            // Player of the Match, Geburtstag, Neuzugang, Sponsor
+            set('in-potm-player', 'Luca Neumann'); set('in-potm-text', '2 Tore');
+            set('in-bday-player', 'Felix Hartmann'); set('in-bday-text', 'Alles Gute zum Geburtstag!');
+            set('in-new-player', 'Elias Brenner'); set('in-new-position', 'Stürmer'); set('in-new-number', '19'); set('in-new-from-select', 'SC Probstal'); set('in-new-from-text', '');
+            set('in-new-text', 'Herzlich willkommen im Team!');
+            set('in-spon-select', 'Autohaus Beispiel'); set('in-spon-text', 'für die großartige Unterstützung!'); set('in-spon-extra', 'Neue Trikots für die Saison');
+            // Kalender: die nächsten 4 Samstage
+            const kal = [['FC Musterstadt', 'heim', '15:00'], ['SV Beispielhausen', 'auswaerts', '15:30'], ['TSV Demoheim', 'heim', '14:00'], ['FV Testingen', 'auswaerts', '15:00']];
+            for (let i = 1; i <= KAL_MAX; i++) {
+                const k = kal[i - 1];
+                set(`kal-date-${i}`, k ? isoDate(nextWeekday(6, i - 1)) : ''); set(`kal-time-${i}`, k ? k[2] : ''); set(`kal-opp-${i}`, k ? k[0] : ''); set(`kal-venue-${i}`, k ? k[1] : 'heim');
+            }
+            set('in-kal-mode', 'upcoming');
+            // Wochenende
+            const wk = [['1. Mannschaft', '3:1', 'SC Probstal', 'heim'], ['2. Mannschaft', '2:2', 'FV Testingen', 'auswaerts'], ['A-Jugend', '0:1', 'SpVgg Vorlagendorf', 'heim'], ['Damen', '4:0', 'TSV Demoheim', 'auswaerts']];
+            for (let i = 1; i <= WK_MAX; i++) {
+                const r = wk[i - 1];
+                set(`wk-team-${i}`, r ? r[0] : ''); set(`wk-score-${i}`, r ? r[1] : ''); set(`wk-opp-${i}`, r ? r[2] : ''); set(`wk-venue-${i}`, r ? r[3] : 'heim');
+            }
+            // Sponsorenleiste in Ankündigung und Ergebnis
+            ['post', 'ergebnis'].forEach(t => {
+                selectedSponsors[t] = demo.sponsors.map(s => s.name);
+                const cb = $(`in-show-sponsors-${t}`);
+                if (cb) cb.checked = true;
+            });
+            refreshSponsorChecklists();
+            Object.keys(captionDirty).forEach(k => captionDirty[k] = false);
+            renderAll();
+            await saveSlotNow();
+            updateBackupReminder();
+            updateDemoDataCard();
+            toast('🎲 Beispieldaten geladen – schau dir die Reiter an!');
+        }
+
+        async function removeDemoData() {
+            if (!confirm('Alle Beispiel-Spieler, -Gegner und -Sponsoren löschen? Deine eigenen Einträge bleiben erhalten.')) return;
+            ['players', 'opponents', 'sponsors'].forEach(t => { stammdaten[t] = stammdaten[t].filter(e => !e.demo); });
+            await onStammdatenChanged('players');
+            await onStammdatenChanged('opponents');
+            await onStammdatenChanged('sponsors');
+            if (val('cfg-team-name') === DEMO_TEAM) { setVal('cfg-team-name', ''); renderAll(); scheduleSave(); }
+            updateDemoDataCard();
+            toast('🗑️ Beispieldaten entfernt');
+        }
+
+        /* ---------- Grafik-Paket: mehrere Grafiken auf einmal ---------- */
+        let packFiles = [];
+        let packUrls = [];
+
+        function packButtonHTML(tab) {
+            return `<button type="button" class="copy-action-btn pack-btn" style="margin-top:12px; background:#2a9d8f; font-size:12px; padding:10px;" onclick="openPackDialog('${tab}')">📦 Mehrere Grafiken auf einmal teilen</button>`;
+        }
+
+        /* Alle Grafiken der Reiter – ermittelt aus den „In Fotos / Teilen“-Knöpfen der Vorschau */
+        function getPackItems() {
+            const items = [];
+            tabList.forEach(tab => {
+                const view = $(`view-${tab}`);
+                if (!view) return;
+                view.querySelectorAll('.download-btn').forEach(btn => {
+                    const m = (btn.getAttribute('onclick') || '').match(/shareImage\('([^']+)',\s*'([^']+)'/);
+                    if (!m || !$(m[1])) return;
+                    const el = $(m[1]);
+                    const tag = btn.closest('.preview-wrapper')?.querySelector('.preview-label-tag')?.textContent.trim() || m[2];
+                    const kind = el.classList.contains('story-template') ? 'story' : 'feed';
+                    items.push({ tab, id: m[1], file: m[2], label: tag, kind });
+                });
+            });
+            return items;
+        }
+        function tabTitle(tab) {
+            const b = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+            return b ? b.textContent.replace(/\s+/g, ' ').trim() : tab;
+        }
+
+        function openPackDialog(tab) {
+            const items = getPackItems();
+            const groups = {};
+            items.forEach(it => (groups[it.tab] = groups[it.tab] || []).push(it));
+            $('pack-list').innerHTML = Object.entries(groups).map(([t, list]) => `
+                <div class="pack-group">
+                    <b>${esc(tabTitle(t))}</b>
+                    ${list.map(it => `<label><input type="checkbox" value="${it.id}" data-file="${esc(it.file)}" data-kind="${it.kind}" data-tab="${t}" ${tab && t === tab ? 'checked' : ''}> ${esc(it.label)}</label>`).join('')}
+                </div>`).join('');
+            // Aktueller Reiter zuerst
+            if (tab) {
+                const first = $('pack-list').querySelector(`input[data-tab="${tab}"]`)?.closest('.pack-group');
+                if (first) $('pack-list').prepend(first);
+            }
+            $('pack-select').hidden = false;
+            $('pack-result').hidden = true;
+            $('pack-run').hidden = false;
+            $('pack-run').disabled = false;
+            $('pack-share').hidden = true;
+            $('pack-download').hidden = true;
+            setText('pack-progress', '');
+            $('pack-overlay').hidden = false;
+        }
+        function packQuickSelect(kind) {
+            $('pack-list').querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = kind !== 'none' && cb.dataset.kind === kind; });
+        }
+        function clearPackFiles() {
+            packUrls.forEach(u => URL.revokeObjectURL(u));
+            packUrls = [];
+            packFiles = [];
+        }
+        function closePackDialog() {
+            $('pack-overlay').hidden = true;
+            clearPackFiles();
+            $('pack-results').innerHTML = '';
+        }
+
+        async function runPackExport() {
+            const chosen = Array.from($('pack-list').querySelectorAll('input[type="checkbox"]:checked'));
+            if (!chosen.length) { setText('pack-progress', 'Bitte mindestens eine Grafik auswählen.'); return; }
+            clearPackFiles();
+            $('pack-run').disabled = true;
+            selectElement(null);
+            await saveSlotNow();
+            try {
+                for (let i = 0; i < chosen.length; i++) {
+                    const cb = chosen[i];
+                    setText('pack-progress', `⏳ Erstelle Grafik ${i + 1} von ${chosen.length} …`);
+                    const canvas = await renderElementToCanvas($(cb.value));
+                    const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 1.0));
+                    canvas.width = canvas.height = 0;   // Speicher auf dem Handy sofort freigeben
+                    if (!blob) throw new Error('Grafik konnte nicht erstellt werden.');
+                    const name = String(i + 1).padStart(2, '0') + '_' + cb.dataset.file;
+                    packFiles.push(new File([blob], name, { type: 'image/png' }));
+                }
+            } catch (err) {
+                setText('pack-progress', '❌ Fehler: ' + err.message);
+                $('pack-run').disabled = false;
+                return;
+            }
+            setText('pack-progress', '');
+            packUrls = packFiles.map(f => URL.createObjectURL(f));
+            $('pack-results').innerHTML = packFiles.map((f, i) => `<a href="${packUrls[i]}" download="${esc(f.name)}"><img src="${packUrls[i]}" alt="">${esc(f.name)}</a>`).join('');
+            const canShare = !!(navigator.canShare && navigator.canShare({ files: packFiles }));
+            setText('pack-result-text', `${packFiles.length} Grafik${packFiles.length === 1 ? '' : 'en'} erstellt. ` + (canShare
+                ? 'Tippe auf „Alle teilen“ und wähle z.B. „Bilder sichern“ oder direkt Instagram.'
+                : 'Tippe auf ein Bild, um es einzeln zu speichern, oder lade alle herunter.'));
+            $('pack-select').hidden = true;
+            $('pack-result').hidden = false;
+            $('pack-run').hidden = true;
+            $('pack-share').hidden = !canShare;
+            $('pack-download').hidden = false;
+        }
+
+        async function sharePackFiles() {
+            if (!packFiles.length) return;
+            try {
+                await navigator.share({ files: packFiles, title: 'Vereinsgrafiken' });
+            } catch (err) {
+                if (err.name !== 'AbortError') setText('pack-progress', 'Teilen nicht möglich – bitte „Alle herunterladen“ verwenden.');
+            }
+        }
+
+        async function downloadPackFiles() {
+            for (let i = 0; i < packFiles.length; i++) {
+                const a = document.createElement('a');
+                a.href = packUrls[i];
+                a.download = packFiles[i].name;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                await new Promise(r => setTimeout(r, 350));
             }
         }
 
@@ -5365,13 +5826,16 @@
             const hasData = stammdaten.players.length + stammdaten.opponents.length + stammdaten.sponsors.length + stammdaten.templates.length > 0;
             const now = Date.now();
             const days = prefs.lastBackupAt ? Math.floor((now - prefs.lastBackupAt) / 86400000) : null;
-            const due = hasData && (days === null || days >= BACKUP_REMIND_DAYS);
+            // Ohne dauerhaften Speicher wöchentlich erinnern
+            const interval = isStorageSafe() ? BACKUP_REMIND_DAYS : BACKUP_REMIND_DAYS_UNSAFE;
+            const due = hasData && (days === null || days >= interval);
             const snoozed = prefs.backupSnoozeUntil && now < prefs.backupSnoozeUntil;
             card.hidden = !due || snoozed;
             if (!card.hidden) {
                 $('backup-reminder-text').textContent = (days === null
                     ? 'Du hast noch nie ein Backup erstellt.'
-                    : `Dein letztes Backup ist ${days} Tage alt.`) + ' Deine Daten liegen nur auf diesem Gerät – sichere sie, damit bei Handywechsel oder Browser-Bereinigung nichts verloren geht.';
+                    : `Dein letztes Backup ist ${days} Tage alt.`) + ' Deine Daten liegen nur auf diesem Gerät – sichere sie, damit bei Handywechsel oder Browser-Bereinigung nichts verloren geht.'
+                    + (isStorageSafe() ? '' : ' Da der Speicher dieses Browsers nicht dauerhaft geschützt ist, erinnern wir dich wöchentlich.');
             }
         }
 
@@ -5452,6 +5916,9 @@
             if (!card) return;
             if (isStandalone()) { card.hidden = true; return; }
             card.hidden = false;
+            const st = storageStatusText();
+            const stEl = $('install-storage-status');
+            if (stEl) { stEl.textContent = st.text; stEl.className = 'storage-status ' + (st.ok ? 'ok' : 'warn'); }
             const actions = $('install-actions');
             if (deferredInstallPrompt) {
                 $('install-text').textContent = 'Installiere die App auf deinem Startbildschirm. So startet sie schneller, funktioniert offline und deine Daten bleiben dauerhaft gespeichert.';
@@ -5488,7 +5955,9 @@
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register('./sw.js').catch(() => {});
                 }
-                navigator.storage?.persist?.().catch(() => {});
+                ensurePersistentStorage(true);
+                // Manche Browser gewähren dauerhaften Speicher erst nach einer Nutzeraktion
+                document.addEventListener('pointerdown', () => { if (!storagePersisted) ensurePersistentStorage(true); }, { once: true });
 
                 await migrateLegacyData();
                 stammdaten = { ...emptyStammdaten(), ...(await localforage.getItem(STORE.stammdaten) || {}) };
