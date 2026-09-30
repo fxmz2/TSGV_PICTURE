@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vereinsgrafik – Insta-Vorlagen 17.4</title>
+    <title>Vereinsgrafik – Insta-Vorlagen 17.5</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -311,6 +311,10 @@
         .kal-story .kal-meta { font-size: 11px; }
         .kal-story .kal-logo { width: 46px; height: 46px; }
         .kal-empty { text-align: center; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; color: #fff; text-shadow: none; font-size: 13px; }
+        .season-preview { max-height: 220px; overflow: auto; margin-top: 8px; font-size: 12px; }
+        .season-preview .sp-row { display: grid; grid-template-columns: 78px 42px 20px 1fr; gap: 4px; padding: 4px 2px; border-bottom: 1px solid #eee; align-items: center; }
+        .season-preview .sp-row.past { opacity: 0.45; }
+        .season-preview .sp-sum { font-weight: bold; margin-bottom: 4px; }
         .kal-edit-row { border: 1px solid #ddd; border-radius: 8px; padding: 8px; margin-bottom: 8px; background: white; }
         .kal-edit-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; margin-bottom: 6px; }
         .kal-edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -412,7 +416,8 @@
         .wk-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.58); border-radius: 10px; padding: 7px 10px; color: #fff; text-shadow: none; }
         .wk-team { width: 92px; flex-shrink: 0; font-size: 10px; font-weight: bold; text-transform: uppercase; background: rgba(255,255,255,0.16); border-radius: 6px; padding: 5px 6px; text-align: center; line-height: 1.2; box-sizing: border-box; }
         .wk-match { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; text-transform: uppercase; line-height: 1.2; }
-        .wk-match img { width: 28px; height: 28px; object-fit: contain; background: #fff; border-radius: 50%; padding: 2px; box-sizing: border-box; flex-shrink: 0; }
+        .wk-match img, .wk-own { width: 28px; height: 28px; object-fit: contain; background: #fff; border-radius: 50%; padding: 2px; box-sizing: border-box; flex-shrink: 0; }
+        .wk-row .wk-own { margin-right: -4px; }
         .wk-venue { display: block; font-size: 9px; color: rgba(255,255,255,0.75); letter-spacing: 0.5px; }
         .wk-score { min-width: 54px; flex-shrink: 0; text-align: center; font-size: 18px; font-weight: 900; border-radius: 8px; padding: 4px 6px; background: #6c757d; box-sizing: border-box; }
         .wk-score.win { background: #1b8a3c; }
@@ -421,12 +426,12 @@
         .wk-compact { gap: 5px; }
         .wk-compact .wk-row { padding: 4px 8px; }
         .wk-compact .wk-score { font-size: 15px; min-width: 46px; padding: 3px 4px; }
-        .wk-compact .wk-match img { width: 22px; height: 22px; }
+        .wk-compact .wk-match img, .wk-compact .wk-own { width: 22px; height: 22px; }
         .wk-story { top: 150px; gap: 12px; }
         .wk-story .wk-row { padding: 10px 12px; }
         .wk-story .wk-team { width: 100px; font-size: 11px; }
         .wk-story .wk-match { font-size: 13px; }
-        .wk-story .wk-match img { width: 36px; height: 36px; }
+        .wk-story .wk-match img, .wk-story .wk-own { width: 36px; height: 36px; }
         .wk-story .wk-score { font-size: 22px; min-width: 64px; }
 
         .caption-text { width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px; line-height: 1.45; padding: 8px; border: 1px solid #ccc; border-radius: 6px; resize: vertical; }
@@ -635,6 +640,7 @@
                     <div><label for="wz-primary">Hauptfarbe</label><input type="color" id="wz-primary" oninput="wizardSync()"></div>
                     <div><label for="wz-jersey">Zweitfarbe / Trikot</label><input type="color" id="wz-jersey" oninput="wizardSync()"></div>
                 </div>
+                <button type="button" class="copy-action-btn" style="background:#2a9d8f; font-size:13px; padding:9px; margin-top:8px;" onclick="applyCrestColors('wizard')">🎨 Farben aus dem Wappen übernehmen</button>
                 <div class="wz-preview" id="wz-preview">VORSCHAU</div>
             </div>
 
@@ -764,6 +770,7 @@
                         <input type="color" id="cfg-color-jersey" value="#bb3e03" onchange="updateDesignSettings()">
                     </div>
                 </div>
+                <button type="button" class="copy-action-btn" style="background:#2a9d8f;" onclick="applyCrestColors('start')">🎨 Farben aus dem Wappen übernehmen</button>
 
                 <div class="control-group">
                     <label>Kreis-/Rahmenfarbe</label>
@@ -1009,7 +1016,8 @@
                 <div class="control-group"><label>Titel</label><input type="text" id="in-ergebnis-title" value="ENDERGEBNIS" oninput="updateErgebnis();"></div>
                 <div class="control-group"><label>Spielstand</label><input type="text" id="in-ergebnis-score" value="3 : 1" oninput="updateErgebnis();"></div>
                 <div class="control-group"><label>Zusatztext</label><input type="text" id="in-ergebnis-text" value="Auswärtssieg!" oninput="updateErgebnis();"></div>
-                <span class="hint" style="margin-bottom:10px;">Gegner und Heim/Auswärts werden aus „Ankündigung“ übernommen.</span>
+                <button type="button" class="copy-action-btn" style="background:#2a9d8f; font-size:13px; padding:10px;" onclick="applyLastKalenderToErgebnis()">📅 Letztes Spiel aus Kalender übernehmen</button>
+                <span class="hint" style="margin-bottom:10px;">Gegner und Heim/Auswärts werden aus „Ankündigung“ übernommen (und dort mit geändert).</span>
 
                 <div class="control-group">
                     <label><input type="checkbox" id="in-erg-show-scorers" checked onchange="updateErgebnis();"> Torschützen anzeigen</label>
@@ -1108,9 +1116,29 @@
                     <div class="control-group"><label>✈️ Farbe Auswärts</label><input type="color" id="in-kal-color-away" value="#bb3e03" onchange="updateKalender();"></div>
                 </div>
 
+                <div class="control-group">
+                    <label><input type="checkbox" id="in-kal-own-logo" checked onchange="updateKalender(); scheduleSave();"> Eigenes Wappen bei jedem Spiel anzeigen</label>
+                    <span class="hint">Heimteam steht links, Gast rechts.</span>
+                </div>
+
                 <label>Termine (max. 6)</label>
                 <div id="kal-controls"></div>
                 <span class="hint" style="margin-bottom:10px;">Termine werden automatisch nach Datum sortiert. Gegner legst du unter „Daten“ an.</span>
+
+                <details class="design-details" id="season-details">
+                    <summary>📋 Spielplan einfügen (ganze Saison) <span class="sd-count" id="season-count">0</span></summary>
+                    <div class="details-body">
+                        <textarea id="season-input" rows="8" class="caption-text" placeholder="Spielplan hier einfügen, z.B. von fussball.de kopiert oder aus Excel:&#10;&#10;So, 05.10.2026 15:00  TSGV Rechberg - FC Musterstadt&#10;12.10.2026 15:30  SV Beispielhausen - TSGV Rechberg&#10;19.10. 14:00 TSV Demoheim (H)"></textarea>
+                        <button type="button" class="copy-action-btn" style="background:#2a9d8f; font-size:13px; padding:10px; margin-top:6px;" onclick="importSeason()">🔍 Spielplan erkennen & übernehmen</button>
+                        <span class="hint">Erkannt werden Datum, Uhrzeit, Gegner und Heim/Auswärts (steht dein Verein zuerst, ist es ein Heimspiel – sonst „H“/„A“ bzw. „Heim“/„Auswärts“ dazuschreiben). Unbekannte Gegner werden unter „Daten“ angelegt; das Wappen kannst du dort ergänzen.</span>
+                        <div id="season-preview" class="season-preview"></div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
+                            <button type="button" class="copy-action-btn" style="margin:0;" onclick="fillKalenderFromSeason()">📅 Nächste 6 Spiele in den Kalender</button>
+                            <button type="button" class="copy-action-btn" style="margin:0; background:#c1121f;" onclick="clearSeason()">🗑️ Spielplan löschen</button>
+                        </div>
+                        <span class="hint">Tipp: Jede Woche einmal „Nächste 6 Spiele“ tippen – „Nächsten Termin übernehmen“ (Ankündigung) und „Letztes Spiel übernehmen“ (Ergebnis) nutzen automatisch den ganzen Spielplan.</span>
+                    </div>
+                </details>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('kalender')">🔄 Positionen & Design auf Standard setzen</button>
             </div>
@@ -1172,6 +1200,7 @@
 
                 <div class="control-group"><label>Titel</label><input type="text" id="in-wk-title" value="ERGEBNISSE" oninput="updateWochenende();"></div>
                 <div class="control-group"><label>Untertitel</label><input type="text" id="in-wk-sub" value="VOM WOCHENENDE" placeholder="z.B. 27./28.09." oninput="updateWochenende();"></div>
+                <div class="control-group"><label><input type="checkbox" id="in-wk-own-logo" checked onchange="updateWochenende(); scheduleSave();"> Eigenes Wappen bei jedem Spiel anzeigen</label></div>
                 <button type="button" class="copy-action-btn" style="background:#2a9d8f;" onclick="fillWeekendTeams()">👥 Mannschaften aus den Versionsnamen übernehmen</button>
 
                 <label>Spiele (max. 6)</label>
@@ -1756,7 +1785,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "17.4";
+        const APP_VERSION = "17.5";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -1898,6 +1927,7 @@
         let stammdaten = emptyStammdaten();
         let club = null;
         let selectedSponsors = {};
+        let season = [];               // eingefügter Saison-Spielplan: [{ date, time, opp, venue }]
         let labels = {};               // je Reiter: { key: eigener Text } → siehe LABEL_DEFS
         let customTexts = {};          // je Reiter: [{ id, text, target, size, color, bold, box, font }]
         let prefs = { versionNames: {}, safeZones: true, lastBackupAt: null, backupSnoozeUntil: null };
@@ -3111,7 +3141,7 @@
             ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers'], inputs: [/^erg-/] },
             kader:      { keys: ['kaderMeeting', 'kaderJersey', 'kaderDuty1', 'kaderDuty2', 'kaderFreetext'], inputs: [/^kader-player-/] },
             potm:       { keys: ['potmPlayer', 'potmText'], inputs: [] },
-            kalender:   { keys: [], inputs: [/^in-kal-(mode|title)$/, /^kal-/] },
+            kalender:   { keys: ['season'], inputs: [/^in-kal-(mode|title)$/, /^kal-/] },
             geburtstag: { keys: ['bdayConfetti'], inputs: [/^in-bday-/] },
             neuzugang:  { keys: [], inputs: [/^in-new-/] },
             sponsor:    { keys: [], inputs: [/^in-spon-/] },
@@ -3121,7 +3151,8 @@
         const TAB_DESIGN_EXTRA = {
             story:    { keys: ['pitchMode', 'numbersShow'], inputs: [] },
             tor:      { keys: ['torImgSize'], inputs: [] },
-            kalender: { keys: [], inputs: [/^in-kal-color-/] }
+            kalender: { keys: ['kalOwnLogo'], inputs: [/^in-kal-color-/] },
+            wochenende: { keys: ['wkOwnLogo'], inputs: [] }
         };
 
         function tabCopyHTML(tab, withWhat = true) {
@@ -4009,12 +4040,14 @@
 
         function updateWochenende() {
             const rows = readWeekendRows();
+            const ownWk = ($('in-wk-own-logo')?.checked ?? true) ? `<img class="wk-own" src="${getClubLogoSrc()}" alt="">` : '';
             ['', '-feed'].forEach(sfx => {
                 setText(`out-wk-title${sfx}`, val('in-wk-title'));
                 setText(`out-wk-sub${sfx}`, val('in-wk-sub'));
             });
             const html = rows.length ? rows.map(r => `
                 <div class="wk-row">
+                    ${ownWk}
                     <div class="wk-team">${esc(r.team || getTeamName())}</div>
                     <div class="wk-match">
                         <img src="${getOpponentLogoSrc(r.opp || 'Gegner')}" alt="">
@@ -4191,6 +4224,7 @@
         function renderKalenderRows(list) {
             if (!list.length) return `<div class="kal-empty">${esc(L('kalender', 'empty'))}</div>`;
             const own = esc(getTeamName());
+            const ownLogo = ($('in-kal-own-logo')?.checked ?? true) ? `<img class="kal-logo kal-own" src="${getClubLogoSrc()}" alt="">` : '';
             return list.map(e => {
                 const d = parseISODate(e.date);
                 const home = e.venue !== 'auswaerts';
@@ -4198,14 +4232,19 @@
                 const vs = `<span class="kal-vs">${esc(L('kalender', 'vs'))}</span>`;
                 const teams = home ? `${own}${vs}${opp}` : `${opp}${vs}${own}`;
                 const venue = L('kalender', home ? 'home' : 'away');
+                const oppLogo = `<img class="kal-logo" src="${getOpponentLogoSrc(e.opp || 'Gegner')}" alt="">`;
+                // Mit eigenem Wappen: Heimteam links, Gast rechts – sonst nur das Gegner-Wappen rechts
+                const leftLogo = ownLogo ? (home ? ownLogo : oppLogo) : '';
+                const rightLogo = ownLogo ? (home ? oppLogo : ownLogo) : oppLogo;
                 return `
                     <div class="kal-row ${home ? 'heim' : 'auswaerts'}">
                         <div class="kal-date"><span class="kal-wd">${WEEKDAYS[d.getDay()]}</span><span class="kal-day">${pad(d.getDate())}</span><span class="kal-mon">${MONTHS_SHORT[d.getMonth()]}</span></div>
+                        ${leftLogo}
                         <div class="kal-match">
                             <div class="kal-teams">${teams}</div>
                             <div class="kal-meta">${venue ? `<span class="kal-badge ${home ? 'heim' : 'auswaerts'}">${esc(venue)}</span>` : ''}${e.time ? `<span>${esc((e.time + ' ' + L('kalender', 'time')).trim())}</span>` : ''}</div>
                         </div>
-                        <img class="kal-logo" src="${getOpponentLogoSrc(e.opp || 'Gegner')}" alt="">
+                        ${rightLogo}
                     </div>`;
             }).join('');
         }
@@ -4246,9 +4285,30 @@
             scheduleSave();
         }
 
+        /* Alle bekannten Spiele: Kalender-Termine + eingefügter Saison-Spielplan (ohne Doppelte) */
+        function allKnownGames() {
+            const list = [...readKalenderInputs()];
+            season.forEach(g => { if (!list.some(e => e.date === g.date && e.opp === g.opp)) list.push(g); });
+            return list.sort((a, b) => (a.date + (a.time || '99:99')).localeCompare(b.date + (b.time || '99:99')));
+        }
+
+        function applyLastKalenderToErgebnis() {
+            const last = allKnownGames().filter(e => e.date <= todayISO()).pop();
+            if (!last) { alert('Kein vergangenes Spiel (bis heute) im Kalender oder Spielplan gefunden.'); return; }
+            const home = last.venue !== 'auswaerts';
+            setVal('in-post-venue', home ? 'heim' : 'auswaerts');
+            setVal('in-post-opponent-select', last.opp || '');
+            updateMatchup();
+            updateErgebnis();
+            updateCaption('ergebnis');
+            scheduleSave();
+            const d = parseISODate(last.date);
+            toast(`✅ Spiel vom ${pad(d.getDate())}.${pad(d.getMonth() + 1)}. gegen ${last.opp || 'Gegner'} übernommen`);
+        }
+
         function applyNextKalenderToPost() {
-            const next = readKalenderInputs().find(e => e.date >= todayISO());
-            if (!next) { alert('Kein kommender Termin im Kalender gefunden.'); return; }
+            const next = allKnownGames().find(e => e.date >= todayISO());
+            if (!next) { alert('Kein kommender Termin im Kalender oder Spielplan gefunden.'); return; }
             const d = parseISODate(next.date);
             const home = next.venue !== 'auswaerts';
             setVal('in-post-venue', home ? 'heim' : 'auswaerts');
@@ -4691,6 +4751,9 @@
                 feedFormat: getFeedFormat(),
                 hashtags: val('cfg-hashtags'),
                 bdayConfetti: $('in-bday-confetti')?.checked ?? true,
+                kalOwnLogo: $('in-kal-own-logo')?.checked ?? true,
+                wkOwnLogo: $('in-wk-own-logo')?.checked ?? true,
+                season: season,
                 customTexts: customTexts,
                 labels: labels,
 
@@ -4765,6 +4828,10 @@
             if (data.numbersShow !== undefined && $('cfg-show-numbers')) $('cfg-show-numbers').checked = data.numbersShow;
             if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
             if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
+            if ($('in-kal-own-logo')) $('in-kal-own-logo').checked = data.kalOwnLogo ?? true;
+            if ($('in-wk-own-logo')) $('in-wk-own-logo').checked = data.wkOwnLogo ?? true;
+            season = Array.isArray(data.season) ? data.season : [];
+            renderSeasonPreview();
 
             if (data.eckArrows) eckArrows = data.eckArrows;
             if (data.eckNodes) eckNodes = data.eckNodes;
@@ -5572,6 +5639,224 @@
             toast('🗑️ Beispieldaten entfernt');
         }
 
+
+        /* =========================================================
+           SPIELPLAN EINFÜGEN (Text aus fussball.de, Excel/CSV, Liste)
+           ========================================================= */
+        const SCHEDULE_SKIP = /(liga|klasse|staffel|spieltag|pokal|junioren|jugend|meisterschaft|freundschaft|testspiel|turnier)|\b(spielbericht|vorbericht|nachbericht|anstoß|anstoss|datum|uhrzeit|ergebnis|spielort|sportplatz|kunstrasen|rasenplatz|halle|abgesagt|verlegt|nichtantritt|spielfrei|herren|damen|frauen|senioren|zum spiel|spielinfo|details|tickets|u\d{1,2})\b/i;
+        const LEAGUE_RE = /[a-zäöü-]*(liga|klasse|staffel)\b(\s+(?:[a-z]{1,2}\d?|\d{1,2}))?\b/gi;
+        const WEEKDAY_RE = /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|mo|di|mi|do|fr|sa|so)\b\.?,?/gi;
+        const normTeam = s => String(s || '').toLowerCase().replace(/e\.\s?v\.?/g, '').replace(/[^a-z0-9äöüß]+/g, ' ').trim();
+
+        function teamMatches(a, b) {
+            const x = normTeam(a), y = normTeam(b);
+            if (!x || !y) return false;
+            if (x === y) return true;
+            const short = x.length < y.length ? x : y, long = x.length < y.length ? y : x;
+            return short.length >= 5 && long.includes(short);
+        }
+
+        function inferYear(day, month, yearStr) {
+            if (yearStr) return yearStr.length === 2 ? 2000 + +yearStr : +yearStr;
+            const now = new Date();
+            let y = now.getFullYear();
+            // Liegt das Datum mehr als 4 Monate zurück, gehört es zur nächsten Saisonhälfte
+            if (new Date(y, month - 1, day) < new Date(now.getFullYear(), now.getMonth() - 4, now.getDate())) y++;
+            return y;
+        }
+
+        function parseSchedule(text, ownNames) {
+            text = String(text || '').replace(/\r/g, '');
+            const dateRe = /(\d{4})-(\d{2})-(\d{2})|(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2}(?!\d))?/g;
+            const found = [];
+            let m;
+            while ((m = dateRe.exec(text))) {
+                const day = +(m[3] || m[4]), month = +(m[2] || m[5]);
+                if (day < 1 || day > 31 || month < 1 || month > 12) continue;
+                // „15.00 Uhr“ o.ä. ist keine Datumsangabe
+                if (!m[1] && !m[6] && /^\s*uhr/i.test(text.slice(dateRe.lastIndex))) continue;
+                const year = m[1] ? +m[1] : inferYear(day, month, m[6]);
+                found.push({ index: m.index, end: dateRe.lastIndex, iso: `${year}-${pad(month)}-${pad(day)}` });
+            }
+            if (!found.length) return [];
+
+            // Steht in jeder Zeile ein Datum → zeilenweise, sonst beginnt jeder Block mit einem Datum
+            const lines = text.split('\n').filter(l => l.trim());
+            const lineMode = lines.every(l => /\d{1,2}\.\d{1,2}\.|\d{4}-\d{2}-\d{2}/.test(l));
+            const blocks = [];
+            if (lineMode) {
+                let pos = 0;
+                text.split('\n').forEach(line => {
+                    const start = pos; pos += line.length + 1;
+                    const f = found.find(x => x.index >= start && x.index < start + line.length);
+                    if (f) blocks.push({ iso: f.iso, text: line.slice(0, f.index - start) + '\n' + line.slice(f.end - start) });
+                });
+            } else {
+                found.forEach((f, i) => blocks.push({ iso: f.iso, text: text.slice(f.end, i + 1 < found.length ? found[i + 1].index : text.length) }));
+            }
+
+            const games = [];
+            blocks.forEach(b => {
+                let t = b.text;
+                let time = '';
+                const tm = /\b([01]?\d|2[0-3])[:.]([0-5]\d)\b(?!\s*:\s*\d)/.exec(t);
+                if (tm) { time = `${pad(+tm[1])}:${tm[2]}`; t = t.slice(0, tm.index) + ' ' + t.slice(tm.index + tm[0].length); }
+                t = t.replace(LEAGUE_RE, ' ');   // „Kreisliga A“ – das A ist kein Auswärts-Kürzel
+                let marker = '';
+                const mk = /\((h|a)\)|\b(heim|auswärts|auswaerts)\b|(?:^|\s)(h|a)\s*$/im.exec(t);
+                if (mk) { marker = (mk[1] || mk[2] || mk[3]).toLowerCase().startsWith('h') ? 'heim' : 'auswaerts'; t = t.replace(mk[0], ' '); }
+                t = t.replace(/\buhr\b/gi, ' ').replace(WEEKDAY_RE, ' ').replace(/-\s*:\s*-/g, ' ').replace(/\b\d{1,2}\s*:\s*\d{1,2}\b/g, ' ');
+                const segs = t.split(/\n|\t|;|\||\s[-–—]\s|\s[-–—]$|^[-–—]\s|\svs\.?\s|\sgegen\s|\s:\s/i)
+                    .map(x => x.replace(/^[\s,.:\-–—|]+|[\s,.:\-–—|]+$/g, '').replace(/\s+/g, ' '))
+                    .filter(x => x.length >= 3 && /[a-zäöü]/i.test(x) && !SCHEDULE_SKIP.test(x));
+                const ownIdx = segs.findIndex(x => ownNames.some(n => teamMatches(x, n)));
+                const others = segs.map((x, i) => ({ x, i })).filter(o => o.i !== ownIdx && !ownNames.some(n => teamMatches(o.x, n)));
+                if (!others.length) return;
+                const known = others.find(o => stammdaten.opponents.some(op => teamMatches(op.name, o.x))) || others[0];
+                const knownName = stammdaten.opponents.find(op => teamMatches(op.name, known.x))?.name;
+                let venue = marker || 'heim';
+                if (!marker && ownIdx >= 0) venue = ownIdx < known.i ? 'heim' : 'auswaerts';
+                const opp = knownName || known.x;
+                if (!games.some(g => g.date === b.iso && g.opp === opp)) games.push({ date: b.iso, time, opp, venue });
+            });
+            return games.sort((a, b) => (a.date + (a.time || '99:99')).localeCompare(b.date + (b.time || '99:99')));
+        }
+
+        async function importSeason() {
+            const text = val('season-input');
+            if (!normName(text)) { alert('Bitte zuerst den Spielplan in das Textfeld einfügen.'); return; }
+            const own = [getTeamName(), club && !club.demo ? club.name : ''].filter(Boolean);
+            const games = parseSchedule(text, own);
+            if (!games.length) {
+                alert('Es wurden keine Spiele erkannt.\n\nJede Zeile bzw. jeder Block braucht ein Datum (z.B. 05.10.2026) und den Gegner, z.B.:\n05.10.2026 15:00 TSGV Rechberg - FC Musterstadt');
+                return;
+            }
+            const unknown = [...new Set(games.map(g => g.opp))].filter(n => !findOpponent(n));
+            if (unknown.length) {
+                unknown.forEach(name => stammdaten.opponents.push({ name, img: null }));
+                await onStammdatenChanged('opponents');
+            }
+            season = games;
+            fillKalenderFromSeason(true);
+            setVal('season-input', '');
+            renderSeasonPreview();
+            scheduleSave();
+            toast(`✅ ${games.length} Spiele erkannt` + (unknown.length ? ` · ${unknown.length} neue Gegner angelegt` : ''));
+        }
+
+        function fillKalenderFromSeason(silent) {
+            const upcoming = season.filter(g => g.date >= todayISO()).slice(0, KAL_MAX);
+            if (!upcoming.length) { if (!silent) alert('Im Spielplan gibt es keine kommenden Spiele.'); return; }
+            for (let i = 1; i <= KAL_MAX; i++) {
+                const g = upcoming[i - 1];
+                setVal(`kal-date-${i}`, g ? g.date : '');
+                setVal(`kal-time-${i}`, g ? g.time : '');
+                setVal(`kal-opp-${i}`, g ? g.opp : '');
+                setVal(`kal-venue-${i}`, g ? g.venue : 'heim');
+            }
+            updateKalender();
+            scheduleSave();
+            if (!silent) toast(`📅 ${upcoming.length} Termine in den Kalender übernommen`);
+        }
+
+        function clearSeason() {
+            if (!season.length || !confirm('Eingefügten Spielplan löschen? Die Termine im Kalender bleiben erhalten.')) return;
+            season = [];
+            renderSeasonPreview();
+            scheduleSave();
+        }
+
+        function renderSeasonPreview() {
+            const host = $('season-preview');
+            setText('season-count', season.length);
+            if (!host) return;
+            if (!season.length) { host.innerHTML = '<span class="sd-empty">Noch kein Spielplan eingefügt.</span>'; return; }
+            const today = todayISO();
+            const upcoming = season.filter(g => g.date >= today).length;
+            host.innerHTML = `<div class="sp-sum">${season.length} Spiele · ${upcoming} kommend</div>` + season.map(g => {
+                const d = parseISODate(g.date);
+                return `<div class="sp-row ${g.date < today ? 'past' : ''}"><span>${WEEKDAYS[d.getDay()]} ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${String(d.getFullYear()).slice(2)}</span><span>${esc(g.time || '')}</span><span>${g.venue === 'auswaerts' ? '✈️' : '🏠'}</span><span>${esc(g.opp)}</span></div>`;
+            }).join('');
+        }
+
+        /* =========================================================
+           VEREINSFARBEN AUS DEM WAPPEN
+           ========================================================= */
+        const toHex = (r, g, b) => '#' + [r, g, b].map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
+        const lumOf = ([r, g, b]) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        const colorDist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+        async function extractCrestColors(src) {
+            const img = new Image();
+            img.src = src;
+            await img.decode();
+            const N = 96;
+            const c = document.createElement('canvas');
+            c.width = c.height = N;
+            const ctx = c.getContext('2d', { willReadFrequently: true });
+            const k = Math.min(N / img.naturalWidth, N / img.naturalHeight);
+            const w = img.naturalWidth * k, h = img.naturalHeight * k;
+            ctx.drawImage(img, (N - w) / 2, (N - h) / 2, w, h);
+            const d = ctx.getImageData(0, 0, N, N).data;
+            // Hintergrund = Farbe der Bildecken (falls nicht transparent)
+            const px = (x, y) => { const i = (y * N + x) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; };
+            const x0 = Math.ceil((N - w) / 2), y0 = Math.ceil((N - h) / 2), x1 = Math.floor((N + w) / 2) - 1, y1 = Math.floor((N + h) / 2) - 1;
+            const corners = [px(x0, y0), px(x1, y0), px(x0, y1), px(x1, y1)].filter(p => p[3] > 200);
+            const buckets = new Map();
+            for (let i = 0; i < d.length; i += 4) {
+                if (d[i + 3] < 200) continue;
+                const rgb = [d[i], d[i + 1], d[i + 2]];
+                if (corners.some(cn => colorDist(cn, rgb) < 60)) continue;
+                const max = Math.max(...rgb), min = Math.min(...rgb);
+                const sat = max ? (max - min) / max : 0;
+                const l = lumOf(rgb);
+                if (l > 0.93 && sat < 0.1) continue;           // Weiß
+                const key = (rgb[0] >> 5) + ',' + (rgb[1] >> 5) + ',' + (rgb[2] >> 5);
+                const bkt = buckets.get(key) || { n: 0, w: 0, r: 0, g: 0, b: 0 };
+                const wgt = sat < 0.15 ? 0.4 : 1 + 3 * sat;   // kräftige Farben bevorzugen
+                bkt.n++; bkt.w += wgt; bkt.r += rgb[0]; bkt.g += rgb[1]; bkt.b += rgb[2];
+                buckets.set(key, bkt);
+            }
+            const cols = [...buckets.values()].filter(b => b.n >= 8).sort((a, b) => b.w - a.w).map(b => [b.r / b.n, b.g / b.n, b.b / b.n]);
+            if (!cols.length) return null;
+            const satOf = rgb => { const mx = Math.max(...rgb), mn = Math.min(...rgb); return mx ? (mx - mn) / mx : 0; };
+            const first = cols[0];
+            const second = cols.find(cl => colorDist(cl, first) > 90);
+            let primary = first, accent = second || null;
+            if (second) {
+                const [dark, light] = lumOf(first) <= lumOf(second) ? [first, second] : [second, first];
+                // Normal: dunklere Farbe als Hintergrund. Ist die dunkle aber nur Schwarz/Grau und die bunte selbst dunkel genug → die bunte.
+                const preferLight = satOf(dark) < 0.25 && satOf(light) >= 0.25 && lumOf(light) <= 0.5;
+                [primary, accent] = preferLight ? [light, dark] : [dark, light];
+            }
+            if (accent && satOf(accent) < 0.2 && lumOf(accent) > 0.6) accent = [255, 255, 255];
+            // Hauptfarbe dient als Hintergrund → bei zu hellen Farben abdunkeln
+            if (lumOf(primary) > 0.5) primary = primary.map(v => v * 0.55);
+            if (!accent) accent = lumOf(first) < 0.35 ? [255, 255, 255] : first;
+            return { primary: toHex(...primary), jersey: toHex(...accent) };
+        }
+
+        async function applyCrestColors(target) {
+            const src = club && club.logo ? club.logo : null;
+            if (!src) { alert('Es ist noch kein Vereinswappen hinterlegt.'); return false; }
+            let cols;
+            try { cols = await extractCrestColors(src); } catch (e) { cols = null; }
+            if (!cols) { alert('Aus dem Wappen konnten keine Farben ermittelt werden.'); return false; }
+            if (target === 'wizard') {
+                setVal('wz-primary', cols.primary);
+                setVal('wz-jersey', cols.jersey);
+                wizardSync();
+            } else {
+                setVal('cfg-color-primary', cols.primary);
+                setVal('cfg-color-jersey', cols.jersey);
+                updateDesignSettings();
+                renderAll();
+                scheduleSave();
+            }
+            toast('🎨 Farben aus dem Wappen übernommen');
+            return true;
+        }
+
         /* ---------- Grafik-Paket: mehrere Grafiken auf einmal ---------- */
         let packFiles = [];
         let packUrls = [];
@@ -5863,6 +6148,9 @@
                 : 'Tipp: Installiere die App danach über das Browser-Menü auf deinem Startbildschirm – dann bleiben deine Daten dauerhaft gespeichert.');
             $('wizard-overlay').hidden = false;
             updateWizard();
+            // Noch Standardfarben + echtes Wappen → Farben gleich aus dem Wappen vorschlagen
+            const untouched = val('wz-primary').toLowerCase() === '#005f73' && val('wz-jersey').toLowerCase() === '#bb3e03';
+            if (untouched && club && club.logo && !club.demo) applyCrestColors('wizard').catch(() => {});
         }
 
         function updateWizard() {
