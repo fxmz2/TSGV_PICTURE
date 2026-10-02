@@ -3,7 +3,7 @@
    - Bibliotheken, Schriften, Icons: aus dem Zwischenspeicher
    - vereine.txt und Wappen: immer aus dem Netz (werden nie zwischengespeichert)
    Bei jeder neuen App-Version CACHE_VERSION erhöhen. */
-const CACHE_VERSION = 'clubsnap-v17.6';
+const CACHE_VERSION = 'clubsnap-v17.7';
 
 const CORE_FILES = [
     './',
@@ -21,6 +21,8 @@ const CORE_FILES = [
     './icons/icon-192.png',
     './icons/icon-512.png',
     './icons/apple-touch-icon.png',
+    './icons/icon-maskable-512.png',
+    './icons/favicon-32.png',
     './impressum.html',
     './datenschutz.html',
     './agb.html'

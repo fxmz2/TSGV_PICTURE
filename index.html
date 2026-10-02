@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Club-Snap – Grafiken für Vereine 17.6</title>
+    <title>Club-Snap – Grafiken für Vereine 17.7</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,11 +18,12 @@
     <meta name="apple-mobile-web-app-title" content="Club-Snap">
 
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" href="club-snap.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 
     <!-- Für Android (Manifest) -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#005f73">
+    <meta name="theme-color" content="#0b1d26">
 
     <!-- Bibliotheken & Schriften liegen lokal im Ordner vendor/ (DSGVO: keine Anfragen an Google oder CDNs) -->
     <script src="vendor/html2canvas.min.js"></script>
@@ -1801,7 +1802,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "17.6";
+        const APP_VERSION = "17.7";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
