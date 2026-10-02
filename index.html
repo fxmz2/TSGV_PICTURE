@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 17.9</title>
+    <title>ClubShot – Grafiken für Vereine 18.0</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -380,6 +380,7 @@
         .sd-meta select, .sd-meta input { font-size: 11px; padding: 2px 3px; border: 1px solid #ccc; border-radius: 4px; background: #fff; min-width: 0; }
         .sd-meta select { flex: 1 1 42%; max-width: 140px; }
         .sd-meta input { width: 38px; text-align: center; }
+        .num-input[hidden], #new-number-field[hidden] { display: none; }
         .sd-group-head { position: sticky; top: 0; z-index: 1; background: #eef3f5; color: #0b3b47; font-size: 11px; font-weight: bold; text-transform: uppercase;
             letter-spacing: 0.5px; padding: 4px 6px; margin-top: 6px; border-radius: 4px; }
         .sd-group-head span { float: right; opacity: 0.6; }
@@ -997,7 +998,8 @@
                     </select>
                 </div>
                 <div class="control-group">
-                    <label><input type="checkbox" id="cfg-show-numbers" checked onchange="buildFormation();"> Rückennummern auf Spielerbildern anzeigen</label>
+                    <label><input type="checkbox" id="cfg-show-numbers" onchange="buildFormation(); updateNumberInputs();"> 🔢 Rückennummern anzeigen</label>
+                    <span class="hint">Nur wenn angehakt, erscheinen Nummern auf dem Spielfeld, den Trikots und in der Liste. Leere Felder nehmen die Nummer aus „Daten“.</span>
                 </div>
 
                 <div class="control-group"><label>Titel-Text</label><input type="text" id="in-story-title-text" value="S11" oninput="updateStoryTitle();"></div>
@@ -1216,10 +1218,11 @@
                 </div>
                 <div class="control-group"><label>Spieler</label><select id="in-new-player" class="player-select" onchange="updateNeuzugang();"></select></div>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-new-title" value="NEUZUGANG" oninput="updateNeuzugang();"></div>
-                <div style="display:grid; grid-template-columns: 1fr 90px; gap: 8px;">
-                    <div class="control-group"><label>Position</label><input type="text" id="in-new-position" value="" placeholder="z.B. Stürmer" oninput="updateNeuzugang();"></div>
-                    <div class="control-group"><label>Nummer</label><input type="text" id="in-new-number" value="" placeholder="9" oninput="updateNeuzugang();"></div>
+                <div style="display:flex; gap: 8px;">
+                    <div class="control-group" style="flex:1;"><label>Position</label><input type="text" id="in-new-position" value="" placeholder="z.B. Stürmer" oninput="updateNeuzugang();"></div>
+                    <div class="control-group" id="new-number-field" style="width:90px;" hidden><label>Nummer</label><input type="text" id="in-new-number" value="" placeholder="9" oninput="updateNeuzugang();"></div>
                 </div>
+                <div class="control-group"><label><input type="checkbox" id="in-new-show-number" onchange="updateNumberInputs(); updateNeuzugang(); updateCaption('neuzugang');"> 🔢 Rückennummer anzeigen</label></div>
                 <span class="hint" style="margin:-4px 0 8px;">Leer lassen = Position, Nummer und Mannschaft werden automatisch aus den Spielerdaten („Daten“) übernommen.</span>
                 <div id="new-from-controls">
                     <div class="control-group">
@@ -1841,7 +1844,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "17.9";
+        const APP_VERSION = "18.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -1860,14 +1863,23 @@
         const BACKUP_REMIND_DAYS = 30;
         const BACKUP_REMIND_DAYS_UNSAFE = 7;
 
+        /* Alle Vereinsdaten (Stammdaten, Versionen) liegen getrennt je Vereinscode: vg_c_<CODE>_…
+           Gerätebezogenes (aktiver Verein, Reiter, Geräte-Einstellungen) bleibt global. */
+        let clubNs = '';
+        function nsForClub(c) { return c ? 'c_' + (c.demo ? 'DEMO' : normalizeCode(c.code)) + '_' : ''; }
         const STORE = {
-            stammdaten: 'vg_stammdaten',
+            get stammdaten() { return 'vg_' + clubNs + 'stammdaten'; },
             club: 'vg_club',
-            version: 'vg_current_version',
+            get version() { return 'vg_' + clubNs + 'current_version'; },
             tab: 'vg_active_tab',
             prefs: 'vg_prefs',
-            slot: v => 'vg_slot_' + v
+            slot: v => 'vg_' + clubNs + 'slot_' + v
         };
+        const NS_KEYS = ['stammdaten', 'current_version', 'slot_v1', 'slot_v2', 'slot_v3'];
+        // Einstellungen, die zum Verein gehören (werden in prefs.byClub je Verein abgelegt)
+        const CLUB_PREF_KEYS = ['versionNames', 'lastBackupAt', 'backupSnoozeUntil', 'onboardingDone', 'demoSeeded'];
+        const clubPrefDefaults = () => ({ versionNames: {}, lastBackupAt: null, backupSnoozeUntil: null, onboardingDone: false, demoSeeded: false });
+        const pickClubPrefs = () => Object.fromEntries(CLUB_PREF_KEYS.map(k => [k, prefs[k] ?? clubPrefDefaults()[k]]));
         const LEGACY_SLOT = v => 'sva_slot_' + v;
 
         const PLAYER_FALLBACK = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23c9ced6'/><circle cx='50' cy='38' r='18' fill='%23ffffff'/><path d='M16 100 C18 72 34 62 50 62 C66 62 82 72 84 100 Z' fill='%23ffffff'/></svg>";
@@ -2771,6 +2783,13 @@
             await onStammdatenChanged('players');
         }
 
+        function updateNumberInputs() {
+            const lineup = !!$('cfg-show-numbers')?.checked;
+            document.querySelectorAll('#starter-controls .num-input').forEach(i => { i.hidden = !lineup; });
+            const nz = !!$('in-new-show-number')?.checked;
+            if ($('new-number-field')) $('new-number-field').hidden = !nz;
+        }
+
         function getPlayersOptionsHTML() {
             let options = '<option value="Keiner">Keiner</option>';
             if (hasTeamAssignments()) {
@@ -3307,7 +3326,8 @@
             eckball:    { keys: ['eckArrows', 'eckNodes'], inputs: [/^eck-/] }
         };
         const TAB_DESIGN_EXTRA = {
-            story:    { keys: ['pitchMode', 'numbersShow'], inputs: [] },
+            story:    { keys: ['pitchMode', 'showNumbers2'], inputs: [] },
+            neuzugang: { keys: ['newShowNumber'], inputs: [] },
             tor:      { keys: ['torImgSize'], inputs: [] },
             kalender: { keys: ['kalOwnLogo'], inputs: [/^in-kal-color-/] },
             wochenende: { keys: ['wkOwnLogo'], inputs: [] }
@@ -3974,7 +3994,7 @@
             const rows = formations[formType] || [1, 4, 4, 2];
             const pitchStory = $('pitch');
             const pitchFeed = $('pitch-feed');
-            const showNumbers = $('cfg-show-numbers')?.checked ?? true;
+            const showNumbers = !!$('cfg-show-numbers')?.checked;
 
             if(pitchStory) pitchStory.innerHTML = '';
             if(pitchFeed) pitchFeed.innerHTML = '';
@@ -3988,7 +4008,7 @@
                     const numInput = $(`num-player-${playerIdx}`);
                     const pNum = name !== 'Keiner' ? (findPlayer(name)?.number || '') : '';
                     if (numInput) numInput.placeholder = pNum || 'Nr.';
-                    let numVal = esc(val(`num-player-${playerIdx}`) || pNum);
+                    let numVal = showNumbers ? esc(val(`num-player-${playerIdx}`) || pNum) : '';
                     let numBadge = (showNumbers && numVal && pitchMode === 'photos') ? `<div class="player-number-badge">${numVal}</div>` : '';
 
                     let avatarHTML = '';
@@ -3996,7 +4016,7 @@
                         avatarHTML = `
                             <svg class="jersey-svg-icon" viewBox="0 0 64 64">
                                 <path d="M18 12 L26 6 L38 6 L46 12 L58 18 L50 30 L44 25 L44 58 L20 58 L20 25 L14 30 L6 18 Z" fill="var(--jersey-color)" stroke="#ffffff" stroke-width="2.5"/>
-                                <text x="32" y="41" font-size="18" font-weight="bold" fill="#ffffff" text-anchor="middle">${numVal || '?'}</text>
+                                <text x="32" y="41" font-size="18" font-weight="bold" fill="#ffffff" text-anchor="middle">${numVal}</text>
                             </svg>`;
                     } else {
                         avatarHTML = `${numBadge}<img class="player-img" src="${getPlayerImageSrc(name, 'story')}" alt="">`;
@@ -4244,7 +4264,7 @@
             return {
                 name, p, vorstellung,
                 position: normName(val('in-new-position')) || p?.position || '',
-                number: normName(val('in-new-number')) || p?.number || '',
+                number: $('in-new-show-number')?.checked ? (normName(val('in-new-number')) || p?.number || '') : '',
                 team: p?.team || ''
             };
         }
@@ -4772,6 +4792,7 @@
         function renderAll() {
             applyFeedFormatClasses();
             applyLabels();
+            updateNumberInputs();
             updateDesignSettings();
             editorTabs.forEach(t => { updateTabDesign(t); renderSelectedSponsors(t); });
             updatePostFields();
@@ -4907,7 +4928,8 @@
                 jerseyColor: val('cfg-color-jersey') || '#bb3e03',
                 frameColor: val('cfg-color-frame') || '#ffffff',
                 selectedSponsors: selectedSponsors,
-                numbersShow: $('cfg-show-numbers')?.checked ?? true,
+                showNumbers2: !!$('cfg-show-numbers')?.checked,
+                newShowNumber: !!$('in-new-show-number')?.checked,
 
                 venue: val('in-post-venue') || 'heim',
                 opponentSelect: val('in-post-opponent-select'),
@@ -5019,7 +5041,10 @@
             }
             // Alte Versionen hatten "SVA" als festen Standardnamen
             if (data.teamName === 'SVA' && club) setVal('cfg-team-name', '');
-            if (data.numbersShow !== undefined && $('cfg-show-numbers')) $('cfg-show-numbers').checked = data.numbersShow;
+            // Nummern sind ab v18 nur noch auf Wunsch sichtbar (eigener Schlüssel, Standard: aus)
+            if ($('cfg-show-numbers')) $('cfg-show-numbers').checked = !!data.showNumbers2;
+            if ($('in-new-show-number')) $('in-new-show-number').checked = !!data.newShowNumber;
+            updateNumberInputs();
             if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
             if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
             if ($('in-kal-own-logo')) $('in-kal-own-logo').checked = data.kalOwnLogo ?? true;
@@ -5343,8 +5368,8 @@
             // Demo-Modus: ohne Server, Exporte mit Wasserzeichen
             if (code === DEMO_CODE) {
                 if (club && !club.demo && !isLicenseExpired(club) && !confirm('Du hast bereits einen gültigen Vereinscode. Wirklich in den Demo-Modus wechseln?')) return;
-                club = { code, name: 'Demo-Verein', demo: true, logo: demoCrestSvg('Demo Verein', '#005f73', '#bb3e03'), logoFile: '', validUntil: null, checkedAt: Date.now() };
-                await localforage.setItem(STORE.club, club);
+                const demoClub = { code, name: 'Demo-Verein', demo: true, logo: demoCrestSvg('Demo Verein', '#005f73', '#bb3e03'), logoFile: '', validUntil: null, checkedAt: Date.now() };
+                if (await switchClubTo(demoClub, '🧪 Demo-Modus aktiv')) return;
                 hideLicenseOverlay();
                 applyClubBranding();
                 renderAll();
@@ -5378,8 +5403,8 @@
                     return;
                 }
                 const previousName = club ? club.name : null;
-                club = { code, name: entry.name, logoFile: entry.logo, logo: await loadClubLogo(entry.logo), validUntil: entry.validUntil, checkedAt: Date.now() };
-                await localforage.setItem(STORE.club, club);
+                const newClub = { code, name: entry.name, logoFile: entry.logo, logo: await loadClubLogo(entry.logo), validUntil: entry.validUntil, checkedAt: Date.now() };
+                if (await switchClubTo(newClub, `✅ ${entry.name} freigeschaltet`)) return;
                 const teamInput = $('cfg-team-name');
                 if (teamInput && (teamInput.value === previousName || teamInput.value === 'SVA')) teamInput.value = '';
                 hideLicenseOverlay();
@@ -6208,7 +6233,47 @@
            EINSTELLUNGEN FÜR DAS GERÄT (Versionsnamen, Hilfslinien, Backup)
            ========================================================= */
         async function savePrefs() {
+            if (clubNs) { prefs.byClub = prefs.byClub || {}; prefs.byClub[clubNs] = pickClubPrefs(); }
             try { await localforage.setItem(STORE.prefs, prefs); } catch (e) { console.warn(e); }
+        }
+
+        /* ---------- Vereinsdaten je Code ---------- */
+        async function nsHasData(ns) {
+            for (const k of ['stammdaten', 'slot_v1', 'slot_v2', 'slot_v3']) if (await localforage.getItem('vg_' + ns + k)) return true;
+            return false;
+        }
+        async function copyNamespace(fromNs, toNs, move) {
+            for (const k of NS_KEYS) {
+                const v = await localforage.getItem('vg_' + fromNs + k);
+                if (v !== null && v !== undefined) await localforage.setItem('vg_' + toNs + k, v);
+                if (move) await localforage.removeItem('vg_' + fromNs + k);
+            }
+        }
+        /* Wechselt den aktiven Verein. Bei anderem Code werden dessen eigene Daten geladen (Neustart der Seite).
+           Gibt true zurück, wenn neu geladen wird. */
+        async function switchClubTo(newClub, message) {
+            const oldNs = clubNs, oldName = club ? (club.demo ? 'Demo-Modus' : club.name) : 'dem bisherigen Verein';
+            const newNs = nsForClub(newClub);
+            club = newClub;
+            await localforage.setItem(STORE.club, club);
+            if (oldNs === newNs) return false;
+            if (appReady) await saveSlotNow();
+            await savePrefs();
+            prefs.byClub = prefs.byClub || {};
+            if (!(await nsHasData(newNs))) {
+                if (!oldNs && await nsHasData('')) {
+                    // Daten aus der Zeit vor der Trennung gehören zum ersten freigeschalteten Verein
+                    await copyNamespace('', newNs, true);
+                    prefs.byClub[newNs] = pickClubPrefs();
+                } else if (oldNs && await nsHasData(oldNs) && confirm(`Für „${newClub.demo ? 'Demo-Modus' : newClub.name}“ sind auf diesem Gerät noch keine Daten gespeichert.\n\nSollen die Daten von „${oldName}“ (Spieler, Gegner, Sponsoren, Hintergründe und Versionen) übernommen werden?\n\nOK = übernehmen · Abbrechen = leer starten`)) {
+                    await copyNamespace(oldNs, newNs, false);
+                    prefs.byClub[newNs] = { ...pickClubPrefs(), lastBackupAt: null, backupSnoozeUntil: null, demoSeeded: true };
+                }
+            }
+            try { await localforage.setItem(STORE.prefs, prefs); } catch (e) {}
+            try { if (message) sessionStorage.setItem('vg_toast', message); } catch (e) {}
+            location.reload();
+            return true;
         }
 
         function applyVersionNames() {
@@ -6238,7 +6303,7 @@
         }
 
         /* Einstellungen einer Version in eine andere kopieren (alles, nur Design oder nur Inhalte) */
-        const DESIGN_KEYS = ['primary', 'jerseyColor', 'frameColor', 'tabSettings', 'positions', 'customTexts', 'selectedSponsors', 'torImgSize', 'pitchMode', 'numbersShow', 'feedFormat', 'labels'];
+        const DESIGN_KEYS = ['primary', 'jerseyColor', 'frameColor', 'tabSettings', 'positions', 'customTexts', 'selectedSponsors', 'torImgSize', 'pitchMode', 'showNumbers2', 'newShowNumber', 'feedFormat', 'labels'];
         const DESIGN_INPUTS = [/^in-kal-color-/];
 
         async function copyBetweenVersions() {
@@ -6448,11 +6513,19 @@
                 // Manche Browser gewähren dauerhaften Speicher erst nach einer Nutzeraktion
                 document.addEventListener('pointerdown', () => { if (!storagePersisted) ensurePersistentStorage(true); }, { once: true });
 
+                club = await localforage.getItem(STORE.club);
+                prefs = { ...prefs, ...(await localforage.getItem(STORE.prefs) || {}) };
+                prefs.byClub = prefs.byClub || {};
+                clubNs = nsForClub(club);
+                if (clubNs && !(await nsHasData(clubNs)) && await nsHasData('')) {
+                    // Update: bisherige (gemeinsame) Daten gehören dem aktuell freigeschalteten Verein
+                    await copyNamespace('', clubNs, true);
+                    prefs.byClub[clubNs] = pickClubPrefs();
+                }
+                Object.assign(prefs, clubPrefDefaults(), prefs.byClub[clubNs] || (clubNs ? {} : pickClubPrefs()));
                 await migrateLegacyData();
                 stammdaten = { ...emptyStammdaten(), ...(await localforage.getItem(STORE.stammdaten) || {}) };
                 sortStammdaten();
-                club = await localforage.getItem(STORE.club);
-                prefs = { ...prefs, ...(await localforage.getItem(STORE.prefs) || {}) };
                 applyVersionNames();
                 setText('app-version-label', 'Version ' + APP_VERSION);
                 if ($('cfg-safe-zones')) $('cfg-safe-zones').checked = !!prefs.safeZones;
@@ -6524,11 +6597,23 @@
 
                 appReady = true;
 
+                try {
+                    const msg = sessionStorage.getItem('vg_toast');
+                    if (msg) { sessionStorage.removeItem('vg_toast'); toast(msg); }
+                } catch (e) {}
+
                 if (!club && LICENSE_REQUIRED) showLicenseOverlay(false);
                 else {
                     checkLicenseValidity();
                     verifyLicenseInBackground();
-                    if (!prefs.onboardingDone && !stammdaten.players.length) startWizard();
+                    // Demo ohne eigene Daten → mit Beispielen füllen, damit man sofort fertige Grafiken sieht
+                    const empty = !stammdaten.players.length && !stammdaten.opponents.length && !stammdaten.sponsors.length;
+                    if (club && club.demo && empty && !prefs.demoSeeded) {
+                        await loadDemoData(false);
+                        prefs.demoSeeded = true;
+                        savePrefs();
+                    }
+                    if (!prefs.onboardingDone && (club?.demo || !stammdaten.players.length)) startWizard();
                 }
             } catch (e) {
                 console.warn("InitApp Error:", e);
