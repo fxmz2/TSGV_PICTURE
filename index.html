@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 17.8</title>
+    <title>ClubShot – Grafiken für Vereine 17.9</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -376,6 +376,13 @@
         .sd-thumb.story { width: 22px; height: 39px; }
         .sd-name { flex: 1; min-width: 0; font-weight: bold; overflow-wrap: anywhere; }
         .sd-name small { display: block; font-weight: normal; color: #777; font-size: 10px; }
+        .sd-meta { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+        .sd-meta select, .sd-meta input { font-size: 11px; padding: 2px 3px; border: 1px solid #ccc; border-radius: 4px; background: #fff; min-width: 0; }
+        .sd-meta select { flex: 1 1 42%; max-width: 140px; }
+        .sd-meta input { width: 38px; text-align: center; }
+        .sd-group-head { position: sticky; top: 0; z-index: 1; background: #eef3f5; color: #0b3b47; font-size: 11px; font-weight: bold; text-transform: uppercase;
+            letter-spacing: 0.5px; padding: 4px 6px; margin-top: 6px; border-radius: 4px; }
+        .sd-group-head span { float: right; opacity: 0.6; }
         .sd-actions { display: flex; gap: 4px; flex-shrink: 0; }
         .sd-btn { background: #eef1f4; border: none; border-radius: 5px; padding: 5px 7px; cursor: pointer; font-size: 13px; line-height: 1; }
         .sd-btn.danger { background: #fde8ea; }
@@ -862,6 +869,23 @@
                 <h2 style="font-size:1.3rem; margin-bottom:8px;">🗃️ Stammdaten verwalten</h2>
                 <span class="hint" style="margin-bottom:14px;">Alles wird nur lokal auf diesem Gerät gespeichert. Mit dem JSON-Backup (Start) überträgst du die Daten auf ein anderes Gerät.</span>
 
+                <details class="sd-section">
+                    <summary>🏷️ Mannschaften & Positionen</summary>
+                    <div class="details-body">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div class="control-group"><label>Mannschaften (eine pro Zeile)</label>
+                                <textarea id="sd-teams" rows="6" class="caption-text" onchange="saveTeamPositionLists()"></textarea></div>
+                            <div class="control-group"><label>Positionen (eine pro Zeile)</label>
+                                <textarea id="sd-positions" rows="6" class="caption-text" onchange="saveTeamPositionLists()"></textarea></div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                            <button type="button" class="copy-action-btn" style="margin:0;" onclick="setPositionPreset('simple')">Positionen: einfach</button>
+                            <button type="button" class="copy-action-btn" style="margin:0;" onclick="setPositionPreset('detailed')">Positionen: detailliert</button>
+                        </div>
+                        <span class="hint">Die Reihenfolge bestimmt die Sortierung der Spielerliste und der Auswahlfelder. Umbenennen in derselben Zeile übernimmt die Zuordnung der Spieler.</span>
+                    </div>
+                </details>
+
                 <details class="sd-section" open>
                     <summary>👤 Spieler & Trainer <span class="sd-count" id="count-players">0</span></summary>
                     <div class="details-body">
@@ -873,6 +897,11 @@
                                 <option value="Trainer">Trainer</option>
                                 <option value="Betreuer">Betreuer</option>
                             </select>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 64px; gap: 6px;">
+                            <div class="control-group"><label>Mannschaft</label><select id="new-player-team" class="team-select"></select></div>
+                            <div class="control-group"><label>Position</label><select id="new-player-position" class="position-select"></select></div>
+                            <div class="control-group"><label>Nr.</label><input type="text" id="new-player-number" placeholder="–" maxlength="3"></div>
                         </div>
                         <div class="control-group"><label>Foto</label><input type="file" id="new-player-img" accept="image/*"></div>
                         <div class="control-group"><label>Torjubel-Foto (optional, für „Tor“)</label><input type="file" id="new-player-torimg" accept="image/*"></div>
@@ -1175,22 +1204,32 @@
 
             <!-- EDITOR: NEUZUGANG -->
             <div id="editor-neuzugang" class="editor-section">
-                <h2>🆕 Neuzugang</h2>
+                <h2>🆕 Neuzugang / Spielervorstellung</h2>
                 <div id="design-controls-neuzugang"></div>
 
+                <div class="control-group">
+                    <label>Art der Grafik</label>
+                    <select id="in-new-mode" onchange="onNewModeChange()">
+                        <option value="neuzugang">🆕 Neuzugang (mit „Kommt von“)</option>
+                        <option value="vorstellung">👋 Spielervorstellung (mit Mannschaft)</option>
+                    </select>
+                </div>
                 <div class="control-group"><label>Spieler</label><select id="in-new-player" class="player-select" onchange="updateNeuzugang();"></select></div>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-new-title" value="NEUZUGANG" oninput="updateNeuzugang();"></div>
                 <div style="display:grid; grid-template-columns: 1fr 90px; gap: 8px;">
                     <div class="control-group"><label>Position</label><input type="text" id="in-new-position" value="" placeholder="z.B. Stürmer" oninput="updateNeuzugang();"></div>
                     <div class="control-group"><label>Nummer</label><input type="text" id="in-new-number" value="" placeholder="9" oninput="updateNeuzugang();"></div>
                 </div>
-                <div class="control-group">
-                    <label>Kommt von (Gegner-Liste)</label>
-                    <select id="in-new-from-select" class="opp-select" onchange="updateNeuzugang();"></select>
-                </div>
-                <div class="control-group">
-                    <label>… oder Vereinsname eingeben</label>
-                    <input type="text" id="in-new-from-text" value="" placeholder="z.B. FC Musterstadt" oninput="updateNeuzugang();">
+                <span class="hint" style="margin:-4px 0 8px;">Leer lassen = Position, Nummer und Mannschaft werden automatisch aus den Spielerdaten („Daten“) übernommen.</span>
+                <div id="new-from-controls">
+                    <div class="control-group">
+                        <label>Kommt von (Gegner-Liste)</label>
+                        <select id="in-new-from-select" class="opp-select" onchange="updateNeuzugang();"></select>
+                    </div>
+                    <div class="control-group">
+                        <label>… oder Vereinsname eingeben</label>
+                        <input type="text" id="in-new-from-text" value="" placeholder="z.B. FC Musterstadt" oninput="updateNeuzugang();">
+                    </div>
                 </div>
                 <div class="control-group"><label>Text</label><input type="text" id="in-new-text" value="Herzlich willkommen im Team!" oninput="updateNeuzugang();"></div>
 
@@ -1802,7 +1841,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "17.8";
+        const APP_VERSION = "17.9";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -1851,6 +1890,10 @@
         const DEFAULT_BG = 'verlauf';
 
         const PLAYER_GROUPS = ['Spieler', 'Trainer', 'Betreuer'];
+        const DEFAULT_TEAMS = ['1. Mannschaft', '2. Mannschaft', 'Kaderpool'];
+        const DEFAULT_POSITIONS = ['Tor', 'Abwehr', 'Mittelfeld', 'Sturm'];
+        const DETAILED_POSITIONS = ['Torwart', 'Innenverteidiger', 'Außenverteidiger', 'Defensives Mittelfeld', 'Zentrales Mittelfeld',
+            'Offensives Mittelfeld', 'Flügelspieler', 'Stürmer'];
         const WEEKDAYS = ['SO', 'MO', 'DI', 'MI', 'DO', 'FR', 'SA'];
         const WEEKDAYS_LONG = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
         const MONTHS = ['JANUAR', 'FEBRUAR', 'MÄRZ', 'APRIL', 'MAI', 'JUNI', 'JULI', 'AUGUST', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DEZEMBER'];
@@ -1963,7 +2006,7 @@
         let pendingImageTarget = null;
 
         function emptyStammdaten() {
-            return { players: [], opponents: [], sponsors: [], templates: [] };
+            return { players: [], opponents: [], sponsors: [], templates: [], teams: [...DEFAULT_TEAMS], positions: [...DEFAULT_POSITIONS] };
         }
 
         /* =========================================================
@@ -2340,7 +2383,10 @@
         function sortStammdaten() {
             const coll = new Intl.Collator('de');
             const g = p => { const i = PLAYER_GROUPS.indexOf(p.group); return i < 0 ? 0 : i; };
-            stammdaten.players.sort((a, b) => (g(a) - g(b)) || coll.compare(a.name, b.name));
+            const idx = (list, v) => { const i = v ? list.indexOf(v) : -1; return i < 0 ? (v ? list.length : list.length + 1) : i; };
+            const t = p => idx(stammdaten.teams || [], p.team);
+            const pos = p => idx(stammdaten.positions || [], p.position);
+            stammdaten.players.sort((a, b) => (t(a) - t(b)) || (g(a) - g(b)) || (pos(a) - pos(b)) || coll.compare(a.name, b.name));
             stammdaten.opponents.sort((a, b) => coll.compare(a.name, b.name));
             stammdaten.sponsors.sort((a, b) => coll.compare(a.name, b.name));
         }
@@ -2412,6 +2458,7 @@
             const name = normName(val('new-player-name'));
             if (!name) { alert("Bitte einen Namen eingeben!"); return; }
             const group = val('new-player-group') || 'Spieler';
+            const team = val('new-player-team'), position = val('new-player-position'), number = normName(val('new-player-number'));
             const file = $('new-player-img').files[0];
             const torFile = $('new-player-torimg').files[0];
             try {
@@ -2420,13 +2467,21 @@
                 let p = findPlayer(name);
                 if (p) {
                     p.group = group;
+                    if (team) p.team = team;
+                    if (position) p.position = position;
+                    if (number) p.number = number;
                     if (img) { p.img = img; delete p.cutImg; }
                     if (torImg) { p.torImg = torImg; delete p.torCutImg; }
                 } else {
-                    stammdaten.players.push({ name, group, img, torImg });
+                    const np = { name, group, img, torImg };
+                    if (team) np.team = team;
+                    if (position) np.position = position;
+                    if (number) np.number = number;
+                    stammdaten.players.push(np);
                 }
             } catch (e) { alert(e.message); return; }
             $('new-player-name').value = '';
+            $('new-player-number').value = '';
             $('new-player-img').value = '';
             $('new-player-torimg').value = '';
             await onStammdatenChanged('players');
@@ -2616,12 +2671,26 @@
                 if (!host) return;
                 if (!list.length) { host.innerHTML = '<span class="sd-empty">Noch keine Einträge angelegt.</span>'; return; }
                 const btn = (icon, title, action, cls = '') => `<button type="button" class="sd-btn ${cls}" title="${title}" onclick="${action}">${icon}</button>`;
+                let lastHead = null;
                 host.innerHTML = list.map((e, i) => {
-                    let thumb, thumbCls = '', sub = '', btns = '';
+                    let thumb, thumbCls = '', sub = '', btns = '', meta = '', head = '';
+                    if (type === 'players' && hasTeamAssignments()) {
+                        const h = e.team && (stammdaten.teams || []).includes(e.team) ? e.team : 'Ohne Mannschaft';
+                        if (h !== lastHead) {
+                            lastHead = h;
+                            const n = list.filter(x => (x.team && (stammdaten.teams || []).includes(x.team) ? x.team : 'Ohne Mannschaft') === h).length;
+                            head = `<div class="sd-group-head">${esc(h)} <span>${n}</span></div>`;
+                        }
+                    }
                     if (type === 'players') {
                         thumb = e.cutImg || e.img || PLAYER_FALLBACK;
                         thumbCls = e.cutImg ? 'cut-thumb' : '';
                         sub = (e.group || 'Spieler') + (e.torImg ? ' · Torjubel-Foto ✓' : '') + (e.cutImg || e.torCutImg ? ' · freigestellt ✓' : '');
+                        meta = `<div class="sd-meta">
+                            <select title="Mannschaft" onchange="setPlayerField(${i}, 'team', this.value)">${teamOptionsHTML(e.team, '– Mannschaft –')}</select>
+                            ${(e.group || 'Spieler') === 'Spieler' ? `<select title="Position" onchange="setPlayerField(${i}, 'position', this.value)">${positionOptionsHTML(e.position, '– Position –')}</select>
+                            <input type="text" title="Rückennummer" placeholder="Nr." maxlength="3" value="${esc(e.number || '')}" onchange="setPlayerField(${i}, 'number', this.value)">` : ''}
+                        </div>`;
                         btns = btn('📷', 'Foto ändern', `changeEntryImage('players', ${i}, 'img')`) + btn('⚽', 'Torjubel-Foto ändern', `changeEntryImage('players', ${i}, 'torImg')`)
                             + (e.img || e.torImg ? btn('✂️', e.cutImg || e.torCutImg ? 'Freistellung entfernen' : 'Hintergrund entfernen', `togglePlayerCutout(${i})`, e.cutImg || e.torCutImg ? 'active' : '') : '');
                     } else if (type === 'templates') {
@@ -2636,21 +2705,91 @@
                                 : btn('✨', 'Hintergrund entfernen & zuschneiden', `toggleLogoClean('${type}', ${i})`)) : '');
                     }
                     btns += btn('🗑️', 'Löschen', `deleteEntry('${type}', ${i})`, 'danger');
-                    return `<div class="sd-item"><img class="sd-thumb ${thumbCls}" src="${thumb}" alt=""><div class="sd-name">${esc(e.name)}${sub ? `<small>${esc(sub)}</small>` : ''}</div><div class="sd-actions">${btns}</div></div>`;
+                    return `${head}<div class="sd-item"><img class="sd-thumb ${thumbCls}" src="${thumb}" alt=""><div class="sd-name">${esc(e.name)}${sub ? `<small>${esc(sub)}</small>` : ''}${meta}</div><div class="sd-actions">${btns}</div></div>`;
                 }).join('');
             });
+            refreshTeamPositionSelects();
         }
 
         /* =========================================================
            DROPDOWNS
            ========================================================= */
+        function hasTeamAssignments() { return stammdaten.players.some(p => p.team && (stammdaten.teams || []).includes(p.team)); }
+        function playerOptionLabel(p) {
+            const extra = (p.group && p.group !== 'Spieler') ? p.group : p.position;
+            return extra ? `${p.name} · ${extra}` : p.name;
+        }
+        function teamOptionsHTML(selected, emptyLabel) {
+            const list = [...(stammdaten.teams || [])];
+            if (selected && !list.includes(selected)) list.push(selected);
+            return `<option value="">${esc(emptyLabel)}</option>` + list.map(t => `<option value="${esc(t)}" ${t === selected ? 'selected' : ''}>${esc(t)}</option>`).join('');
+        }
+        function positionOptionsHTML(selected, emptyLabel) {
+            const list = [...(stammdaten.positions || [])];
+            if (selected && !list.includes(selected)) list.push(selected);
+            return `<option value="">${esc(emptyLabel)}</option>` + list.map(t => `<option value="${esc(t)}" ${t === selected ? 'selected' : ''}>${esc(t)}</option>`).join('');
+        }
+        function refreshTeamPositionSelects() {
+            document.querySelectorAll('select.team-select').forEach(sel => { const v = sel.value; sel.innerHTML = teamOptionsHTML(v, '– keine –'); sel.value = v; });
+            document.querySelectorAll('select.position-select').forEach(sel => { const v = sel.value; sel.innerHTML = positionOptionsHTML(v, '– keine –'); sel.value = v; });
+            setVal('sd-teams', (stammdaten.teams || []).join('\n'));
+            setVal('sd-positions', (stammdaten.positions || []).join('\n'));
+        }
+        async function setPlayerField(idx, field, value) {
+            const p = stammdaten.players[idx];
+            if (!p) return;
+            value = normName(value);
+            if (value) p[field] = value; else delete p[field];
+            await onStammdatenChanged('players');
+        }
+        function parseLines(text) {
+            const out = [];
+            String(text || '').split('\n').map(normName).filter(Boolean).forEach(x => { if (!out.includes(x)) out.push(x); });
+            return out;
+        }
+        async function saveTeamPositionLists() {
+            const rename = (oldList, newList, field) => {
+                // Gleiche Zeile, neuer Text → Zuordnung der Spieler mitnehmen
+                oldList.forEach((o, i) => {
+                    const n = newList[i];
+                    if (n && o !== n && !newList.includes(o) && !oldList.includes(n)) stammdaten.players.forEach(p => { if (p[field] === o) p[field] = n; });
+                });
+            };
+            const teams = parseLines(val('sd-teams')), positions = parseLines(val('sd-positions'));
+            rename(stammdaten.teams || [], teams, 'team');
+            rename(stammdaten.positions || [], positions, 'position');
+            stammdaten.teams = teams;
+            stammdaten.positions = positions;
+            await onStammdatenChanged('players');
+            toast('✅ Mannschaften & Positionen gespeichert');
+        }
+        async function setPositionPreset(kind) {
+            const next = kind === 'detailed' ? DETAILED_POSITIONS : DEFAULT_POSITIONS;
+            const used = stammdaten.players.filter(p => p.position && !next.includes(p.position)).length;
+            if (used && !confirm(`${used} Spieler haben eine Position, die in der neuen Liste nicht vorkommt. Sie bleibt beim Spieler erhalten und wird am Ende einsortiert. Fortfahren?`)) return;
+            stammdaten.positions = [...next];
+            await onStammdatenChanged('players');
+        }
+
         function getPlayersOptionsHTML() {
             let options = '<option value="Keiner">Keiner</option>';
+            if (hasTeamAssignments()) {
+                // Nach Mannschaft gruppiert (Reihenfolge wie in den Stammdaten sortiert)
+                const groups = [...(stammdaten.teams || []), ''];
+                groups.forEach(team => {
+                    const players = stammdaten.players.filter(p => (p.team && (stammdaten.teams || []).includes(p.team) ? p.team : '') === team);
+                    if (!players.length) return;
+                    options += `<optgroup label="${esc(team || 'Ohne Mannschaft')}">`;
+                    players.forEach(p => { options += `<option value="${esc(p.name)}">${esc(playerOptionLabel(p))}</option>`; });
+                    options += `</optgroup>`;
+                });
+                return options;
+            }
             PLAYER_GROUPS.forEach(group => {
                 const players = stammdaten.players.filter(p => (PLAYER_GROUPS.includes(p.group) ? p.group : 'Spieler') === group);
                 if (!players.length) return;
                 options += `<optgroup label="${esc(group)}">`;
-                players.forEach(p => { options += `<option value="${esc(p.name)}">${esc(p.name)}</option>`; });
+                players.forEach(p => { options += `<option value="${esc(p.name)}">${esc(playerOptionLabel(p))}</option>`; });
                 options += `</optgroup>`;
             });
             return options;
@@ -3096,10 +3235,12 @@
                 }
                 case 'neuzugang': {
                     const n = playerLabel(val('in-new-player'));
-                    const from = normName(val('in-new-from-text')) || val('in-new-from-select');
-                    lines.push(`🆕 Willkommen im Team${n ? `, ${n}` : ''}!`);
-                    if (normName(val('in-new-position'))) lines.push(`📍 Position: ${normName(val('in-new-position'))}`);
-                    if (normName(val('in-new-number'))) lines.push(`🔢 Rückennummer: ${normName(val('in-new-number'))}`);
+                    const info = newPlayerInfo();
+                    const from = info.vorstellung ? '' : (normName(val('in-new-from-text')) || val('in-new-from-select'));
+                    lines.push(info.vorstellung ? `👋 Spielervorstellung${n ? `: ${n}` : ''}` : `🆕 Willkommen im Team${n ? `, ${n}` : ''}!`);
+                    if (info.vorstellung && info.team) lines.push(`🏟️ Mannschaft: ${info.team}`);
+                    if (info.position) lines.push(`📍 Position: ${info.position}`);
+                    if (info.number) lines.push(`🔢 Rückennummer: ${info.number}`);
                     if (from) lines.push(`↪️ Kommt von: ${from}`);
                     if (normName(val('in-new-text'))) lines.push('', normName(val('in-new-text')));
                     break;
@@ -3844,7 +3985,10 @@
                 let rowHTML = '';
                 for (let i = 0; i < count; i++) {
                     let name = val(`player-${playerIdx}`) || "Keiner";
-                    let numVal = esc(val(`num-player-${playerIdx}`));
+                    const numInput = $(`num-player-${playerIdx}`);
+                    const pNum = name !== 'Keiner' ? (findPlayer(name)?.number || '') : '';
+                    if (numInput) numInput.placeholder = pNum || 'Nr.';
+                    let numVal = esc(val(`num-player-${playerIdx}`) || pNum);
                     let numBadge = (showNumbers && numVal && pitchMode === 'photos') ? `<div class="player-number-badge">${numVal}</div>` : '';
 
                     let avatarHTML = '';
@@ -4092,17 +4236,49 @@
         }
 
         /* ---------- Neuzugang ---------- */
-        function updateNeuzugang() {
+        /* Neuzugang/Vorstellung: Eingaben überschreiben, sonst Werte aus den Stammdaten des Spielers */
+        function newPlayerInfo() {
             const name = val('in-new-player') || 'Keiner';
+            const p = name !== 'Keiner' ? findPlayer(name) : null;
+            const vorstellung = val('in-new-mode') === 'vorstellung';
+            return {
+                name, p, vorstellung,
+                position: normName(val('in-new-position')) || p?.position || '',
+                number: normName(val('in-new-number')) || p?.number || '',
+                team: p?.team || ''
+            };
+        }
+        const NEW_TITLES = { neuzugang: 'NEUZUGANG', vorstellung: 'SPIELERVORSTELLUNG' };
+        const NEW_TEXTS = { neuzugang: 'Herzlich willkommen im Team!', vorstellung: 'Lerne unser Team kennen!' };
+        function onNewModeChange() {
+            const t = normName(val('in-new-title')).toUpperCase();
+            if (!t || Object.values(NEW_TITLES).includes(t)) setVal('in-new-title', NEW_TITLES[val('in-new-mode')] || 'NEUZUGANG');
+            const txt = normName(val('in-new-text'));
+            if (!txt || Object.values(NEW_TEXTS).includes(txt)) setVal('in-new-text', NEW_TEXTS[val('in-new-mode')] || NEW_TEXTS.neuzugang);
+            captionDirty.neuzugang = false;
+            updateNeuzugang();
+            updateCaption('neuzugang');
+            scheduleSave();
+        }
+
+        function updateNeuzugang() {
+            const info = newPlayerInfo();
+            const name = info.name;
             const src = getPlayerImageSrc(name, 'neuzugang');
-            const fromOpp = val('in-new-from-select');
-            const fromName = normName(val('in-new-from-text')) || fromOpp;
-            const position = normName(val('in-new-position'));
-            const number = normName(val('in-new-number'));
+            const fromOpp = info.vorstellung ? '' : val('in-new-from-select');
+            const fromName = info.vorstellung ? '' : (normName(val('in-new-from-text')) || fromOpp);
+            const position = info.position;
+            const number = info.number;
+            if ($('new-from-controls')) $('new-from-controls').hidden = info.vorstellung;
+            if ($('in-new-position')) $('in-new-position').placeholder = info.p?.position || 'z.B. Stürmer';
+            if ($('in-new-number')) $('in-new-number').placeholder = info.p?.number || '9';
 
             let chips = '';
             if (number || position) {
                 chips += `<span class="transfer-chip">${number ? `<span class="transfer-number">${esc(number)}</span>` : ''}${esc(position)}</span>`;
+            }
+            if (info.vorstellung && info.team) {
+                chips += `<span class="transfer-chip"><img src="${getClubLogoSrc()}" alt=""> ${esc(info.team)}</span>`;
             }
             if (fromName) {
                 const logo = (!normName(val('in-new-from-text')) && fromOpp) ? getOpponentLogoSrc(fromOpp) : makeBadgeSvg(fromName);
@@ -4784,7 +4960,7 @@
 
             const inputIds = ['in-kal-mode', 'in-kal-title', 'in-kal-color-home', 'in-kal-color-away',
                 'in-bday-player', 'in-bday-title', 'in-bday-text',
-                'in-new-player', 'in-new-title', 'in-new-position', 'in-new-number', 'in-new-from-select', 'in-new-from-text', 'in-new-text',
+                'in-new-mode', 'in-new-player', 'in-new-title', 'in-new-position', 'in-new-number', 'in-new-from-select', 'in-new-from-text', 'in-new-text',
                 'in-spon-select', 'in-spon-title', 'in-spon-text', 'in-spon-extra', 'in-wk-title', 'in-wk-sub'];
             for (let i = 1; i <= WK_MAX; i++) inputIds.push(`wk-team-${i}`, `wk-score-${i}`, `wk-opp-${i}`, `wk-venue-${i}`);
             for (let i = 1; i <= SCORER_MAX; i++) inputIds.push(`erg-scorer-${i}`, `erg-minute-${i}`);
@@ -5550,9 +5726,14 @@
             const shirt = '#bb3e03', bg = '#005f73';
             const names = ['Jonas Keller', 'Tim Brandt', 'Leon Wagner', 'Paul Richter', 'Felix Hartmann', 'Niklas Vogel', 'Ben Schuster', 'David Krämer',
                 'Luca Neumann', 'Simon Lang', 'Jan Seidel', 'Moritz Frank', 'Tobias Engel', 'Kevin Roth', 'Marco Albrecht', 'Fabian Winter', 'Elias Brenner', 'Noah Pfeiffer'];
-            const players = names.map((name, i) => ({ name, group: 'Spieler', img: demoPortraitSvg(i + 1, bg, shirt, skins[i % 5], hairs[(i * 2) % 5]), torImg: null, demo: true }));
-            players.push({ name: 'Thomas Berger', group: 'Trainer', img: demoPortraitSvg('', bg, '#222222', skins[0], hairs[1]), torImg: null, demo: true });
-            players.push({ name: 'Andreas Kühn', group: 'Trainer', img: demoPortraitSvg('', bg, '#222222', skins[2], hairs[4]), torImg: null, demo: true });
+            // Positionen passend zur Demo-Aufstellung (4-2-3-1), Spieler 15–18 in der 2. Mannschaft
+            const demoPos = ['Tor', 'Abwehr', 'Abwehr', 'Abwehr', 'Abwehr', 'Mittelfeld', 'Mittelfeld', 'Mittelfeld', 'Mittelfeld', 'Mittelfeld', 'Sturm',
+                'Tor', 'Abwehr', 'Mittelfeld', 'Sturm', 'Abwehr', 'Mittelfeld', 'Sturm'];
+            const demoNums = [1, 2, 4, 5, 3, 6, 8, 7, 10, 11, 9, 12, 13, 14, 15, 16, 17, 19];
+            const players = names.map((name, i) => ({ name, group: 'Spieler', img: demoPortraitSvg(demoNums[i], bg, shirt, skins[i % 5], hairs[(i * 2) % 5]), torImg: null, demo: true,
+                team: i < 14 ? '1. Mannschaft' : '2. Mannschaft', position: demoPos[i], number: String(demoNums[i]) }));
+            players.push({ name: 'Thomas Berger', group: 'Trainer', team: '1. Mannschaft', img: demoPortraitSvg('', bg, '#222222', skins[0], hairs[1]), torImg: null, demo: true });
+            players.push({ name: 'Andreas Kühn', group: 'Trainer', team: '2. Mannschaft', img: demoPortraitSvg('', bg, '#222222', skins[2], hairs[4]), torImg: null, demo: true });
             const opps = [['FC Musterstadt', '#1d4ed8', '#facc15'], ['SV Beispielhausen', '#15803d', '#ffffff'], ['TSV Demoheim', '#b91c1c', '#111111'],
                 ['SC Probstal', '#7c3aed', '#f5f5f5'], ['FV Testingen', '#0f766e', '#f59e0b'], ['SpVgg Vorlagendorf', '#1e293b', '#e11d48']];
             const opponents = opps.map(([name, c1, c2]) => ({ name, img: demoCrestSvg(name, c1, c2), demo: true }));
@@ -5580,6 +5761,8 @@
         async function loadDemoData(ask) {
             if (ask && !confirm('Beispieldaten laden?\n\nEs werden erfundene Spieler, Gegner und Sponsoren ergänzt und die aktuelle Version mit Beispielinhalten gefüllt. Deine eigenen Einträge bleiben erhalten.')) return;
             const demo = buildDemoStammdaten();
+            stammdaten.teams = stammdaten.teams || [];
+            ['1. Mannschaft', '2. Mannschaft'].forEach(t => { if (!stammdaten.teams.includes(t)) stammdaten.teams.push(t); });
             ['players', 'opponents', 'sponsors'].forEach(t => {
                 demo[t].forEach(e => { if (!stammdaten[t].some(x => x.name === e.name)) stammdaten[t].push(e); });
             });
@@ -5615,7 +5798,7 @@
             // Player of the Match, Geburtstag, Neuzugang, Sponsor
             set('in-potm-player', 'Luca Neumann'); set('in-potm-text', '2 Tore');
             set('in-bday-player', 'Felix Hartmann'); set('in-bday-text', 'Alles Gute zum Geburtstag!');
-            set('in-new-player', 'Elias Brenner'); set('in-new-position', 'Stürmer'); set('in-new-number', '19'); set('in-new-from-select', 'SC Probstal'); set('in-new-from-text', '');
+            set('in-new-mode', 'neuzugang'); set('in-new-player', 'Elias Brenner'); set('in-new-position', ''); set('in-new-number', ''); set('in-new-from-select', 'SC Probstal'); set('in-new-from-text', '');
             set('in-new-text', 'Herzlich willkommen im Team!');
             set('in-spon-select', 'Autohaus Beispiel'); set('in-spon-text', 'für die großartige Unterstützung!'); set('in-spon-extra', 'Neue Trikots für die Saison');
             // Kalender: die nächsten 4 Samstage
