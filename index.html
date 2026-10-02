@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.0</title>
+    <title>ClubShot – Grafiken für Vereine 18.1</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1844,7 +1844,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.0";
+        const APP_VERSION = "18.1";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -5576,9 +5576,9 @@
             root.querySelectorAll('img').forEach(img => {
                 const cs = getComputedStyle(img);
                 const shadow = (!cs.clipPath || cs.clipPath === 'none') ? parseDropShadow(cs.filter) : null;
-                if (shadow && rasterizeDropShadow(img, cs, shadow)) return;
+                if (shadow && rasterizeDropShadow(img, cs, shadow, exportScaleFor(img))) return;
                 if (cs.clipPath && cs.clipPath !== 'none') {
-                    const data = rasterizeClippedImage(img, cs);
+                    const data = rasterizeClippedImage(img, cs, exportScaleFor(img));
                     if (data) {
                         // Als echtes Bild (kein Hintergrund), sonst zeichnet html2canvas am Rand eine Linie
                         const w = img.offsetWidth, h = img.offsetHeight;
@@ -5592,22 +5592,90 @@
                 }
                 const fit = cs.objectFit;
                 if ((fit !== 'cover' && fit !== 'contain') || !img.naturalWidth) return;
-                const div = document.createElement('div');
-                div.className = img.className;
-                div.style.cssText = img.style.cssText;
-                Object.assign(div.style, {
-                    width: img.offsetWidth + 'px',
-                    height: img.offsetHeight + 'px',
-                    boxSizing: 'border-box',
-                    display: cs.display === 'inline' ? 'inline-block' : cs.display,
-                    backgroundImage: `url("${img.currentSrc || img.src}")`,
-                    backgroundSize: fit,
-                    backgroundPosition: cs.objectPosition || 'center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundOrigin: 'content-box'
-                });
-                img.replaceWith(div);
+                // Fertig zugeschnitten in Export-Auflösung vorberechnen – html2canvas würde object-fit ignorieren
+                // bzw. als Hintergrund nur in einfacher Auflösung zeichnen und dann hochskalieren (pixelig)
+                const data = rasterizeFitImage(img, cs);
+                if (data) { img.src = data; img.style.objectFit = 'fill'; }
             });
+        }
+
+        const EXPORT_SCALE = 3;
+        /* Wie stark ein Element im Export tatsächlich vergrößert wird (Export-Faktor × eigene/übergeordnete Skalierung) */
+        function exportScaleFor(el) {
+            const r = el.getBoundingClientRect();
+            const s = el.offsetWidth ? r.width / el.offsetWidth : 1;
+            return Math.min(8, Math.max(1, EXPORT_SCALE * (s || 1)));
+        }
+        function objectPositionOffsets(pos, freeW, freeH) {
+            const parts = String(pos || '50% 50%').split(/\s+/);
+            const one = (v, free) => {
+                if (!v) return free / 2;
+                if (v === 'left' || v === 'top') return 0;
+                if (v === 'right' || v === 'bottom') return free;
+                if (v === 'center') return free / 2;
+                if (v.endsWith('%')) return free * parseFloat(v) / 100;
+                return parseFloat(v) || 0;
+            };
+            return [one(parts[0], freeW), one(parts[1] || parts[0], freeH)];
+        }
+        /* Bild mit object-fit cover/contain in den Inhaltsbereich zuschneiden, in voller Export-Auflösung */
+        function rasterizeFitImage(img, cs) {
+            const px = v => parseFloat(v) || 0;
+            const w = img.offsetWidth, h = img.offsetHeight;
+            const cw = w - px(cs.borderLeftWidth) - px(cs.paddingLeft) - px(cs.borderRightWidth) - px(cs.paddingRight);
+            const ch = h - px(cs.borderTopWidth) - px(cs.paddingTop) - px(cs.borderBottomWidth) - px(cs.paddingBottom);
+            if (cw <= 0 || ch <= 0 || !img.naturalWidth) return null;
+            let scale = exportScaleFor(img);
+            scale = Math.min(scale, 3000 / Math.max(cw, ch));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(cw * scale));
+            canvas.height = Math.max(1, Math.round(ch * scale));
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const r = cs.objectFit === 'cover' ? Math.max(cw / iw, ch / ih) : Math.min(cw / iw, ch / ih);
+            const dw = iw * r, dh = ih * r;
+            const [ox, oy] = objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
+            ctx.scale(scale, scale);
+            ctx.drawImage(img, ox, oy, dw, dh);
+            try { return canvas.toDataURL('image/png'); } catch (e) { return null; }
+        }
+
+        /* Hintergrundbilder (z.B. eigene Vorlagen) als scharfe Bild-Ebene statt CSS-Hintergrund rendern */
+        async function replaceBackgroundImages(root) {
+            const els = [root, ...root.querySelectorAll('*')];
+            for (const el of els) {
+                const cs = getComputedStyle(el);
+                const m = /^url\("?(.*?)"?\)$/.exec(cs.backgroundImage || '');
+                if (!m || !el.offsetWidth || !el.offsetHeight) continue;
+                const size = cs.backgroundSize;
+                if (size !== 'cover' && size !== 'contain') continue;
+                const src = new Image();
+                src.src = m[1];
+                try { await src.decode(); } catch (e) { continue; }
+                const w = el.clientWidth, h = el.clientHeight;
+                let scale = Math.min(exportScaleFor(el), 3000 / Math.max(w, h));
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(w * scale); canvas.height = Math.round(h * scale);
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingQuality = 'high';
+                const iw = src.naturalWidth, ih = src.naturalHeight;
+                const r = size === 'cover' ? Math.max(w / iw, h / ih) : Math.min(w / iw, h / ih);
+                const dw = iw * r, dh = ih * r;
+                const [ox, oy] = objectPositionOffsets(cs.backgroundPosition, w - dw, h - dh);
+                ctx.scale(scale, scale);
+                ctx.drawImage(src, ox, oy, dw, dh);
+                let data;
+                try { data = canvas.toDataURL('image/jpeg', 0.95); } catch (e) { continue; }
+                const layer = document.createElement('img');
+                layer.src = data;
+                layer.style.cssText = 'position:absolute; left:0; top:0; width:100%; height:100%; z-index:-1; pointer-events:none; object-fit:fill;';
+                if (cs.position === 'static') el.style.position = 'relative';
+                if (cs.zIndex === 'auto') el.style.zIndex = '0';   // eigener Stapelkontext: Ebene liegt unter allen Inhalten
+                el.style.backgroundImage = 'none';
+                el.insertBefore(layer, el.firstChild);
+            }
         }
 
         /* Demo-Modus: schräges Wasserzeichen + Hinweisleiste direkt ins Bild zeichnen */
@@ -5666,8 +5734,9 @@
             try {
                 await waitForImages(clone);
                 replaceObjectFitImages(clone);
+                await replaceBackgroundImages(clone);
                 await waitForImages(clone);
-                const canvas = await html2canvas(clone, { scale: 3, useCORS: true, logging: false, backgroundColor: null });
+                const canvas = await html2canvas(clone, { scale: EXPORT_SCALE, useCORS: true, logging: false, backgroundColor: null });
                 if (club && club.demo) drawDemoWatermark(canvas);
                 return canvas;
             } finally {
