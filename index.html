@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-    Club-Snap – Social-Media-Grafiken für Vereine
+    ClubShot – Social-Media-Grafiken für Vereine
     © [Jahr] [Vorname Nachname / Firma]. Alle Rechte vorbehalten.
     Diese Software ist urheberrechtlich geschützt. Kopieren, Verändern, Weiterverbreiten oder eigenes Hosten –
     auch in Teilen – ist ohne schriftliche Zustimmung untersagt. Nutzung nur mit gültigem Vereinscode
@@ -10,12 +10,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Club-Snap – Grafiken für Vereine 17.7</title>
+    <title>ClubShot – Grafiken für Vereine 17.8</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Club-Snap">
+    <meta name="apple-mobile-web-app-title" content="ClubShot">
 
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -61,7 +61,7 @@
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #003f4d; }
 
-        /* Kopfzeile mit Club-Snap-Logo (immer sichtbar) */
+        /* Kopfzeile mit ClubShot-Logo (immer sichtbar) */
         .app-header { display: flex; align-items: center; gap: 10px; padding: 6px 14px; background: #0b1d26; color: #fff; flex-shrink: 0; min-height: 44px; box-sizing: border-box; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 20; }
         .app-header .brand-logo { height: 32px; width: auto; max-width: 120px; object-fit: contain; border-radius: 6px; }
         .app-header .brand-name { font-family: 'Montserrat', Arial, sans-serif; font-weight: 900; font-size: 19px; letter-spacing: 0.5px; }
@@ -614,7 +614,7 @@
     <!-- LIZENZ / VEREINSCODE -->
     <div id="license-overlay" class="license-overlay" hidden>
         <div class="license-card">
-            <div class="brand-hero"><img src="club-snap.png" alt="" onerror="this.hidden = true"><span>Club-Snap</span></div>
+            <div class="brand-hero"><img src="clubshot.png" alt="" onerror="this.hidden = true"><span>ClubShot</span></div>
             <h2>Vereinscode eingeben</h2>
             <p id="license-text">Bitte gib den Code ein, den du für deinen Verein erhalten hast. Zum Ausprobieren gibt es den Demo-Modus.</p>
             <input type="text" id="license-input" placeholder="XXXX-XXXX" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false">
@@ -635,8 +635,8 @@
             <div class="wz-dots" id="wz-dots"></div>
 
             <div class="wz-step" data-step="1">
-                <div class="brand-hero"><img src="club-snap.png" alt="" onerror="this.hidden = true"></div>
-                <h2>Willkommen bei Club-Snap<span id="wz-club-name"></span>!</h2>
+                <div class="brand-hero"><img src="clubshot.png" alt="" onerror="this.hidden = true"></div>
+                <h2>Willkommen bei ClubShot<span id="wz-club-name"></span>!</h2>
                 <p>In wenigen Schritten ist deine App startklar. Alles lässt sich später jederzeit ändern.</p>
                 <label for="wz-team">Wie soll dein Verein auf den Grafiken heißen?</label>
                 <input type="text" id="wz-team" placeholder="z.B. TSGV Rechberg" oninput="wizardSync()">
@@ -693,8 +693,8 @@
 
     <!-- KOPFZEILE -->
     <header class="app-header">
-        <img class="brand-logo" src="club-snap.png" alt="Club-Snap" onerror="this.hidden = true">
-        <span class="brand-name">Club-Snap</span>
+        <img class="brand-logo" src="clubshot.png" alt="ClubShot" onerror="this.hidden = true">
+        <span class="brand-name">ClubShot</span>
         <span class="brand-club" id="brand-club"></span>
     </header>
 
@@ -852,7 +852,7 @@
                 </div>
 
                 <div class="app-footer">
-                    Club-Snap <span id="app-version-label"></span> · © [Anbieter]<br>
+                    ClubShot <span id="app-version-label"></span> · © [Anbieter]<br>
                     <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a>
                 </div>
             </div>
@@ -1802,7 +1802,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "17.7";
+        const APP_VERSION = "17.8";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4957,7 +4957,7 @@
             for (const v of ['v1', 'v2', 'v3']) slots[v] = await localforage.getItem(STORE.slot(v)) || null;
 
             const data = {
-                app: 'Club-Snap',
+                app: 'ClubShot',
                 formatVersion: 2,
                 appVersion: APP_VERSION,
                 exportedAt: new Date().toISOString(),
@@ -5443,7 +5443,7 @@
             ctx.font = `bold ${Math.round(bh * 0.45)}px Arial, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('Club-Snap DEMO – mit Vereinscode ohne Wasserzeichen', w / 2, h - bh / 2);
+            ctx.fillText('ClubShot DEMO – mit Vereinscode ohne Wasserzeichen', w / 2, h - bh / 2);
             ctx.restore();
         }
 
@@ -5982,7 +5982,7 @@
         async function sharePackFiles() {
             if (!packFiles.length) return;
             try {
-                await navigator.share({ files: packFiles, title: 'Club-Snap Grafiken' });
+                await navigator.share({ files: packFiles, title: 'ClubShot Grafiken' });
             } catch (err) {
                 if (err.name !== 'AbortError') setText('pack-progress', 'Teilen nicht möglich – bitte „Alle herunterladen“ verwenden.');
             }
