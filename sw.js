@@ -3,7 +3,7 @@
    - Bibliotheken, Schriften, Icons: aus dem Zwischenspeicher
    - vereine.txt und Wappen: immer aus dem Netz (werden nie zwischengespeichert)
    Bei jeder neuen App-Version CACHE_VERSION erhöhen. */
-const CACHE_VERSION = 'clubshot-v18.1';
+const CACHE_VERSION = 'clubshot-v18.2';
 
 const CORE_FILES = [
     './',
@@ -18,6 +18,18 @@ const CORE_FILES = [
     './vendor/fonts/montserrat-latin-900-normal.woff2',
     './vendor/fonts/oswald-latin-600-normal.woff2',
     './vendor/fonts/oswald-latin-700-normal.woff2',
+    './vendor/fonts/anton-latin-400-normal.woff2',
+    './vendor/fonts/archivo-black-latin-400-normal.woff2',
+    './vendor/fonts/bangers-latin-400-normal.woff2',
+    './vendor/fonts/barlow-condensed-latin-800-normal.woff2',
+    './vendor/fonts/barlow-condensed-latin-800-italic.woff2',
+    './vendor/fonts/black-ops-one-latin-400-normal.woff2',
+    './vendor/fonts/graduate-latin-400-normal.woff2',
+    './vendor/fonts/kanit-latin-800-normal.woff2',
+    './vendor/fonts/kanit-latin-800-italic.woff2',
+    './vendor/fonts/permanent-marker-latin-400-normal.woff2',
+    './vendor/fonts/russo-one-latin-400-normal.woff2',
+    './vendor/fonts/teko-latin-600-normal.woff2',
     './icons/icon-192.png',
     './icons/icon-512.png',
     './icons/apple-touch-icon.png',

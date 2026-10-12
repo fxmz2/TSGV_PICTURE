@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.1</title>
+    <title>ClubShot – Grafiken für Vereine 18.2</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,7 +177,7 @@
             background-image: linear-gradient(160deg, var(--primary) 0%, #0b0f14 100%);
             background-size: cover; background-position: center; position: relative;
             display: flex; flex-direction: column; align-items: center; color: inherit;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2); text-shadow: 2px 2px 4px rgba(0,0,0,0.9); box-sizing: border-box;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); text-shadow: var(--tpl-text-shadow, 2px 2px 4px rgba(0,0,0,0.9)); box-sizing: border-box;
             overflow: hidden;
         }
 
@@ -185,7 +185,8 @@
         .post-template.fmt-45 { height: 500px; }
         .story-template { width: 400px; height: 711px; }
 
-        .title-dyn { font-size: 2rem; font-weight: bold; margin: 0; text-align: center; text-transform: uppercase; width: 100%; }
+        .title-dyn { font-size: 2rem; font-weight: bold; margin: 0; text-align: center; text-transform: var(--title-transform, uppercase); width: 100%;
+            font-family: var(--title-font, inherit); color: var(--title-color, inherit); letter-spacing: var(--title-ls, normal); font-style: var(--title-style, normal); }
         .info-dyn { font-size: 1.1rem; margin: 5px 0; text-align: center; width: 100%; }
 
         .draggable-text {
@@ -200,6 +201,11 @@
             background: transparent; display: flex; align-items: center; justify-content: center; gap: 15px;
             padding: 6px 10px; box-sizing: border-box; z-index: 10; border-top: none;
         }
+        .sponsor-banner.sb-top { top: 8px; bottom: auto; }
+        .sponsor-banner.sb-left, .sponsor-banner.sb-right { top: 0; bottom: 0; width: auto; min-height: 0; flex-direction: column; justify-content: center; gap: 10px; padding: 8px; }
+        .sponsor-banner.sb-left { left: 0; right: auto; }
+        .sponsor-banner.sb-right { right: 0; left: auto; }
+        .sponsor-banner.sb-grid { justify-content: center; justify-items: center; align-items: center; gap: 8px 14px; }
         .sponsor-logo {
             object-fit: contain;
             filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.6));
@@ -280,7 +286,15 @@
         }
         .kader-grid-name { font-size: 9px; font-weight: bold; text-align: center; color: black; background: rgba(255, 255, 255, 0.9); padding: 2px 4px; border-radius: 3px; text-shadow: none; margin-top: 2px; }
 
-        .potm-badge { font-size: 1.6rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #f1c40f; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        .potm-badge { font-size: 1.6rem; font-weight: 900; letter-spacing: var(--title-ls, 2px); text-transform: var(--title-transform, uppercase); color: var(--title-color, #f1c40f);
+            font-family: var(--title-font, inherit); font-style: var(--title-style, normal); text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        /* Zusätzliche Spieler (bis zu 3 je Vorlage) */
+        .extra-player { display: flex; flex-direction: column; align-items: center; width: 100px; z-index: 6; }
+        .xp-img { width: 100px; height: 100px; display: block; object-fit: cover; background-color: var(--avatar-bg, #fff); border-radius: var(--avatar-radius, 50%);
+            border: var(--avatar-border, 3px solid var(--frame-color)); clip-path: var(--avatar-clip, none); box-shadow: var(--avatar-shadow, 0 2px 5px rgba(0,0,0,0.5)); box-sizing: border-box; }
+        .story-template .extra-player { width: 110px; }
+        .story-template .xp-img { width: 110px; height: 110px; }
+        .xp-name { margin-top: 4px; font-size: 11px; font-weight: bold; background: rgba(0,0,0,0.72); color: #fff; padding: 2px 8px; border-radius: 5px; text-shadow: none; white-space: nowrap; }
         .potm-player-img { width: 200px; height: 240px; object-fit: cover; border-radius: 12px; border: 4px solid #f1c40f; margin: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
         .potm-player-name { font-size: 1.4rem; font-weight: bold; background: rgba(0,0,0,0.75); color: white; padding: 5px 15px; border-radius: 8px; border-bottom: 3px solid #f1c40f; text-shadow: none; }
 
@@ -476,10 +490,10 @@
         .wz-start-grid button { border: 1px solid #ddd; background: #f7f8fa; border-radius: 10px; padding: 14px 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
 
         /* Freistellen & Schatten */
-        .logo, .kal-logo, .story-wappen-top-right, .tor-wappen, .player-img, .kader-grid-img, .list-item-img, .bday-photo, .transfer-photo, .tor-player-img-feed, .tor-player-img-story { filter: var(--avatar-filter, none); }
+        .logo, .kal-logo, .story-wappen-top-right, .tor-wappen, .xp-img, .player-img, .kader-grid-img, .list-item-img, .bday-photo, .transfer-photo, .tor-player-img-feed, .tor-player-img-story { filter: var(--avatar-filter, none); }
         .shape-free .logo, .shape-free .kal-logo, .shape-free .story-wappen-top-right, .shape-free .tor-wappen { padding: 0; }
         .shape-free .potm-player-img { border-color: transparent; box-shadow: none; filter: drop-shadow(0px 6px 10px rgba(0,0,0,0.6)); }
-        .shape-free .potm-player-img, .shape-free .bday-photo, .shape-free .transfer-photo, .shape-free .player-img, .shape-free .kader-grid-img, .shape-free .list-item-img { object-fit: contain; object-position: center bottom; }
+        .shape-free .xp-img, .shape-free .potm-player-img, .shape-free .bday-photo, .shape-free .transfer-photo, .shape-free .player-img, .shape-free .kader-grid-img, .shape-free .list-item-img { object-fit: contain; object-position: center bottom; }
         .sd-thumb.cut-thumb { background-color: #fff; background-image: linear-gradient(45deg, #e3e6ea 25%, transparent 25%, transparent 75%, #e3e6ea 75%), linear-gradient(45deg, #e3e6ea 25%, transparent 25%, transparent 75%, #e3e6ea 75%); background-size: 10px 10px; background-position: 0 0, 5px 5px; object-fit: contain; }
         .sd-btn.active { background: #d8f3dc; }
         .busy-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -1029,6 +1043,7 @@
                     <span class="hint">Zeigt bei Startelf und Ersatzbank nur die Spieler, die im Reiter „Kader“ ausgewählt sind.</span>
                 </div>
 
+                <button type="button" class="copy-action-btn" style="background:#c1121f;" onclick="clearLineup()">🧹 Aufstellung leeren (Startelf & Ersatzbank)</button>
                 <label>Startelf & Rückennummern</label>
                 <div class="scrollable-controls-box" id="starter-controls"></div>
 
@@ -1087,6 +1102,7 @@
                 <div class="control-group"><label>Spieltagsdienst 2</label><select id="in-kader-duty-2" class="player-select" onchange="updateKader();"></select></div>
                 <div class="control-group"><label>Zusatz / Fließtext</label><input type="text" id="in-kader-freetext" value="12 Bälle, Hütchen, Medi-Tasche" oninput="updateKader();"></div>
 
+                <button type="button" class="copy-action-btn" style="background:#c1121f;" onclick="clearKader()">🧹 Kader leeren (alle Spieler entfernen)</button>
                 <label>Spieler auswählen (Kader, max. 20)</label>
                 <div class="scrollable-controls-box" id="kader-controls"></div>
 
@@ -1844,7 +1860,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.1";
+        const APP_VERSION = "18.2";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2345,7 +2361,10 @@
         function useCutout(tab) { return !!(tab && $(`in-cutout-${tab}`)?.checked); }
 
         /* tab (optional): in Reitern mit „Freigestellte Spielerfotos“ wird die freigestellte Version genutzt */
+        function photoTypeOf(tab) { return tab ? (val(`in-photo-type-${tab}`) || (tab === 'tor' ? 'tor' : 'normal')) : 'normal'; }
+        /* Spielerfoto je Reiter: normales oder Torjubel-Foto (Einstellung „Spielerfoto“), ggf. freigestellt */
         function getPlayerImageSrc(name, tab) {
+            if (photoTypeOf(tab) === 'tor') return getPlayerTorImageSrc(name, tab);
             const p = findPlayer(name);
             if (!p) return PLAYER_FALLBACK;
             if (useCutout(tab) && p.cutImg) return p.cutImg;
@@ -3040,13 +3059,59 @@
             });
         }
 
+        /* Alle Schriften liegen lokal in vendor/fonts (keine Verbindung zu Google Fonts) */
+        const FONT_LIST = [
+            ['Arial, sans-serif', 'Standard (Arial)'], ["'Bebas Neue', sans-serif", 'Bebas Neue'], ["'Oswald', sans-serif", 'Oswald'],
+            ["'Montserrat', sans-serif", 'Montserrat'], ["'Anton', sans-serif", 'Anton'], ["'Archivo Black', sans-serif", 'Archivo Black'],
+            ["'Barlow Condensed', sans-serif", 'Barlow Condensed'], ["'Teko', sans-serif", 'Teko'], ["'Kanit', sans-serif", 'Kanit'],
+            ["'Russo One', sans-serif", 'Russo One'], ["'Black Ops One', sans-serif", 'Black Ops One (Stencil)'], ["'Graduate', serif", 'Graduate (College)'],
+            ["'Bangers', sans-serif", 'Bangers (Comic)'], ["'Permanent Marker', sans-serif", 'Permanent Marker (Handschrift)'],
+            ["'Impact', sans-serif", 'Impact (nicht auf jedem Gerät)']
+        ];
+        const fontOptionList = (list, sel) => list.map(([v, l]) => `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${l}</option>`).join('');
+
+        /* Weitere Design-Einstellungen je Reiter (werden generisch gespeichert, kopiert und zurückgesetzt) */
+        const EXTRA_DESIGN = [
+            { key: 'photoType', id: 'in-photo-type', def: t => t === 'tor' ? 'tor' : 'normal' },
+            { key: 'titleFont', id: 'in-font-title', def: () => '' },
+            { key: 'titleColorMode', id: 'in-title-color-mode', def: () => 'text' },
+            { key: 'titleColor', id: 'in-color-title', def: () => '#f1c40f' },
+            { key: 'textEffect', id: 'in-text-effect', def: () => 'soft' },
+            { key: 'letterSpacing', id: 'in-letter-spacing', def: () => '0' },
+            { key: 'titleUpper', id: 'in-title-upper', def: () => true, check: true },
+            { key: 'titleItalic', id: 'in-title-italic', def: () => false, check: true },
+            { key: 'sponsorLayout', id: 'in-sponsor-layout', def: () => 'bottom' },
+            { key: 'sponsorCols', id: 'in-sponsor-cols', def: () => '2' },
+            { key: 'sponsorSize', id: 'in-sponsor-size', def: () => '100' },
+            { key: 'xp1', id: 'in-xp1', def: () => 'Keiner' },
+            { key: 'xp2', id: 'in-xp2', def: () => 'Keiner' },
+            { key: 'xp3', id: 'in-xp3', def: () => 'Keiner' },
+            { key: 'xpNames', id: 'in-xp-names', def: () => true, check: true }
+        ];
+        function collectExtraDesign(t) {
+            const o = {};
+            EXTRA_DESIGN.forEach(f => { const el = $(`${f.id}-${t}`); if (el) o[f.key] = f.check ? el.checked : el.value; });
+            return o;
+        }
+        function applyExtraDesign(t, s) {
+            EXTRA_DESIGN.forEach(f => {
+                const el = $(`${f.id}-${t}`);
+                if (!el) return;
+                const v = s && s[f.key] !== undefined ? s[f.key] : f.def(t);
+                if (f.check) el.checked = !!v; else el.value = v;
+            });
+        }
+        const TEXT_EFFECTS = {
+            none: 'none',
+            soft: '2px 2px 4px rgba(0,0,0,0.9)',
+            strong: '0 3px 10px rgba(0,0,0,1), 0 0 3px rgba(0,0,0,1)',
+            outline: '-1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000, 0 3px 6px rgba(0,0,0,0.6)',
+            glow: '0 0 6px var(--jersey-color), 0 0 14px var(--jersey-color), 0 2px 4px rgba(0,0,0,0.8)',
+            '3d': '2px 2px 0 var(--jersey-color), 4px 4px 0 rgba(0,0,0,0.65)'
+        };
+
         function buildDesignControls() {
-            const fontOptions = `
-                <option value="Arial, sans-serif">Standard (Arial)</option>
-                <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
-                <option value="'Oswald', sans-serif">Oswald</option>
-                <option value="'Montserrat', sans-serif">Montserrat</option>
-                <option value="'Impact', sans-serif">Impact</option>`;
+            const fontOptions = fontOptionList(FONT_LIST);
             Object.entries(TAB_DESIGN).forEach(([tab, cfg]) => {
                 const host = $(`design-controls-${tab}`);
                 if (!host) return;
@@ -3082,21 +3147,72 @@
                                 <div class="control-group"><label>Schriftfarbe</label><input type="color" id="in-color-text-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
                             </div>
                             <div class="control-group">
-                                <label>Schriftart</label>
+                                <label>Schriftart (Texte)</label>
                                 <select id="in-font-${tab}" onchange="updateTabDesign('${tab}')">${fontOptions}</select>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="design-details">
+                        <summary>🔤 Schrift & Text-Design</summary>
+                        <div class="details-body">
+                            <div class="control-group">
+                                <label>Schriftart Überschriften</label>
+                                <select id="in-font-title-${tab}" onchange="updateTabDesign('${tab}')"><option value="">Wie Texte</option>${fontOptions}</select>
                             </div>
                             ${cfg.sizes ? `
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div class="control-group"><label>Titel-Größe</label><input type="range" id="in-size-title-${tab}" min="0.8" max="6" step="0.1" value="2.0" oninput="updateTabDesign('${tab}')"></div>
                                 <div class="control-group"><label>Text-Größe</label><input type="range" id="in-size-info-${tab}" min="0.6" max="4" step="0.1" value="1.1" oninput="updateTabDesign('${tab}')"></div>
                             </div>` : ''}
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Farbe Überschriften</label>
+                                    <select id="in-title-color-mode-${tab}" onchange="updateTabDesign('${tab}')">
+                                        <option value="text">Wie Schriftfarbe</option>
+                                        <option value="jersey">Trikotfarbe</option>
+                                        <option value="primary">Hauptfarbe</option>
+                                        <option value="custom">Eigene Farbe →</option>
+                                    </select></div>
+                                <div class="control-group"><label>Eigene Farbe</label><input type="color" id="in-color-title-${tab}" value="#f1c40f" onchange="setVal('in-title-color-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Text-Effekt</label>
+                                    <select id="in-text-effect-${tab}" onchange="updateTabDesign('${tab}')">
+                                        <option value="soft">Schatten (Standard)</option>
+                                        <option value="strong">Starker Schatten</option>
+                                        <option value="outline">Kontur</option>
+                                        <option value="glow">Leuchten (Trikotfarbe)</option>
+                                        <option value="3d">3D-Versatz</option>
+                                        <option value="none">Ohne</option>
+                                    </select></div>
+                                <div class="control-group"><label>Buchstabenabstand</label><input type="range" id="in-letter-spacing-${tab}" min="-2" max="12" step="0.5" value="0" oninput="updateTabDesign('${tab}')"></div>
+                            </div>
+                            <div class="ct-checks">
+                                <label><input type="checkbox" id="in-title-upper-${tab}" checked onchange="updateTabDesign('${tab}')"> GROSSBUCHSTABEN</label>
+                                <label><input type="checkbox" id="in-title-italic-${tab}" onchange="updateTabDesign('${tab}')"> <i>Kursiv</i></label>
+                            </div>
+                            <span class="hint">Gilt für die Überschriften dieses Reiters. Einzelne Texte kannst du zusätzlich in der Vorschau antippen und größer/kleiner ziehen.</span>
                         </div>
                     </details>
-                    ${cfg.cutout ? `
-                    <div class="control-group">
-                        <label><input type="checkbox" id="in-cutout-${tab}" onchange="updateAllViews();"> ✂️ Freigestellte Spielerfotos verwenden</label>
-                        <span class="hint">Spieler vorher unter „🗃️ Daten“ mit ✂️ freistellen. Passt gut zur Rahmenform „Freigestellt mit Schatten“.</span>
-                    </div>` : ''}
+                    <details class="design-details">
+                        <summary>👥 Spielerfotos & zusätzliche Spieler</summary>
+                        <div class="details-body">
+                            <div class="control-group">
+                                <label>Spielerfoto</label>
+                                <select id="in-photo-type-${tab}" onchange="updateAllViews();">
+                                    <option value="normal">📷 Normales Foto</option>
+                                    <option value="tor">⚽ Torjubel-Foto (falls vorhanden)</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label><input type="checkbox" id="in-cutout-${tab}" onchange="updateAllViews();"> ✂️ Freigestellte Spielerfotos verwenden</label>
+                                <span class="hint">Spieler vorher unter „🗃️ Daten“ mit ✂️ freistellen. Passt gut zur Rahmenform „Freigestellt mit Schatten“.</span>
+                            </div>
+                            <label>Zusätzliche Spieler im Bild (bis zu 3)</label>
+                            ${[1, 2, 3].map(i => `<div class="control-group"><select id="in-xp${i}-${tab}" class="player-select" onchange="updateTabDesign('${tab}')"></select></div>`).join('')}
+                            <div class="control-group"><label><input type="checkbox" id="in-xp-names-${tab}" checked onchange="updateTabDesign('${tab}')"> Namen unter den Spielern anzeigen</label></div>
+                            <span class="hint">Die Spieler erscheinen in Beitrag und Story und lassen sich in der Vorschau verschieben und größer/kleiner ziehen.</span>
+                        </div>
+                    </details>
                     ${cfg.teamNames ? `
                     <div class="control-group">
                         <label><input type="checkbox" id="in-show-teamnames-${tab}" onchange="updateMatchup();" checked> Team-Namen unter Logos anzeigen</label>
@@ -3111,6 +3227,20 @@
                     <div class="control-group">
                         <label><input type="checkbox" id="in-show-sponsors-${tab}" onchange="renderSelectedSponsors('${tab}');"> ${cfg.sponsorLabel}</label>
                         <div class="sponsor-checkbox-list" id="sponsor-checkbox-list-${tab}"></div>
+                        <div style="display:grid; grid-template-columns: 1fr 92px; gap: 6px; margin-top:6px;">
+                            <select id="in-sponsor-layout-${tab}" onchange="renderSelectedSponsors('${tab}'); scheduleSave();">
+                                <option value="bottom">⬇️ Unten (Leiste)</option>
+                                <option value="top">⬆️ Oben (Leiste)</option>
+                                <option value="left">⬅️ Links (Spalte)</option>
+                                <option value="right">➡️ Rechts (Spalte)</option>
+                                <option value="grid">🔲 Raster (z.B. 2×2)</option>
+                            </select>
+                            <select id="in-sponsor-cols-${tab}" onchange="renderSelectedSponsors('${tab}'); scheduleSave();" title="Spalten im Raster">
+                                <option value="2">2 Spalten</option><option value="3">3 Spalten</option><option value="4">4 Spalten</option>
+                            </select>
+                        </div>
+                        <div class="control-group" style="margin-top:6px;"><label>Größe der Sponsorenlogos</label>
+                            <input type="range" id="in-sponsor-size-${tab}" min="60" max="160" step="5" value="100" oninput="renderSelectedSponsors('${tab}');"></div>
                     </div>
                     <details class="design-details" id="ct-details-${tab}">
                         <summary>✍️ Eigene Texte <span class="sd-count" id="ct-count-${tab}">0</span></summary>
@@ -3402,8 +3532,7 @@
            EIGENE TEXTE (beliebig viele je Reiter)
            ========================================================= */
         function fontOptionsHTML(selected) {
-            const fonts = [['', 'Wie Reiter'], ['Arial, sans-serif', 'Arial'], ["'Bebas Neue', sans-serif", 'Bebas Neue'], ["'Oswald', sans-serif", 'Oswald'], ["'Montserrat', sans-serif", 'Montserrat'], ["'Impact', sans-serif", 'Impact']];
-            return fonts.map(([v, l]) => `<option value="${esc(v)}" ${v === selected ? 'selected' : ''}>${l}</option>`).join('');
+            return fontOptionList([['', 'Wie Reiter'], ...FONT_LIST], selected);
         }
 
         function addCustomText(tab) {
@@ -3622,6 +3751,21 @@
                 viewContainer.style.setProperty('--avatar-bg', bg);
                 viewContainer.style.setProperty('--avatar-shadow', shadow);
 
+                // Überschriften: eigene Schrift, Farbe, Abstand, Großbuchstaben, Kursiv; Text-Effekt für alle Texte
+                const tFont = val(`in-font-title-${tab}`);
+                const setOrClear = (k, v) => v ? viewContainer.style.setProperty(k, v) : viewContainer.style.removeProperty(k);
+                setOrClear('--title-font', tFont);
+                const cMode = val(`in-title-color-mode-${tab}`) || 'text';
+                setOrClear('--title-color', cMode === 'jersey' ? 'var(--jersey-color)' : cMode === 'primary' ? 'var(--primary)' : cMode === 'custom' ? (val(`in-color-title-${tab}`) || '#f1c40f') : '');
+                const ls = parseFloat(val(`in-letter-spacing-${tab}`) || '0');
+                setOrClear('--title-ls', ls ? ls + 'px' : '');
+                setOrClear('--title-transform', $(`in-title-upper-${tab}`) && !$(`in-title-upper-${tab}`).checked ? 'none' : '');
+                setOrClear('--title-style', $(`in-title-italic-${tab}`)?.checked ? 'italic' : '');
+                const eff = val(`in-text-effect-${tab}`) || 'soft';
+                setOrClear('--tpl-text-shadow', eff === 'soft' ? '' : TEXT_EFFECTS[eff]);
+
+                renderExtraPlayers(tab);
+
                 const logoFeed = !!$(`in-logo-feed-${tab}`)?.checked;
                 const logoStory = $(`in-logo-story-${tab}`)?.checked ?? true;
                 viewContainer.querySelectorAll('.post-template .corner-logo').forEach(l => l.classList.toggle('logo-hidden', !logoFeed));
@@ -3646,42 +3790,73 @@
             const show = $(`in-show-sponsors-${tab}`)?.checked;
             const tabSponsors = (selectedSponsors[tab] || []).filter(n => findSponsor(n));
             const count = tabSponsors.length;
+            const layout = val(`in-sponsor-layout-${tab}`) || 'bottom';
+            const cols = Math.max(1, Math.min(count || 1, parseInt(val(`in-sponsor-cols-${tab}`) || '2', 10)));
+            const f = (parseFloat(val(`in-sponsor-size-${tab}`) || '100') || 100) / 100;
 
-            // [Story, Beitrag] – im quadratischen Beitrag etwas kleinere Logos
-            let size = { story: [45, 100], feed: [34, 80] };
-            if (count === 1) size = { story: [60, 200], feed: [44, 150] };
-            else if (count === 2) size = { story: [52, 140], feed: [40, 115] };
-            else if (count === 3) size = { story: [45, 110], feed: [36, 95] };
-            else if (count >= 4) size = { story: [38, 85], feed: [30, 72] };
+            // Logogröße [Höhe, Breite] je Anordnung; Story etwas größer als Beitrag
+            const sizeFor = isFeed => {
+                if (layout === 'left' || layout === 'right') {
+                    const per = count <= 2 ? 1 : count === 3 ? 0.85 : 0.72;
+                    return isFeed ? [50 * per, 80 * per] : [66 * per, 104 * per];
+                }
+                if (layout === 'grid') {
+                    const w = (isFeed ? 300 : 340) / cols - 12;
+                    return [Math.min(w * 0.55, isFeed ? 60 : 80), w];
+                }
+                let sz = { story: [45, 100], feed: [34, 80] };
+                if (count === 1) sz = { story: [60, 200], feed: [44, 150] };
+                else if (count === 2) sz = { story: [52, 140], feed: [40, 115] };
+                else if (count === 3) sz = { story: [45, 110], feed: [36, 95] };
+                else if (count >= 4) sz = { story: [38, 85], feed: [30, 72] };
+                return isFeed ? sz.feed : sz.story;
+            };
 
             const buildHtml = ([h, w]) => tabSponsors.map(name => {
                 const s = findSponsor(name);
                 return s.img
-                    ? `<img src="${s.img}" class="sponsor-logo" alt="" style="max-height:${h}px; max-width:${w}px;">`
+                    ? `<img src="${s.img}" class="sponsor-logo" alt="" style="max-height:${(h * f).toFixed(1)}px; max-width:${(w * f).toFixed(1)}px;">`
                     : `<span class="sponsor-text">${esc(s.name)}</span>`;
             }).join('');
             const visible = !!show && count > 0;
 
             $(`view-${tab}`)?.querySelectorAll('.sponsor-banner').forEach(banner => {
                 const isFeed = !!banner.closest('.post-template');
-                banner.style.display = visible ? 'flex' : 'none';
-                banner.innerHTML = buildHtml(isFeed ? size.feed : size.story);
-                banner.dataset.logoH = size.feed[0];
+                const [h, w] = sizeFor(isFeed);
+                banner.classList.remove('sb-bottom', 'sb-top', 'sb-left', 'sb-right', 'sb-grid');
+                banner.classList.add('sb-' + layout);
+                banner.style.display = visible ? (layout === 'grid' ? 'grid' : 'flex') : 'none';
+                banner.style.gridTemplateColumns = layout === 'grid' ? `repeat(${cols}, auto)` : '';
+                banner.innerHTML = buildHtml([h, w]);
+                // Platzbedarf für den Beitrag (Inhalt wird daneben/darüber eingepasst)
+                banner.dataset.pos = layout === 'grid' ? 'bottom' : layout;
+                if (layout === 'left' || layout === 'right') banner.dataset.extent = (w * f + 20).toFixed(1);
+                else if (layout === 'grid') { const rows = Math.ceil(count / cols); banner.dataset.extent = (rows * h * f + (rows - 1) * 8 + 20).toFixed(1); }
+                else banner.dataset.extent = (h * f + 26).toFixed(1);
             });
             $(`view-${tab}`)?.querySelectorAll('.post-template').forEach(layoutFeedContent);
         }
 
-        /* Beiträge: Inhalt (400×400) wird mittig platziert (4:5) und bei Sponsorenleiste passend verkleinert */
+        /* Beiträge: Inhalt (400×400) wird mittig platziert (4:5) und bei Sponsoren passend verkleinert/verschoben */
         function layoutFeedContent(tpl) {
             const content = tpl.querySelector(':scope > .tpl-content');
             if (!content) return;
             const H = tpl.classList.contains('fmt-45') ? 500 : 400;
             const banner = tpl.querySelector(':scope > .sponsor-banner');
-            const bannerH = banner && banner.style.display !== 'none' ? (parseFloat(banner.dataset.logoH) || 40) + 26 : 0;
-            const avail = H - bannerH;
-            const scale = Math.min(1, avail / 400);
-            const top = Math.max(0, (avail - 400 * scale) / 2);
-            content.style.transform = (scale === 1 && top === 0) ? '' : `translateY(${top.toFixed(1)}px) scale(${scale.toFixed(3)})`;
+            const on = banner && banner.style.display !== 'none';
+            const pos = on ? (banner.dataset.pos || 'bottom') : 'bottom';
+            const ext = on ? (parseFloat(banner.dataset.extent) || 0) : 0;
+            let scale, tx = 0, ty;
+            if (pos === 'left' || pos === 'right') {
+                scale = Math.min(1, (400 - ext) / 400, H / 400);
+                tx = (pos === 'left' ? 1 : -1) * ext / 2;
+                ty = Math.max(0, (H - 400 * scale) / 2);
+            } else {
+                const avail = H - ext;
+                scale = Math.min(1, avail / 400);
+                ty = (pos === 'top' ? ext : 0) + Math.max(0, (avail - 400 * scale) / 2);
+            }
+            content.style.transform = (scale === 1 && !tx && !ty) ? '' : `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px) scale(${scale.toFixed(3)})`;
         }
 
         function getFeedFormat() { return val('cfg-feed-format') === '11' ? '11' : '45'; }
@@ -3923,6 +4098,23 @@
                         tpl.insertAdjacentHTML('afterbegin', '<img class="story-wappen-top-right club-logo-img corner-logo movable" alt="">');
                     }
                     tpl.querySelectorAll('.sponsor-banner').forEach(b => b.classList.add('movable'));
+                    // Bis zu 3 zusätzliche Spieler je Vorlage (verschieb- und skalierbar)
+                    if (!tpl.querySelector('.extra-player')) {
+                        const isStory = tpl.classList.contains('story-template');
+                        const host = tpl.querySelector(':scope > .tpl-content') || tpl;
+                        [1, 2, 3].forEach(i => {
+                            const top = isStory ? 500 : 255, left = isStory ? [25, 145, 265][i - 1] : [30, 150, 270][i - 1];
+                            const el = document.createElement('div');
+                            el.className = 'draggable-img extra-player';
+                            el.id = `xp-${tpl.id}-${i}`;
+                            el.dataset.xp = i;
+                            el.setAttribute('data-default-top', top + 'px');
+                            el.setAttribute('data-default-left', left + 'px');
+                            el.style.cssText = `top:${top}px; left:${left}px; display:none;`;
+                            el.innerHTML = '<img class="xp-img" alt=""><div class="xp-name"></div>';
+                            host.insertBefore(el, host.querySelector(':scope > .sponsor-banner'));
+                        });
+                    }
                     if (tpl.classList.contains('post-template') && !tpl.querySelector(':scope > .tpl-content')) {
                         const content = document.createElement('div');
                         content.className = 'tpl-content';
@@ -3966,6 +4158,9 @@
             setVal(`in-size-title-${tab}`, '2.0');
             setVal(`in-size-info-${tab}`, '1.1');
             setVal(`in-logo-size-${tab}`, '75');
+            // Text-Design, Foto-Art und Sponsoren-Anordnung zurücksetzen – zusätzliche Spieler bleiben ausgewählt
+            const keepXp = { xp1: val(`in-xp1-${tab}`), xp2: val(`in-xp2-${tab}`), xp3: val(`in-xp3-${tab}`), xpNames: $(`in-xp-names-${tab}`)?.checked };
+            applyExtraDesign(tab, keepXp);
 
             const sp = $(`in-show-sponsors-${tab}`);
             if (sp) sp.checked = false;
@@ -3978,6 +4173,43 @@
             renderSelectedSponsors(tab);
             updateAllViews();
             scheduleSave();
+        }
+
+        function clearLineup() {
+            if (!confirm('Alle Spieler der Aufstellung (Startelf, Rückennummern und Ersatzbank) leeren?\nTrainer bleiben erhalten. Mit ↩️ lässt sich das rückgängig machen.')) return;
+            for (let i = 1; i <= 11; i++) { setVal(`player-${i}`, 'Keiner'); setVal(`num-player-${i}`, ''); }
+            for (let i = 1; i <= 7; i++) setVal(`bench-player-${i}`, 'Keiner');
+            buildFormation();
+            updateCaption('story');
+            scheduleSave();
+            toast('🧹 Aufstellung geleert');
+        }
+        function clearKader() {
+            if (!confirm('Alle Spieler aus dem Kader entfernen?\nMit ↩️ lässt sich das rückgängig machen.')) return;
+            for (let i = 1; i <= KADER_MAX; i++) setVal(`kader-player-${i}`, 'Keiner');
+            updateKader();
+            refreshLineupOptions();
+            updateCaption('kader');
+            scheduleSave();
+            toast('🧹 Kader geleert');
+        }
+
+        function renderExtraPlayers(tab) {
+            const view = $(`view-${tab}`);
+            if (!view) return;
+            const showNames = $(`in-xp-names-${tab}`)?.checked ?? true;
+            view.querySelectorAll('.extra-player').forEach(el => {
+                const name = val(`in-xp${el.dataset.xp}-${tab}`);
+                const on = !!name && name !== 'Keiner' && !!findPlayer(name);
+                el.style.display = on ? 'flex' : 'none';
+                if (!on) return;
+                const img = el.querySelector('.xp-img');
+                const src = getPlayerImageSrc(name, tab);
+                if (img.getAttribute('src') !== src) img.src = src;
+                const nm = el.querySelector('.xp-name');
+                nm.textContent = name;
+                nm.style.display = showNames ? '' : 'none';
+            });
         }
 
         function updateTorImageSize() {
@@ -4080,7 +4312,7 @@
             if ($('out-tor-player-name')) $('out-tor-player-name').innerHTML = scorerHtml;
             if ($('out-tor-player-name-feed')) $('out-tor-player-name-feed').innerHTML = scorerHtml;
 
-            const torSrc = getPlayerTorImageSrc(name, 'tor');
+            const torSrc = getPlayerImageSrc(name, 'tor');
             ['img-tor-player', 'img-tor-player-feed'].forEach(id => { const img = $(id); if (img) img.src = torSrc; });
 
             [['out-tor-assist-wrap', 'img-tor-assist', 'out-tor-assist-name'],
@@ -5019,7 +5251,8 @@
                     logoFeed: !!$(`in-logo-feed-${t}`)?.checked,
                     cutout: !!$(`in-cutout-${t}`)?.checked,
                     logoSize: val(`in-logo-size-${t}`) || '',
-                    logoStory: $(`in-logo-story-${t}`)?.checked ?? true
+                    logoStory: $(`in-logo-story-${t}`)?.checked ?? true,
+                    ...collectExtraDesign(t)
                 };
             });
             return data;
@@ -5085,7 +5318,7 @@
 
             editorTabs.forEach(t => {
                 const s = data.tabSettings && data.tabSettings[t];
-                if (!s) return;
+                if (!s) { applyExtraDesign(t, null); return; }
                 setVal(`in-bg-${t}-feed`, s.bgFeed || DEFAULT_BG);
                 setVal(`in-bg-${t}-story`, s.bgStory || DEFAULT_BG);
                 setVal(`in-frame-shape-${t}`, s.frameShape || 'circle');
@@ -5102,6 +5335,7 @@
                 if ($(`in-cutout-${t}`)) $(`in-cutout-${t}`).checked = !!s.cutout;
                 if ($(`in-logo-size-${t}`)) setVal(`in-logo-size-${t}`, s.logoSize || '75');
                 if ($(`in-logo-story-${t}`) && s.logoStory !== undefined) $(`in-logo-story-${t}`).checked = s.logoStory;
+                applyExtraDesign(t, s);
             });
             refreshSponsorChecklists();
         }
@@ -6607,6 +6841,7 @@
                 $(`btn-${currentVersion}`)?.classList.add('active');
 
                 buildDesignControls();
+                editorTabs.forEach(t => applyExtraDesign(t, null));   // Standardwerte (z.B. Tor-Reiter: Torjubel-Foto)
                 buildPlayerSelectControls();
                 refreshPlayerOptions();
                 refreshOpponentDropdown();
