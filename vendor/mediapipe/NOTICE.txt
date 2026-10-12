@@ -1,0 +1,7 @@
+MediaPipe Tasks Vision 1.0.1 – Copyright Google LLC – Apache License 2.0
+Modell "Selfie Multiclass Segmentation (256x256)" – Google – Apache License 2.0
+Quelle: https://github.com/google-ai-edge/mediapipe / https://ai.google.dev/edge/mediapipe
+
+Änderung für Vereinsgrafik: In vision_bundle.mjs wurde der Versand von
+Nutzungsstatistiken an odml.pa.googleapis.com deaktiviert. Die Bildverarbeitung
+läuft vollständig lokal auf dem Gerät; es werden keine Bilder übertragen.
