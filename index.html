@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.5</title>
+    <title>ClubShot – Grafiken für Vereine 18.6</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -255,7 +255,7 @@
         .player-name { text-align: center; font-size: calc(9px * var(--pc-size, 1)); margin-top: 2px; font-weight: bold; background: rgba(0,0,0,0.6); color: white; padding: 1px 3px; border-radius: 3px; }
         /* Spielfeld (gezeichnet) und Profi-Look der Aufstellung */
         .field-img { position: absolute; z-index: 0; pointer-events: none; max-width: none; }
-        .pc-captain { position: absolute; top: -3px; left: 0; width: calc(15px * var(--pc-size, 1)); height: calc(15px * var(--pc-size, 1)); border-radius: 50%; background: #f1c40f; color: #111;
+        .pc-captain-old { position: absolute; top: -3px; left: 0; width: calc(15px * var(--pc-size, 1)); height: calc(15px * var(--pc-size, 1)); border-radius: 50%; background: #f1c40f; color: #111;
             font-size: calc(9px * var(--pc-size, 1)); font-weight: 900; display: flex; align-items: center; justify-content: center; border: 1.5px solid #fff; z-index: 7; text-shadow: none; box-sizing: border-box; }
         .pitch.pc-pro .player-card { width: calc(74px * var(--pc-size, 1)); }
         .pitch.pc-pro .player-img { width: calc(64px * var(--pc-size, 1)); height: calc(74px * var(--pc-size, 1)); border: none; border-radius: 0; clip-path: none; background: transparent;
@@ -270,6 +270,12 @@
             background: rgba(0,0,0,0.38); box-shadow: 0 0 6px 3px rgba(0,0,0,0.28); z-index: 1; }
         .pc-bignum { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); font-size: calc(40px * var(--pc-size, 1)); font-weight: 900; line-height: 1;
             color: rgba(255,255,255,0.3); z-index: 0; text-shadow: none; }
+        .lineup-match { width: 100%; text-align: center; z-index: 6; }
+        .lineup-match .lm-teams { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 900; font-size: calc(var(--lm-size, 1) * 15px); line-height: 1.1; text-transform: var(--title-transform, uppercase); }
+        .lineup-match .lm-logo { width: calc(var(--lm-size, 1) * 30px); height: calc(var(--lm-size, 1) * 30px); object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); }
+        .lineup-match .lm-vs { font-size: 0.7em; opacity: 0.75; font-weight: bold; }
+        .lineup-match .lm-opp { opacity: 0.8; }
+        .lineup-match .lm-sub { font-size: calc(var(--lm-size, 1) * 10px); font-weight: bold; opacity: 0.85; margin-top: 3px; }
         .pitch-bench { width: 92%; margin: 0 0 18px; display: flex; flex-direction: column; gap: 3px; z-index: 2; font-size: 10px; text-align: center; }
         .pitch-bench .pb-line { background: rgba(0,0,0,0.55); border-radius: 4px; padding: 3px 6px; color: #fff; text-shadow: none; line-height: 1.35; }
         .pitch-bench .pb-line b { color: var(--title-color, #fff); margin-right: 4px; }
@@ -1138,7 +1144,7 @@
                     <span class="hint">Nur wenn angehakt, erscheinen Nummern auf dem Spielfeld, den Trikots und in der Liste. Leere Felder nehmen die Nummer aus „Daten“.</span>
                 </div>
 
-                <div class="control-group"><label>Titel-Text</label><input type="text" id="in-story-title-text" value="S11" oninput="updateStoryTitle();"></div>
+                <div class="control-group"><label>Titel-Text</label><input type="text" id="in-story-title-text" value="Startaufstellung" oninput="updateStoryTitle();"></div>
                 <div class="control-group"><label>Trainer 1</label><select id="in-coach-1" class="player-select" onchange="buildFormation();"></select></div>
                 <div class="control-group"><label>Trainer 2</label><select id="in-coach-2" class="player-select" onchange="buildFormation();"></select></div>
                 <div class="control-group">
@@ -1166,7 +1172,12 @@
                 </div>
 
                 <div class="control-group"><label>©️ Kapitän</label><select id="in-captain" class="player-select" onchange="buildFormation();"></select>
-                    <span class="hint">Wird auf dem Spielfeld mit „C“ markiert und in der Liste mit (C).</span></div>
+                    <span class="hint">Bekommt auf dem Spielfeld und in der Liste ein „(C)“ hinter dem Namen.</span></div>
+                <div class="control-group">
+                    <label><input type="checkbox" id="in-lineup-match" onchange="buildFormation(); scheduleSave();"> 🆚 Gegner & Datum anzeigen (wie bei den Profis)</label>
+                    <input type="text" id="in-lineup-sub" placeholder="z.B. Kreisliga A · 8. Spieltag" oninput="buildFormation();" style="margin-top:6px;">
+                    <span class="hint" id="lineup-match-hint">Gegner, Heim/Auswärts und Datum kommen aus dem Reiter „Ankündigung“.</span>
+                </div>
                 <div class="control-group">
                     <span class="hint">✋ Spieler in der Vorschau antippen, dann frei verschieben (z.B. hängende Spitze) und größer/kleiner ziehen. Mit 🏷️ in der Leiste oben blendest du den Namen einzeln aus. Bei einer neuen Formation stehen alle wieder auf Standard – jede Formation merkt sich ihre eigenen Verschiebungen.</span>
                     <button type="button" class="copy-action-btn" onclick="resetPlayerPositions()">↺ Spieler-Positionen zurücksetzen</button>
@@ -1247,7 +1258,7 @@
                     <button type="button" id="eck-redo-btn" class="copy-action-btn" onclick="redoEckball()" style="margin-bottom:0; background:#2a9d8f;">↪️ Wiederholen</button>
                 </div>
 
-                <button type="button" class="copy-action-btn" style="background:#005f73; font-size:13px; padding:10px;" onclick="copyS11ToEckball()">🔄 Übernimm S11 von Aufstellung</button>
+                <button type="button" class="copy-action-btn" style="background:#005f73; font-size:13px; padding:10px;" onclick="copyS11ToEckball()">🔄 Startelf von Aufstellung übernehmen</button>
                 <hr style="margin:10px 0; border:none; border-top:1px solid #ccc;">
 
                 <div class="control-group">
@@ -1477,7 +1488,8 @@
                 <div class="preview-wrapper">
                     <div class="preview-label-tag">📷 Spielfeld Feed (1:1)</div>
                     <div id="capture-story-feed" class="post-template">
-                        <div class="draggable-text" data-default-top="10px" data-default-left="0px" style="top: 10px; left: 0px;"><h2 class="title-dyn" id="out-story-title-feed">S11</h2></div>
+                        <div class="draggable-text" data-default-top="10px" data-default-left="0px" style="top: 10px; left: 0px;"><h2 class="title-dyn" id="out-story-title-feed">Startaufstellung</h2></div>
+                        <div id="lineup-match-feed" class="draggable-text lineup-match" data-default-top="50px" data-default-left="0px" style="top:50px; left:0px; display:none;"></div>
                         <div id="pitch-feed" class="pitch movable" style="margin-top: 40px; margin-bottom: 15px;"></div>
                         <div id="pitch-bench-feed" class="pitch-bench movable" style="display:none; margin-bottom:8px;"></div>
                     </div>
@@ -1490,9 +1502,10 @@
                     <div class="preview-label-tag">⚽ Spielfeld Story (9:16)</div>
                     <div id="capture-story" class="story-template">
                         <img class="story-wappen-top-right club-logo-img" alt="">
-                        <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top: 20px; left: 0px;"><h2 class="title-dyn" id="out-story-title">S11</h2></div>
+                        <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top: 20px; left: 0px;"><h2 class="title-dyn" id="out-story-title">Startaufstellung</h2></div>
+                        <div id="lineup-match" class="draggable-text lineup-match" data-default-top="78px" data-default-left="0px" style="top:78px; left:0px; display:none;"></div>
                         <div id="pitch" class="pitch movable"></div>
-                        <div id="pitch-bench" class="pitch-bench movable" style="display:none; margin:-28px 0 34px;"></div>
+                        <div id="pitch-bench" class="pitch-bench movable" style="display:none; margin-bottom:34px;"></div>
                     </div>
                     <div class="btn-action-group">
                         <button class="download-btn" onclick="shareImage('capture-story', 'aufstellung_spielfeld_story.png', this)">📲 In Fotos / Teilen</button>
@@ -2005,7 +2018,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.5";
+        const APP_VERSION = "18.6";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3236,6 +3249,8 @@
             { key: 'logoDir', id: 'in-logo-dir', def: () => 'row' },
             { key: 'fieldStyle', id: 'in-field-style', def: () => 'none' },
             { key: 'fieldView', id: 'in-field-view', def: () => 'flat' },
+            { key: 'fieldShape', id: 'in-field-shape', def: () => 'half' },
+            { key: 'pitchNameMode', id: 'in-pitch-namemode', def: () => 'full' },
             { key: 'fieldOpacity', id: 'in-field-opacity', def: () => '70' },
             { key: 'fieldSize', id: 'in-field-size', def: () => '100' },
             { key: 'playerStyle', id: 'in-player-style', def: () => 'classic' },
@@ -3282,16 +3297,23 @@
                                 <div class="control-group"><label>Spielfeld zeichnen</label>
                                     <select id="in-field-style-${tab}" ${on}>
                                         <option value="none">Kein Feld</option>
-                                        <option value="lines">Nur weiße Linien</option>
+                                        <option value="lines">Leuchtende Linien</option>
+                                        <option value="dark">Dunkle Fläche + Linien</option>
                                         <option value="grass">Rasen mit Streifen</option>
                                         <option value="club">Rasen in Vereinsfarbe</option>
                                     </select></div>
-                                <div class="control-group adv-only"><label>Ansicht</label>
-                                    <select id="in-field-view-${tab}" ${on}>
-                                        <option value="flat">Von oben</option>
-                                        <option value="persp">Schräg wie im TV</option>
+                                <div class="control-group"><label>Feld-Ausschnitt</label>
+                                    <select id="in-field-shape-${tab}" ${on}>
+                                        <option value="half">Halbes Feld (wie Profis)</option>
+                                        <option value="full">Ganzes Feld</option>
                                     </select></div>
                             </div>
+                            <div class="control-group adv-only"><label>Ansicht</label>
+                                <select id="in-field-view-${tab}" ${on}>
+                                    <option value="flat">Von oben</option>
+                                    <option value="persp">Schräg wie im TV</option>
+                                </select></div>
+                            <span class="hint">Tipp: Bei Foto-Hintergründen sieht „Dunkle Fläche + Linien“ am besten aus.</span>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div class="control-group"><label>Deckkraft Linien</label><input type="range" id="in-field-opacity-${tab}" min="20" max="100" step="5" value="70" ${live}></div>
                                 <div class="control-group"><label>Größe Spielfeld</label><input type="range" id="in-field-size-${tab}" min="70" max="125" step="1" value="100" ${live}></div>
@@ -3304,6 +3326,12 @@
                                     <option value="pro">⭐ Profi: freigestellt mit Namensbalken</option>
                                 </select>
                                 <span class="hint">Profi-Look nutzt die freigestellten Fotos (unter „🗃️ Daten“ mit ✂️ freistellen – am besten Oberkörper-Fotos vor ruhigem Hintergrund).</span></div>
+                            <div class="control-group"><label>Namen auf dem Spielfeld</label>
+                                <select id="in-pitch-namemode-${tab}" ${on}>
+                                    <option value="full">Vor- und Nachname</option>
+                                    <option value="last">Nur Nachname</option>
+                                    <option value="first">Nur Vorname</option>
+                                </select></div>
                             <div class="ct-checks">
                                 <label><input type="checkbox" id="in-pitch-names-${tab}" checked ${on}> Namen anzeigen</label>
                                 <label class="adv-only"><input type="checkbox" id="in-pitch-shadow-${tab}" checked ${on}> Schatten auf dem Rasen (Profi)</label>
@@ -3665,7 +3693,7 @@
            ========================================================= */
         const TAB_CONTENT = {
             post:       { keys: ['venue', 'opponentSelect', 'postTitle', 'postDate', 'postTime'], inputs: [] },
-            story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly', 'captain', 'pitchHideNames'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
+            story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly', 'captain', 'pitchHideNames', 'lineupMatch', 'lineupSub'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
             tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute'], inputs: [] },
             ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers'], inputs: [/^erg-/] },
             kader:      { keys: ['kaderMeeting', 'kaderJersey', 'kaderDuty1', 'kaderDuty2', 'kaderFreetext'], inputs: [/^kader-player-/] },
@@ -3990,6 +4018,7 @@
                 setOrClear('--tpl-text-shadow', eff === 'soft' ? '' : TEXT_EFFECTS[eff]);
 
                 renderExtraPlayers(tab);
+                if (tab === 'story') fitStoryTitles();
 
                 const logoFeed = !!$(`in-logo-feed-${tab}`)?.checked;
                 const logoStory = $(`in-logo-story-${tab}`)?.checked ?? true;
@@ -4141,10 +4170,22 @@
         /* =========================================================
            GRAFIKEN AKTUALISIEREN
            ========================================================= */
+        /* Lange Aufstellungs-Titel automatisch verkleinern (Story: Platz neben dem Vereinslogo lassen) */
+        function fitStoryTitles() {
+            const base = (parseFloat(val('in-size-title-story')) || 2) * 16;
+            [['out-story-title', 250], ['out-story-title-feed', 350]].forEach(([id, maxW]) => {
+                const el = $(id);
+                if (!el) return;
+                const len = Math.max(1, (el.textContent || '').length);
+                const px = Math.min(base, maxW / (len * 0.66));
+                el.style.fontSize = px.toFixed(1) + 'px';
+            });
+        }
         function updateStoryTitle() {
-            const text = val('in-story-title-text') || "S11";
+            const text = val('in-story-title-text') || "Startaufstellung";
             setText('out-story-title', text);
             setText('out-story-title-feed', text);
+            fitStoryTitles();
         }
 
         /* ---------- Verschieben (1 Finger) & Skalieren (2 Finger / Leiste / Mausrad) ---------- */
@@ -4671,9 +4712,11 @@
             return '#' + ch.map(c => c.toString(16).padStart(2, '0')).join('');
         }
         function fieldSvgUri(w, h, o) {
-            const Lm = 105, Wm = 68;
-            const k = o.persp ? 0.56 : 1, c = 1 / k - 1;          // Breite am fernen Ende (schräge Ansicht)
-            const padX = w * (o.persp ? 0.07 : 0.05), padT = h * (o.persp ? 0.04 : 0.025), padB = h * 0.025;
+            const Wm = 68, FULL = 105;
+            const half = o.shape !== 'full';
+            const Lm = half ? 55 : FULL;                              // sichtbare Länge (halbes Feld: bis knapp über die Mittellinie)
+            const k = o.persp ? 0.6 : 1, c = 1 / k - 1;               // Breite am fernen Ende (schräge Ansicht)
+            const padX = w * (o.persp ? 0.08 : 0.06), padT = h * 0.03, padB = h * 0.03;
             const fw = w - 2 * padX, fh = h - padT - padB;
             const P = (x, y) => {
                 const z = y / Lm, sc = 1 / (1 + c * z), g = z * (1 + c) / (1 + c * z);
@@ -4683,43 +4726,56 @@
             const path = (pts, close) => 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join(' L') + (close ? ' Z' : '');
             const line = (x1, y1, x2, y2) => { const pts = []; for (let i = 0; i <= 12; i++) pts.push(P(x1 + (x2 - x1) * i / 12, y1 + (y2 - y1) * i / 12)); return pts; };
             const rect = (x1, y1, x2, y2) => [...line(x1, y1, x2, y1), ...line(x2, y1, x2, y2), ...line(x2, y2, x1, y2), ...line(x1, y2, x1, y1)];
-            // Kreise: von oben echte Kreise (Radius nach der Breite), schräg perspektivisch verzerrt
+            // Kreise: von oben echte Kreise (Radius nach der Breite), schräg perspektivisch gestaucht
             const ryf = (fw / Wm) / (fh / Lm) * (o.persp ? 0.62 : 1);
             const arc = (cx, cy, r, keep) => {
-                const pts = [];
-                for (let i = 0; i <= 72; i++) {
-                    const a = i / 72 * Math.PI * 2, x = cx + r * Math.cos(a), y = cy + r * ryf * Math.sin(a);
-                    if (!keep || keep(x, y)) pts.push(P(x, y)); else if (pts.length) { pts.push(null); }
-                }
-                // in zusammenhängende Stücke teilen
                 const parts = [[]];
-                pts.forEach(p => p ? parts[parts.length - 1].push(p) : parts.push([]));
+                for (let i = 0; i <= 96; i++) {
+                    const a = i / 96 * Math.PI * 2, x = cx + r * Math.cos(a), y = cy + r * ryf * Math.sin(a);
+                    if (!keep || keep(x, y)) parts[parts.length - 1].push(P(x, y)); else if (parts[parts.length - 1].length) parts.push([]);
+                }
                 return parts.filter(q => q.length > 1);
             };
-            let bg = '', lines = [];
+            const top = half ? FULL / 2 : FULL;                       // obere Linie: Mittellinie bzw. Torlinie
+            const outline = path(rect(0, 0, Wm, top), true);
+            let fill = '';
+            const radius = Math.max(8, w * 0.035);
             if (o.style === 'grass' || o.style === 'club') {
                 const base = o.style === 'club' ? shadeHex(o.club, -0.35) : '#2b7a30';
                 const light = o.style === 'club' ? shadeHex(o.club, -0.22) : '#348c39';
-                bg = `<rect width="${w}" height="${h}" fill="${base}"/>`;
-                const n = 14, y0 = -6, y1 = Lm + 6;
+                const area = path(rect(-5, -3, Wm + 5, half ? Lm : FULL + 3), true);
+                fill = `<clipPath id="fa"><path d="${area}"/></clipPath>`
+                    + `<path d="${area}" fill="${base}" stroke="${base}" stroke-width="${f1(radius)}" stroke-linejoin="round"/><g clip-path="url(#fa)">`;
+                const n = 12, y0 = -4, y1 = Lm + 4;
                 for (let i = 0; i < n; i += 2) {
                     const a = y0 + (y1 - y0) * i / n, b = y0 + (y1 - y0) * (i + 1) / n;
-                    bg += `<path d="${path([...line(-12, a, Wm + 12, a), ...line(Wm + 12, b, -12, b)], true)}" fill="${light}"/>`;
+                    fill += `<path d="${path([...line(-12, a, Wm + 12, a), ...line(Wm + 12, b, -12, b)], true)}" fill="${light}"/>`;
                 }
+                fill += '</g>';
+            } else if (o.style === 'dark') {
+                const area = path(rect(-3, -2, Wm + 3, half ? Lm - 1 : FULL + 2), true);
+                fill = `<path d="${area}" fill="#000" fill-opacity="0.42" stroke="#000" stroke-opacity="0.42" stroke-width="${f1(radius)}" stroke-linejoin="round"/>`;
             }
-            lines.push(path(rect(0, 0, Wm, Lm), true));
-            lines.push(path(line(0, Lm / 2, Wm, Lm / 2)));
-            arc(Wm / 2, Lm / 2, 9.15).forEach(q => lines.push(path(q, true)));
-            [[0, 16.5, 5.5, 11, y => y > 16.5], [Lm, Lm - 16.5, Lm - 5.5, Lm - 11, y => y < Lm - 16.5]].forEach(([gl, pa, ga, spot, keep]) => {
+            const lines = [outline];
+            if (!half) lines.push(path(line(0, FULL / 2, Wm, FULL / 2)));
+            arc(Wm / 2, FULL / 2, 9.15, (x, y) => !half || y <= FULL / 2 + 0.01).forEach(q => lines.push(path(q)));
+            const ends = [[0, 16.5, 5.5, 11, y => y > 16.5]];
+            if (!half) ends.push([FULL, FULL - 16.5, FULL - 5.5, FULL - 11, y => y < FULL - 16.5]);
+            ends.forEach(([gl, pa, ga, spot, keep]) => {
                 lines.push(path(rect(13.85, gl, 54.15, pa), true));
                 lines.push(path(rect(24.85, gl, 43.15, ga), true));
                 arc(Wm / 2, spot, 9.15, (x, y) => keep(y)).forEach(q => lines.push(path(q)));
-                const gd = gl ? 2 : -2;
-                lines.push(path(rect(30.34, gl, 37.66, gl + gd), true));
             });
-            const spots = [[Wm / 2, Lm / 2], [Wm / 2, 11], [Wm / 2, Lm - 11]].map(([x, y]) => { const [px, py] = P(x, y); return `<circle cx="${f1(px)}" cy="${f1(py)}" r="2.2" fill="#fff" fill-opacity="${o.opacity}"/>`; }).join('');
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${bg}`
-                + `<g fill="none" stroke="#ffffff" stroke-opacity="${o.opacity}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${lines.map(d => `<path d="${d}"/>`).join('')}</g>${spots}</svg>`;
+            const spotsAt = [[Wm / 2, FULL / 2], [Wm / 2, 11]];
+            if (!half) spotsAt.push([Wm / 2, FULL - 11]);
+            const spots = spotsAt.map(([x, y]) => { const [px, py] = P(x, y); return `<circle cx="${f1(px)}" cy="${f1(py)}" r="2.4" fill="#fff" fill-opacity="${o.opacity}"/>`; }).join('');
+            const d = lines.map(x => `<path d="${x}"/>`).join('');
+            // Leuchtende Linien: weicher, breiter Schein + klare Linie
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">`
+                + `<defs><filter id="gl" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3"/></filter></defs>${fill}`
+                + `<g fill="none" stroke="#ffffff" stroke-linejoin="round" stroke-linecap="round">`
+                + `<g stroke-opacity="${(o.opacity * 0.55).toFixed(2)}" stroke-width="5" filter="url(#gl)">${d}</g>`
+                + `<g stroke-opacity="${o.opacity}" stroke-width="2.2">${d}</g></g>${spots}</svg>`;
             return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
         }
 
@@ -4764,6 +4820,8 @@
             const sizeF = (parseFloat(val('in-player-size-story')) || 100) / 100;
             const fieldStyle = val('in-field-style-story') || 'none';
             const persp = adv && val('in-field-view-story') === 'persp';
+            const nameMode = val('in-pitch-namemode-story') || 'full';
+            const shortName = n => { const parts = String(n).trim().split(/\s+/); return nameMode === 'last' ? parts[parts.length - 1] : nameMode === 'first' ? parts[0] : n; };
             const formKey = formType.replace(/[^\w-]/g, '_');
 
             // Verschobene Spieler merken (auch die anderer Formationen), bevor das Feld neu aufgebaut wird
@@ -4794,7 +4852,7 @@
                     if (numInput) numInput.placeholder = pNum || 'Nr.';
                     let numVal = showNumbers ? esc(val(`num-player-${playerIdx}`) || pNum) : '';
                     const isCap = name !== 'Keiner' && name === captain;
-                    const capBadge = isCap ? '<div class="pc-captain">C</div>' : '';
+                    const capBadge = '';
 
                     let figure = '';
                     if (pitchMode === 'jerseys') {
@@ -4811,10 +4869,11 @@
                         figure = `${numBadge}${capBadge}<img class="player-img" src="${getPlayerImageSrc(name, 'story')}" alt="">`;
                     }
                     const showName = name !== 'Keiner' && showNamesAll && !pitchHideNames.includes(name);
+                    const label = showName ? shortName(name) + (isCap ? ' (C)' : '') : isCap ? '(C)' : '';
                     const nameHtml = name === 'Keiner' ? '<div class="player-name"></div>'
-                        : !showName ? ''
-                        : pro ? `<div class="player-name">${numVal && !bigNum ? `<span class="pc-num">${numVal}</span>` : ''}<span>${esc(name.toUpperCase())}</span></div>`
-                        : `<div class="player-name">${esc(name)}</div>`;
+                        : !label ? ''
+                        : pro ? `<div class="player-name">${numVal && !bigNum && showName ? `<span class="pc-num">${numVal}</span>` : ''}<span>${esc(label.toUpperCase())}</span></div>`
+                        : `<div class="player-name">${esc(label)}</div>`;
                     row.push({ slot: playerIdx, name, html: `<div class="pc-figure">${figure}</div>${nameHtml}` });
 
                     if (name !== "Keiner") {
@@ -4829,23 +4888,64 @@
                 cardRows.push(row);
             });
 
+            // Ersatzbank & Trainer unter dem Spielfeld (vor dem Zeichnen, damit das Feld nicht überlappt)
+            const benchOn = !!$('in-pitch-bench-story')?.checked;
+            const benchNames = [], coachNames = [];
+            for (let i = 1; i <= 7; i++) { const n = val(`bench-player-${i}`); if (n && n !== 'Keiner') benchNames.push(esc(n)); }
+            ['in-coach-1', 'in-coach-2'].forEach(id => { const n = val(id); if (n && n !== 'Keiner') coachNames.push(esc(n)); });
+            const benchHtml = (benchNames.length ? `<div class="pb-line"><b>${esc(L('story', 'bench'))}</b>${benchNames.join(' · ')}</div>` : '')
+                + (coachNames.length ? `<div class="pb-line"><b>${esc(L('story', 'coaches'))}</b>${coachNames.join(' · ')}</div>` : '');
+            const benchVisible = benchOn && !!benchHtml;
+            ['pitch-bench', 'pitch-bench-feed'].forEach(id => {
+                const el = $(id);
+                if (!el) return;
+                el.innerHTML = benchHtml;
+                el.style.display = benchVisible ? 'flex' : 'none';
+            });
+            // Gegner & Datum (wie bei Profi-Grafiken)
+            const matchOn = !!$('in-lineup-match')?.checked;
+            const opp = val('in-post-opponent-select');
+            const isHome = val('in-post-venue') !== 'auswaerts';
+            const own = getTeamName();
+            const sub = [val('in-lineup-sub'), [val('in-post-date'), val('in-post-time')].filter(Boolean).join(' · ')].filter(Boolean).join('  |  ');
+            const ownItem = `<img class="lm-logo" src="${getClubLogoSrc()}" alt=""><span>${esc(own)}</span>`;
+            const oppItem = `<span class="lm-opp">${esc(opp || 'Gegner')}</span><img class="lm-logo" src="${getOpponentLogoSrc(opp || 'Gegner')}" alt="">`;
+            const oppItemL = `<img class="lm-logo" src="${getOpponentLogoSrc(opp || 'Gegner')}" alt=""><span class="lm-opp">${esc(opp || 'Gegner')}</span>`;
+            const ownItemR = `<span>${esc(own)}</span><img class="lm-logo" src="${getClubLogoSrc()}" alt="">`;
+            const matchHtml = `<div class="lm-teams">${isHome ? ownItem + '<span class="lm-vs">vs</span>' + oppItem : oppItemL + '<span class="lm-vs">vs</span>' + ownItemR}</div>`
+                + (sub ? `<div class="lm-sub">${esc(sub)}</div>` : '');
+            ['lineup-match', 'lineup-match-feed'].forEach(id => {
+                const el = $(id);
+                if (!el) return;
+                el.innerHTML = matchOn ? matchHtml : '';
+                el.style.display = matchOn ? 'block' : 'none';
+            });
+            if ($('lineup-match-hint')) $('lineup-match-hint').textContent = `Gegner, Heim/Auswärts und Datum kommen aus dem Reiter „Ankündigung“ – aktuell: ${opp || 'kein Gegner gewählt'}${val('in-post-date') ? ', ' + val('in-post-date') : ''}.`;
+            // Platz schaffen: Spielfeld rückt unter den Gegner-Kopf, Ersatzbank darunter
+            if (pitchStory) { pitchStory.style.marginTop = matchOn ? '128px' : ''; pitchStory.style.marginBottom = benchVisible ? '8px' : ''; }
+            if (pitchFeed) { pitchFeed.style.marginTop = matchOn ? '92px' : '40px'; pitchFeed.style.marginBottom = benchVisible ? '6px' : '15px'; }
+
             [pitchStory, pitchFeed].forEach(pitch => {
                 if (!pitch) return;
                 pitch.innerHTML = '';
                 pitch.classList.toggle('pc-pro', pro);
-                // Beitrag ist niedriger als die Story – Profi-Spieler dort etwas kleiner
-                pitch.style.setProperty('--pc-size', (sizeF * (pro && pitch.id === 'pitch-feed' ? 0.82 : 1)).toFixed(3));
+                // Spieler automatisch so verkleinern, dass alle Reihen ins Feld passen (leichte Überlappung erlaubt)
+                const isFeedP = pitch.id === 'pitch-feed';
+                const boxH = pitch.offsetHeight || ((isFeedP ? 365 : 616) - (matchOn ? (isFeedP ? 52 : 78) : 0) - (benchVisible ? (isFeedP ? 40 : 60) : 0));
+                const cardH = (pro ? 92 : 60) * sizeF;
+                const fit = Math.min(1, (boxH / rows.length) * 1.12 / cardH);
+                pitch.style.setProperty('--pc-size', (sizeF * fit).toFixed(3));
                 // Gezeichnetes Spielfeld
                 if (fieldStyle !== 'none') {
+                    // Größe in % der Spielfeld-Box – passt sich automatisch an (Gegner-Kopf, Ersatzbank, Format)
                     const isFeed = pitch.id === 'pitch-feed';
-                    const W = pitch.offsetWidth || 360, H = pitch.offsetHeight || (isFeed ? 365 : 616);
-                    const fs = (parseFloat(val('in-field-size-story')) || 100) / 100;
-                    const fw = Math.round(W * fs), fh = Math.round(H * fs);
+                    const W = pitch.offsetWidth || 360, H = boxH;
+                    const fs = (parseFloat(val('in-field-size-story')) || 100);
                     const img = document.createElement('img');
                     img.className = 'field-img';
                     img.alt = '';
-                    img.src = fieldSvgUri(fw, fh, { style: fieldStyle, persp, opacity: (parseFloat(val('in-field-opacity-story')) || 70) / 100, club: val('cfg-color-primary') || '#005f73' });
-                    img.style.cssText = `left:${((W - fw) / 2).toFixed(1)}px; top:${((H - fh) / 2).toFixed(1)}px; width:${fw}px; height:${fh}px;`;
+                    img.src = fieldSvgUri(Math.round(W * fs / 100), Math.round(H * fs / 100), { style: fieldStyle, persp, shape: val('in-field-shape-story') || 'half', opacity: (parseFloat(val('in-field-opacity-story')) || 70) / 100, club: val('cfg-color-primary') || '#005f73' });
+                    img.style.cssText = `left:${((100 - fs) / 2).toFixed(1)}%; top:${((100 - fs) / 2).toFixed(1)}%; width:${fs}%; height:${fs}%;`;
                     pitch.appendChild(img);
                 }
                 cardRows.forEach((row, ri) => {
@@ -4866,20 +4966,6 @@
             });
             if (selId && $(selId)) selectElement($(selId));
             if ($('btn-show-all-names')) $('btn-show-all-names').hidden = !pitchHideNames.length;
-
-            // Ersatzbank & Trainer unter dem Spielfeld
-            const benchOn = !!$('in-pitch-bench-story')?.checked;
-            const benchNames = [], coachNames = [];
-            for (let i = 1; i <= 7; i++) { const n = val(`bench-player-${i}`); if (n && n !== 'Keiner') benchNames.push(esc(n)); }
-            ['in-coach-1', 'in-coach-2'].forEach(id => { const n = val(id); if (n && n !== 'Keiner') coachNames.push(esc(n)); });
-            const benchHtml = (benchNames.length ? `<div class="pb-line"><b>${esc(L('story', 'bench'))}</b>${benchNames.join(' · ')}</div>` : '')
-                + (coachNames.length ? `<div class="pb-line"><b>${esc(L('story', 'coaches'))}</b>${coachNames.join(' · ')}</div>` : '');
-            ['pitch-bench', 'pitch-bench-feed'].forEach(id => {
-                const el = $(id);
-                if (!el) return;
-                el.innerHTML = benchHtml;
-                el.style.display = benchOn && benchHtml ? 'flex' : 'none';
-            });
 
             if ($('out-list-starter')) $('out-list-starter').innerHTML = starterListHTML || esc(L('story', 'noStarters'));
 
@@ -5799,6 +5885,8 @@
                 formation: val('formation-select') || '4-4-2',
                 pitchMode: val('in-pitch-mode') || 'photos',
                 captain: val('in-captain') || 'Keiner',
+                lineupMatch: !!$('in-lineup-match')?.checked,
+                lineupSub: val('in-lineup-sub'),
                 pitchHideNames: [...pitchHideNames],
 
                 torImgSize: val('in-size-tor-img') || '170',
@@ -5893,7 +5981,7 @@
             const map = {
                 teamName: 'cfg-team-name', primary: 'cfg-color-primary', jerseyColor: 'cfg-color-jersey', frameColor: 'cfg-color-frame',
                 venue: 'in-post-venue', opponentSelect: 'in-post-opponent-select', postTitle: 'in-post-title', postDate: 'in-post-date', postTime: 'in-post-time',
-                storyTitleText: 'in-story-title-text', coach1: 'in-coach-1', coach2: 'in-coach-2', formation: 'formation-select', pitchMode: 'in-pitch-mode', captain: 'in-captain',
+                storyTitleText: 'in-story-title-text', coach1: 'in-coach-1', coach2: 'in-coach-2', formation: 'formation-select', pitchMode: 'in-pitch-mode', captain: 'in-captain', lineupSub: 'in-lineup-sub',
                 torImgSize: 'in-size-tor-img', torPlayer: 'in-tor-player', torAssist: 'in-tor-assist', torScore: 'in-tor-score', torMinute: 'in-tor-minute',
                 ergTitle: 'in-ergebnis-title', ergScore: 'in-ergebnis-score', ergText: 'in-ergebnis-text',
                 kaderMeeting: 'in-kader-meeting', kaderJersey: 'in-kader-jersey', kaderDuty1: 'in-kader-duty-1', kaderDuty2: 'in-kader-duty-2', kaderFreetext: 'in-kader-freetext',
@@ -5915,6 +6003,9 @@
             season = Array.isArray(data.season) ? data.season : [];
             renderSeasonPreview();
             pitchHideNames = Array.isArray(data.pitchHideNames) ? data.pitchHideNames : [];
+            // Früherer Standardtitel „S11“ → „Startaufstellung“
+            if (data.storyTitleText === 'S11') setVal('in-story-title-text', 'Startaufstellung');
+            if ($('in-lineup-match')) $('in-lineup-match').checked = !!data.lineupMatch;
 
             if (data.eckArrows) eckArrows = data.eckArrows;
             if (data.eckNodes) eckNodes = data.eckNodes;
@@ -7217,7 +7308,7 @@
             start: 'Oben tippst du an, welche Grafik du erstellen möchtest. Darunter legst du Vereinsname, Farben und das Format der Beiträge fest. Unter „Ansicht anpassen“ blendest du Reiter und Bereiche aus, die du nicht brauchst. Denk an regelmäßige Backups!',
             stammdaten: 'Lege hier einmalig Spieler (mit Foto und Torjubel-Foto), Gegner, Sponsoren und eigene Hintergründe an. Alles steht danach in allen Reitern zur Auswahl. Mehrere Fotos auf einmal: Dateiname = Spielername.',
             post: 'Gegner, Heim/Auswärts, Datum und Uhrzeit eintragen – oder mit „Nächsten Termin aus Kalender übernehmen“ automatisch füllen. Texte und Logos in der Vorschau antippen, verschieben und größer/kleiner ziehen – mit 🔗 in der Leiste oben bewegt sich das Gegenstück in der Story mit. Design, Wappen-Anordnung und Sponsoren findest du unten unter „Aussehen anpassen“, verlorene Elemente über „Zurücksetzen“.',
-            story: 'Formation wählen, Startelf und Kapitän eintragen. Spieler in der Vorschau antippen und frei verschieben oder größer ziehen (🏷️ blendet den Namen aus). Unter „Spielfeld & Spieler-Look“ zeichnest du ein Fußballfeld (auch schräg wie im TV) und wählst den Profi-Look mit freigestellten Spielern. „Aufstellung leeren“ setzt alles zurück.',
+            story: 'Formation wählen, Startelf und Kapitän eintragen. Mit „Gegner & Datum anzeigen“ erscheint die Paarung wie bei Profi-Grafiken (Gegner und Datum aus dem Reiter „Ankündigung“). Spieler in der Vorschau antippen und frei verschieben oder größer ziehen (🏷️ blendet den Namen aus). Unter „Spielfeld & Spieler-Look“ zeichnest du ein Fußballfeld (auch schräg wie im TV) und wählst den Profi-Look mit freigestellten Spielern. „Aufstellung leeren“ setzt alles zurück.',
             tor: 'Torschütze, Vorlage, Spielstand und Minute wählen. Standardmäßig wird das Torjubel-Foto genutzt – unter „Spielerfotos“ kannst du auf das normale Foto wechseln.',
             ergebnis: 'Endstand, Zusatztext und Torschützen eintragen. „Letztes Spiel aus Kalender übernehmen“ füllt Gegner und Heim/Auswärts automatisch.',
             kader: 'Bis zu 20 Spieler für den Kader wählen und Treffpunkt, Trikots und Dienste eintragen. „Kader leeren“ entfernt alle Spieler.',

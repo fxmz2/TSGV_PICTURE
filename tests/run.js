@@ -244,7 +244,11 @@ async function makePhotos(browser) {
         check('Neue Formation startet auf Standard', await page.evaluate(() => [...document.querySelectorAll('#pitch .player-card')].every(e => !getElOffset(e).y)));
         await page.evaluate(() => { setVal('formation-select', '4-3-3'); buildFormation(); });
         check('Formation merkt sich verschobene Spieler', await page.evaluate(id => getElOffset(document.getElementById(id)).y === 30, pcId));
-        check('Kapitän mit „C“ markiert', (await page.$$eval('#pitch .pc-captain', l => l.length)) === 1);
+        check('Kapitän mit „(C)“ hinter dem Namen', (await page.$$eval('#pitch .player-name', l => l.filter(e => /\(C\)/.test(e.textContent)).length)) === 1);
+        await page.evaluate(() => { setVal('in-pitch-namemode-story', 'last'); $('in-lineup-match').checked = true; buildFormation(); });
+        check('Nur Nachname auf dem Spielfeld', await page.$$eval('#pitch .player-name', l => l.every(e => !/\S\s+\S/.test(e.textContent.replace(' (C)', '').trim()))));
+        check('Gegner & Datum im Kopf', await page.$eval('#lineup-match', e => e.style.display === 'block' && /vs/i.test(e.textContent)));
+        check('Titel standardmäßig „Startaufstellung“', /startaufstellung/i.test(await page.textContent('#out-story-title')));
         await page.evaluate(() => { setVal('in-player-style-story', 'pro'); setVal('in-field-style-story', 'grass'); setVal('in-field-view-story', 'persp'); $('in-pitch-bench-story').checked = true; buildFormation(); });
         check('Profi-Look mit gezeichnetem Spielfeld', await page.evaluate(() => $('pitch').classList.contains('pc-pro') && !!document.querySelector('#pitch .field-img') && $('pitch-bench').style.display === 'flex'));
         check('Export Aufstellung mit Spielfeld', (await exportSize(page, 'capture-story')) === '1200x2133');
