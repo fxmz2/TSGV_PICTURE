@@ -27,3 +27,4 @@
 # - Zeilen mit # am Anfang sind Kommentare.
 
 60d96de6c546de03961e73890cb9653c218d111117fdb68376c348ee28fa8362 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg = 2050-12-31 = advanced
+db084c40900afa5a276169ff266987e6035d7ebc3e6806b896c081865b1363a3 = TSV Grünwald = Wappen/TSV_Grünwald.jpg = 2050-12-31 = basis
