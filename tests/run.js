@@ -1,0 +1,227 @@
+/*
+ * ClubShot – automatische Tests (Playwright / Chromium)
+ *
+ * Start:  cd tests && npm install && npx playwright install chromium && npm test
+ * Optional: HEADED=1 npm test   (Browser sichtbar)
+ *
+ * Die Tests starten einen kleinen lokalen Webserver auf dem Projektordner, ersetzen
+ * vereine.txt durch eine Test-Liste (fixtures/vereine.test.txt) und erzeugen ihre
+ * Testbilder selbst – es werden keine echten Spielerfotos benötigt.
+ */
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+let chromium;
+try { ({ chromium } = require('playwright')); }
+catch (e) { ({ chromium } = require(process.env.PLAYWRIGHT_MODULE || '/opt/node22/lib/node_modules/playwright')); }
+
+const ROOT = path.resolve(__dirname, '..');
+const FIXTURE_LIST = fs.readFileSync(path.join(__dirname, 'fixtures', 'vereine.test.txt'), 'utf8');
+const TMP = path.join(__dirname, '.tmp');
+const PORT = 8790 + Math.floor(Math.random() * 100);
+const BASE = `http://localhost:${PORT}/index.html`;
+
+/* ---------- kleiner statischer Webserver ---------- */
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
+    '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.wasm': 'application/wasm', '.txt': 'text/plain; charset=utf-8', '.tflite': 'application/octet-stream' };
+const server = http.createServer((req, res) => {
+    const p = decodeURIComponent(new URL(req.url, BASE).pathname);
+    const file = path.join(ROOT, p === '/' ? 'index.html' : p);
+    if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end('not found'); }
+    res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
+    fs.createReadStream(file).pipe(res);
+});
+
+/* ---------- Mini-Testrahmen ---------- */
+let passed = 0, failed = 0;
+function check(name, ok, detail = '') {
+    if (ok) { passed++; console.log(`  ✅ ${name}`); }
+    else { failed++; console.log(`  ❌ ${name}${detail ? '  → ' + detail : ''}`); }
+}
+async function section(title, fn) {
+    console.log(`\n▶ ${title}`);
+    try { await fn(); } catch (e) { failed++; console.log(`  ❌ Abbruch: ${e.message.split('\n')[0]}`); }
+}
+
+async function newPage(browser, opts = {}) {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true, ...opts });
+    const page = await ctx.newPage();
+    page.errors = [];
+    page.external = [];
+    page.dialogs = [];
+    page.answers = [];
+    page.on('pageerror', e => page.errors.push(e.message));
+    page.on('request', r => { const u = r.url(); if (!/^(http:\/\/localhost|data:|blob:)/.test(u)) page.external.push(u); });
+    page.on('dialog', d => { page.dialogs.push(d.message()); const a = page.answers.length ? page.answers.shift() : true; a ? d.accept() : d.dismiss(); });
+    await page.route('**/vereine.txt*', r => r.fulfill({ status: 200, contentType: 'text/plain; charset=utf-8', body: FIXTURE_LIST }));
+    return page;
+}
+async function waitReady(page) {
+    await page.waitForTimeout(800);
+    await page.waitForFunction(() => typeof appReady !== 'undefined' && appReady, null, { timeout: 20000 });
+    await page.waitForTimeout(500);
+    if (await page.isVisible('#wizard-overlay')) await page.click('#wizard-overlay .license-cancel');
+}
+async function enterCode(page, code) {
+    if (!(await page.isVisible('#license-overlay'))) { await page.click('.tab-btn[data-tab="start"]'); await page.click('.club-card-btn'); }
+    await page.fill('#license-input', code);
+    await Promise.all([page.waitForEvent('load', { timeout: 8000 }).catch(() => null), page.click('#license-submit')]);
+    await waitReady(page);
+}
+async function exportSize(page, id) {
+    return page.evaluate(async id => { const c = await renderElementToCanvas(document.getElementById(id)); return c.width + 'x' + c.height; }, id);
+}
+
+/* Testbilder erzeugen (einfarbige „Porträts“) */
+async function makePhotos(browser) {
+    fs.mkdirSync(TMP, { recursive: true });
+    const page = await browser.newPage();
+    const names = ['Max_Muster', 'Max_Muster_TOR', 'Tim_Test', 'Ben_Beispiel'];
+    for (const [i, n] of names.entries()) {
+        await page.setContent(`<div id=p style="width:300px;height:380px;background:hsl(${i * 80},60%,45%);display:flex;align-items:center;justify-content:center;font:bold 60px Arial;color:#fff">${n[0]}${n.includes('TOR') ? '⚽' : ''}</div>`);
+        await page.locator('#p').screenshot({ path: path.join(TMP, n + '.png') });
+    }
+    await page.close();
+    return names.map(n => path.join(TMP, n + '.png'));
+}
+
+(async () => {
+    await new Promise(r => server.listen(PORT, r));
+    const browser = await chromium.launch({ headless: !process.env.HEADED });
+    const photos = await makePhotos(browser);
+    console.log(`ClubShot-Tests auf ${BASE}`);
+
+    await section('Start, Sicherheit, Demo-Modus', async () => {
+        const page = await newPage(browser);
+        await page.goto(BASE);
+        await page.waitForTimeout(800);
+        check('Freischalt-Fenster erscheint', await page.isVisible('#license-overlay'));
+        await page.click('#license-demo');
+        await waitReady(page);
+        const counts = await page.evaluate(() => [stammdaten.players.length, stammdaten.opponents.length, stammdaten.sponsors.length]);
+        check('Demo füllt Beispieldaten', counts[0] >= 18 && counts[1] >= 6 && counts[2] >= 3, counts.join('/'));
+        check('Export Beitrag 4:5 = 1200x1500', (await exportSize(page, 'capture-post-feed')) === '1200x1500');
+        check('Export Story = 1200x2133', (await exportSize(page, 'capture-post-story')) === '1200x2133');
+        check('Keine Verbindungen zu fremden Servern', page.external.length === 0, page.external.join(', '));
+        check('Keine JavaScript-Fehler', page.errors.length === 0, page.errors.join(' | '));
+        await page.context().close();
+    });
+
+    await section('Lizenzen, Pakete, Daten je Verein', async () => {
+        const page = await newPage(browser);
+        await page.goto(BASE);
+        await page.waitForTimeout(600);
+        await page.fill('#license-input', 'TEST-OLD1');
+        await page.click('#license-submit');
+        await page.waitForTimeout(800);
+        check('Abgelaufener Code wird abgelehnt', /abgelaufen/i.test(await page.textContent('#license-error')));
+        await enterCode(page, 'TEST-BAS1');
+        check('Basis-Paket erkannt', /Basis/.test(await page.textContent('#club-card-code')));
+        check('Advanced-Reiter gesperrt', (await page.$$eval('.tab-btn.locked', l => l.map(b => b.dataset.tab).sort().join(','))) === 'eckball,neuzugang,sponsor,wochenende');
+        await page.click('.tab-btn[data-tab="eckball"]');
+        check('Gesperrter Reiter zeigt Hinweis', await page.isVisible('#editor-locked'));
+        await page.click('.tab-btn[data-tab="stammdaten"]');
+        await page.fill('#new-player-name', 'Nur Basis');
+        await page.click('button:has-text("Spieler speichern")');
+        await page.waitForTimeout(500);
+        page.answers.push(false);   // keine Daten übernehmen
+        await enterCode(page, 'TEST-ADV1');
+        check('Advanced: keine Sperren', (await page.$$eval('.tab-btn.locked', l => l.length)) === 0);
+        check('Neuer Verein startet leer', (await page.evaluate(() => stammdaten.players.length)) === 0);
+        await enterCode(page, 'TEST-BAS1');
+        check('Daten des ersten Vereins wieder da', (await page.evaluate(() => stammdaten.players.map(p => p.name).join(','))) === 'Nur Basis');
+        check('Keine JavaScript-Fehler', page.errors.length === 0, page.errors.join(' | '));
+        await page.context().close();
+    });
+
+    await section('Spieler, Fotos, Einwilligungen, Zusatzspieler', async () => {
+        const page = await newPage(browser);
+        await page.goto(BASE);
+        await page.waitForTimeout(600);
+        await enterCode(page, 'TEST-ADV1');
+        await page.click('.tab-btn[data-tab="stammdaten"]');
+        await page.setInputFiles('#bulk-photo-upload', photos);
+        await page.waitForTimeout(2000);
+        const p = await page.evaluate(() => { const x = findPlayer('Max Muster'); return x && !!x.img && !!x.torImg; });
+        check('Mehrfach-Upload mit Torjubel-Foto', p);
+        // Foto-Umschalter
+        await page.click('.tab-btn[data-tab="potm"]');
+        await page.selectOption('#in-potm-player', 'Max Muster');
+        await page.evaluate(() => { setVal('in-photo-type-potm', 'tor'); updateAllViews(); });
+        check('Torjubel-Foto umschaltbar', await page.evaluate(() => $('out-potm-img').src === findPlayer('Max Muster').torImg));
+        // Zusatzspieler
+        await page.click('.tab-btn[data-tab="post"]');
+        await page.evaluate(() => { setVal('in-xp1-post', 'Tim Test'); updateTabDesign('post'); });
+        check('Zusatzspieler sichtbar', (await page.$$eval('#capture-post-feed .extra-player', l => l.filter(e => e.style.display !== 'none').length)) === 1);
+        // Einwilligungen
+        await page.click('.tab-btn[data-tab="stammdaten"]');
+        await page.check('#sd-consent-check');
+        await page.click('.tab-btn[data-tab="post"]');
+        page.answers.push(false);
+        page.dialogs.length = 0;
+        await page.click('#view-post .download-btn >> nth=0');
+        await page.waitForTimeout(500);
+        check('Warnung bei fehlender Einwilligung', /Einwilligung/.test(page.dialogs[0] || ''));
+        // Leeren
+        await page.click('.tab-btn[data-tab="kader"]');
+        await page.selectOption('#kader-player-1', 'Max Muster');
+        await page.click('button:has-text("Kader leeren")');
+        await page.waitForTimeout(300);
+        check('Kader leeren', (await page.inputValue('#kader-player-1')) === 'Keiner');
+        check('Keine JavaScript-Fehler', page.errors.length === 0, page.errors.join(' | '));
+        await page.context().close();
+    });
+
+    await section('Design, Ansicht, Sponsoren, Spielplan', async () => {
+        const page = await newPage(browser);
+        await page.goto(BASE);
+        await page.waitForTimeout(600);
+        await page.click('#license-demo');
+        await waitReady(page);
+        // Design auf alle Reiter
+        await page.evaluate(() => { setVal('in-frame-shape-post', 'shield'); setVal('in-font-title-post', "'Anton', sans-serif"); updateTabDesign('post'); });
+        page.answers.push(true, false);
+        await page.evaluate(() => applyDesignToAllTabs('post'));
+        check('Design auf alle Reiter übertragen', await page.evaluate(() => val('in-frame-shape-kader') === 'shield' && val('in-font-title-kader').includes('Anton')));
+        // Ansicht anpassen
+        await page.evaluate(() => uiPreset('simple'));
+        check('Einfach-Modus blendet Bereiche aus', await page.$eval('#editor-ergebnis [data-section="labels"]', e => e.hidden));
+        await page.waitForTimeout(600);
+        await page.reload();
+        await waitReady(page);
+        check('Ansicht bleibt nach Neuladen', await page.$eval('#editor-ergebnis [data-section="labels"]', e => e.hidden));
+        await page.evaluate(() => uiPreset('all'));
+        // Sponsoren-Raster
+        await page.evaluate(() => { selectedSponsors.ergebnis = stammdaten.sponsors.map(s => s.name); $('in-show-sponsors-ergebnis').checked = true; setVal('in-sponsor-layout-ergebnis', 'grid'); renderSelectedSponsors('ergebnis'); });
+        check('Sponsoren als Raster', await page.$eval('#capture-ergebnis-feed .sponsor-banner', b => b.classList.contains('sb-grid') && b.style.display === 'grid'));
+        // Spielplan-Erkennung
+        const games = await page.evaluate(() => parseSchedule('So, 05.10.2099 15:00 SV Demo 1920 - FC Musterstadt\n12.10.2099 14:30 FV Testingen - SV Demo 1920\n19.10.2099 13:00 TSV Demoheim (H)', ['SV Demo 1920']));
+        check('Spielplan wird erkannt', games.length === 3 && games[0].venue === 'heim' && games[1].venue === 'auswaerts' && games[1].opp === 'FV Testingen', JSON.stringify(games));
+        // Nummern optional
+        check('Rückennummern standardmäßig aus', (await page.$$eval('#pitch .player-number-badge', l => l.length)) === 0);
+        check('Keine JavaScript-Fehler', page.errors.length === 0, page.errors.join(' | '));
+        await page.context().close();
+    });
+
+    await section('Handy (Touch, Samsung-Galaxy-Größe)', async () => {
+        const page = await newPage(browser, { viewport: { width: 360, height: 780 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3,
+            userAgent: 'Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/25.0 Chrome/121.0.0.0 Mobile Safari/537.36' });
+        await page.goto(BASE);
+        await page.waitForTimeout(600);
+        await page.click('#license-demo');
+        await waitReady(page);
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+        check('Kein seitliches Scrollen der Seite', !overflow);
+        check('Reiterleiste sichtbar', await page.isVisible('#tab-bar'));
+        check('Export auf dem Handy', (await exportSize(page, 'capture-post-feed')) === '1200x1500');
+        check('Keine JavaScript-Fehler', page.errors.length === 0, page.errors.join(' | '));
+        await page.context().close();
+    });
+
+    await browser.close();
+    server.close();
+    fs.rmSync(TMP, { recursive: true, force: true });
+    console.log(`\n${failed ? '❌' : '✅'} ${passed} bestanden, ${failed} fehlgeschlagen`);
+    process.exit(failed ? 1 : 0);
+})().catch(e => { console.error(e); server.close(); process.exit(1); });

@@ -1,0 +1,4 @@
+# Test-Lizenzliste – wird nur von den automatischen Tests verwendet (nicht hochladen)
+TEST-ADV1 = Test Advanced FC = = 2099-12-31 = advanced
+TEST-BAS1 = Test Basis SV = = 2099-12-31 = basis
+TEST-OLD1 = Abgelaufen FC = = 2020-01-01

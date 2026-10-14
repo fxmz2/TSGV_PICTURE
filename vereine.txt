@@ -1,7 +1,7 @@
 # Freigeschaltete Vereine (Lizenz-/Vereinscodes)
 #
 # Format pro Zeile:
-#   CODE-HASH = Vereinsname = Wappen-Datei = gültig bis
+#   CODE-HASH = Vereinsname = Wappen-Datei = gültig bis = Paket
 #
 # - Den CODE-HASH (64 Zeichen) erzeugst du mit code-generator.html.
 #   So steht der eigentliche Code nicht lesbar in dieser Datei.
@@ -17,8 +17,13 @@
 #   nächsten Start mit Internet. Ohne Datum ist der Code unbegrenzt gültig.
 # - Wird eine Zeile gelöscht, ist der Code beim nächsten Start (mit Internet)
 #   automatisch gesperrt.
+# - "Paket" ist basis oder advanced. Ohne Angabe gilt advanced (alle Funktionen).
+#   Basis: Ankündigung, Aufstellung, Tor, Ergebnis, Kader, POTM, Kalender, Geburtstag.
+#   Advanced zusätzlich: Eckball, Neuzugang/Vorstellung, Danke-Sponsor, Wochenende,
+#   Sponsorenleisten, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte,
+#   Spielplan-Import und Grafik-Paket.
 # - Der Code DEMO ist fest in der App eingebaut (Demo-Modus mit Wasserzeichen)
 #   und muss hier nicht eingetragen werden.
 # - Zeilen mit # am Anfang sind Kommentare.
 
-548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg = 2050-12-31
+60d96de6c546de03961e73890cb9653c218d111117fdb68376c348ee28fa8362 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg = 2050-12-31 = advanced

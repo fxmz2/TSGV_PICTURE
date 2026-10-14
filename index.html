@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.2</title>
+    <title>ClubShot – Grafiken für Vereine 18.3</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,6 +24,8 @@
     <!-- Für Android (Manifest) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0b1d26">
+    <!-- Erzwungenen Dunkelmodus (z.B. Samsung Internet, Chrome) verhindern – die Vorlagen sollen exakt so aussehen wie exportiert -->
+    <meta name="color-scheme" content="only light">
 
     <!-- Bibliotheken & Schriften liegen lokal im Ordner vendor/ (DSGVO: keine Anfragen an Google oder CDNs) -->
     <script src="vendor/html2canvas.min.js"></script>
@@ -574,6 +576,23 @@
         .modal-actions .secondary { background: #e9ecef; color: #333; }
         .modal-actions button:disabled { opacity: 0.6; cursor: default; }
         .storage-status { display: block; margin-top: 6px; font-weight: bold; }
+        /* Pakete & Ansicht */
+        body.tier-basis .adv-only { display: none !important; }
+        .tab-btn.locked { opacity: 0.55; }
+        .tab-btn.locked .tab-ico::after { content: '🔒'; font-size: 10px; margin-left: 1px; }
+        .tab-btn[hidden], [data-section][hidden] { display: none !important; }
+        .ui-tab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; font-size: 13px; margin-bottom: 6px; }
+        .ui-tab-grid label, .ui-sec-list label { display: flex; align-items: center; gap: 6px; padding: 3px 0; font-weight: normal; }
+        .ui-sec-list { display: grid; grid-template-columns: 1fr; font-size: 13px; margin-top: 6px; }
+        /* Hilfe */
+        .help-btn { margin-left: 8px; border: none; background: #e8eef7; color: #1d3557; border-radius: 50%; width: 26px; height: 26px; font-size: 14px; cursor: pointer; vertical-align: middle; }
+        .help-box { background: #eef6ff; border: 1px solid #c9ddf5; border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.5; margin: -4px 0 12px; color: #1d3557; }
+        .help-box[hidden] { display: none; }
+        .help-box a { font-weight: bold; color: #c1121f; }
+        /* Einwilligungen */
+        .consent-btn { font-size: 10px; border: none; border-radius: 5px; padding: 2px 6px; cursor: pointer; font-weight: bold; }
+        .consent-btn.ok { background: #d8f3dc; color: #1b4332; }
+        .consent-btn.missing { background: #ffe5d9; color: #9d0208; }
         .storage-status.ok { color: #2a7d3f; }
         .storage-status.warn { color: #a35a00; }
         .el-toolbar .el-scale-label { min-width: 44px; text-align: center; }
@@ -784,7 +803,7 @@
                     <button type="button" class="club-card-btn" onclick="showLicenseOverlay(true)">Code ändern</button>
                 </div>
 
-                <button type="button" class="copy-action-btn pack-btn" style="background:#2a9d8f; font-size:13px; padding:10px;" onclick="openPackDialog()">📦 Spieltags-Paket: mehrere Grafiken auf einmal teilen</button>
+                <button type="button" class="copy-action-btn pack-btn adv-only" style="background:#2a9d8f; font-size:13px; padding:10px;" onclick="openPackDialog()">📦 Spieltags-Paket: mehrere Grafiken auf einmal teilen</button>
 
                 <div class="control-group">
                     <label><input type="checkbox" id="cfg-crest-clean" onchange="updateCrestClean()"> ✨ Hintergrund des Vereinswappens entfernen</label>
@@ -862,10 +881,37 @@
                     <span class="hint">Markiert oben und unten die Bereiche, die Instagram mit Profilbild bzw. Antwortfeld überdeckt. Die Linien erscheinen nicht im gespeicherten Bild.</span>
                 </div>
 
+                <!-- PAKET-HINWEIS (Basis) -->
+                <div id="tier-card" class="notice-card info" hidden>
+                    <b>📦 Basis-Paket</b>
+                    Im Advanced-Paket zusätzlich enthalten: Eckbälle, Neuzugang/Spielervorstellung, Danke-Sponsor, Wochenend-Ergebnisse,
+                    Sponsorenleisten, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte, Spielplan-Import und Grafik-Paket.
+                    Für ein Upgrade wende dich an deinen Anbieter.
+                </div>
+
+                <details class="design-details" id="ui-settings">
+                    <summary>👁️ Ansicht anpassen</summary>
+                    <div class="details-body">
+                        <label>Sichtbare Reiter</label>
+                        <div class="ui-tab-grid" id="ui-tabs"></div>
+                        <label style="margin-top:10px;">Bereiche je Reiter</label>
+                        <select id="ui-sec-tab" onchange="renderUiSections()"></select>
+                        <div class="ui-sec-list" id="ui-sections"></div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-top:6px;">
+                            <button type="button" class="copy-action-btn" style="margin:0;" onclick="uiApplySectionsToAll()">Für alle Reiter</button>
+                            <button type="button" class="copy-action-btn" style="margin:0; background:#2a9d8f;" onclick="uiPreset('simple')">Einfach-Modus</button>
+                            <button type="button" class="copy-action-btn" style="margin:0; background:#6c757d;" onclick="uiPreset('all')">Alles zeigen</button>
+                        </div>
+                        <span class="hint">Ausgeblendete Reiter und Bereiche bleiben erhalten und lassen sich hier jederzeit wieder einblenden. Gilt für diesen Verein auf diesem Gerät.</span>
+                    </div>
+                </details>
+
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
 
                 <h2 style="font-size:1.1rem; margin-bottom:10px;">💾 Backup & Export (Alle Versionen)</h2>
                 <button type="button" class="copy-action-btn" style="background:#2a9d8f; font-size:14px; padding:12px;" onclick="exportConfigJSON()">📥 Alles als JSON sichern (inkl. Bilder)</button>
+                <button type="button" class="copy-action-btn" style="background:#5a4fcf; font-size:14px; padding:12px;" onclick="shareBackup()">📤 Backup teilen (WhatsApp, Mail, AirDrop …)</button>
+                <span class="hint" style="margin-bottom:8px;">Zum Übertragen auf ein anderes Handy oder an einen zweiten Admin: Datei teilen und dort unter „JSON Datei importieren“ einlesen.</span>
                 <span class="hint" id="last-backup-info" style="margin-bottom:8px;"></span>
                 <div class="control-group" style="margin-top:10px;">
                     <label>JSON Datei importieren:</label>
@@ -876,6 +922,15 @@
                 <div class="app-footer">
                     ClubShot <span id="app-version-label"></span> · © [Anbieter]<br>
                     <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a>
+                </div>
+            </div>
+
+            <!-- GESPERRTER REITER (Basis-Paket) -->
+            <div id="editor-locked" class="editor-section">
+                <div class="notice-card info" style="margin-top:20px;">
+                    <b>🔒 Advanced-Funktion</b>
+                    <span id="locked-text">Dieser Reiter ist im Advanced-Paket enthalten.</span>
+                    Für ein Upgrade wende dich an deinen Anbieter – deine Daten bleiben erhalten.
                 </div>
             </div>
 
@@ -904,6 +959,10 @@
                 <details class="sd-section" open>
                     <summary>👤 Spieler & Trainer <span class="sd-count" id="count-players">0</span></summary>
                     <div class="details-body">
+                        <div class="control-group consent-box">
+                            <label><input type="checkbox" id="sd-consent-check" onchange="toggleConsentCheck()"> 🛡️ Einwilligungen verwalten (DSGVO)</label>
+                            <span class="hint" id="consent-summary">Pro Spieler festhalten, ob eine Einwilligung zur Veröffentlichung von Foto und Name vorliegt. Beim Teilen warnt die App, wenn jemand ohne Einwilligung abgebildet ist.</span>
+                        </div>
                         <div class="control-group"><label>Name</label><input type="text" id="new-player-name" placeholder="z.B. Max Mustermann"></div>
                         <div class="control-group">
                             <label>Rolle</label>
@@ -1189,7 +1248,7 @@
                 <div id="kal-controls"></div>
                 <span class="hint" style="margin-bottom:10px;">Termine werden automatisch nach Datum sortiert. Gegner legst du unter „Daten“ an.</span>
 
-                <details class="design-details" id="season-details">
+                <details class="design-details adv-only" id="season-details">
                     <summary>📋 Spielplan einfügen (ganze Saison) <span class="sd-count" id="season-count">0</span></summary>
                     <div class="details-body">
                         <textarea id="season-input" rows="8" class="caption-text" placeholder="Spielplan hier einfügen, z.B. von fussball.de kopiert oder aus Excel:&#10;&#10;So, 05.10.2026 15:00  TSGV Rechberg - FC Musterstadt&#10;12.10.2026 15:30  SV Beispielhausen - TSGV Rechberg&#10;19.10. 14:00 TSV Demoheim (H)"></textarea>
@@ -1860,7 +1919,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.2";
+        const APP_VERSION = "18.3";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -1893,8 +1952,8 @@
         };
         const NS_KEYS = ['stammdaten', 'current_version', 'slot_v1', 'slot_v2', 'slot_v3'];
         // Einstellungen, die zum Verein gehören (werden in prefs.byClub je Verein abgelegt)
-        const CLUB_PREF_KEYS = ['versionNames', 'lastBackupAt', 'backupSnoozeUntil', 'onboardingDone', 'demoSeeded'];
-        const clubPrefDefaults = () => ({ versionNames: {}, lastBackupAt: null, backupSnoozeUntil: null, onboardingDone: false, demoSeeded: false });
+        const CLUB_PREF_KEYS = ['versionNames', 'lastBackupAt', 'backupSnoozeUntil', 'onboardingDone', 'demoSeeded', 'ui'];
+        const clubPrefDefaults = () => ({ versionNames: {}, lastBackupAt: null, backupSnoozeUntil: null, onboardingDone: false, demoSeeded: false, ui: { hiddenTabs: [], hiddenSections: {} } });
         const pickClubPrefs = () => Object.fromEntries(CLUB_PREF_KEYS.map(k => [k, prefs[k] ?? clubPrefDefaults()[k]]));
         const LEGACY_SLOT = v => 'sva_slot_' + v;
 
@@ -2358,7 +2417,7 @@
         function findSponsor(name) { return stammdaten.sponsors.find(s => s.name === name); }
         function findTemplate(id) { return stammdaten.templates.find(t => t.id === id); }
 
-        function useCutout(tab) { return !!(tab && $(`in-cutout-${tab}`)?.checked); }
+        function useCutout(tab) { return isAdvanced() && !!(tab && $(`in-cutout-${tab}`)?.checked); }
 
         /* tab (optional): in Reitern mit „Freigestellte Spielerfotos“ wird die freigestellte Version genutzt */
         function photoTypeOf(tab) { return tab ? (val(`in-photo-type-${tab}`) || (tab === 'tor' ? 'tor' : 'normal')) : 'normal'; }
@@ -2717,7 +2776,9 @@
                         thumb = e.cutImg || e.img || PLAYER_FALLBACK;
                         thumbCls = e.cutImg ? 'cut-thumb' : '';
                         sub = (e.group || 'Spieler') + (e.torImg ? ' · Torjubel-Foto ✓' : '') + (e.cutImg || e.torCutImg ? ' · freigestellt ✓' : '');
-                        meta = `<div class="sd-meta">
+                        const consentBtn = consentEnabled()
+                            ? `<button type="button" class="consent-btn ${e.consent ? 'ok' : 'missing'}" onclick="togglePlayerConsent(${i})">${e.consent ? `✅ Einwilligung${e.consentDate ? ' ' + formatIsoDate(e.consentDate) : ''}` : '⚠️ keine Einwilligung'}</button>` : '';
+                        meta = `<div class="sd-meta">${consentBtn}
                             <select title="Mannschaft" onchange="setPlayerField(${i}, 'team', this.value)">${teamOptionsHTML(e.team, '– Mannschaft –')}</select>
                             ${(e.group || 'Spieler') === 'Spieler' ? `<select title="Position" onchange="setPlayerField(${i}, 'position', this.value)">${positionOptionsHTML(e.position, '– Position –')}</select>
                             <input type="text" title="Rückennummer" placeholder="Nr." maxlength="3" value="${esc(e.number || '')}" onchange="setPlayerField(${i}, 'number', this.value)">` : ''}
@@ -2740,6 +2801,7 @@
                 }).join('');
             });
             refreshTeamPositionSelects();
+            updateConsentSummary();
         }
 
         /* =========================================================
@@ -3031,7 +3093,7 @@
             const defs = LABEL_DEFS[tab];
             if (!defs) return '';
             return `
-                <details class="design-details" id="lbl-details-${tab}">
+                <details class="design-details" id="lbl-details-${tab}" data-section="labels">
                     <summary>🔤 Feste Texte ändern</summary>
                     <div class="details-body lbl-grid">
                         ${Object.entries(defs).map(([key, def]) => `
@@ -3116,7 +3178,7 @@
                 const host = $(`design-controls-${tab}`);
                 if (!host) return;
                 host.innerHTML = `
-                    <details class="design-details">
+                    <details class="design-details" data-section="design">
                         <summary>🎨 Design & Hintergrund</summary>
                         <div class="details-body">
                             <div class="control-group">
@@ -3150,12 +3212,14 @@
                                 <label>Schriftart (Texte)</label>
                                 <select id="in-font-${tab}" onchange="updateTabDesign('${tab}')">${fontOptions}</select>
                             </div>
+                            <button type="button" class="copy-action-btn" style="background:#5a4fcf;" onclick="applyDesignToAllTabs('${tab}')">🎨 Dieses Design auf alle Reiter übertragen</button>
+                            <span class="hint">Überträgt Rahmen, Farben, Schriften, Text-Effekte, Logo- und Sponsoren-Einstellungen – auf Wunsch auch die Hintergründe.</span>
                         </div>
                     </details>
-                    <details class="design-details">
+                    <details class="design-details" data-section="text">
                         <summary>🔤 Schrift & Text-Design</summary>
                         <div class="details-body">
-                            <div class="control-group">
+                            <div class="control-group adv-only">
                                 <label>Schriftart Überschriften</label>
                                 <select id="in-font-title-${tab}" onchange="updateTabDesign('${tab}')"><option value="">Wie Texte</option>${fontOptions}</select>
                             </div>
@@ -3164,7 +3228,7 @@
                                 <div class="control-group"><label>Titel-Größe</label><input type="range" id="in-size-title-${tab}" min="0.8" max="6" step="0.1" value="2.0" oninput="updateTabDesign('${tab}')"></div>
                                 <div class="control-group"><label>Text-Größe</label><input type="range" id="in-size-info-${tab}" min="0.6" max="4" step="0.1" value="1.1" oninput="updateTabDesign('${tab}')"></div>
                             </div>` : ''}
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div class="adv-only" style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div class="control-group"><label>Farbe Überschriften</label>
                                     <select id="in-title-color-mode-${tab}" onchange="updateTabDesign('${tab}')">
                                         <option value="text">Wie Schriftfarbe</option>
@@ -3174,7 +3238,7 @@
                                     </select></div>
                                 <div class="control-group"><label>Eigene Farbe</label><input type="color" id="in-color-title-${tab}" value="#f1c40f" onchange="setVal('in-title-color-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
                             </div>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div class="adv-only" style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div class="control-group"><label>Text-Effekt</label>
                                     <select id="in-text-effect-${tab}" onchange="updateTabDesign('${tab}')">
                                         <option value="soft">Schatten (Standard)</option>
@@ -3186,14 +3250,14 @@
                                     </select></div>
                                 <div class="control-group"><label>Buchstabenabstand</label><input type="range" id="in-letter-spacing-${tab}" min="-2" max="12" step="0.5" value="0" oninput="updateTabDesign('${tab}')"></div>
                             </div>
-                            <div class="ct-checks">
+                            <div class="ct-checks adv-only">
                                 <label><input type="checkbox" id="in-title-upper-${tab}" checked onchange="updateTabDesign('${tab}')"> GROSSBUCHSTABEN</label>
                                 <label><input type="checkbox" id="in-title-italic-${tab}" onchange="updateTabDesign('${tab}')"> <i>Kursiv</i></label>
                             </div>
                             <span class="hint">Gilt für die Überschriften dieses Reiters. Einzelne Texte kannst du zusätzlich in der Vorschau antippen und größer/kleiner ziehen.</span>
                         </div>
                     </details>
-                    <details class="design-details">
+                    <details class="design-details" data-section="photos">
                         <summary>👥 Spielerfotos & zusätzliche Spieler</summary>
                         <div class="details-body">
                             <div class="control-group">
@@ -3203,28 +3267,30 @@
                                     <option value="tor">⚽ Torjubel-Foto (falls vorhanden)</option>
                                 </select>
                             </div>
-                            <div class="control-group">
+                            <div class="control-group adv-only">
                                 <label><input type="checkbox" id="in-cutout-${tab}" onchange="updateAllViews();"> ✂️ Freigestellte Spielerfotos verwenden</label>
                                 <span class="hint">Spieler vorher unter „🗃️ Daten“ mit ✂️ freistellen. Passt gut zur Rahmenform „Freigestellt mit Schatten“.</span>
                             </div>
+                            <div class="adv-only">
                             <label>Zusätzliche Spieler im Bild (bis zu 3)</label>
                             ${[1, 2, 3].map(i => `<div class="control-group"><select id="in-xp${i}-${tab}" class="player-select" onchange="updateTabDesign('${tab}')"></select></div>`).join('')}
                             <div class="control-group"><label><input type="checkbox" id="in-xp-names-${tab}" checked onchange="updateTabDesign('${tab}')"> Namen unter den Spielern anzeigen</label></div>
                             <span class="hint">Die Spieler erscheinen in Beitrag und Story und lassen sich in der Vorschau verschieben und größer/kleiner ziehen.</span>
+                            </div>
                         </div>
                     </details>
                     ${cfg.teamNames ? `
                     <div class="control-group">
                         <label><input type="checkbox" id="in-show-teamnames-${tab}" onchange="updateMatchup();" checked> Team-Namen unter Logos anzeigen</label>
                     </div>` : ''}
-                    <div class="control-group">
+                    <div class="control-group" data-section="logo">
                         <label>Vereinslogo oben rechts</label>
                         <div class="ct-checks">
                             <label><input type="checkbox" id="in-logo-feed-${tab}" ${cfg.logoFeed ? 'checked' : ''} onchange="updateTabDesign('${tab}');"> im Beitrag (1:1)</label>
                             <label><input type="checkbox" id="in-logo-story-${tab}" ${cfg.logoStory === false ? '' : 'checked'} onchange="updateTabDesign('${tab}');"> in der Story</label>
                         </div>
                     </div>
-                    <div class="control-group">
+                    <div class="control-group adv-only" data-section="sponsors">
                         <label><input type="checkbox" id="in-show-sponsors-${tab}" onchange="renderSelectedSponsors('${tab}');"> ${cfg.sponsorLabel}</label>
                         <div class="sponsor-checkbox-list" id="sponsor-checkbox-list-${tab}"></div>
                         <div style="display:grid; grid-template-columns: 1fr 92px; gap: 6px; margin-top:6px;">
@@ -3242,7 +3308,7 @@
                         <div class="control-group" style="margin-top:6px;"><label>Größe der Sponsorenlogos</label>
                             <input type="range" id="in-sponsor-size-${tab}" min="60" max="160" step="5" value="100" oninput="renderSelectedSponsors('${tab}');"></div>
                     </div>
-                    <details class="design-details" id="ct-details-${tab}">
+                    <details class="design-details" id="ct-details-${tab}" data-section="ctexts">
                         <summary>✍️ Eigene Texte <span class="sd-count" id="ct-count-${tab}">0</span></summary>
                         <div class="details-body">
                             <div id="ct-list-${tab}" data-tab="${tab}"></div>
@@ -3267,7 +3333,7 @@
 
         function captionHTML(tab) {
             return `
-                <details class="design-details" style="margin-top:12px;">
+                <details class="design-details" style="margin-top:12px;" data-section="caption">
                     <summary>💬 Text für den Beitrag</summary>
                     <div class="details-body">
                         <textarea id="cap-text-${tab}" rows="7" class="caption-text" oninput="captionDirty['${tab}'] = true"></textarea>
@@ -3465,7 +3531,7 @@
 
         function tabCopyHTML(tab, withWhat = true) {
             return `
-                <details class="design-details" style="margin-top:12px;">
+                <details class="design-details" style="margin-top:12px;" data-section="tabcopy">
                     <summary>📋 Aus anderer Version übernehmen</summary>
                     <div class="details-body">
                         <div style="display:grid; grid-template-columns: ${withWhat ? '1fr 1fr' : '1fr'}; gap:6px;">
@@ -3752,16 +3818,17 @@
                 viewContainer.style.setProperty('--avatar-shadow', shadow);
 
                 // Überschriften: eigene Schrift, Farbe, Abstand, Großbuchstaben, Kursiv; Text-Effekt für alle Texte
-                const tFont = val(`in-font-title-${tab}`);
+                const adv = isAdvanced();   // Basis-Paket: Überschriften im Standard-Design
+                const tFont = adv ? val(`in-font-title-${tab}`) : '';
                 const setOrClear = (k, v) => v ? viewContainer.style.setProperty(k, v) : viewContainer.style.removeProperty(k);
                 setOrClear('--title-font', tFont);
-                const cMode = val(`in-title-color-mode-${tab}`) || 'text';
+                const cMode = adv ? (val(`in-title-color-mode-${tab}`) || 'text') : 'text';
                 setOrClear('--title-color', cMode === 'jersey' ? 'var(--jersey-color)' : cMode === 'primary' ? 'var(--primary)' : cMode === 'custom' ? (val(`in-color-title-${tab}`) || '#f1c40f') : '');
-                const ls = parseFloat(val(`in-letter-spacing-${tab}`) || '0');
+                const ls = adv ? parseFloat(val(`in-letter-spacing-${tab}`) || '0') : 0;
                 setOrClear('--title-ls', ls ? ls + 'px' : '');
-                setOrClear('--title-transform', $(`in-title-upper-${tab}`) && !$(`in-title-upper-${tab}`).checked ? 'none' : '');
-                setOrClear('--title-style', $(`in-title-italic-${tab}`)?.checked ? 'italic' : '');
-                const eff = val(`in-text-effect-${tab}`) || 'soft';
+                setOrClear('--title-transform', adv && $(`in-title-upper-${tab}`) && !$(`in-title-upper-${tab}`).checked ? 'none' : '');
+                setOrClear('--title-style', adv && $(`in-title-italic-${tab}`)?.checked ? 'italic' : '');
+                const eff = adv ? (val(`in-text-effect-${tab}`) || 'soft') : 'soft';
                 setOrClear('--tpl-text-shadow', eff === 'soft' ? '' : TEXT_EFFECTS[eff]);
 
                 renderExtraPlayers(tab);
@@ -3787,7 +3854,7 @@
         }
 
         function renderSelectedSponsors(tab) {
-            const show = $(`in-show-sponsors-${tab}`)?.checked;
+            const show = isAdvanced() && $(`in-show-sponsors-${tab}`)?.checked;
             const tabSponsors = (selectedSponsors[tab] || []).filter(n => findSponsor(n));
             const count = tabSponsors.length;
             const layout = val(`in-sponsor-layout-${tab}`) || 'bottom';
@@ -3886,7 +3953,8 @@
             setText('brand-club', club ? (club.demo ? 'Demo-Modus' : club.name) : '');
             setText('club-card-code', !club ? 'Bitte Vereinscode eingeben'
                 : club.demo ? 'Demo-Modus – Grafiken mit Wasserzeichen'
-                : `Vereinscode: ${formatCode(club.code)}${club.validUntil ? ` · gültig bis ${formatIsoDate(club.validUntil)}` : ''}`);
+                : `Vereinscode: ${formatCode(club.code)} · ${(club.tier || 'advanced') === 'basis' ? 'Basis' : 'Advanced'}${club.validUntil ? ` · gültig bis ${formatIsoDate(club.validUntil)}` : ''}`);
+            applyTier();
             const demoBanner = $('demo-banner');
             if (demoBanner) demoBanner.hidden = !(club && club.demo);
             updateDemoDataCard();
@@ -4200,7 +4268,7 @@
             const showNames = $(`in-xp-names-${tab}`)?.checked ?? true;
             view.querySelectorAll('.extra-player').forEach(el => {
                 const name = val(`in-xp${el.dataset.xp}-${tab}`);
-                const on = !!name && name !== 'Keiner' && !!findPlayer(name);
+                const on = isAdvanced() && !!name && name !== 'Keiner' && !!findPlayer(name);
                 el.style.display = on ? 'flex' : 'none';
                 if (!on) return;
                 const img = el.querySelector('.xp-img');
@@ -5076,8 +5144,14 @@
             localforage.setItem(STORE.tab, tab).catch(() => {});
             document.querySelectorAll('.template-container, .tab-btn, .editor-section').forEach(el => el.classList.remove('active'));
 
-            $(`view-${tab}`)?.classList.add('active');
-            $(`editor-${tab}`)?.classList.add('active');
+            if (isTabLocked(tab)) {
+                const label = document.querySelector(`.tab-btn[data-tab="${tab}"] span:last-child`)?.textContent || tab;
+                setText('locked-text', `„${label}“ ist im Advanced-Paket enthalten.`);
+                $('editor-locked')?.classList.add('active');
+            } else {
+                $(`view-${tab}`)?.classList.add('active');
+                $(`editor-${tab}`)?.classList.add('active');
+            }
 
             const targetBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
             if (targetBtn) {
@@ -5386,7 +5460,7 @@
         /* =========================================================
            BACKUP (JSON EXPORT / IMPORT)
            ========================================================= */
-        async function exportConfigJSON() {
+        async function buildBackup() {
             await saveSlotNow();
             const slots = {};
             for (const v of ['v1', 'v2', 'v3']) slots[v] = await localforage.getItem(STORE.slot(v)) || null;
@@ -5402,17 +5476,41 @@
                 slots
             };
             const slug = normName(getTeamName()).toLowerCase().replace(/[^a-z0-9äöüß]+/g, '_').replace(/^_|_$/g, '') || 'verein';
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
-            a.download = `${slug}_backup_${new Date().toISOString().slice(0, 10)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+            return { blob: new Blob([JSON.stringify(data)], { type: 'application/json' }), filename: `${slug}_backup_${new Date().toISOString().slice(0, 10)}.json` };
+        }
+        async function markBackupDone() {
             prefs.lastBackupAt = Date.now();
             prefs.backupSnoozeUntil = null;
             await savePrefs();
             updateBackupReminder();
+        }
+        async function exportConfigJSON() {
+            const { blob, filename } = await buildBackup();
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+            await markBackupDone();
+        }
+        /* Backup direkt über das Teilen-Menü des Geräts verschicken (WhatsApp, Mail, AirDrop …) */
+        async function shareBackup() {
+            const { blob, filename } = await buildBackup();
+            const file = new File([blob], filename, { type: 'application/json' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({ files: [file], title: 'ClubShot-Backup' });
+                    await markBackupDone();
+                    toast('✅ Backup geteilt');
+                    return;
+                } catch (e) {
+                    if (e.name === 'AbortError') return;
+                }
+            }
+            toast('Teilen wird hier nicht unterstützt – das Backup wird heruntergeladen.');
+            await exportConfigJSON();
         }
 
         async function importConfigJSON(event) {
@@ -5520,7 +5618,7 @@
                 if (!t || t.startsWith('#')) return;
                 const parts = t.split('=').map(s => s.trim());
                 if (!parts[0] || !parts[1]) return;
-                const entry = { name: parts[1], logo: parts[2] || '', validUntil: parseLicenseDate(parts[3]) };
+                const entry = { name: parts[1], logo: parts[2] || '', validUntil: parseLicenseDate(parts[3]), tier: parseTier(parts[4]) };
                 if (/^[0-9a-f]{64}$/i.test(parts[0])) map.hashed[parts[0].toLowerCase()] = entry;
                 else {
                     const code = normalizeCode(parts[0]);
@@ -5637,7 +5735,7 @@
                     return;
                 }
                 const previousName = club ? club.name : null;
-                const newClub = { code, name: entry.name, logoFile: entry.logo, logo: await loadClubLogo(entry.logo), validUntil: entry.validUntil, checkedAt: Date.now() };
+                const newClub = { code, name: entry.name, logoFile: entry.logo, logo: await loadClubLogo(entry.logo), validUntil: entry.validUntil, tier: entry.tier, checkedAt: Date.now() };
                 if (await switchClubTo(newClub, `✅ ${entry.name} freigeschaltet`)) return;
                 const teamInput = $('cfg-team-name');
                 if (teamInput && (teamInput.value === previousName || teamInput.value === 'SVA')) teamInput.value = '';
@@ -5671,6 +5769,7 @@
             }
             let changed = false;
             if (entry.name !== club.name) { club.name = entry.name; changed = true; }
+            if ((entry.tier || 'advanced') !== (club.tier || 'advanced')) { club.tier = entry.tier; changed = true; applyTier(); applyUiPrefs(); renderAll(); }
             // Verlängerung (neues Datum in vereine.txt) wird beim nächsten Start mit Internet übernommen
             if ((entry.validUntil || null) !== (club.validUntil || null)) {
                 club.validUntil = entry.validUntil || null;
@@ -5981,6 +6080,8 @@
         async function shareImage(elementId, filename, btn) {
             const element = $(elementId);
             if (!element) return;
+            const tabOfEl = (element.closest('.template-container')?.id || '').replace(/^view-/, '');
+            if (tabOfEl && !confirmConsent([tabOfEl])) return;
             const originalText = btn ? btn.innerText : '';
             if (btn) { btn.innerText = '⏳ Generiere HQ...'; btn.disabled = true; }
             try {
@@ -6386,12 +6487,207 @@
             return true;
         }
 
+
+        /* =========================================================
+           PAKETE: BASIS / ADVANCED
+           Paket steht als 5. Feld in vereine.txt (basis | advanced). Ohne Angabe: advanced.
+           ========================================================= */
+        const ADVANCED_TABS = ['eckball', 'neuzugang', 'sponsor', 'wochenende'];
+        function parseTier(v) { return /^basis$/i.test(String(v || '').trim()) ? 'basis' : 'advanced'; }
+        function isAdvanced() { return !club || !!club.demo || (club.tier || 'advanced') !== 'basis'; }
+        function isTabLocked(tab) { return !isAdvanced() && ADVANCED_TABS.includes(tab); }
+        function applyTier() {
+            const adv = isAdvanced();
+            document.body.classList.toggle('tier-basis', !adv);
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('locked', isTabLocked(b.dataset.tab)));
+            if ($('tier-card')) $('tier-card').hidden = adv;
+        }
+
+        /* =========================================================
+           ANSICHT ANPASSEN (sichtbare Reiter & Bereiche je Reiter, gespeichert je Verein)
+           ========================================================= */
+        const UI_FIXED_TABS = ['start', 'stammdaten'];
+        const UI_SECTIONS = [
+            ['design', '🎨 Design & Hintergrund'], ['text', '🔤 Schrift & Text-Design'], ['photos', '👥 Spielerfotos & Zusatzspieler'],
+            ['logo', '🏷️ Vereinslogo oben rechts'], ['sponsors', '🤝 Sponsoren'], ['ctexts', '✍️ Eigene Texte'], ['labels', '🔤 Feste Texte ändern'],
+            ['caption', '💬 Text für den Beitrag'], ['tabcopy', '📋 Aus anderer Version übernehmen'], ['pack', '📦 Mehrere Grafiken teilen']
+        ];
+        const UI_SIMPLE_HIDDEN = ['text', 'ctexts', 'labels', 'tabcopy', 'pack'];
+        function uiPrefs() {
+            if (!prefs.ui || typeof prefs.ui !== 'object') prefs.ui = { hiddenTabs: [], hiddenSections: {} };
+            prefs.ui.hiddenTabs = prefs.ui.hiddenTabs || [];
+            prefs.ui.hiddenSections = prefs.ui.hiddenSections || {};
+            return prefs.ui;
+        }
+        function uiTabs() { return tabList.filter(t => !UI_FIXED_TABS.includes(t)); }
+        function sectionsOfTab(tab) {
+            const ed = $(`editor-${tab}`);
+            if (!ed) return [];
+            const present = new Set(Array.from(ed.querySelectorAll('[data-section]')).map(e => e.dataset.section));
+            return UI_SECTIONS.filter(([k]) => present.has(k));
+        }
+        function applyUiPrefs() {
+            const ui = uiPrefs();
+            document.querySelectorAll('.tab-btn').forEach(b => { b.hidden = ui.hiddenTabs.includes(b.dataset.tab); });
+            uiTabs().forEach(tab => {
+                const hidden = ui.hiddenSections[tab] || [];
+                $(`editor-${tab}`)?.querySelectorAll('[data-section]').forEach(el => { el.hidden = hidden.includes(el.dataset.section); });
+            });
+            if (ui.hiddenTabs.includes(activeTab)) switchTab('start');
+        }
+        function renderUiSettings() {
+            const ui = uiPrefs();
+            const host = $('ui-tabs');
+            if (!host) return;
+            host.innerHTML = uiTabs().map(t => `<label><input type="checkbox" data-ui-tab="${t}" ${ui.hiddenTabs.includes(t) ? '' : 'checked'}> ${esc(tabTitle(t))}${ADVANCED_TABS.includes(t) && !isAdvanced() ? ' 🔒' : ''}</label>`).join('');
+            host.querySelectorAll('input').forEach(cb => cb.addEventListener('change', () => {
+                const t = cb.dataset.uiTab;
+                ui.hiddenTabs = ui.hiddenTabs.filter(x => x !== t);
+                if (!cb.checked) ui.hiddenTabs.push(t);
+                savePrefs(); applyUiPrefs();
+            }));
+            const sel = $('ui-sec-tab');
+            const cur = sel.value;
+            sel.innerHTML = uiTabs().filter(t => sectionsOfTab(t).length).map(t => `<option value="${t}">${esc(tabTitle(t))}</option>`).join('');
+            if (cur && sel.querySelector(`option[value="${cur}"]`)) sel.value = cur;
+            renderUiSections();
+        }
+        function renderUiSections() {
+            const ui = uiPrefs();
+            const tab = val('ui-sec-tab');
+            const host = $('ui-sections');
+            if (!host || !tab) return;
+            const hidden = ui.hiddenSections[tab] || [];
+            host.innerHTML = sectionsOfTab(tab).map(([k, l]) => `<label><input type="checkbox" data-ui-sec="${k}" ${hidden.includes(k) ? '' : 'checked'}> ${l}</label>`).join('');
+            host.querySelectorAll('input').forEach(cb => cb.addEventListener('change', () => {
+                const k = cb.dataset.uiSec;
+                const list = (ui.hiddenSections[tab] || []).filter(x => x !== k);
+                if (!cb.checked) list.push(k);
+                ui.hiddenSections[tab] = list;
+                savePrefs(); applyUiPrefs();
+            }));
+        }
+        function uiApplySectionsToAll() {
+            const ui = uiPrefs();
+            const tab = val('ui-sec-tab');
+            const hidden = ui.hiddenSections[tab] || [];
+            uiTabs().forEach(t => { ui.hiddenSections[t] = [...hidden]; });
+            savePrefs(); applyUiPrefs(); renderUiSections();
+            toast('✅ Auswahl für alle Reiter übernommen');
+        }
+        function uiPreset(kind) {
+            const ui = uiPrefs();
+            uiTabs().forEach(t => { ui.hiddenSections[t] = kind === 'simple' ? [...UI_SIMPLE_HIDDEN] : []; });
+            if (kind === 'all') ui.hiddenTabs = [];
+            savePrefs(); applyUiPrefs(); renderUiSettings();
+            toast(kind === 'simple' ? '✅ Einfach-Modus: nur das Nötigste sichtbar' : '✅ Alle Reiter und Bereiche sichtbar');
+        }
+
+        /* =========================================================
+           DESIGN AUF ALLE REITER ÜBERTRAGEN
+           ========================================================= */
+        const DESIGN_COPY_VALUES = ['frame-shape', 'color-frame', 'color-text', 'font', 'font-title', 'title-color-mode', 'color-title', 'text-effect',
+            'letter-spacing', 'logo-size', 'sponsor-layout', 'sponsor-cols', 'sponsor-size'];
+        const DESIGN_COPY_CHECKS = ['title-upper', 'title-italic', 'cutout'];
+        function applyDesignToAllTabs(tab) {
+            if (!confirm('Das Design dieses Reiters (Rahmen, Farben, Schriften, Text-Effekte, Logo- und Sponsoren-Einstellungen) auf alle anderen Reiter übertragen?\n\nMit ↩️ lässt sich das rückgängig machen.')) return;
+            const withBg = confirm('Sollen auch die Hintergründe (Beitrag und Story) übertragen werden?\n\nOK = ja · Abbrechen = Hintergründe behalten');
+            editorTabs.filter(t => t !== tab).forEach(t => {
+                DESIGN_COPY_VALUES.forEach(f => { const src = $(`in-${f}-${tab}`), dst = $(`in-${f}-${t}`); if (src && dst) dst.value = src.value; });
+                DESIGN_COPY_CHECKS.forEach(f => { const src = $(`in-${f}-${tab}`), dst = $(`in-${f}-${t}`); if (src && dst) dst.checked = src.checked; });
+                if (withBg) ['feed', 'story'].forEach(fmt => setVal(`in-bg-${t}-${fmt}`, val(`in-bg-${tab}-${fmt}`)));
+                updateTabDesign(t);
+                renderSelectedSponsors(t);
+            });
+            renderAll();
+            scheduleSave();
+            toast('🎨 Design auf alle Reiter übertragen');
+        }
+
+        /* =========================================================
+           EINWILLIGUNGEN (DSGVO) – optional, je Verein
+           ========================================================= */
+        function consentEnabled() { return !!stammdaten.consentCheck; }
+        async function toggleConsentCheck() {
+            stammdaten.consentCheck = !!$('sd-consent-check')?.checked;
+            await saveStammdaten();
+            renderStammdatenLists();
+        }
+        async function togglePlayerConsent(idx) {
+            const p = stammdaten.players[idx];
+            if (!p) return;
+            if (p.consent) {
+                if (!confirm(`Einwilligung von ${p.name} wirklich entfernen?`)) return;
+                delete p.consent; delete p.consentDate;
+            } else {
+                p.consent = true;
+                p.consentDate = todayISO();
+            }
+            await saveStammdaten();
+            renderStammdatenLists();
+        }
+        function updateConsentSummary() {
+            const el = $('consent-summary');
+            if ($('sd-consent-check')) $('sd-consent-check').checked = consentEnabled();
+            if (!el) return;
+            if (!consentEnabled()) { el.textContent = 'Pro Spieler festhalten, ob eine Einwilligung zur Veröffentlichung von Foto und Name vorliegt. Beim Teilen warnt die App, wenn jemand ohne Einwilligung abgebildet ist.'; return; }
+            const missing = stammdaten.players.filter(p => !p.consent).length;
+            el.textContent = missing ? `⚠️ ${missing} von ${stammdaten.players.length} Personen ohne hinterlegte Einwilligung. Tippe in der Liste auf den Status, um ihn zu ändern.` : '✅ Für alle Personen ist eine Einwilligung hinterlegt.';
+        }
+        /* Personen, die in einem Reiter ausgewählt sind und keine Einwilligung haben */
+        function playersWithoutConsent(tabs) {
+            if (!consentEnabled()) return [];
+            const names = new Set();
+            tabs.forEach(tab => $(`editor-${tab}`)?.querySelectorAll('select.player-select').forEach(sel => {
+                const n = sel.value;
+                if (n && n !== 'Keiner' && n !== OWN_GOAL) names.add(n);
+            }));
+            return [...names].filter(n => { const p = findPlayer(n); return p && !p.consent; });
+        }
+        function confirmConsent(tabs) {
+            const missing = playersWithoutConsent(tabs);
+            if (!missing.length) return true;
+            return confirm(`Auf dieser Grafik sind Personen ohne hinterlegte Einwilligung:\n\n${missing.join(', ')}\n\nTrotzdem erstellen und teilen?`);
+        }
+
+        /* =========================================================
+           HILFE JE REITER
+           Video-Links hier eintragen, z.B. post: 'https://youtu.be/…'
+           ========================================================= */
+        const HELP_VIDEOS = {};
+        const HELP_TEXTS = {
+            start: 'Hier legst du Vereinsname, Farben und das Format der Beiträge fest. Unter „Ansicht anpassen“ blendest du Reiter und Bereiche aus, die du nicht brauchst. Denk an regelmäßige Backups!',
+            stammdaten: 'Lege hier einmalig Spieler (mit Foto und Torjubel-Foto), Gegner, Sponsoren und eigene Hintergründe an. Alles steht danach in allen Reitern zur Auswahl. Mehrere Fotos auf einmal: Dateiname = Spielername.',
+            post: 'Gegner, Heim/Auswärts, Datum und Uhrzeit eintragen – oder mit „Nächsten Termin aus Kalender übernehmen“ automatisch füllen. Texte und Logos in der Vorschau antippen, verschieben und größer/kleiner ziehen.',
+            story: 'Formation wählen und die Startelf eintragen. Mit „Nur Spieler aus dem Kader“ siehst du nur den aktuellen Kader. „Aufstellung leeren“ setzt alles zurück.',
+            tor: 'Torschütze, Vorlage, Spielstand und Minute wählen. Standardmäßig wird das Torjubel-Foto genutzt – unter „Spielerfotos“ kannst du auf das normale Foto wechseln.',
+            ergebnis: 'Endstand, Zusatztext und Torschützen eintragen. „Letztes Spiel aus Kalender übernehmen“ füllt Gegner und Heim/Auswärts automatisch.',
+            kader: 'Bis zu 20 Spieler für den Kader wählen und Treffpunkt, Trikots und Dienste eintragen. „Kader leeren“ entfernt alle Spieler.',
+            eckball: 'Spieler auf die Rollen verteilen und auf dem Taktikbrett Spieler und Pfeile verschieben. Die Legende rechts füllt sich automatisch.',
+            potm: 'Spieler des Spiels wählen und einen kurzen Text (z.B. „2 Tore“) eintragen. Das Foto lässt sich in der Vorschau verschieben und vergrößern.',
+            kalender: 'Termine eintragen oder unter „Spielplan einfügen“ die ganze Saison übernehmen. Die nächsten Spiele erscheinen automatisch sortiert.',
+            geburtstag: 'Geburtstagskind wählen und Glückwunsch eintragen. Konfetti lässt sich abschalten.',
+            neuzugang: 'Neuzugang oder Spielervorstellung wählen. Position, Nummer und Mannschaft kommen automatisch aus den Spielerdaten.',
+            sponsor: 'Sponsor wählen und Dankestext eintragen – ideal z.B. für neue Trikots oder Bälle.',
+            wochenende: 'Ergebnisse aller Mannschaften vom Wochenende eintragen (eigene Tore zuerst). Sieg, Remis und Niederlage werden farbig markiert.'
+        };
+        function setupHelp() {
+            Object.keys(HELP_TEXTS).forEach(tab => {
+                const h2 = $(`editor-${tab}`)?.querySelector('h2');
+                if (!h2 || h2.querySelector('.help-btn')) return;
+                h2.insertAdjacentHTML('beforeend', `<button type="button" class="help-btn" title="Hilfe" onclick="toggleHelp('${tab}')">❓</button>`);
+                const video = HELP_VIDEOS[tab] ? ` <a href="${esc(HELP_VIDEOS[tab])}" target="_blank" rel="noopener">▶️ Video-Anleitung ansehen</a>` : '';
+                h2.insertAdjacentHTML('afterend', `<div class="help-box" id="help-${tab}" hidden>${esc(HELP_TEXTS[tab])}${video}</div>`);
+            });
+        }
+        function toggleHelp(tab) { const b = $(`help-${tab}`); if (b) b.hidden = !b.hidden; }
+
         /* ---------- Grafik-Paket: mehrere Grafiken auf einmal ---------- */
         let packFiles = [];
         let packUrls = [];
 
         function packButtonHTML(tab) {
-            return `<button type="button" class="copy-action-btn pack-btn" style="margin-top:12px; background:#2a9d8f; font-size:12px; padding:10px;" onclick="openPackDialog('${tab}')">📦 Mehrere Grafiken auf einmal teilen</button>`;
+            return `<button type="button" class="copy-action-btn pack-btn adv-only" data-section="pack" style="margin-top:12px; background:#2a9d8f; font-size:12px; padding:10px;" onclick="openPackDialog('${tab}')">📦 Mehrere Grafiken auf einmal teilen</button>`;
         }
 
         /* Alle Grafiken der Reiter – ermittelt aus den „In Fotos / Teilen“-Knöpfen der Vorschau */
@@ -6399,7 +6695,7 @@
             const items = [];
             tabList.forEach(tab => {
                 const view = $(`view-${tab}`);
-                if (!view) return;
+                if (!view || isTabLocked(tab) || uiPrefs().hiddenTabs.includes(tab)) return;
                 view.querySelectorAll('.download-btn').forEach(btn => {
                     const m = (btn.getAttribute('onclick') || '').match(/shareImage\('([^']+)',\s*'([^']+)'/);
                     if (!m || !$(m[1])) return;
@@ -6456,6 +6752,7 @@
         async function runPackExport() {
             const chosen = Array.from($('pack-list').querySelectorAll('input[type="checkbox"]:checked'));
             if (!chosen.length) { setText('pack-progress', 'Bitte mindestens eine Grafik auswählen.'); return; }
+            if (!confirmConsent([...new Set(chosen.map(cb => cb.dataset.tab))])) return;
             clearPackFiles();
             $('pack-run').disabled = true;
             selectElement(null);
@@ -6841,6 +7138,7 @@
                 $(`btn-${currentVersion}`)?.classList.add('active');
 
                 buildDesignControls();
+                setupHelp();
                 editorTabs.forEach(t => applyExtraDesign(t, null));   // Standardwerte (z.B. Tor-Reiter: Torjubel-Foto)
                 buildPlayerSelectControls();
                 refreshPlayerOptions();
@@ -6862,6 +7160,9 @@
                 updateBackupReminder();
                 updateInstallCard();
 
+                applyTier();
+                renderUiSettings();
+                applyUiPrefs();
                 switchTab(await localforage.getItem(STORE.tab) || 'start');
 
                 const sidebarEl = document.querySelector('.sidebar');

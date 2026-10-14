@@ -1,0 +1,11 @@
+{
+  "name": "clubshot-tests",
+  "private": true,
+  "description": "Automatische Browser-Tests für ClubShot",
+  "scripts": {
+    "test": "node run.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}
