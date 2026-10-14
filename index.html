@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.7</title>
+    <title>ClubShot – Grafiken für Vereine 18.8</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -274,13 +274,19 @@
         .pc-bignum { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); font-size: calc(40px * var(--pc-size, 1)); font-weight: 900; line-height: 1;
             color: rgba(255,255,255,0.3); z-index: 0; text-shadow: none; }
         .lineup-match { width: 100%; text-align: center; z-index: 6; }
-        .lineup-match .lm-teams { display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 94%; margin: 0 auto; font-weight: 900; font-size: calc(var(--lm-size, 1) * 15px); line-height: 1.1; text-transform: var(--title-transform, uppercase); }
-        .lineup-match .lm-name { flex: 0 1 auto; min-width: 0; max-width: 40%; text-align: center; }
+        .lm-opts { margin-top: 6px; padding-left: 8px; border-left: 3px solid #dfe5ea; }
+        .lm-opts[hidden] { display: none; }
+        .lineup-match .lm-teams { display: flex; align-items: center; justify-content: center; gap: calc(var(--lm-text, 1) * 8px); max-width: 94%; margin: 0 auto; font-weight: 900;
+            font-size: calc(var(--lm-size, 1) * var(--lm-text, 1) * 15px); line-height: 1.1; text-transform: var(--title-transform, uppercase); }
+        .lineup-match .lm-team { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 42%; }
+        .lineup-match .lm-stack .lm-team { flex-direction: column; gap: 4px; }
+        .lineup-match .lm-name { min-width: 0; text-align: center; }
         .lineup-match .lm-logo, .lineup-match .lm-vs { flex: 0 0 auto; }
-        .lineup-match .lm-logo { width: calc(var(--lm-size, 1) * 30px); height: calc(var(--lm-size, 1) * 30px); object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); }
-        .lineup-match .lm-vs { font-size: 0.7em; opacity: 0.75; font-weight: bold; }
-        .lineup-match .lm-opp { opacity: 0.8; }
-        .lineup-match .lm-sub { font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.88); margin-top: 4px; white-space: nowrap; }
+        .lineup-match .lm-logo { width: var(--lm-logo, 30px); height: var(--lm-logo, 30px); object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); }
+        .lineup-match .lm-vs { font-size: 0.75em; opacity: 0.8; font-weight: bold; }
+        .lineup-match .lm-opp { opacity: 0.85; }
+        .lineup-match .lm-sub { font-size: calc(var(--lm-text, 1) * 11px); font-weight: bold; color: rgba(255,255,255,0.88); margin-top: 4px; white-space: nowrap; }
+        .lineup-match .lm-sub:empty, .lineup-match .lm-teams:empty { display: none; }
         .pitch-bench { width: 92%; margin: 0 0 18px; display: flex; flex-direction: column; gap: 3px; z-index: 2; font-size: 10px; text-align: center; }
         .pitch-bench .pb-line { background: rgba(0,0,0,0.55); border-radius: 4px; padding: 3px 6px; color: #fff; text-shadow: none; line-height: 1.35; }
         .pitch-bench .pb-line b { color: var(--title-color, #fff); margin-right: 4px; }
@@ -1180,8 +1186,26 @@
                     <span class="hint">Bekommt auf dem Spielfeld und in der Liste ein „(C)“ hinter dem Namen.</span></div>
                 <div class="control-group">
                     <label><input type="checkbox" id="in-lineup-match" onchange="buildFormation(); scheduleSave();"> 🆚 Gegner & Datum anzeigen (wie bei den Profis)</label>
-                    <input type="text" id="in-lineup-sub" placeholder="z.B. Kreisliga A · 8. Spieltag" oninput="buildFormation();" style="margin-top:6px;">
-                    <span class="hint" id="lineup-match-hint">Gegner, Heim/Auswärts und Datum kommen aus dem Reiter „Ankündigung“.</span>
+                    <div id="lineup-match-opts" class="lm-opts">
+                        <div class="ct-checks">
+                            <label><input type="checkbox" id="in-lm-logos-story" checked onchange="buildFormation(); scheduleSave();"> 🛡️ Wappen</label>
+                            <label><input type="checkbox" id="in-lm-names-story" checked onchange="buildFormation(); scheduleSave();"> 🔤 Vereinsnamen</label>
+                            <label><input type="checkbox" id="in-lm-date-story" checked onchange="buildFormation(); scheduleSave();"> 📅 Datum & Zusatztext</label>
+                        </div>
+                        <input type="text" id="in-lineup-sub" placeholder="Zusatztext, z.B. Kreisliga A · 8. Spieltag" oninput="buildFormation();" style="margin-top:6px;">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top:6px;">
+                            <div class="control-group"><label>Anordnung</label>
+                                <select id="in-lm-layout-story" onchange="buildFormation(); scheduleSave();">
+                                    <option value="row">Wappen neben Namen</option>
+                                    <option value="stack">Wappen über Namen</option>
+                                </select></div>
+                            <div class="control-group"><label>Text zwischen den Teams</label><input type="text" id="in-lm-vs-story" value="vs" maxlength="12" oninput="buildFormation();"></div>
+                            <div class="control-group"><label>Wappen-Größe</label><input type="range" id="in-lm-logosize-story" min="16" max="90" step="2" value="30" oninput="buildFormation();"></div>
+                            <div class="control-group"><label>Schriftgröße</label><input type="range" id="in-lm-textsize-story" min="60" max="180" step="5" value="100" oninput="buildFormation();"></div>
+                        </div>
+                        <span class="hint" id="lineup-match-hint">Gegner, Heim/Auswärts und Datum kommen aus dem Reiter „Ankündigung“.</span>
+                        <span class="hint">✋ In der Vorschau lassen sich Paarung und Datumszeile einzeln antippen, verschieben und größer/kleiner ziehen.</span>
+                    </div>
                 </div>
                 <div class="control-group">
                     <span class="hint">✋ Spieler in der Vorschau antippen, dann frei verschieben (z.B. hängende Spitze) und größer/kleiner ziehen. Mit 🏷️ in der Leiste oben blendest du den Namen einzeln aus. Bei einer neuen Formation stehen alle wieder auf Standard – jede Formation merkt sich ihre eigenen Verschiebungen.</span>
@@ -1494,7 +1518,7 @@
                     <div class="preview-label-tag">📷 Spielfeld Feed (1:1)</div>
                     <div id="capture-story-feed" class="post-template">
                         <div class="draggable-text" data-default-top="10px" data-default-left="0px" style="top: 10px; left: 0px;"><h2 class="title-dyn" id="out-story-title-feed">Startaufstellung</h2></div>
-                        <div id="lineup-match-feed" class="draggable-text lineup-match" data-default-top="50px" data-default-left="0px" style="top:50px; left:0px; display:none;"></div>
+                        <div id="lineup-match-feed" class="draggable-text lineup-match" data-default-top="50px" data-default-left="0px" style="top:50px; left:0px; display:none;"><div id="lm-teams-feed" class="lm-teams movable"></div><div id="lm-date-feed" class="lm-sub movable"></div></div>
                         <div id="pitch-feed" class="pitch movable" style="margin-top: 40px; margin-bottom: 15px;"></div>
                         <div id="pitch-bench-feed" class="pitch-bench movable" style="display:none; margin-bottom:8px;"></div>
                     </div>
@@ -1508,7 +1532,7 @@
                     <div id="capture-story" class="story-template">
                         <img class="story-wappen-top-right club-logo-img" alt="">
                         <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top: 20px; left: 0px;"><h2 class="title-dyn" id="out-story-title">Startaufstellung</h2></div>
-                        <div id="lineup-match" class="draggable-text lineup-match" data-default-top="78px" data-default-left="0px" style="top:78px; left:0px; display:none;"></div>
+                        <div id="lineup-match" class="draggable-text lineup-match" data-default-top="78px" data-default-left="0px" style="top:78px; left:0px; display:none;"><div id="lm-teams" class="lm-teams movable"></div><div id="lm-date" class="lm-sub movable"></div></div>
                         <div id="pitch" class="pitch movable"></div>
                         <div id="pitch-bench" class="pitch-bench movable" style="display:none; margin-bottom:34px;"></div>
                     </div>
@@ -2023,7 +2047,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.7";
+        const APP_VERSION = "18.8";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3256,6 +3280,13 @@
             { key: 'fieldView', id: 'in-field-view', def: () => 'flat' },
             { key: 'fieldShape', id: 'in-field-shape', def: () => 'half' },
             { key: 'pitchNameMode', id: 'in-pitch-namemode', def: () => 'full' },
+            { key: 'lmLogos', id: 'in-lm-logos', def: () => true, check: true },
+            { key: 'lmNames', id: 'in-lm-names', def: () => true, check: true },
+            { key: 'lmDate', id: 'in-lm-date', def: () => true, check: true },
+            { key: 'lmLayout', id: 'in-lm-layout', def: () => 'row' },
+            { key: 'lmLogoSize', id: 'in-lm-logosize', def: () => '30' },
+            { key: 'lmTextSize', id: 'in-lm-textsize', def: () => '100' },
+            { key: 'lmVs', id: 'in-lm-vs', def: () => 'vs' },
             { key: 'fieldOpacity', id: 'in-field-opacity', def: () => '70' },
             { key: 'fieldSize', id: 'in-field-size', def: () => '100' },
             { key: 'playerStyle', id: 'in-player-style', def: () => 'classic' },
@@ -4296,11 +4327,15 @@
             const keys = syncKeys(el);
             if (!keys.length) return [];
             const other = tpl.classList.contains('post-template') ? '.story-template' : '.post-template';
-            const out = [];
+            const out = [], exact = [];
             view.querySelectorAll(other).forEach(t => t.querySelectorAll(DRAG_SEL).forEach(c => {
-                if (c !== el && c.closest('.post-template, .story-template') === t && syncKeys(c).some(k => keys.includes(k))) out.push(c);
+                if (c === el || c.closest('.post-template, .story-template') !== t) return;
+                const ck = syncKeys(c);
+                if (ck[0] === keys[0]) exact.push(c);
+                else if (ck.some(k => keys.includes(k))) out.push(c);
             }));
-            return out;
+            // Genaue Treffer (gleiche Haupt-Kennung) haben Vorrang vor Treffern über enthaltene Elemente
+            return exact.length ? exact : out;
         }
         function syncOn() { return !!prefs.syncFormats; }
         function activePartners(el) { return syncOn() ? syncPartners(el) : []; }
@@ -4913,24 +4948,44 @@
             const isHome = val('in-post-venue') !== 'auswaerts';
             const own = getTeamName();
             const sub = [val('in-lineup-sub'), [val('in-post-date'), val('in-post-time')].filter(Boolean).join(' · ')].filter(Boolean).join('  |  ');
-            const ownItem = `<img class="lm-logo" src="${getClubLogoSrc()}" alt=""><span class="lm-name">${esc(own)}</span>`;
-            const oppItem = `<span class="lm-name lm-opp">${esc(opp || 'Gegner')}</span><img class="lm-logo" src="${getOpponentLogoSrc(opp || 'Gegner')}" alt="">`;
-            const oppItemL = `<img class="lm-logo" src="${getOpponentLogoSrc(opp || 'Gegner')}" alt=""><span class="lm-name lm-opp">${esc(opp || 'Gegner')}</span>`;
-            const ownItemR = `<span class="lm-name">${esc(own)}</span><img class="lm-logo" src="${getClubLogoSrc()}" alt="">`;
+            const lmLogos = $('in-lm-logos-story')?.checked ?? true, lmNames = $('in-lm-names-story')?.checked ?? true, lmDate = $('in-lm-date-story')?.checked ?? true;
+            const lmStack = val('in-lm-layout-story') === 'stack';
+            const lmLogoPx = parseFloat(val('in-lm-logosize-story')) || 30;
+            const lmText = (parseFloat(val('in-lm-textsize-story')) || 100) / 100;
+            const vsText = $('in-lm-vs-story') ? val('in-lm-vs-story') : 'vs';
+            const oppName = opp || 'Gegner';
+            const team = (name, logo, cls, logoFirst) => {
+                const l = lmLogos ? `<img class="lm-logo" src="${logo}" alt="">` : '';
+                const n = lmNames ? `<span class="lm-name${cls}">${esc(name)}</span>` : '';
+                return (l || n) ? `<div class="lm-team">${lmStack || logoFirst ? l + n : n + l}</div>` : '';
+            };
+            const left = isHome ? team(own, getClubLogoSrc(), '', true) : team(oppName, getOpponentLogoSrc(oppName), ' lm-opp', true);
+            const right = isHome ? team(oppName, getOpponentLogoSrc(oppName), ' lm-opp', false) : team(own, getClubLogoSrc(), '', false);
             // Lange Vereinsnamen: Schrift automatisch kleiner, damit beide Wappen im Bild bleiben
-            const lmSize = Math.max(0.68, Math.min(1.1, 30 / Math.max(1, own.length + (opp || 'Gegner').length)));
-            const matchHtml = `<div class="lm-teams" style="--lm-size:${lmSize.toFixed(2)}">${isHome ? ownItem + '<span class="lm-vs">vs</span>' + oppItem : oppItemL + '<span class="lm-vs">vs</span>' + ownItemR}</div>`
-                + (sub ? `<div class="lm-sub">${esc(sub)}</div>` : '');
-            ['lineup-match', 'lineup-match-feed'].forEach(id => {
-                const el = $(id);
-                if (!el) return;
-                el.innerHTML = matchOn ? matchHtml : '';
+            const lmSize = lmStack ? 1 : Math.max(0.68, Math.min(1.1, 30 / Math.max(1, own.length + oppName.length)));
+            const teamsHtml = (left || right) ? left + (vsText ? `<span class="lm-vs">${esc(vsText)}</span>` : '') + right : '';
+            const dateText = lmDate ? sub : '';
+            const LM_FEED = 0.8;   // Beitrag ist niedriger – Kopf dort etwas kleiner
+            [['lineup-match', 'lm-teams', 'lm-date', 1], ['lineup-match-feed', 'lm-teams-feed', 'lm-date-feed', LM_FEED]].forEach(([id, tId, dId, f]) => {
+                const el = $(id), tEl = $(tId), dEl = $(dId);
+                if (!el || !tEl || !dEl) return;
                 el.style.display = matchOn ? 'block' : 'none';
+                tEl.innerHTML = matchOn ? teamsHtml : '';
+                tEl.classList.toggle('lm-stack', lmStack);
+                tEl.style.setProperty('--lm-size', lmSize.toFixed(2));
+                tEl.style.setProperty('--lm-logo', (lmLogoPx * f).toFixed(1) + 'px');
+                el.style.setProperty('--lm-text', (lmText * f).toFixed(2));
+                dEl.textContent = matchOn ? dateText : '';
             });
+            // Höhe des Kopfs schätzen → Spielfeld rückt passend nach unten
+            const nameH = lmNames ? 34 * lmText * lmSize : 0;
+            const teamsH = !teamsHtml ? 0 : lmStack ? (lmLogos ? lmLogoPx : 0) + nameH + (lmLogos && lmNames ? 4 : 0) : Math.max(lmLogos ? lmLogoPx : 0, nameH);
+            const headH = matchOn ? teamsH + (dateText ? 18 * lmText : 0) + 6 : 0;
             if ($('lineup-match-hint')) $('lineup-match-hint').textContent = `Gegner, Heim/Auswärts und Datum kommen aus dem Reiter „Ankündigung“ – aktuell: ${opp || 'kein Gegner gewählt'}${val('in-post-date') ? ', ' + val('in-post-date') : ''}.`;
             // Platz schaffen: Spielfeld rückt unter den Gegner-Kopf, Ersatzbank darunter
-            if (pitchStory) { pitchStory.style.marginTop = matchOn ? '128px' : ''; pitchStory.style.marginBottom = benchVisible ? '8px' : ''; }
-            if (pitchFeed) { pitchFeed.style.marginTop = matchOn ? '92px' : '40px'; pitchFeed.style.marginBottom = benchVisible ? '6px' : '15px'; }
+            if (pitchStory) { pitchStory.style.marginTop = headH ? Math.round(78 + headH) + 'px' : ''; pitchStory.style.marginBottom = benchVisible ? '8px' : ''; }
+            if (pitchFeed) { pitchFeed.style.marginTop = headH ? Math.round(50 + headH * LM_FEED) + 'px' : '40px'; pitchFeed.style.marginBottom = benchVisible ? '6px' : '15px'; }
+            if ($('lineup-match-opts')) $('lineup-match-opts').hidden = !matchOn;
 
             [pitchStory, pitchFeed].forEach(pitch => {
                 if (!pitch) return;
@@ -4938,9 +4993,10 @@
                 pitch.classList.toggle('pc-pro', pro);
                 // Spieler automatisch so verkleinern, dass alle Reihen ins Feld passen (leichte Überlappung erlaubt)
                 const isFeedP = pitch.id === 'pitch-feed';
-                const boxH = pitch.offsetHeight || ((isFeedP ? 365 : 616) - (matchOn ? (isFeedP ? 52 : 78) : 0) - (benchVisible ? (isFeedP ? 40 : 60) : 0));
-                const cardH = (pro ? 92 : 60) * sizeF;
-                const fit = Math.min(1, (boxH / rows.length) * 1.12 / cardH);
+                const boxH = pitch.offsetHeight || ((isFeedP ? 365 : 616) - (headH ? headH * (isFeedP ? LM_FEED : 1) + (isFeedP ? 10 : 28) : 0) - (benchVisible ? (isFeedP ? 40 : 60) : 0));
+                const twoLines = showNamesAll && nameMode === 'full' && !pro;      // klassische Namen brechen oft in zwei Zeilen um
+                const cardH = (pro ? 94 : twoLines ? 72 : 60) * sizeF;
+                const fit = Math.min(1, (boxH / rows.length) * 1.08 / cardH);
                 pitch.style.setProperty('--pc-size', (sizeF * fit).toFixed(3));
                 // Gezeichnetes Spielfeld
                 if (fieldStyle !== 'none') {
