@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.4</title>
+    <title>ClubShot – Grafiken für Vereine 18.5</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -236,21 +236,43 @@
             padding: 3px; object-fit: contain; z-index: 5; box-sizing: border-box;
         }
 
-        .pitch { width: 90%; flex-grow: 1; margin-top: 50px; margin-bottom: 45px; display: flex; flex-direction: column-reverse; justify-content: space-around; z-index: 2;}
+        .pitch { width: 90%; flex-grow: 1; margin-top: 50px; margin-bottom: 45px; display: flex; flex-direction: column-reverse; justify-content: space-around; z-index: 2; position: relative; }
+        .pitch > .row { position: relative; z-index: 1; }
         .row { display: flex; gap: 12px; justify-content: center; width: 100%; }
-        .player-card { display: flex; flex-direction: column; align-items: center; width: 55px; position: relative; }
+        .player-card { display: flex; flex-direction: column; align-items: center; width: calc(55px * var(--pc-size, 1)); position: relative; flex-shrink: 0; }
+        .pc-figure { position: relative; display: flex; justify-content: center; align-items: flex-end; }
         .player-img {
-            width: 42px; height: 45px; background-color: var(--avatar-bg, #ffffff);
+            width: calc(42px * var(--pc-size, 1)); height: calc(45px * var(--pc-size, 1)); background-color: var(--avatar-bg, #ffffff);
             border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 3px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
             object-fit: cover; box-shadow: var(--avatar-shadow, 0 2px 5px rgba(0,0,0,0.5));
         }
-        .jersey-svg-icon { width: 45px; height: 45px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.6)); }
+        .jersey-svg-icon { width: calc(45px * var(--pc-size, 1)); height: calc(45px * var(--pc-size, 1)); filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.6)); }
         .player-number-badge {
             position: absolute; top: -2px; right: 2px; background: var(--jersey-color); color: white;
             font-size: 9px; font-weight: bold; border-radius: 50%; width: 17px; height: 17px;
             display: flex; align-items: center; justify-content: center; border: 1px solid white; text-shadow: none; z-index: 6;
         }
-        .player-name { text-align: center; font-size: 9px; margin-top: 2px; font-weight: bold; background: rgba(0,0,0,0.6); color: white; padding: 1px 3px; border-radius: 3px; }
+        .player-name { text-align: center; font-size: calc(9px * var(--pc-size, 1)); margin-top: 2px; font-weight: bold; background: rgba(0,0,0,0.6); color: white; padding: 1px 3px; border-radius: 3px; }
+        /* Spielfeld (gezeichnet) und Profi-Look der Aufstellung */
+        .field-img { position: absolute; z-index: 0; pointer-events: none; max-width: none; }
+        .pc-captain { position: absolute; top: -3px; left: 0; width: calc(15px * var(--pc-size, 1)); height: calc(15px * var(--pc-size, 1)); border-radius: 50%; background: #f1c40f; color: #111;
+            font-size: calc(9px * var(--pc-size, 1)); font-weight: 900; display: flex; align-items: center; justify-content: center; border: 1.5px solid #fff; z-index: 7; text-shadow: none; box-sizing: border-box; }
+        .pitch.pc-pro .player-card { width: calc(74px * var(--pc-size, 1)); }
+        .pitch.pc-pro .player-img { width: calc(64px * var(--pc-size, 1)); height: calc(74px * var(--pc-size, 1)); border: none; border-radius: 0; clip-path: none; background: transparent;
+            box-shadow: none; object-fit: contain; object-position: center bottom; position: relative; z-index: 2; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.45)); }
+        .pitch.pc-pro .player-name { margin-top: 0; background: var(--primary); border-radius: 2px; padding: 2px 4px; font-size: calc(7.5px * var(--pc-size, 1)); line-height: 1.15;
+            max-width: calc(80px * var(--pc-size, 1)); box-sizing: border-box; border-bottom: 2px solid var(--jersey-color); position: relative; z-index: 3; text-shadow: none;
+            display: flex; gap: 3px; align-items: center; justify-content: center; }
+        .pitch.pc-pro .player-name .pc-num { flex-shrink: 0; }
+        .pitch.pc-pro .pc-captain { left: 16%; top: 6%; }
+        .pc-num { background: var(--jersey-color); padding: 0 3px; border-radius: 2px; }
+        .pc-shadow { position: absolute; left: 50%; bottom: 1px; width: 66%; height: calc(7px * var(--pc-size, 1)); transform: translateX(-50%); border-radius: 50%;
+            background: rgba(0,0,0,0.38); box-shadow: 0 0 6px 3px rgba(0,0,0,0.28); z-index: 1; }
+        .pc-bignum { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); font-size: calc(40px * var(--pc-size, 1)); font-weight: 900; line-height: 1;
+            color: rgba(255,255,255,0.3); z-index: 0; text-shadow: none; }
+        .pitch-bench { width: 92%; margin: 0 0 18px; display: flex; flex-direction: column; gap: 3px; z-index: 2; font-size: 10px; text-align: center; }
+        .pitch-bench .pb-line { background: rgba(0,0,0,0.55); border-radius: 4px; padding: 3px 6px; color: #fff; text-shadow: none; line-height: 1.35; }
+        .pitch-bench .pb-line b { color: var(--title-color, #fff); margin-right: 4px; }
 
         .list-layout-wrap { width: 90%; display: flex; flex-direction: column; gap: 5px; z-index: 2; margin-top: 55px; }
         .list-section-title { font-size: 10px; font-weight: bold; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; border-left: 3px solid var(--jersey-color); color: white; }
@@ -1143,6 +1165,13 @@
                     <span class="hint">Zeigt bei Startelf und Ersatzbank nur die Spieler, die im Reiter „Kader“ ausgewählt sind.</span>
                 </div>
 
+                <div class="control-group"><label>©️ Kapitän</label><select id="in-captain" class="player-select" onchange="buildFormation();"></select>
+                    <span class="hint">Wird auf dem Spielfeld mit „C“ markiert und in der Liste mit (C).</span></div>
+                <div class="control-group">
+                    <span class="hint">✋ Spieler in der Vorschau antippen, dann frei verschieben (z.B. hängende Spitze) und größer/kleiner ziehen. Mit 🏷️ in der Leiste oben blendest du den Namen einzeln aus. Bei einer neuen Formation stehen alle wieder auf Standard – jede Formation merkt sich ihre eigenen Verschiebungen.</span>
+                    <button type="button" class="copy-action-btn" onclick="resetPlayerPositions()">↺ Spieler-Positionen zurücksetzen</button>
+                    <button type="button" class="copy-action-btn" id="btn-show-all-names" onclick="showAllPitchNames()" hidden>🏷️ Alle Namen wieder einblenden</button>
+                </div>
                 <button type="button" class="copy-action-btn" style="background:#c1121f;" onclick="clearLineup()">🧹 Aufstellung leeren (Startelf & Ersatzbank)</button>
                 <label>Startelf & Rückennummern</label>
                 <div class="scrollable-controls-box" id="starter-controls"></div>
@@ -1450,6 +1479,7 @@
                     <div id="capture-story-feed" class="post-template">
                         <div class="draggable-text" data-default-top="10px" data-default-left="0px" style="top: 10px; left: 0px;"><h2 class="title-dyn" id="out-story-title-feed">S11</h2></div>
                         <div id="pitch-feed" class="pitch movable" style="margin-top: 40px; margin-bottom: 15px;"></div>
+                        <div id="pitch-bench-feed" class="pitch-bench movable" style="display:none; margin-bottom:8px;"></div>
                     </div>
                     <div class="btn-action-group">
                         <button class="download-btn" onclick="shareImage('capture-story-feed', 'aufstellung_spielfeld_feed.png', this)">📲 In Fotos / Teilen</button>
@@ -1462,6 +1492,7 @@
                         <img class="story-wappen-top-right club-logo-img" alt="">
                         <div class="draggable-text" data-default-top="20px" data-default-left="0px" style="top: 20px; left: 0px;"><h2 class="title-dyn" id="out-story-title">S11</h2></div>
                         <div id="pitch" class="pitch movable"></div>
+                        <div id="pitch-bench" class="pitch-bench movable" style="display:none; margin:-28px 0 34px;"></div>
                     </div>
                     <div class="btn-action-group">
                         <button class="download-btn" onclick="shareImage('capture-story', 'aufstellung_spielfeld_story.png', this)">📲 In Fotos / Teilen</button>
@@ -1942,6 +1973,7 @@
         <button type="button" onclick="layerSelected(-1)" title="Nach hinten schieben">⬇</button>
         <span class="tb-sep"></span>
         <button type="button" id="el-sync-btn" onclick="toggleSyncFormats()" title="Beitrag & Story gemeinsam anpassen">🔗</button>
+        <button type="button" id="el-name-btn" onclick="togglePitchName()" title="Namen dieses Spielers ein-/ausblenden" hidden>🏷️</button>
         <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
         <button type="button" onclick="selectElement(null)" title="Fertig">✓</button>
     </div>
@@ -1973,7 +2005,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.4";
+        const APP_VERSION = "18.5";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2052,7 +2084,7 @@
 
         const TAB_DESIGN = {
             post:     { frameLabel: 'Rahmenform Logos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
-            story:    { frameLabel: 'Rahmenform Spieler', sizes: true, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen (Nur Aufstellungs-Liste)' },
+            story:    { frameLabel: 'Rahmenform Spieler', sizes: true, cutout: true, pitch: true, sponsorLabel: 'Sponsoren-Leiste anzeigen (Nur Aufstellungs-Liste)' },
             tor:      { frameLabel: 'Rahmenform Wappen/Assist', sizes: false, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             ergebnis: { frameLabel: 'Rahmenform Logos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             kader:    { frameLabel: 'Rahmenform Spieler', sizes: true, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
@@ -3202,6 +3234,16 @@
             { key: 'sponsorFree', id: 'in-sponsor-free', def: () => false, check: true },
             { key: 'logoGap', id: 'in-logo-gap', def: () => '20' },
             { key: 'logoDir', id: 'in-logo-dir', def: () => 'row' },
+            { key: 'fieldStyle', id: 'in-field-style', def: () => 'none' },
+            { key: 'fieldView', id: 'in-field-view', def: () => 'flat' },
+            { key: 'fieldOpacity', id: 'in-field-opacity', def: () => '70' },
+            { key: 'fieldSize', id: 'in-field-size', def: () => '100' },
+            { key: 'playerStyle', id: 'in-player-style', def: () => 'classic' },
+            { key: 'playerSize', id: 'in-player-size', def: () => '100' },
+            { key: 'pitchNames', id: 'in-pitch-names', def: () => true, check: true },
+            { key: 'pitchShadow', id: 'in-pitch-shadow', def: () => true, check: true },
+            { key: 'pitchBigNum', id: 'in-pitch-bignum', def: () => false, check: true },
+            { key: 'pitchBench', id: 'in-pitch-bench', def: () => false, check: true },
             { key: 'xp1', id: 'in-xp1', def: () => 'Keiner' },
             { key: 'xp2', id: 'in-xp2', def: () => 'Keiner' },
             { key: 'xp3', id: 'in-xp3', def: () => 'Keiner' },
@@ -3229,12 +3271,55 @@
             '3d': '2px 2px 0 var(--jersey-color), 4px 4px 0 rgba(0,0,0,0.65)'
         };
 
+        /* Aufstellung: Spielfeld zeichnen, Spielergröße, Profi-Look */
+        function pitchDesignHTML(tab) {
+            const on = `onchange="buildFormation(); scheduleSave();"`, live = `oninput="buildFormation();"`;
+            return `
+                    <details class="design-details" data-section="pitch" open>
+                        <summary>⚽ Spielfeld & Spieler-Look</summary>
+                        <div class="details-body">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Spielfeld zeichnen</label>
+                                    <select id="in-field-style-${tab}" ${on}>
+                                        <option value="none">Kein Feld</option>
+                                        <option value="lines">Nur weiße Linien</option>
+                                        <option value="grass">Rasen mit Streifen</option>
+                                        <option value="club">Rasen in Vereinsfarbe</option>
+                                    </select></div>
+                                <div class="control-group adv-only"><label>Ansicht</label>
+                                    <select id="in-field-view-${tab}" ${on}>
+                                        <option value="flat">Von oben</option>
+                                        <option value="persp">Schräg wie im TV</option>
+                                    </select></div>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Deckkraft Linien</label><input type="range" id="in-field-opacity-${tab}" min="20" max="100" step="5" value="70" ${live}></div>
+                                <div class="control-group"><label>Größe Spielfeld</label><input type="range" id="in-field-size-${tab}" min="70" max="125" step="1" value="100" ${live}></div>
+                            </div>
+                            <div class="control-group"><label>Größe aller Spieler</label><input type="range" id="in-player-size-${tab}" min="60" max="180" step="5" value="100" ${live}>
+                                <span class="hint">Einzelne Spieler (z.B. den Kapitän) zusätzlich in der Vorschau antippen und größer ziehen.</span></div>
+                            <div class="control-group adv-only"><label>Spieler-Look</label>
+                                <select id="in-player-style-${tab}" ${on}>
+                                    <option value="classic">Klassisch (Foto im Rahmen)</option>
+                                    <option value="pro">⭐ Profi: freigestellt mit Namensbalken</option>
+                                </select>
+                                <span class="hint">Profi-Look nutzt die freigestellten Fotos (unter „🗃️ Daten“ mit ✂️ freistellen – am besten Oberkörper-Fotos vor ruhigem Hintergrund).</span></div>
+                            <div class="ct-checks">
+                                <label><input type="checkbox" id="in-pitch-names-${tab}" checked ${on}> Namen anzeigen</label>
+                                <label class="adv-only"><input type="checkbox" id="in-pitch-shadow-${tab}" checked ${on}> Schatten auf dem Rasen (Profi)</label>
+                                <label class="adv-only"><input type="checkbox" id="in-pitch-bignum-${tab}" ${on}> Große Nummer hinter dem Spieler (Profi, nur mit Rückennummern)</label>
+                                <label><input type="checkbox" id="in-pitch-bench-${tab}" ${on}> Ersatzbank & Trainer unter dem Spielfeld</label>
+                            </div>
+                        </div>
+                    </details>`;
+        }
+
         function buildDesignControls() {
             const fontOptions = fontOptionList(FONT_LIST);
             Object.entries(TAB_DESIGN).forEach(([tab, cfg]) => {
                 const host = $(`design-controls-${tab}`);
                 if (!host) return;
-                host.innerHTML = `
+                host.innerHTML = (cfg.pitch ? pitchDesignHTML(tab) : '') + `
                     <details class="design-details" data-section="design">
                         <summary>🎨 Design & Hintergrund</summary>
                         <div class="details-body">
@@ -3580,7 +3665,7 @@
            ========================================================= */
         const TAB_CONTENT = {
             post:       { keys: ['venue', 'opponentSelect', 'postTitle', 'postDate', 'postTime'], inputs: [] },
-            story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
+            story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly', 'captain', 'pitchHideNames'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
             tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute'], inputs: [] },
             ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers'], inputs: [/^erg-/] },
             kader:      { keys: ['kaderMeeting', 'kaderJersey', 'kaderDuty1', 'kaderDuty2', 'kaderFreetext'], inputs: [/^kader-player-/] },
@@ -3652,7 +3737,7 @@
                 const tplIds = Array.from(view?.querySelectorAll('.post-template, .story-template') || []).map(t => t.id);
                 view?.querySelectorAll('.movable').forEach(el => { delete data.positions[el.id]; });
                 for (const k in (src.positions || {})) {
-                    const inView = view?.contains($(k)) || (k.startsWith('ct-') && tplIds.some(id => k.endsWith('-' + id)));
+                    const inView = view?.contains($(k)) || (k.startsWith('ct-') && tplIds.some(id => k.endsWith('-' + id))) || (tab === 'story' && k.startsWith('pc-'));
                     if (inView) data.positions[k] = copy(src.positions[k]);
                 }
                 if (TAB_DESIGN_EXTRA[tab]) takeKeys(TAB_DESIGN_EXTRA[tab]);
@@ -4146,6 +4231,7 @@
             if (el.classList.contains('corner-logo')) return ['corner'];
             if (el.classList.contains('sponsor-banner')) return ['banner'];
             if (el.dataset.spKey) return ['spl:' + el.dataset.spKey];
+            if (el.dataset.pcKey) return ['pc:' + el.dataset.pcKey];
             if (el.dataset.xp) return ['xp:' + el.dataset.xp];
             if (el.dataset.ctId) return ['ct:' + el.dataset.ctId];
             const norm = id => 'id:' + id.replace(/-(feed|story)(?=-|$)/g, '');
@@ -4201,6 +4287,8 @@
             if (!selectedEl) return;
             setText('el-scale-label', Math.round(getElScale(selectedEl) * 100) + ' %');
             $('el-delete-btn').hidden = !selectedEl.classList.contains('custom-text');
+            const nameBtn = $('el-name-btn');
+            if (nameBtn) nameBtn.hidden = !(selectedEl.dataset.pcName && selectedEl.dataset.pcName !== 'Keiner');
             const syncBtn = $('el-sync-btn');
             if (syncBtn) {
                 syncBtn.hidden = !syncPartners(selectedEl).length;
@@ -4375,6 +4463,7 @@
 
         function resetTabAll(tab) {
             $(`view-${tab}`)?.querySelectorAll(DRAG_SEL).forEach(resetElement);
+            if (tab === 'story') for (const id in pendingPositions) if (id.startsWith('pc-')) delete pendingPositions[id];
             resetTabBackgrounds(tab);
             resetTabStyle(tab);
             resetTabSponsors(tab);
@@ -4436,6 +4525,7 @@
             if (el.classList.contains('corner-logo')) return '🛡️ Vereinslogo (Ecke)';
             if (el.classList.contains('sponsor-banner')) return '🤝 Sponsorenleiste (komplett)';
             if (el.dataset.spName) return '🤝 Sponsor: ' + el.dataset.spName;
+            if (el.dataset.pcKey) return '👤 ' + (el.dataset.pcName && el.dataset.pcName !== 'Keiner' ? el.dataset.pcName : 'Spieler-Position ' + el.dataset.pcKey.split('-').pop());
             if (el.dataset.xp) return '👤 Zusätzlicher Spieler ' + el.dataset.xp;
             if (el.classList.contains('custom-text')) return '✍️ Eigener Text: „' + (el.textContent.trim().slice(0, 22) || '…') + '“';
             if (el.classList.contains('team-logos')) return '🛡️ Wappen';
@@ -4564,6 +4654,100 @@
             });
         }
 
+        /* ---------- Spielfeld zeichnen (als SVG-Bild, damit es sauber exportiert wird) ---------- */
+        /* Demo-Spieler: Porträt ohne Hintergrund als „freigestellte“ Version */
+        function demoCutout(uri) {
+            try {
+                const svg = decodeURIComponent(uri.slice(uri.indexOf(',') + 1))
+                    .replace(/<rect width="400" height="500"[^>]*\/>/, '').replace(/<circle cx="200" cy="120" r="170"[^>]*\/>/, '');
+                return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+            } catch (e) { return uri; }
+        }
+        function shadeHex(hex, f) {
+            const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+            if (!m) return hex || '#2e7d32';
+            const n = parseInt(m[1], 16), ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+                .map(c => Math.round(f < 0 ? c * (1 + f) : c + (255 - c) * f));
+            return '#' + ch.map(c => c.toString(16).padStart(2, '0')).join('');
+        }
+        function fieldSvgUri(w, h, o) {
+            const Lm = 105, Wm = 68;
+            const k = o.persp ? 0.56 : 1, c = 1 / k - 1;          // Breite am fernen Ende (schräge Ansicht)
+            const padX = w * (o.persp ? 0.07 : 0.05), padT = h * (o.persp ? 0.04 : 0.025), padB = h * 0.025;
+            const fw = w - 2 * padX, fh = h - padT - padB;
+            const P = (x, y) => {
+                const z = y / Lm, sc = 1 / (1 + c * z), g = z * (1 + c) / (1 + c * z);
+                return [w / 2 + (x / Wm - 0.5) * fw * sc, h - padB - g * fh];
+            };
+            const f1 = n => n.toFixed(1);
+            const path = (pts, close) => 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join(' L') + (close ? ' Z' : '');
+            const line = (x1, y1, x2, y2) => { const pts = []; for (let i = 0; i <= 12; i++) pts.push(P(x1 + (x2 - x1) * i / 12, y1 + (y2 - y1) * i / 12)); return pts; };
+            const rect = (x1, y1, x2, y2) => [...line(x1, y1, x2, y1), ...line(x2, y1, x2, y2), ...line(x2, y2, x1, y2), ...line(x1, y2, x1, y1)];
+            // Kreise: von oben echte Kreise (Radius nach der Breite), schräg perspektivisch verzerrt
+            const ryf = (fw / Wm) / (fh / Lm) * (o.persp ? 0.62 : 1);
+            const arc = (cx, cy, r, keep) => {
+                const pts = [];
+                for (let i = 0; i <= 72; i++) {
+                    const a = i / 72 * Math.PI * 2, x = cx + r * Math.cos(a), y = cy + r * ryf * Math.sin(a);
+                    if (!keep || keep(x, y)) pts.push(P(x, y)); else if (pts.length) { pts.push(null); }
+                }
+                // in zusammenhängende Stücke teilen
+                const parts = [[]];
+                pts.forEach(p => p ? parts[parts.length - 1].push(p) : parts.push([]));
+                return parts.filter(q => q.length > 1);
+            };
+            let bg = '', lines = [];
+            if (o.style === 'grass' || o.style === 'club') {
+                const base = o.style === 'club' ? shadeHex(o.club, -0.35) : '#2b7a30';
+                const light = o.style === 'club' ? shadeHex(o.club, -0.22) : '#348c39';
+                bg = `<rect width="${w}" height="${h}" fill="${base}"/>`;
+                const n = 14, y0 = -6, y1 = Lm + 6;
+                for (let i = 0; i < n; i += 2) {
+                    const a = y0 + (y1 - y0) * i / n, b = y0 + (y1 - y0) * (i + 1) / n;
+                    bg += `<path d="${path([...line(-12, a, Wm + 12, a), ...line(Wm + 12, b, -12, b)], true)}" fill="${light}"/>`;
+                }
+            }
+            lines.push(path(rect(0, 0, Wm, Lm), true));
+            lines.push(path(line(0, Lm / 2, Wm, Lm / 2)));
+            arc(Wm / 2, Lm / 2, 9.15).forEach(q => lines.push(path(q, true)));
+            [[0, 16.5, 5.5, 11, y => y > 16.5], [Lm, Lm - 16.5, Lm - 5.5, Lm - 11, y => y < Lm - 16.5]].forEach(([gl, pa, ga, spot, keep]) => {
+                lines.push(path(rect(13.85, gl, 54.15, pa), true));
+                lines.push(path(rect(24.85, gl, 43.15, ga), true));
+                arc(Wm / 2, spot, 9.15, (x, y) => keep(y)).forEach(q => lines.push(path(q)));
+                const gd = gl ? 2 : -2;
+                lines.push(path(rect(30.34, gl, 37.66, gl + gd), true));
+            });
+            const spots = [[Wm / 2, Lm / 2], [Wm / 2, 11], [Wm / 2, Lm - 11]].map(([x, y]) => { const [px, py] = P(x, y); return `<circle cx="${f1(px)}" cy="${f1(py)}" r="2.2" fill="#fff" fill-opacity="${o.opacity}"/>`; }).join('');
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${bg}`
+                + `<g fill="none" stroke="#ffffff" stroke-opacity="${o.opacity}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${lines.map(d => `<path d="${d}"/>`).join('')}</g>${spots}</svg>`;
+            return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        }
+
+        /* Ausgeblendete Namen auf dem Spielfeld (je Spieler) */
+        let pitchHideNames = [];
+        function togglePitchName() {
+            const el = selectedEl;
+            const name = el?.dataset.pcName;
+            if (!name || name === 'Keiner') return;
+            const hide = !pitchHideNames.includes(name);
+            pitchHideNames = hide ? [...pitchHideNames, name] : pitchHideNames.filter(n => n !== name);
+            const id = el.id;
+            buildFormation();
+            const again = $(id);
+            if (again) selectElement(again);
+            toast(hide ? `🏷️ Name von ${name} ausgeblendet` : `🏷️ Name von ${name} wieder sichtbar`);
+            scheduleSave();
+        }
+        function showAllPitchNames() { pitchHideNames = []; buildFormation(); scheduleSave(); }
+        function resetPlayerPositions() {
+            const form = val('formation-select') || '4-4-2';
+            for (const id in pendingPositions) if (id.startsWith('pc-') && id.includes(`-${form}-`)) delete pendingPositions[id];
+            document.querySelectorAll('.pitch .player-card.movable').forEach(resetElement);
+            selectElement(null);
+            toast('↺ Spieler stehen wieder auf ihren Standard-Positionen');
+            scheduleSave();
+        }
+
         function buildFormation() {
             const formType = val('formation-select') || '4-4-2';
             const pitchMode = val('in-pitch-mode') || 'photos';
@@ -4571,55 +4755,130 @@
             const pitchStory = $('pitch');
             const pitchFeed = $('pitch-feed');
             const showNumbers = !!$('cfg-show-numbers')?.checked;
+            const adv = isAdvanced();
+            const pro = adv && pitchMode === 'photos' && val('in-player-style-story') === 'pro';
+            const showNamesAll = $('in-pitch-names-story') ? $('in-pitch-names-story').checked : true;
+            const shadow = pro && ($('in-pitch-shadow-story')?.checked ?? true);
+            const bigNum = pro && showNumbers && !!$('in-pitch-bignum-story')?.checked;
+            const captain = val('in-captain') || 'Keiner';
+            const sizeF = (parseFloat(val('in-player-size-story')) || 100) / 100;
+            const fieldStyle = val('in-field-style-story') || 'none';
+            const persp = adv && val('in-field-view-story') === 'persp';
+            const formKey = formType.replace(/[^\w-]/g, '_');
 
-            if(pitchStory) pitchStory.innerHTML = '';
-            if(pitchFeed) pitchFeed.innerHTML = '';
+            // Verschobene Spieler merken (auch die anderer Formationen), bevor das Feld neu aufgebaut wird
+            document.querySelectorAll('.pitch .player-card.movable').forEach(el => {
+                const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el);
+                if (x || y || sc !== 1 || z) pendingPositions[el.id] = z ? { x, y, scale: sc, z } : { x, y, scale: sc };
+                else delete pendingPositions[el.id];
+            });
+            const selId = selectedEl && selectedEl.classList.contains('player-card') ? selectedEl.id : null;
+            if (selId) selectElement(null);
+
             let playerIdx = 1;
             let starterListHTML = '';
+            const cardRows = [];
+            const cutSrc = name => {
+                const p = findPlayer(name);
+                if (!p) return '';
+                if (p.demo && !p.cutImg && /^data:image\/svg\+xml/.test(p.img || '')) return demoCutout(p.img);
+                return photoTypeOf('story') === 'tor' ? (p.torCutImg || (!p.torImg && p.cutImg) || '') : (p.cutImg || '');
+            };
 
             rows.forEach(count => {
-                let rowHTML = '';
+                const row = [];
                 for (let i = 0; i < count; i++) {
                     let name = val(`player-${playerIdx}`) || "Keiner";
                     const numInput = $(`num-player-${playerIdx}`);
                     const pNum = name !== 'Keiner' ? (findPlayer(name)?.number || '') : '';
                     if (numInput) numInput.placeholder = pNum || 'Nr.';
                     let numVal = showNumbers ? esc(val(`num-player-${playerIdx}`) || pNum) : '';
-                    let numBadge = (showNumbers && numVal && pitchMode === 'photos') ? `<div class="player-number-badge">${numVal}</div>` : '';
+                    const isCap = name !== 'Keiner' && name === captain;
+                    const capBadge = isCap ? '<div class="pc-captain">C</div>' : '';
 
-                    let avatarHTML = '';
+                    let figure = '';
                     if (pitchMode === 'jerseys') {
-                        avatarHTML = `
+                        figure = `${capBadge}
                             <svg class="jersey-svg-icon" viewBox="0 0 64 64">
                                 <path d="M18 12 L26 6 L38 6 L46 12 L58 18 L50 30 L44 25 L44 58 L20 58 L20 25 L14 30 L6 18 Z" fill="var(--jersey-color)" stroke="#ffffff" stroke-width="2.5"/>
                                 <text x="32" y="41" font-size="18" font-weight="bold" fill="#ffffff" text-anchor="middle">${numVal}</text>
                             </svg>`;
+                    } else if (pro) {
+                        figure = `${bigNum && numVal ? `<div class="pc-bignum">${numVal}</div>` : ''}${shadow ? '<div class="pc-shadow"></div>' : ''}${capBadge}`
+                            + `<img class="player-img" src="${cutSrc(name) || getPlayerImageSrc(name, 'story')}" alt="">`;
                     } else {
-                        avatarHTML = `${numBadge}<img class="player-img" src="${getPlayerImageSrc(name, 'story')}" alt="">`;
+                        const numBadge = (showNumbers && numVal) ? `<div class="player-number-badge">${numVal}</div>` : '';
+                        figure = `${numBadge}${capBadge}<img class="player-img" src="${getPlayerImageSrc(name, 'story')}" alt="">`;
                     }
-
-                    rowHTML += `
-                        <div class="player-card">
-                            ${avatarHTML}
-                            <div class="player-name">${name === "Keiner" ? "" : esc(name)}</div>
-                        </div>`;
+                    const showName = name !== 'Keiner' && showNamesAll && !pitchHideNames.includes(name);
+                    const nameHtml = name === 'Keiner' ? '<div class="player-name"></div>'
+                        : !showName ? ''
+                        : pro ? `<div class="player-name">${numVal && !bigNum ? `<span class="pc-num">${numVal}</span>` : ''}<span>${esc(name.toUpperCase())}</span></div>`
+                        : `<div class="player-name">${esc(name)}</div>`;
+                    row.push({ slot: playerIdx, name, html: `<div class="pc-figure">${figure}</div>${nameHtml}` });
 
                     if (name !== "Keiner") {
                         starterListHTML += `
                             <div class="list-item">
                                 <img class="list-item-img" src="${getPlayerImageSrc(name, 'story')}" alt="">
-                                <b>${numVal ? numVal + '.' : ''}</b> ${esc(name)}
+                                <b>${numVal ? numVal + '.' : ''}</b> ${esc(name)}${isCap ? ' (C)' : ''}
                             </div>`;
                     }
                     playerIdx++;
                 }
-                [pitchStory, pitchFeed].forEach(pitch => {
-                    if (!pitch) return;
+                cardRows.push(row);
+            });
+
+            [pitchStory, pitchFeed].forEach(pitch => {
+                if (!pitch) return;
+                pitch.innerHTML = '';
+                pitch.classList.toggle('pc-pro', pro);
+                // Beitrag ist niedriger als die Story – Profi-Spieler dort etwas kleiner
+                pitch.style.setProperty('--pc-size', (sizeF * (pro && pitch.id === 'pitch-feed' ? 0.82 : 1)).toFixed(3));
+                // Gezeichnetes Spielfeld
+                if (fieldStyle !== 'none') {
+                    const isFeed = pitch.id === 'pitch-feed';
+                    const W = pitch.offsetWidth || 360, H = pitch.offsetHeight || (isFeed ? 365 : 616);
+                    const fs = (parseFloat(val('in-field-size-story')) || 100) / 100;
+                    const fw = Math.round(W * fs), fh = Math.round(H * fs);
+                    const img = document.createElement('img');
+                    img.className = 'field-img';
+                    img.alt = '';
+                    img.src = fieldSvgUri(fw, fh, { style: fieldStyle, persp, opacity: (parseFloat(val('in-field-opacity-story')) || 70) / 100, club: val('cfg-color-primary') || '#005f73' });
+                    img.style.cssText = `left:${((W - fw) / 2).toFixed(1)}px; top:${((H - fh) / 2).toFixed(1)}px; width:${fw}px; height:${fh}px;`;
+                    pitch.appendChild(img);
+                }
+                cardRows.forEach((row, ri) => {
                     const rowDiv = document.createElement('div');
                     rowDiv.className = 'row';
-                    rowDiv.innerHTML = rowHTML;
+                    // Schräge Ansicht: hintere Reihen etwas kleiner (Tiefenwirkung)
+                    if (persp && cardRows.length > 1) rowDiv.style.transform = `scale(${(1 - 0.26 * ri / (cardRows.length - 1)).toFixed(3)})`;
+                    rowDiv.innerHTML = row.map(c => {
+                        const id = `pc-${pitch.id}-${formKey}-${c.slot}`;
+                        return `<div class="player-card movable" id="${id}" data-pc-key="${formKey}-${c.slot}" data-pc-name="${esc(c.name)}">${c.html}</div>`;
+                    }).join('');
                     pitch.appendChild(rowDiv);
                 });
+                pitch.querySelectorAll('.player-card.movable').forEach(el => {
+                    bindDraggable(el);
+                    if (pendingPositions[el.id]) applyPosition(el, pendingPositions[el.id]);
+                });
+            });
+            if (selId && $(selId)) selectElement($(selId));
+            if ($('btn-show-all-names')) $('btn-show-all-names').hidden = !pitchHideNames.length;
+
+            // Ersatzbank & Trainer unter dem Spielfeld
+            const benchOn = !!$('in-pitch-bench-story')?.checked;
+            const benchNames = [], coachNames = [];
+            for (let i = 1; i <= 7; i++) { const n = val(`bench-player-${i}`); if (n && n !== 'Keiner') benchNames.push(esc(n)); }
+            ['in-coach-1', 'in-coach-2'].forEach(id => { const n = val(id); if (n && n !== 'Keiner') coachNames.push(esc(n)); });
+            const benchHtml = (benchNames.length ? `<div class="pb-line"><b>${esc(L('story', 'bench'))}</b>${benchNames.join(' · ')}</div>` : '')
+                + (coachNames.length ? `<div class="pb-line"><b>${esc(L('story', 'coaches'))}</b>${coachNames.join(' · ')}</div>` : '');
+            ['pitch-bench', 'pitch-bench-feed'].forEach(id => {
+                const el = $(id);
+                if (!el) return;
+                el.innerHTML = benchHtml;
+                el.style.display = benchOn && benchHtml ? 'flex' : 'none';
             });
 
             if ($('out-list-starter')) $('out-list-starter').innerHTML = starterListHTML || esc(L('story', 'noStarters'));
@@ -5539,6 +5798,8 @@
                 coach2: val('in-coach-2') || 'Keiner',
                 formation: val('formation-select') || '4-4-2',
                 pitchMode: val('in-pitch-mode') || 'photos',
+                captain: val('in-captain') || 'Keiner',
+                pitchHideNames: [...pitchHideNames],
 
                 torImgSize: val('in-size-tor-img') || '170',
                 torPlayer: val('in-tor-player') || 'Keiner',
@@ -5602,7 +5863,7 @@
             });
             // Einzeln verschobene Sponsorenlogos merken, auch wenn „einzeln verschieben“ gerade aus ist
             for (const id in pendingPositions) {
-                if (id.startsWith('spl-') && !data.positions[id] && !$(id)?.classList.contains('movable')) data.positions[id] = pendingPositions[id];
+                if ((id.startsWith('spl-') || id.startsWith('pc-')) && !data.positions[id] && !$(id)?.classList.contains('movable')) data.positions[id] = pendingPositions[id];
             }
 
             editorTabs.forEach(t => {
@@ -5632,7 +5893,7 @@
             const map = {
                 teamName: 'cfg-team-name', primary: 'cfg-color-primary', jerseyColor: 'cfg-color-jersey', frameColor: 'cfg-color-frame',
                 venue: 'in-post-venue', opponentSelect: 'in-post-opponent-select', postTitle: 'in-post-title', postDate: 'in-post-date', postTime: 'in-post-time',
-                storyTitleText: 'in-story-title-text', coach1: 'in-coach-1', coach2: 'in-coach-2', formation: 'formation-select', pitchMode: 'in-pitch-mode',
+                storyTitleText: 'in-story-title-text', coach1: 'in-coach-1', coach2: 'in-coach-2', formation: 'formation-select', pitchMode: 'in-pitch-mode', captain: 'in-captain',
                 torImgSize: 'in-size-tor-img', torPlayer: 'in-tor-player', torAssist: 'in-tor-assist', torScore: 'in-tor-score', torMinute: 'in-tor-minute',
                 ergTitle: 'in-ergebnis-title', ergScore: 'in-ergebnis-score', ergText: 'in-ergebnis-text',
                 kaderMeeting: 'in-kader-meeting', kaderJersey: 'in-kader-jersey', kaderDuty1: 'in-kader-duty-1', kaderDuty2: 'in-kader-duty-2', kaderFreetext: 'in-kader-freetext',
@@ -5653,6 +5914,7 @@
             if ($('in-wk-own-logo')) $('in-wk-own-logo').checked = data.wkOwnLogo ?? true;
             season = Array.isArray(data.season) ? data.season : [];
             renderSeasonPreview();
+            pitchHideNames = Array.isArray(data.pitchHideNames) ? data.pitchHideNames : [];
 
             if (data.eckArrows) eckArrows = data.eckArrows;
             if (data.eckNodes) eckNodes = data.eckNodes;
@@ -6803,7 +7065,7 @@
            ========================================================= */
         const UI_FIXED_TABS = ['start', 'stammdaten'];
         const UI_SECTIONS = [
-            ['design', '🎨 Design & Hintergrund'], ['text', '🔤 Schrift & Text-Design'], ['photos', '👥 Spielerfotos & Zusatzspieler'],
+            ['pitch', '⚽ Spielfeld & Spieler-Look'], ['design', '🎨 Design & Hintergrund'], ['text', '🔤 Schrift & Text-Design'], ['photos', '👥 Spielerfotos & Zusatzspieler'],
             ['logo', '🏷️ Vereinslogo oben rechts'], ['sponsors', '🤝 Sponsoren'], ['ctexts', '✍️ Eigene Texte'], ['labels', '🔤 Feste Texte ändern'],
             ['caption', '💬 Text für den Beitrag'], ['tabcopy', '📋 Aus anderer Version übernehmen'], ['pack', '📦 Mehrere Grafiken teilen']
         ];
@@ -6955,7 +7217,7 @@
             start: 'Oben tippst du an, welche Grafik du erstellen möchtest. Darunter legst du Vereinsname, Farben und das Format der Beiträge fest. Unter „Ansicht anpassen“ blendest du Reiter und Bereiche aus, die du nicht brauchst. Denk an regelmäßige Backups!',
             stammdaten: 'Lege hier einmalig Spieler (mit Foto und Torjubel-Foto), Gegner, Sponsoren und eigene Hintergründe an. Alles steht danach in allen Reitern zur Auswahl. Mehrere Fotos auf einmal: Dateiname = Spielername.',
             post: 'Gegner, Heim/Auswärts, Datum und Uhrzeit eintragen – oder mit „Nächsten Termin aus Kalender übernehmen“ automatisch füllen. Texte und Logos in der Vorschau antippen, verschieben und größer/kleiner ziehen – mit 🔗 in der Leiste oben bewegt sich das Gegenstück in der Story mit. Design, Wappen-Anordnung und Sponsoren findest du unten unter „Aussehen anpassen“, verlorene Elemente über „Zurücksetzen“.',
-            story: 'Formation wählen und die Startelf eintragen. Mit „Nur Spieler aus dem Kader“ siehst du nur den aktuellen Kader. „Aufstellung leeren“ setzt alles zurück.',
+            story: 'Formation wählen, Startelf und Kapitän eintragen. Spieler in der Vorschau antippen und frei verschieben oder größer ziehen (🏷️ blendet den Namen aus). Unter „Spielfeld & Spieler-Look“ zeichnest du ein Fußballfeld (auch schräg wie im TV) und wählst den Profi-Look mit freigestellten Spielern. „Aufstellung leeren“ setzt alles zurück.',
             tor: 'Torschütze, Vorlage, Spielstand und Minute wählen. Standardmäßig wird das Torjubel-Foto genutzt – unter „Spielerfotos“ kannst du auf das normale Foto wechseln.',
             ergebnis: 'Endstand, Zusatztext und Torschützen eintragen. „Letztes Spiel aus Kalender übernehmen“ füllt Gegner und Heim/Auswärts automatisch.',
             kader: 'Bis zu 20 Spieler für den Kader wählen und Treffpunkt, Trikots und Dienste eintragen. „Kader leeren“ entfernt alle Spieler.',

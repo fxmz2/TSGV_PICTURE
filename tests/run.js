@@ -236,6 +236,19 @@ async function makePhotos(browser) {
             && getElOffset(document.getElementById('team-logos-post-container')).x === 0
             && getElScale(document.getElementById('team-logos-post-story-container')) === 1.3
             && getElOffset(document.getElementById(id)).x === 40 && val('in-logo-dir-post') === 'column', logoId));
+        // Aufstellung: Spieler verschieben (je Formation), Kapitän, Profi-Look, Spielfeld
+        await page.evaluate(() => { switchTab('story'); const n = stammdaten.players.filter(p => p.group !== 'Trainer').map(p => p.name);
+            setVal('formation-select', '4-3-3'); for (let i = 1; i <= 11; i++) setVal('player-' + i, n[(i - 1) % n.length]); setVal('in-captain', n[1]); buildFormation(); });
+        const pcId = await page.$eval('#pitch .player-card:last-child', e => e.id);
+        await page.evaluate(id => { setElOffset(document.getElementById(id), 0, 30); setVal('formation-select', '4-4-2'); buildFormation(); }, pcId);
+        check('Neue Formation startet auf Standard', await page.evaluate(() => [...document.querySelectorAll('#pitch .player-card')].every(e => !getElOffset(e).y)));
+        await page.evaluate(() => { setVal('formation-select', '4-3-3'); buildFormation(); });
+        check('Formation merkt sich verschobene Spieler', await page.evaluate(id => getElOffset(document.getElementById(id)).y === 30, pcId));
+        check('Kapitän mit „C“ markiert', (await page.$$eval('#pitch .pc-captain', l => l.length)) === 1);
+        await page.evaluate(() => { setVal('in-player-style-story', 'pro'); setVal('in-field-style-story', 'grass'); setVal('in-field-view-story', 'persp'); $('in-pitch-bench-story').checked = true; buildFormation(); });
+        check('Profi-Look mit gezeichnetem Spielfeld', await page.evaluate(() => $('pitch').classList.contains('pc-pro') && !!document.querySelector('#pitch .field-img') && $('pitch-bench').style.display === 'flex'));
+        check('Export Aufstellung mit Spielfeld', (await exportSize(page, 'capture-story')) === '1200x2133');
+
         // Startseite: Kacheln
         await page.evaluate(() => switchTab('start'));
         check('Startseite zeigt Vorlagen-Kacheln', (await page.$$eval('#create-grid .create-tile', l => l.length)) >= 10);
