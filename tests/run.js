@@ -251,6 +251,9 @@ async function makePhotos(browser) {
         await page.evaluate(() => { $('in-lm-names-story').checked = false; $('in-lm-date-story').checked = true; setVal('in-lm-layout-story', 'stack'); buildFormation(); });
         check('Gegner-Kopf: nur Wappen + Datum wählbar', await page.evaluate(() => !document.querySelector('#lm-teams .lm-name') && document.querySelectorAll('#lm-teams .lm-logo').length === 2));
         check('Paarung einzeln verschiebbar', await page.evaluate(() => $('lm-teams').classList.contains('movable') && syncPartners($('lm-teams')).map(e => e.id).join() === 'lm-teams-feed'));
+        await page.evaluate(() => { setVal('in-color-text-story', '#111111'); setVal('in-box-mode-story', 'custom'); setVal('in-box-color-story', '#ffffff'); setVal('in-box-opacity-story', '80'); updateTabDesign('story'); });
+        check('Schriftfarbe gilt auch für die Datumszeile', await page.$eval('#lm-date', e => getComputedStyle(e).color === 'rgb(17, 17, 17)'));
+        check('Kästen-Farbe gilt für Namensschilder', await page.$eval('#pitch .player-name', e => getComputedStyle(e).backgroundColor === 'rgba(255, 255, 255, 0.8)'));
         check('Titel standardmäßig „Startaufstellung“', /startaufstellung/i.test(await page.textContent('#out-story-title')));
         await page.evaluate(() => { setVal('in-player-style-story', 'pro'); setVal('in-field-style-story', 'grass'); setVal('in-field-view-story', 'persp'); $('in-pitch-bench-story').checked = true; buildFormation(); });
         check('Profi-Look mit gezeichnetem Spielfeld', await page.evaluate(() => $('pitch').classList.contains('pc-pro') && !!document.querySelector('#pitch .field-img') && $('pitch-bench').style.display === 'flex'));

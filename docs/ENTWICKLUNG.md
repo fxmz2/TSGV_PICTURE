@@ -30,7 +30,7 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 |---|---|
 | Speichern/Laden einer Version | `collectSlotData()`, `applySlotData()`, `saveSlotNow()`, `scheduleSave()` |
 | Rückgängig | `recordHistory()`, `undoAction()`, `redoAction()` (Verlauf nur im Arbeitsspeicher) |
-| Design je Reiter | `buildDesignControls()`, `updateTabDesign()`, `EXTRA_DESIGN` (generische Zusatzfelder) |
+| Design je Reiter | `buildDesignControls()`, `updateTabDesign()`, `EXTRA_DESIGN` (generische Zusatzfelder). Bereiche: „🎨 Farben & Schrift“ (`colors`, inkl. Vereinsfarben-Spiegel `mirrorClubColor()` und Kästen `--box-bg`/`--box-fg`) und „🖼️ Hintergrund & Formen“ (`design`) |
 | Verschieben/Skalieren | `.draggable-text`, `.draggable-img`, `.movable`, `bindDraggable()`, Positionen in `positions` |
 | Beitrag ↔ Story gemeinsam | `syncKeys()`, `syncPartners()`, Schalter 🔗 in der Werkzeugleiste (`prefs.syncFormats`, je Gerät) |
 | Sponsorenlogos einzeln | Option `sponsorFree` (EXTRA_DESIGN), Logo-IDs `spl-<Vorlage>-<Sponsor>`, Positionen über `pendingPositions` |
