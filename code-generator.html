@@ -34,6 +34,11 @@
         <input id="club-logo" placeholder="z.B. Wappen/TSGV_Rechberg.jpg">
         <label for="club-valid">Lizenz gültig bis</label>
         <input id="club-valid" type="date" value="2050-12-31">
+        <label for="club-tier">Paket</label>
+        <select id="club-tier" style="width:100%; box-sizing:border-box; padding:10px; font-size:15px; border:1px solid #ccc; border-radius:8px; margin-bottom:12px;">
+            <option value="advanced">Advanced (alle Funktionen)</option>
+            <option value="basis">Basis (Grundfunktionen)</option>
+        </select>
         <label for="club-code">Code (leer lassen = zufälligen Code erzeugen)</label>
         <input id="club-code" placeholder="z.B. K7MX-29QF" autocapitalize="characters">
         <div class="row">
@@ -91,9 +96,10 @@
             if (code.length < 6) { alert('Der Code sollte mindestens 6, besser 8 Zeichen haben.'); return; }
             if (code === 'DEMO') { alert('„DEMO“ ist für den Demo-Modus reserviert.'); return; }
             const valid = document.getElementById('club-valid').value;
+            const tier = document.getElementById('club-tier').value;
             const hash = await hashLicenseCode(code);
             document.getElementById('out-code').textContent = formatCode(code);
-            document.getElementById('out-line').textContent = `${hash} = ${name} = ${logo}${valid ? ' = ' + valid : ''}`;
+            document.getElementById('out-line').textContent = `${hash} = ${name} = ${logo} = ${valid || ''} = ${tier}`;
             document.getElementById('out').hidden = false;
         }
 
@@ -110,6 +116,8 @@
                 while (rest.length < 2) rest.push('');
                 // Ohne Ablaufdatum wird das Datum aus dem Feld "Lizenz gültig bis" ergänzt
                 if (!rest[2] && document.getElementById('club-valid').value) rest[2] = document.getElementById('club-valid').value;
+                // Paket bleibt erhalten; ohne Angabe wird das gewählte Paket ergänzt
+                if (!rest[3]) rest[3] = document.getElementById('club-tier').value;
                 out.push(`# ${parts[1]}\n${hash} = ${rest.join(' = ')}`);
             }
             const el = document.getElementById('convert-out');
