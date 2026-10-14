@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.8</title>
+    <title>ClubShot – Grafiken für Vereine 18.9</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -217,7 +217,7 @@
             transition: all 0.2s;
             image-rendering: -webkit-optimize-contrast;
         }
-        .sponsor-text { font-size: 12px; font-weight: bold; background: rgba(0,0,0,0.55); color: white; padding: 4px 8px; border-radius: 4px; text-shadow: none; }
+        .sponsor-text { font-size: 12px; font-weight: bold; background: var(--box-bg, rgba(0,0,0,0.55)); color: var(--box-fg, white); padding: 4px 8px; border-radius: 4px; text-shadow: none; }
 
         .sponsor-checkbox-list { display: flex; flex-direction: column; gap: 4px; max-height: 110px; overflow-y: auto; background: #f0f0f0; padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
         .sponsor-checkbox-item { font-size: 12px; display: flex; align-items: center; gap: 6px; font-weight: normal; }
@@ -255,7 +255,7 @@
             font-size: 9px; font-weight: bold; border-radius: 50%; width: 17px; height: 17px;
             display: flex; align-items: center; justify-content: center; border: 1px solid white; text-shadow: none; z-index: 6;
         }
-        .player-name { text-align: center; font-size: calc(9px * var(--pc-size, 1)); margin-top: 2px; font-weight: bold; background: rgba(0,0,0,0.6); color: white; padding: 1px 3px; border-radius: 3px; }
+        .player-name { text-align: center; font-size: calc(9px * var(--pc-size, 1)); margin-top: 2px; font-weight: bold; background: var(--box-bg, rgba(0,0,0,0.6)); color: var(--box-fg, white); padding: 1px 3px; border-radius: 3px; }
         /* Spielfeld (gezeichnet) und Profi-Look der Aufstellung */
         .field-img { position: absolute; z-index: 0; pointer-events: none; max-width: none; }
         .pc-captain-old { position: absolute; top: -3px; left: 0; width: calc(15px * var(--pc-size, 1)); height: calc(15px * var(--pc-size, 1)); border-radius: 50%; background: #f1c40f; color: #111;
@@ -263,7 +263,7 @@
         .pitch.pc-pro .player-card { width: calc(74px * var(--pc-size, 1)); }
         .pitch.pc-pro .player-img { width: calc(64px * var(--pc-size, 1)); height: calc(74px * var(--pc-size, 1)); border: none; border-radius: 0; clip-path: none; background: transparent;
             box-shadow: none; object-fit: contain; object-position: center bottom; position: relative; z-index: 2; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.45)); }
-        .pitch.pc-pro .player-name { margin-top: 0; background: var(--primary); border-radius: 2px; padding: 2px 4px; font-size: calc(7.5px * var(--pc-size, 1)); line-height: 1.15;
+        .pitch.pc-pro .player-name { margin-top: 0; background: var(--box-bg, var(--primary)); color: var(--box-fg, #fff); border-radius: 2px; padding: 2px 4px; font-size: calc(7.5px * var(--pc-size, 1)); line-height: 1.15;
             max-width: calc(80px * var(--pc-size, 1)); box-sizing: border-box; border-bottom: 2px solid var(--jersey-color); position: relative; z-index: 3; text-shadow: none;
             display: flex; gap: 3px; align-items: center; justify-content: center; }
         .pitch.pc-pro .player-name .pc-num { flex-shrink: 0; }
@@ -285,23 +285,23 @@
         .lineup-match .lm-logo { width: var(--lm-logo, 30px); height: var(--lm-logo, 30px); object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); }
         .lineup-match .lm-vs { font-size: 0.75em; opacity: 0.8; font-weight: bold; }
         .lineup-match .lm-opp { opacity: 0.85; }
-        .lineup-match .lm-sub { font-size: calc(var(--lm-text, 1) * 11px); font-weight: bold; color: rgba(255,255,255,0.88); margin-top: 4px; white-space: nowrap; }
+        .lineup-match .lm-sub { font-size: calc(var(--lm-text, 1) * 11px); font-weight: bold; color: inherit; opacity: 0.9; margin-top: 4px; white-space: nowrap; }
         .lineup-match .lm-sub:empty, .lineup-match .lm-teams:empty { display: none; }
         .pitch-bench { width: 92%; margin: 0 0 18px; display: flex; flex-direction: column; gap: 3px; z-index: 2; font-size: 10px; text-align: center; }
-        .pitch-bench .pb-line { background: rgba(0,0,0,0.55); border-radius: 4px; padding: 3px 6px; color: #fff; text-shadow: none; line-height: 1.35; }
-        .pitch-bench .pb-line b { color: var(--title-color, #fff); margin-right: 4px; }
+        .pitch-bench .pb-line { background: var(--box-bg, rgba(0,0,0,0.55)); border-radius: 4px; padding: 3px 6px; color: var(--box-fg, #fff); text-shadow: none; line-height: 1.35; }
+        .pitch-bench .pb-line b { color: var(--box-fg, var(--title-color, #fff)); margin-right: 4px; }
 
         .list-layout-wrap { width: 90%; display: flex; flex-direction: column; gap: 5px; z-index: 2; margin-top: 55px; }
-        .list-section-title { font-size: 10px; font-weight: bold; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; border-left: 3px solid var(--jersey-color); color: white; }
+        .list-section-title { font-size: 10px; font-weight: bold; background: var(--box-bg, rgba(0,0,0,0.7)); padding: 2px 6px; border-radius: 4px; border-left: 3px solid var(--jersey-color); color: var(--box-fg, white); }
         .list-grid { display: flex; flex-direction: column; gap: 3px; width: 100%; }
-        .list-item { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; font-size: 9px; color: white; width: 100%; box-sizing: border-box; }
+        .list-item { display: flex; align-items: center; gap: 6px; background: var(--box-bg, rgba(0,0,0,0.5)); padding: 2px 6px; border-radius: 4px; font-size: 9px; color: var(--box-fg, white); width: 100%; box-sizing: border-box; }
         .list-item-img {
             width: 18px; height: 18px; background-color: var(--avatar-bg, #ffffff);
             border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 1.5px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
             object-fit: cover; flex-shrink: 0;
         }
         .bench-list-flex { display: flex; flex-wrap: wrap; gap: 4px; width: 100%; }
-        .bench-tag { background: rgba(0,0,0,0.5); padding: 3px 6px; border-radius: 3px; font-size: 9px; color: white; font-weight: bold; }
+        .bench-tag { background: var(--box-bg, rgba(0,0,0,0.5)); padding: 3px 6px; border-radius: 3px; font-size: 9px; color: var(--box-fg, white); font-weight: bold; }
 
         .tor-container-story { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; height: 100%; padding-top: 25px; box-sizing: border-box; z-index: 2; }
         .tor-wappen {
@@ -309,7 +309,7 @@
             border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 3px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
             padding: 4px; object-fit: contain; margin-bottom: 5px; box-sizing: border-box;
         }
-        .tor-details { background: rgba(0,0,0,0.65); padding: 6px 14px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; display: flex; gap: 10px; text-shadow: none; color: white; margin-top: 5px; }
+        .tor-details { background: var(--box-bg, rgba(0,0,0,0.65)); padding: 6px 14px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; display: flex; gap: 10px; text-shadow: none; color: var(--box-fg, white); margin-top: 5px; }
 
         .assist-wrapper {
             display: flex; flex-direction: column; align-items: center;
@@ -318,15 +318,15 @@
 
         .kader-layout { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 12px; box-sizing: border-box; z-index: 2; margin-top: 50px; }
         .kader-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; margin-bottom: 6px; }
-        .kader-info-block { background: rgba(255, 255, 255, 0.9); padding: 6px; border-radius: 6px; color: #111; text-shadow: none; font-size: 11px; }
-        .kader-freetext { font-size: 10px; background: rgba(255,255,255,0.9); padding: 6px; border-radius: 6px; text-align: center; color: #111; text-shadow: none; width: 100%; box-sizing: border-box; margin-bottom: 8px; }
+        .kader-info-block { background: var(--box-bg, rgba(255, 255, 255, 0.9)); padding: 6px; border-radius: 6px; color: var(--box-fg, #111); text-shadow: none; font-size: 11px; }
+        .kader-freetext { font-size: 10px; background: var(--box-bg, rgba(255,255,255,0.9)); padding: 6px; border-radius: 6px; text-align: center; color: var(--box-fg, #111); text-shadow: none; width: 100%; box-sizing: border-box; margin-bottom: 8px; }
         .kader-grid-pitch { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 4px; justify-items: center; }
         .kader-grid-img {
             width: 45px; height: 45px; background-color: var(--avatar-bg, #ffffff);
             border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 2px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
             object-fit: cover;
         }
-        .kader-grid-name { font-size: 9px; font-weight: bold; text-align: center; color: black; background: rgba(255, 255, 255, 0.9); padding: 2px 4px; border-radius: 3px; text-shadow: none; margin-top: 2px; }
+        .kader-grid-name { font-size: 9px; font-weight: bold; text-align: center; color: var(--box-fg, black); background: var(--box-bg, rgba(255, 255, 255, 0.9)); padding: 2px 4px; border-radius: 3px; text-shadow: none; margin-top: 2px; }
 
         .potm-badge { font-size: 1.6rem; font-weight: 900; letter-spacing: var(--title-ls, 2px); text-transform: var(--title-transform, uppercase); color: var(--title-color, #f1c40f);
             font-family: var(--title-font, inherit); font-style: var(--title-style, normal); text-shadow: 0 0 10px rgba(0,0,0,0.8); }
@@ -336,15 +336,15 @@
             border: var(--avatar-border, 3px solid var(--frame-color)); clip-path: var(--avatar-clip, none); box-shadow: var(--avatar-shadow, 0 2px 5px rgba(0,0,0,0.5)); box-sizing: border-box; }
         .story-template .extra-player { width: 110px; }
         .story-template .xp-img { width: 110px; height: 110px; }
-        .xp-name { margin-top: 4px; font-size: 11px; font-weight: bold; background: rgba(0,0,0,0.72); color: #fff; padding: 2px 8px; border-radius: 5px; text-shadow: none; white-space: nowrap; }
+        .xp-name { margin-top: 4px; font-size: 11px; font-weight: bold; background: var(--box-bg, rgba(0,0,0,0.72)); color: var(--box-fg, #fff); padding: 2px 8px; border-radius: 5px; text-shadow: none; white-space: nowrap; }
         .potm-player-img { width: 200px; height: 240px; object-fit: cover; border-radius: 12px; border: 4px solid #f1c40f; margin: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
-        .potm-player-name { font-size: 1.4rem; font-weight: bold; background: rgba(0,0,0,0.75); color: white; padding: 5px 15px; border-radius: 8px; border-bottom: 3px solid #f1c40f; text-shadow: none; }
+        .potm-player-name { font-size: 1.4rem; font-weight: bold; background: var(--box-bg, rgba(0,0,0,0.75)); color: var(--box-fg, white); padding: 5px 15px; border-radius: 8px; border-bottom: 3px solid #f1c40f; text-shadow: none; }
 
         /* KALENDER */
         .kal-sub { font-size: 12px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; opacity: 0.9; margin-top: 2px; }
         .kal-wrap { position: absolute; left: 0; right: 0; top: 96px; bottom: 16px; display: flex; flex-direction: column; justify-content: flex-start; gap: 7px; padding: 0 18px; box-sizing: border-box; z-index: 2; }
         .kal-wrap.with-sponsors { bottom: 66px; }
-        .kal-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.58); border-radius: 10px; padding: 7px 10px; text-shadow: none; color: #fff; border-left: 4px solid var(--kal-home, #005f73); }
+        .kal-row { display: flex; align-items: center; gap: 10px; background: var(--box-bg, rgba(0,0,0,0.58)); border-radius: 10px; padding: 7px 10px; text-shadow: none; color: var(--box-fg, #fff); border-left: 4px solid var(--kal-home, #005f73); }
         .kal-row.auswaerts { border-left-color: var(--kal-away, #bb3e03); }
         .kal-date { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 44px; background: #fff; color: #111; border-radius: 8px; padding: 3px 4px; line-height: 1.05; flex-shrink: 0; }
         .kal-wd { font-size: 9px; font-weight: bold; color: var(--jersey-color); }
@@ -376,7 +376,7 @@
         .kal-story .kal-teams { font-size: 14px; }
         .kal-story .kal-meta { font-size: 11px; }
         .kal-story .kal-logo { width: 46px; height: 46px; }
-        .kal-empty { text-align: center; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; color: #fff; text-shadow: none; font-size: 13px; }
+        .kal-empty { text-align: center; background: var(--box-bg, rgba(0,0,0,0.5)); padding: 12px; border-radius: 8px; color: var(--box-fg, #fff); text-shadow: none; font-size: 13px; }
         .season-preview { max-height: 220px; overflow: auto; margin-top: 8px; font-size: 12px; }
         .season-preview .sp-row { display: grid; grid-template-columns: 78px 42px 20px 1fr; gap: 4px; padding: 4px 2px; border-bottom: 1px solid #eee; align-items: center; }
         .season-preview .sp-row.past { opacity: 0.45; }
@@ -466,6 +466,9 @@
         /* Inhalt zuerst, Aussehen gesammelt darunter */
         .design-head { margin: 22px 0 10px; padding-top: 14px; border-top: 2px solid #e3e6ea; font-size: 15px; font-weight: bold; color: #123; }
         .design-head small { font-weight: normal; color: #888; }
+        .design-sub { margin: 12px 0 6px; font-size: 12px; font-weight: bold; color: #005f73; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid #e3e6ea; padding-bottom: 3px; }
+        .design-sub:first-child { margin-top: 2px; }
+        .design-sub small { text-transform: none; letter-spacing: 0; font-weight: normal; color: #888; }
         /* Startseite: Was möchtest du erstellen? */
         .create-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 18px; }
         .create-tile { background: #fff; border: 1px solid #dfe5ea; border-radius: 12px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: bold; color: #123; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
@@ -498,12 +501,12 @@
         .spon-card { display: flex; align-items: center; justify-content: center; background: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.45); box-sizing: border-box; padding: 16px; overflow: hidden; }
         .spon-card img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .spon-card-text { color: #111; font-size: 1.6rem; font-weight: 900; text-align: center; text-shadow: none; text-transform: uppercase; }
-        .spon-name { display: inline-block; font-size: 1.3rem; font-weight: bold; background: rgba(0,0,0,0.72); color: white; padding: 5px 16px; border-radius: 8px; border-bottom: 3px solid var(--jersey-color); text-shadow: none; }
+        .spon-name { display: inline-block; font-size: 1.3rem; font-weight: bold; background: var(--box-bg, rgba(0,0,0,0.72)); color: var(--box-fg, white); padding: 5px 16px; border-radius: 8px; border-bottom: 3px solid var(--jersey-color); text-shadow: none; }
         .spon-extra { font-size: 0.85rem; font-weight: bold; color: rgba(255,255,255,0.9); margin-top: 2px; }
 
         /* Wochenend-Ergebnisse */
         .wk-wrap { position: absolute; left: 0; right: 0; top: 96px; display: flex; flex-direction: column; gap: 7px; padding: 0 18px; box-sizing: border-box; z-index: 2; }
-        .wk-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.58); border-radius: 10px; padding: 7px 10px; color: #fff; text-shadow: none; }
+        .wk-row { display: flex; align-items: center; gap: 10px; background: var(--box-bg, rgba(0,0,0,0.58)); border-radius: 10px; padding: 7px 10px; color: var(--box-fg, #fff); text-shadow: none; }
         .wk-team { width: 92px; flex-shrink: 0; font-size: 10px; font-weight: bold; text-transform: uppercase; background: rgba(255,255,255,0.16); border-radius: 6px; padding: 5px 6px; text-align: center; line-height: 1.2; box-sizing: border-box; }
         .wk-match { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; text-transform: uppercase; line-height: 1.2; }
         .wk-match img, .wk-own { width: 28px; height: 28px; object-fit: contain; background: #fff; border-radius: 50%; padding: 2px; box-sizing: border-box; flex-shrink: 0; }
@@ -682,7 +685,7 @@
         .ct-checks label { display: flex; align-items: center; gap: 4px; font-weight: normal; font-size: 12px; margin: 0; }
 
         /* Ergebnis: Torschützen */
-        .scorer-box { display: block; width: fit-content; margin: 0 auto; background: rgba(0,0,0,0.6); color: white; text-shadow: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; line-height: 1.5; max-width: 88%; }
+        .scorer-box { display: block; width: fit-content; margin: 0 auto; background: var(--box-bg, rgba(0,0,0,0.6)); color: var(--box-fg, white); text-shadow: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; line-height: 1.5; max-width: 88%; }
         .scorer-box .scorer-head { font-size: 10px; letter-spacing: 1.5px; color: rgba(255,255,255,0.8); font-weight: bold; }
         .scorer-box .scorer-line { font-weight: bold; }
         .scorer-row { display: grid; grid-template-columns: 1fr 70px; gap: 6px; margin-bottom: 6px; }
@@ -695,11 +698,11 @@
             border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 4px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
             box-shadow: var(--avatar-shadow, 0 8px 20px rgba(0,0,0,0.5)); box-sizing: border-box;
         }
-        .bday-name, .transfer-name { display: inline-block; font-size: 1.4rem; font-weight: bold; background: rgba(0,0,0,0.72); color: white; padding: 5px 16px; border-radius: 8px; border-bottom: 3px solid var(--jersey-color); text-shadow: none; }
+        .bday-name, .transfer-name { display: inline-block; font-size: 1.4rem; font-weight: bold; background: var(--box-bg, rgba(0,0,0,0.72)); color: var(--box-fg, white); padding: 5px 16px; border-radius: 8px; border-bottom: 3px solid var(--jersey-color); text-shadow: none; }
 
         /* Neuzugang */
         .transfer-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-        .transfer-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.62); color: white; text-shadow: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .transfer-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--box-bg, rgba(0,0,0,0.62)); color: var(--box-fg, white); text-shadow: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
         .transfer-chip img { width: 22px; height: 22px; object-fit: contain; background: white; border-radius: 50%; padding: 1px; box-sizing: border-box; }
         .transfer-number { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 22px; background: var(--jersey-color); border-radius: 4px; padding: 0 4px; }
 
@@ -1106,7 +1109,7 @@
                         <div class="control-group">
                             <label>Bild(er) hochladen</label>
                             <input type="file" id="new-template-img" accept="image/*" multiple onchange="handleTemplateUpload(event)">
-                            <span class="hint">Ideal: 1080×1350 px bzw. 1080×1080 px (Beitrag) und 1080×1920 px (Story). Die Hintergründe erscheinen danach in jedem Reiter unter „🎨 Design & Hintergrund“.</span>
+                            <span class="hint">Ideal: 1080×1350 px bzw. 1080×1080 px (Beitrag) und 1080×1920 px (Story). Die Hintergründe erscheinen danach in jedem Reiter unter „🖼️ Hintergrund & Formen“.</span>
                         </div>
                         <div id="list-templates" class="scrollable-controls-box"></div>
                     </div>
@@ -2047,7 +2050,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.8";
+        const APP_VERSION = "18.9";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3280,6 +3283,10 @@
             { key: 'fieldView', id: 'in-field-view', def: () => 'flat' },
             { key: 'fieldShape', id: 'in-field-shape', def: () => 'half' },
             { key: 'pitchNameMode', id: 'in-pitch-namemode', def: () => 'full' },
+            { key: 'boxMode', id: 'in-box-mode', def: () => 'auto' },
+            { key: 'boxColor', id: 'in-box-color', def: () => '#000000' },
+            { key: 'boxText', id: 'in-box-text', def: () => '#ffffff' },
+            { key: 'boxOpacity', id: 'in-box-opacity', def: () => '60' },
             { key: 'lmLogos', id: 'in-lm-logos', def: () => true, check: true },
             { key: 'lmNames', id: 'in-lm-names', def: () => true, check: true },
             { key: 'lmDate', id: 'in-lm-date', def: () => true, check: true },
@@ -3384,8 +3391,69 @@
                 const host = $(`design-controls-${tab}`);
                 if (!host) return;
                 host.innerHTML = (cfg.pitch ? pitchDesignHTML(tab) : '') + `
+                    <details class="design-details" data-section="colors">
+                        <summary>🎨 Farben & Schrift</summary>
+                        <div class="details-body">
+                            <div class="design-sub">Vereinsfarben <small>– gelten für alle Reiter</small></div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Hauptfarbe</label><input type="color" class="club-color-mirror" data-target="cfg-color-primary" value="#005f73" oninput="mirrorClubColor(this)"></div>
+                                <div class="control-group"><label>Akzent- / Trikotfarbe</label><input type="color" class="club-color-mirror" data-target="cfg-color-jersey" value="#bb3e03" oninput="mirrorClubColor(this)"></div>
+                            </div>
+                            <div class="design-sub">Texte <small>– Titel, Datum, Namen ohne Kasten</small></div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Schriftfarbe</label><input type="color" id="in-color-text-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
+                                <div class="control-group adv-only"><label>Farbe Überschriften</label>
+                                    <select id="in-title-color-mode-${tab}" onchange="updateTabDesign('${tab}')">
+                                        <option value="text">Wie Schriftfarbe</option>
+                                        <option value="jersey">Akzent-/Trikotfarbe</option>
+                                        <option value="primary">Hauptfarbe</option>
+                                        <option value="custom">Eigene Farbe ↓</option>
+                                    </select>
+                                    <input type="color" id="in-color-title-${tab}" value="#f1c40f" style="margin-top:4px;" onchange="setVal('in-title-color-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Schriftart Texte</label><select id="in-font-${tab}" onchange="updateTabDesign('${tab}')">${fontOptions}</select></div>
+                                <div class="control-group adv-only"><label>Schriftart Überschriften</label><select id="in-font-title-${tab}" onchange="updateTabDesign('${tab}')"><option value="">Wie Texte</option>${fontOptions}</select></div>
+                            </div>
+                            ${cfg.sizes ? `
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Größe Überschriften</label><input type="range" id="in-size-title-${tab}" min="0.8" max="6" step="0.1" value="2.0" oninput="updateTabDesign('${tab}')"></div>
+                                <div class="control-group"><label>Größe Texte</label><input type="range" id="in-size-info-${tab}" min="0.6" max="4" step="0.1" value="1.1" oninput="updateTabDesign('${tab}')"></div>
+                            </div>` : ''}
+                            <div class="adv-only" style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Text-Effekt</label>
+                                    <select id="in-text-effect-${tab}" onchange="updateTabDesign('${tab}')">
+                                        <option value="soft">Schatten (Standard)</option>
+                                        <option value="strong">Starker Schatten</option>
+                                        <option value="outline">Kontur</option>
+                                        <option value="glow">Leuchten (Akzentfarbe)</option>
+                                        <option value="3d">3D-Versatz</option>
+                                        <option value="none">Ohne</option>
+                                    </select></div>
+                                <div class="control-group"><label>Buchstabenabstand</label><input type="range" id="in-letter-spacing-${tab}" min="-2" max="12" step="0.5" value="0" oninput="updateTabDesign('${tab}')"></div>
+                            </div>
+                            <div class="ct-checks adv-only">
+                                <label><input type="checkbox" id="in-title-upper-${tab}" checked onchange="updateTabDesign('${tab}')"> GROSSBUCHSTABEN</label>
+                                <label><input type="checkbox" id="in-title-italic-${tab}" onchange="updateTabDesign('${tab}')"> <i>Kursiv</i></label>
+                            </div>
+                            <div class="design-sub">Kästen <small>– Namensschilder, Listen, Ersatzbank, Termine</small></div>
+                            <div class="control-group">
+                                <select id="in-box-mode-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                    <option value="auto">Standard (passend je Vorlage)</option>
+                                    <option value="custom">Eigene Farben ↓</option>
+                                </select></div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Kasten-Farbe</label><input type="color" id="in-box-color-${tab}" value="#000000" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
+                                <div class="control-group"><label>Schrift im Kasten</label><input type="color" id="in-box-text-${tab}" value="#ffffff" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
+                            </div>
+                            <div class="control-group"><label>Deckkraft der Kästen</label><input type="range" id="in-box-opacity-${tab}" min="0" max="100" step="5" value="60" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
+                            <div class="design-sub">Rahmen <small>– um Fotos und Wappen</small></div>
+                            <div class="control-group"><label>Rahmenfarbe</label><input type="color" id="in-color-frame-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
+                            <span class="hint">Einzelne Texte und Bilder kannst du zusätzlich in der Vorschau antippen und größer/kleiner ziehen. Eigene Texte haben ihre Farbe unter „✍️ Eigene Texte“.</span>
+                        </div>
+                    </details>
                     <details class="design-details" data-section="design">
-                        <summary>🎨 Design & Hintergrund</summary>
+                        <summary>🖼️ Hintergrund & Formen</summary>
                         <div class="details-body">
                             <div class="control-group">
                                 <label>Hintergrund Beitrag</label>
@@ -3418,57 +3486,8 @@
                                     </select></div>
                                 <div class="control-group"><label>Abstand der Wappen</label><input type="range" id="in-logo-gap-${tab}" min="0" max="140" step="5" value="20" oninput="updateTabDesign('${tab}')"></div>
                             </div>` : ''}
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Rahmenfarbe</label><input type="color" id="in-color-frame-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
-                                <div class="control-group"><label>Schriftfarbe</label><input type="color" id="in-color-text-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
-                            </div>
-                            <div class="control-group">
-                                <label>Schriftart (Texte)</label>
-                                <select id="in-font-${tab}" onchange="updateTabDesign('${tab}')">${fontOptions}</select>
-                            </div>
                             <button type="button" class="copy-action-btn" style="background:#5a4fcf;" onclick="applyDesignToAllTabs('${tab}')">🎨 Dieses Design auf alle Reiter übertragen</button>
-                            <span class="hint">Überträgt Rahmen, Farben, Schriften, Text-Effekte, Logo- und Sponsoren-Einstellungen – auf Wunsch auch die Hintergründe.</span>
-                        </div>
-                    </details>
-                    <details class="design-details" data-section="text">
-                        <summary>🔤 Schrift & Text-Design</summary>
-                        <div class="details-body">
-                            <div class="control-group adv-only">
-                                <label>Schriftart Überschriften</label>
-                                <select id="in-font-title-${tab}" onchange="updateTabDesign('${tab}')"><option value="">Wie Texte</option>${fontOptions}</select>
-                            </div>
-                            ${cfg.sizes ? `
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Titel-Größe</label><input type="range" id="in-size-title-${tab}" min="0.8" max="6" step="0.1" value="2.0" oninput="updateTabDesign('${tab}')"></div>
-                                <div class="control-group"><label>Text-Größe</label><input type="range" id="in-size-info-${tab}" min="0.6" max="4" step="0.1" value="1.1" oninput="updateTabDesign('${tab}')"></div>
-                            </div>` : ''}
-                            <div class="adv-only" style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Farbe Überschriften</label>
-                                    <select id="in-title-color-mode-${tab}" onchange="updateTabDesign('${tab}')">
-                                        <option value="text">Wie Schriftfarbe</option>
-                                        <option value="jersey">Trikotfarbe</option>
-                                        <option value="primary">Hauptfarbe</option>
-                                        <option value="custom">Eigene Farbe →</option>
-                                    </select></div>
-                                <div class="control-group"><label>Eigene Farbe</label><input type="color" id="in-color-title-${tab}" value="#f1c40f" onchange="setVal('in-title-color-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
-                            </div>
-                            <div class="adv-only" style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Text-Effekt</label>
-                                    <select id="in-text-effect-${tab}" onchange="updateTabDesign('${tab}')">
-                                        <option value="soft">Schatten (Standard)</option>
-                                        <option value="strong">Starker Schatten</option>
-                                        <option value="outline">Kontur</option>
-                                        <option value="glow">Leuchten (Trikotfarbe)</option>
-                                        <option value="3d">3D-Versatz</option>
-                                        <option value="none">Ohne</option>
-                                    </select></div>
-                                <div class="control-group"><label>Buchstabenabstand</label><input type="range" id="in-letter-spacing-${tab}" min="-2" max="12" step="0.5" value="0" oninput="updateTabDesign('${tab}')"></div>
-                            </div>
-                            <div class="ct-checks adv-only">
-                                <label><input type="checkbox" id="in-title-upper-${tab}" checked onchange="updateTabDesign('${tab}')"> GROSSBUCHSTABEN</label>
-                                <label><input type="checkbox" id="in-title-italic-${tab}" onchange="updateTabDesign('${tab}')"> <i>Kursiv</i></label>
-                            </div>
-                            <span class="hint">Gilt für die Überschriften dieses Reiters. Einzelne Texte kannst du zusätzlich in der Vorschau antippen und größer/kleiner ziehen.</span>
+                            <span class="hint">Überträgt Farben, Schriften, Kästen, Rahmen, Logo- und Sponsoren-Einstellungen – auf Wunsch auch die Hintergründe.</span>
                         </div>
                     </details>
                     <details class="design-details" data-section="photos">
@@ -3986,10 +4005,18 @@
             scheduleSave();
         }
 
+        /* Vereinsfarben lassen sich auch direkt im Reiter ändern (gleiche Werte wie auf der Startseite) */
+        function mirrorClubColor(inp) {
+            setVal(inp.dataset.target, inp.value);
+            updateDesignSettings();
+            updateAllViews();
+            scheduleSave();
+        }
         function updateDesignSettings() {
             const primary = val('cfg-color-primary') || '#005f73';
             const jerseyCol = val('cfg-color-jersey') || '#bb3e03';
             const frameCol = val('cfg-color-frame') || '#ffffff';
+            document.querySelectorAll('.club-color-mirror').forEach(m => { const v = val(m.dataset.target); if (v && m.value !== v) m.value = v; });
 
             document.documentElement.style.setProperty('--primary', primary);
             document.documentElement.style.setProperty('--jersey-color', jerseyCol);
@@ -4050,8 +4077,22 @@
                 setOrClear('--title-ls', ls ? ls + 'px' : '');
                 setOrClear('--title-transform', adv && $(`in-title-upper-${tab}`) && !$(`in-title-upper-${tab}`).checked ? 'none' : '');
                 setOrClear('--title-style', adv && $(`in-title-italic-${tab}`)?.checked ? 'italic' : '');
+                // Kästen (Namensschilder, Listen …): eigene Farbe, Schrift und Deckkraft
+                if (val(`in-box-mode-${tab}`) === 'custom') {
+                    const hx = /^#([0-9a-f]{6})$/i.exec(val(`in-box-color-${tab}`) || '#000000');
+                    const n = hx ? parseInt(hx[1], 16) : 0, op = (parseFloat(val(`in-box-opacity-${tab}`)) || 0) / 100;
+                    viewContainer.style.setProperty('--box-bg', `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${op})`);
+                    viewContainer.style.setProperty('--box-fg', val(`in-box-text-${tab}`) || '#ffffff');
+                } else {
+                    viewContainer.style.removeProperty('--box-bg');
+                    viewContainer.style.removeProperty('--box-fg');
+                }
                 const eff = adv ? (val(`in-text-effect-${tab}`) || 'soft') : 'soft';
-                setOrClear('--tpl-text-shadow', eff === 'soft' ? '' : TEXT_EFFECTS[eff]);
+                // Dunkle Schrift: heller statt dunkler Schatten (sonst wirkt der Text verschmiert)
+                const tc = /^#([0-9a-f]{6})$/i.exec(textColVal);
+                const tn = tc ? parseInt(tc[1], 16) : 0xffffff;
+                const darkText = (0.299 * ((tn >> 16) & 255) + 0.587 * ((tn >> 8) & 255) + 0.114 * (tn & 255)) < 110;
+                setOrClear('--tpl-text-shadow', eff === 'soft' ? (darkText ? '0 1px 3px rgba(255,255,255,0.55)' : '') : TEXT_EFFECTS[eff]);
 
                 renderExtraPlayers(tab);
                 if (tab === 'story') fitStoryTitles();
@@ -7219,11 +7260,11 @@
            ========================================================= */
         const UI_FIXED_TABS = ['start', 'stammdaten'];
         const UI_SECTIONS = [
-            ['pitch', '⚽ Spielfeld & Spieler-Look'], ['design', '🎨 Design & Hintergrund'], ['text', '🔤 Schrift & Text-Design'], ['photos', '👥 Spielerfotos & Zusatzspieler'],
+            ['pitch', '⚽ Spielfeld & Spieler-Look'], ['colors', '🎨 Farben & Schrift'], ['design', '🖼️ Hintergrund & Formen'], ['photos', '👥 Spielerfotos & Zusatzspieler'],
             ['logo', '🏷️ Vereinslogo oben rechts'], ['sponsors', '🤝 Sponsoren'], ['ctexts', '✍️ Eigene Texte'], ['labels', '🔤 Feste Texte ändern'],
             ['caption', '💬 Text für den Beitrag'], ['tabcopy', '📋 Aus anderer Version übernehmen'], ['pack', '📦 Mehrere Grafiken teilen']
         ];
-        const UI_SIMPLE_HIDDEN = ['text', 'ctexts', 'labels', 'tabcopy', 'pack'];
+        const UI_SIMPLE_HIDDEN = ['ctexts', 'labels', 'tabcopy', 'pack'];
         function uiPrefs() {
             if (!prefs.ui || typeof prefs.ui !== 'object') prefs.ui = { hiddenTabs: [], hiddenSections: {} };
             prefs.ui.hiddenTabs = prefs.ui.hiddenTabs || [];
