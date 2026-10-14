@@ -204,6 +204,45 @@ async function makePhotos(browser) {
         await page.context().close();
     });
 
+    await section('Verschieben: Sponsoren einzeln, Beitrag+Story, Wappen, Zurücksetzen', async () => {
+        const page = await newPage(browser);
+        await page.goto(BASE);
+        await page.waitForTimeout(600);
+        await page.click('#license-demo');
+        await waitReady(page);
+        await page.evaluate(() => switchTab('post'));
+        // Sponsorenlogos einzeln verschieben – Position bleibt beim Neuaufbau und nach dem Laden
+        await page.evaluate(() => { selectedSponsors.post = stammdaten.sponsors.map(s => s.name); $('in-show-sponsors-post').checked = true; $('in-sponsor-free-post').checked = true; renderSelectedSponsors('post'); });
+        const logoId = await page.$eval('#capture-post-feed .sponsor-banner .movable', e => e.id);
+        await page.evaluate(id => { setElOffset(document.getElementById(id), 40, -60); setVal('in-sponsor-size-post', '120'); renderSelectedSponsors('post'); }, logoId);
+        check('Sponsorenlogo einzeln verschiebbar', await page.evaluate(id => { const o = getElOffset(document.getElementById(id)); return o.x === 40 && o.y === -60; }, logoId));
+        await page.evaluate(() => { const d = collectSlotData(); applySlotData(JSON.parse(JSON.stringify(d))); renderAll(); });
+        check('Logo-Position nach dem Laden', await page.evaluate(id => getElOffset(document.getElementById(id)).x === 40, logoId));
+        // Wappen übereinander mit Abstand
+        await page.evaluate(() => { setVal('in-logo-dir-post', 'column'); setVal('in-logo-gap-post', '50'); updateTabDesign('post'); });
+        check('Wappen übereinander mit Abstand', await page.$eval('#team-logos-post-container', e => getComputedStyle(e).flexDirection === 'column' && getComputedStyle(e).rowGap === '50px'));
+        // Beitrag + Story gemeinsam
+        await page.evaluate(() => { prefs.syncFormats = true; selectElement(document.getElementById('team-logos-post-container')); nudgeSelectedScale(0.3); selectElement(null); prefs.syncFormats = false; });
+        check('Beitrag & Story gemeinsam skaliert', await page.evaluate(() => getElScale(document.getElementById('team-logos-post-story-container')) === 1.3));
+        await page.evaluate(() => { selectElement(document.getElementById('team-logos-post-container')); nudgeSelectedScale(0.2); selectElement(null); });
+        check('Ohne 🔗 bleibt die Story unverändert', await page.evaluate(() => getElScale(document.getElementById('team-logos-post-story-container')) === 1.3 && getElScale(document.getElementById('team-logos-post-container')) === 1.5));
+        // Gezielt zurücksetzen: nur Wappen im Beitrag
+        await page.evaluate(() => setElOffset(document.getElementById('team-logos-post-container'), 900, 0));
+        await page.evaluate(() => resetTabDefaults('post'));
+        const row = await page.evaluate(() => [...document.querySelectorAll('#reset-list .reset-row')].map(r => r.textContent).find(t => /Wappen/.test(t) && /außerhalb/.test(t)));
+        check('Zurücksetzen-Liste zeigt Element außerhalb des Bildes', !!row);
+        await page.click('#reset-overlay button:has-text("Auswahl zurücksetzen")');
+        check('Nur ausgewähltes Element zurückgesetzt', await page.evaluate(id => getElScale(document.getElementById('team-logos-post-container')) === 1
+            && getElOffset(document.getElementById('team-logos-post-container')).x === 0
+            && getElScale(document.getElementById('team-logos-post-story-container')) === 1.3
+            && getElOffset(document.getElementById(id)).x === 40 && val('in-logo-dir-post') === 'column', logoId));
+        // Startseite: Kacheln
+        await page.evaluate(() => switchTab('start'));
+        check('Startseite zeigt Vorlagen-Kacheln', (await page.$$eval('#create-grid .create-tile', l => l.length)) >= 10);
+        check('Keine JavaScript-Fehler', page.errors.length === 0, page.errors.join(' | '));
+        await page.context().close();
+    });
+
     await section('Handy (Touch, Samsung-Galaxy-Größe)', async () => {
         const page = await newPage(browser, { viewport: { width: 360, height: 780 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3,
             userAgent: 'Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/25.0 Chrome/121.0.0.0 Mobile Safari/537.36' });

@@ -32,6 +32,10 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Rückgängig | `recordHistory()`, `undoAction()`, `redoAction()` (Verlauf nur im Arbeitsspeicher) |
 | Design je Reiter | `buildDesignControls()`, `updateTabDesign()`, `EXTRA_DESIGN` (generische Zusatzfelder) |
 | Verschieben/Skalieren | `.draggable-text`, `.draggable-img`, `.movable`, `bindDraggable()`, Positionen in `positions` |
+| Beitrag ↔ Story gemeinsam | `syncKeys()`, `syncPartners()`, Schalter 🔗 in der Werkzeugleiste (`prefs.syncFormats`, je Gerät) |
+| Sponsorenlogos einzeln | Option `sponsorFree` (EXTRA_DESIGN), Logo-IDs `spl-<Vorlage>-<Sponsor>`, Positionen über `pendingPositions` |
+| Wappen-Anordnung | `logoDir` (row/column), `logoGap` (EXTRA_DESIGN) → CSS `--logos-gap`, Klasse `logos-stacked` |
+| Zurücksetzen | Dialog `resetTabDefaults()` (einzelne Elemente + Bereiche), komplett `resetTabAll()` |
 | Feste Beschriftungen | `LABEL_DEFS`, `L(tab, key)`, `applyLabels()` |
 | Export | `renderElementToCanvas()` – Kopie außerhalb des Bildschirms, Bilder werden vorab in Export-Auflösung gerastert (`rasterizeFitImage`, `replaceBackgroundImages`), dann html2canvas mit Faktor 3 |
 | Lizenz | `fetchLicenseList()`, `findLicenseEntry()` (PBKDF2, Salt `vereinsgrafik-lizenz-v1` – nicht ändern, sonst sind alle Codes ungültig) |
