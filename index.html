@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.9</title>
+    <title>ClubShot – Grafiken für Vereine 19.0</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -280,6 +280,9 @@
             font-size: calc(var(--lm-size, 1) * var(--lm-text, 1) * 15px); line-height: 1.1; text-transform: var(--title-transform, uppercase); }
         .lineup-match .lm-team { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 42%; }
         .lineup-match .lm-stack .lm-team { flex-direction: column; gap: 4px; }
+        .lineup-match .lm-teams.lm-vertical { flex-direction: column; gap: calc(var(--lm-text, 1) * 3px); }
+        .lineup-match .lm-vertical .lm-team { max-width: 100%; justify-content: center; }
+        .lineup-match .lm-vertical .lm-vs { font-size: 0.65em; line-height: 1; }
         .lineup-match .lm-name { min-width: 0; text-align: center; }
         .lineup-match .lm-logo, .lineup-match .lm-vs { flex: 0 0 auto; }
         .lineup-match .lm-logo { width: var(--lm-logo, 30px); height: var(--lm-logo, 30px); object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); }
@@ -1199,8 +1202,9 @@
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top:6px;">
                             <div class="control-group"><label>Anordnung</label>
                                 <select id="in-lm-layout-story" onchange="buildFormation(); scheduleSave();">
-                                    <option value="row">Wappen neben Namen</option>
-                                    <option value="stack">Wappen über Namen</option>
+                                    <option value="row">Teams nebeneinander</option>
+                                    <option value="stack">Nebeneinander, Wappen über Namen</option>
+                                    <option value="vertical">Teams übereinander</option>
                                 </select></div>
                             <div class="control-group"><label>Text zwischen den Teams</label><input type="text" id="in-lm-vs-story" value="vs" maxlength="12" oninput="buildFormation();"></div>
                             <div class="control-group"><label>Wappen-Größe</label><input type="range" id="in-lm-logosize-story" min="16" max="90" step="2" value="30" oninput="buildFormation();"></div>
@@ -2050,7 +2054,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.9";
+        const APP_VERSION = "19.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4991,6 +4995,7 @@
             const sub = [val('in-lineup-sub'), [val('in-post-date'), val('in-post-time')].filter(Boolean).join(' · ')].filter(Boolean).join('  |  ');
             const lmLogos = $('in-lm-logos-story')?.checked ?? true, lmNames = $('in-lm-names-story')?.checked ?? true, lmDate = $('in-lm-date-story')?.checked ?? true;
             const lmStack = val('in-lm-layout-story') === 'stack';
+            const lmVert = val('in-lm-layout-story') === 'vertical';
             const lmLogoPx = parseFloat(val('in-lm-logosize-story')) || 30;
             const lmText = (parseFloat(val('in-lm-textsize-story')) || 100) / 100;
             const vsText = $('in-lm-vs-story') ? val('in-lm-vs-story') : 'vs';
@@ -4998,12 +5003,12 @@
             const team = (name, logo, cls, logoFirst) => {
                 const l = lmLogos ? `<img class="lm-logo" src="${logo}" alt="">` : '';
                 const n = lmNames ? `<span class="lm-name${cls}">${esc(name)}</span>` : '';
-                return (l || n) ? `<div class="lm-team">${lmStack || logoFirst ? l + n : n + l}</div>` : '';
+                return (l || n) ? `<div class="lm-team">${lmStack || lmVert || logoFirst ? l + n : n + l}</div>` : '';
             };
             const left = isHome ? team(own, getClubLogoSrc(), '', true) : team(oppName, getOpponentLogoSrc(oppName), ' lm-opp', true);
             const right = isHome ? team(oppName, getOpponentLogoSrc(oppName), ' lm-opp', false) : team(own, getClubLogoSrc(), '', false);
             // Lange Vereinsnamen: Schrift automatisch kleiner, damit beide Wappen im Bild bleiben
-            const lmSize = lmStack ? 1 : Math.max(0.68, Math.min(1.1, 30 / Math.max(1, own.length + oppName.length)));
+            const lmSize = lmStack || lmVert ? 1 : Math.max(0.68, Math.min(1.1, 30 / Math.max(1, own.length + oppName.length)));
             const teamsHtml = (left || right) ? left + (vsText ? `<span class="lm-vs">${esc(vsText)}</span>` : '') + right : '';
             const dateText = lmDate ? sub : '';
             const LM_FEED = 0.8;   // Beitrag ist niedriger – Kopf dort etwas kleiner
@@ -5013,6 +5018,7 @@
                 el.style.display = matchOn ? 'block' : 'none';
                 tEl.innerHTML = matchOn ? teamsHtml : '';
                 tEl.classList.toggle('lm-stack', lmStack);
+                tEl.classList.toggle('lm-vertical', lmVert);
                 tEl.style.setProperty('--lm-size', lmSize.toFixed(2));
                 tEl.style.setProperty('--lm-logo', (lmLogoPx * f).toFixed(1) + 'px');
                 el.style.setProperty('--lm-text', (lmText * f).toFixed(2));
@@ -5020,7 +5026,7 @@
             });
             // Höhe des Kopfs schätzen → Spielfeld rückt passend nach unten
             const nameH = lmNames ? 34 * lmText * lmSize : 0;
-            const teamsH = !teamsHtml ? 0 : lmStack ? (lmLogos ? lmLogoPx : 0) + nameH + (lmLogos && lmNames ? 4 : 0) : Math.max(lmLogos ? lmLogoPx : 0, nameH);
+            const teamsH = !teamsHtml ? 0 : lmVert ? 2 * Math.max(lmLogos ? lmLogoPx : 0, lmNames ? 19 * lmText : 0) + (vsText ? 13 * lmText : 0) + 6 * lmText : lmStack ? (lmLogos ? lmLogoPx : 0) + nameH + (lmLogos && lmNames ? 4 : 0) : Math.max(lmLogos ? lmLogoPx : 0, nameH);
             const headH = matchOn ? teamsH + (dateText ? 18 * lmText : 0) + 6 : 0;
             if ($('lineup-match-hint')) $('lineup-match-hint').textContent = `Gegner, Heim/Auswärts und Datum kommen aus dem Reiter „Ankündigung“ – aktuell: ${opp || 'kein Gegner gewählt'}${val('in-post-date') ? ', ' + val('in-post-date') : ''}.`;
             // Platz schaffen: Spielfeld rückt unter den Gegner-Kopf, Ersatzbank darunter
