@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.3</title>
+    <title>ClubShot – Grafiken für Vereine 18.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -219,8 +219,9 @@
         .sponsor-checkbox-list { display: flex; flex-direction: column; gap: 4px; max-height: 110px; overflow-y: auto; background: #f0f0f0; padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
         .sponsor-checkbox-item { font-size: 12px; display: flex; align-items: center; gap: 6px; font-weight: normal; }
 
-        .team-logos { display: flex; align-items: flex-start; justify-content: center; gap: 20px; margin: 15px 0; width: 100%; position: absolute; top: 130px; }
+        .team-logos { display: flex; align-items: flex-start; justify-content: center; gap: var(--logos-gap, 20px); margin: 15px 0; width: 100%; position: absolute; top: 130px; }
         .logo-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .logos-stacked .team-logos { flex-direction: column; align-items: center; }
         .logo {
             width: var(--logo-size, 75px); height: var(--logo-size, 75px); background-color: var(--avatar-bg, white);
             border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 3px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
@@ -422,6 +423,22 @@
         .license-icon { font-size: 40px; }
         .license-card input { width: 100%; box-sizing: border-box; font-size: 22px; text-align: center; letter-spacing: 4px; padding: 12px; border: 2px solid #ccc; border-radius: 10px; text-transform: uppercase; font-family: monospace; }
         .license-card input:focus { outline: none; border-color: #005f73; }
+        .license-card input#wz-team { font-family: inherit; letter-spacing: normal; text-transform: none; font-size: 18px; }
+        /* Inhalt zuerst, Aussehen gesammelt darunter */
+        .design-head { margin: 22px 0 10px; padding-top: 14px; border-top: 2px solid #e3e6ea; font-size: 15px; font-weight: bold; color: #123; }
+        .design-head small { font-weight: normal; color: #888; }
+        /* Startseite: Was möchtest du erstellen? */
+        .create-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 18px; }
+        .create-tile { background: #fff; border: 1px solid #dfe5ea; border-radius: 12px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: bold; color: #123; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .create-tile .ct-ico { font-size: 24px; line-height: 1; }
+        .create-tile:active { transform: scale(0.97); background: #eef6f7; }
+        .create-tile.locked { opacity: 0.55; }
+        /* Hinweise (Demo, Backup) nur auf Start und Daten – die Reiter bleiben aufgeräumt */
+        body:not([data-tab="start"]):not([data-tab="stammdaten"]) #demo-banner,
+        body:not([data-tab="start"]):not([data-tab="stammdaten"]) #backup-reminder,
+        body:not([data-tab="start"]):not([data-tab="stammdaten"]) #demo-data-card { display: none !important; }
+        /* Datei-Auswahl als richtiger Knopf */
+        input[type="file"]::file-selector-button { background: #005f73; color: #fff; border: none; border-radius: 8px; padding: 8px 12px; margin-right: 10px; font-weight: bold; cursor: pointer; }
         .license-submit { margin-top: 12px; width: 100%; background: #005f73; color: white; border: none; border-radius: 10px; padding: 13px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .license-submit:disabled { opacity: 0.6; }
         .license-error { color: #c1121f; font-size: 13px; margin-top: 10px; min-height: 18px; }
@@ -505,8 +522,9 @@
         @keyframes busy-spin { to { transform: rotate(360deg); } }
 
         /* Rückgängig / Wiederholen */
-        .undo-bar { position: fixed; right: 12px; bottom: calc(var(--bottom-bar-h, 80px) + 12px); z-index: 8000; display: flex; gap: 6px; }
-        .undo-bar button { width: 44px; height: 44px; border-radius: 50%; border: none; background: white; box-shadow: 0 4px 14px rgba(0,0,0,0.22); font-size: 18px; cursor: pointer; }
+        /* Rückgängig/Wiederholen in der Kopfzeile – verdeckt keine Eingabefelder */
+        .undo-bar { display: flex; gap: 6px; flex-shrink: 0; }
+        .undo-bar button { width: 38px; height: 34px; border-radius: 9px; border: none; background: rgba(255,255,255,0.16); color: #fff; font-size: 17px; cursor: pointer; padding: 0; }
         .undo-bar button:disabled { opacity: 0.35; cursor: default; }
 
         /* Hinweis-Karten (Backup-Erinnerung, Installation) */
@@ -541,10 +559,21 @@
         /* Handy: große Blöcke erst antippen (auswählen), dann ziehen – so bleibt die Vorschau scrollbar */
         .movable.el-selected { touch-action: none; }
         .el-selected { outline: 2px dashed #ffd60a; outline-offset: 2px; }
+        .el-sync-partner { outline: 2px dashed #4cc9f0; outline-offset: 2px; }
+        .el-toolbar button.tb-on { background: #4cc9f0; color: #062b36; }
+        .sponsor-banner .sponsor-logo.movable, .sponsor-banner .sponsor-text.movable { transform-origin: center center; }
+        .reset-group { border: 1px solid #e3e6ea; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
+        .reset-group > b { display: block; font-size: 13px; margin-bottom: 4px; }
+        .reset-row { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; }
+        .reset-row label { flex: 1; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .reset-row input { width: 18px; height: 18px; flex: none; }
+        .reset-row .reset-show { background: #eef2f5; color: #123; border: none; border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .reset-row small { color: #888; }
         .el-toolbar { position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 9000;
             display: flex; align-items: center; gap: 6px; background: rgba(20,24,30,0.94); color: white; padding: 6px 8px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); font-size: 12px; font-weight: bold; }
         .el-toolbar[hidden] { display: none; }
         .el-toolbar button { background: rgba(255,255,255,0.14); color: white; border: none; border-radius: 8px; min-width: 34px; height: 34px; font-size: 15px; font-weight: bold; cursor: pointer; padding: 0 8px; }
+        .el-toolbar button { white-space: nowrap; }
         .el-toolbar button.danger { background: #c1121f; }
         .el-toolbar .tb-sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.25); margin: 0 2px; }
 
@@ -596,6 +625,12 @@
         .storage-status.ok { color: #2a7d3f; }
         .storage-status.warn { color: #a35a00; }
         .el-toolbar .el-scale-label { min-width: 44px; text-align: center; }
+        @media (max-width: 480px) {
+            .el-toolbar { gap: 4px; padding: 5px 6px; max-width: calc(100vw - 12px); box-sizing: border-box; }
+            .el-toolbar .tb-title { display: none; }
+            .el-toolbar button { min-width: 30px; padding: 0 5px; }
+            .el-toolbar .el-scale-label { min-width: 38px; }
+        }
 
         /* Eigene Texte */
         .custom-text { white-space: pre-line; line-height: 1.2; }
@@ -737,6 +772,10 @@
         <img class="brand-logo" src="clubshot.png" alt="ClubShot" onerror="this.hidden = true">
         <span class="brand-name">ClubShot</span>
         <span class="brand-club" id="brand-club"></span>
+        <div id="undo-bar" class="undo-bar">
+            <button type="button" id="undo-btn" onclick="undoAction()" title="Rückgängig (Strg+Z)" disabled>↩️</button>
+            <button type="button" id="redo-btn" onclick="redoAction()" title="Wiederholen (Strg+Y)" disabled>↪️</button>
+        </div>
     </header>
 
     <div class="main-content">
@@ -783,7 +822,9 @@
 
             <!-- EDITOR: STARTSEITE (GLOBAL) -->
             <div id="editor-start" class="editor-section active">
-                <h2 style="font-size:1.3rem; margin-bottom:16px;">🏠 Globale Einstellungen</h2>
+                <h2 style="font-size:1.3rem; margin-bottom:8px;">✨ Was möchtest du erstellen?</h2>
+                <div id="create-grid" class="create-grid"></div>
+                <h2 style="font-size:1.3rem; margin-bottom:16px;">⚙️ Vereinseinstellungen</h2>
 
                 <div id="install-card" class="notice-card info" hidden>
                     <b>📲 Als App installieren</b>
@@ -1055,7 +1096,7 @@
                 <div class="control-group"><label>Datum</label><input type="text" id="in-post-date" placeholder="Sonntag, 07.06." oninput="updateAllDates();"></div>
                 <div class="control-group"><label>Uhrzeit</label><input type="text" id="in-post-time" placeholder="15:00 Uhr" oninput="updatePostFields();"></div>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('post')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('post')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: AUFSTELLUNG -->
@@ -1109,7 +1150,7 @@
                 <label>Ersatzbank</label>
                 <div class="scrollable-controls-box" id="bench-controls"></div>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('story')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('story')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: TOR -->
@@ -1127,7 +1168,7 @@
                 <div class="control-group"><label>Spielstand</label><input type="text" id="in-tor-score" value="1 : 0" oninput="updateTor();"></div>
                 <div class="control-group"><label>Minute</label><input type="text" id="in-tor-minute" value="12. Min" oninput="updateTor();"></div>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('tor')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('tor')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: ERGEBNIS -->
@@ -1147,7 +1188,7 @@
                 <label>Torschützen (Spieler + Minute)</label>
                 <div class="scrollable-controls-box" id="scorer-controls"></div>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('ergebnis')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('ergebnis')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: KADER -->
@@ -1165,7 +1206,7 @@
                 <label>Spieler auswählen (Kader, max. 20)</label>
                 <div class="scrollable-controls-box" id="kader-controls"></div>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('kader')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('kader')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: ECKBALL TAKTIK -->
@@ -1213,7 +1254,7 @@
                 <div class="control-group"><label>Spieler</label><select id="in-potm-player" class="player-select" onchange="updatePotm();"></select></div>
                 <div class="control-group"><label>Match Info</label><input type="text" id="in-potm-text" value="3 Tore" oninput="updatePotm();"></div>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('potm')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('potm')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: KALENDER -->
@@ -1263,7 +1304,7 @@
                     </div>
                 </details>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('kalender')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('kalender')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: GEBURTSTAG -->
@@ -1276,7 +1317,7 @@
                 <div class="control-group"><label>Text</label><input type="text" id="in-bday-text" value="Alles Gute zum Geburtstag!" oninput="updateGeburtstag();"></div>
                 <div class="control-group"><label><input type="checkbox" id="in-bday-confetti" checked onchange="updateGeburtstag();"> Konfetti anzeigen</label></div>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('geburtstag')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('geburtstag')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: NEUZUGANG -->
@@ -1311,7 +1352,7 @@
                 </div>
                 <div class="control-group"><label>Text</label><input type="text" id="in-new-text" value="Herzlich willkommen im Team!" oninput="updateNeuzugang();"></div>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('neuzugang')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('neuzugang')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: DANKE AN SPONSOR -->
@@ -1324,7 +1365,7 @@
                 <div class="control-group"><label>Text</label><input type="text" id="in-spon-text" value="für die großartige Unterstützung!" oninput="updateSponsorPost();"></div>
                 <div class="control-group"><label>Zusatz (optional)</label><input type="text" id="in-spon-extra" value="" placeholder="z.B. Neue Trikots für die Saison 2026/27" oninput="updateSponsorPost();"></div>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('sponsor')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('sponsor')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
 
             <!-- EDITOR: WOCHENEND-ERGEBNISSE -->
@@ -1341,7 +1382,7 @@
                 <div id="wk-controls"></div>
                 <span class="hint" style="margin-bottom:10px;">Ergebnis immer aus eigener Sicht eintragen (eigene Tore zuerst), z.B. 3:1. Sieg, Remis und Niederlage werden automatisch farbig markiert.</span>
 
-                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('wochenende')">🔄 Positionen & Design auf Standard setzen</button>
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('wochenende')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
         </div>
 
@@ -1845,6 +1886,23 @@
     </div>
 
     <!-- GRAFIK-PAKET -->
+    <div id="reset-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closeResetDialog()">
+        <div class="modal-card">
+            <h2 id="reset-title">🔄 Zurücksetzen</h2>
+            <p>Wähle aus, was wieder auf Standard soll. Elemente, die verschoben oder vergrößert wurden, stehen hier – mit „👁 Zeigen“ findest du sie in der Vorschau wieder.</p>
+            <div class="pack-quick">
+                <button type="button" onclick="resetQuickSelect(true)">Alle auswählen</button>
+                <button type="button" onclick="resetQuickSelect(false)">Nichts</button>
+            </div>
+            <div id="reset-list"></div>
+            <div class="modal-actions">
+                <button type="button" class="primary" onclick="runSelectedReset()">Auswahl zurücksetzen</button>
+                <button type="button" class="secondary" onclick="runFullReset()">Alles in diesem Reiter auf Standard</button>
+                <button type="button" class="secondary" onclick="closeResetDialog()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
     <div id="pack-overlay" class="modal-overlay" hidden>
         <div class="modal-card">
             <div id="pack-select">
@@ -1872,15 +1930,9 @@
         </div>
     </div>
 
-    <!-- RÜCKGÄNGIG / WIEDERHOLEN -->
-    <div id="undo-bar" class="undo-bar">
-        <button type="button" id="undo-btn" onclick="undoAction()" title="Rückgängig (Strg+Z)" disabled>↩️</button>
-        <button type="button" id="redo-btn" onclick="redoAction()" title="Wiederholen (Strg+Y)" disabled>↪️</button>
-    </div>
-
     <!-- WERKZEUGLEISTE FÜR AUSGEWÄHLTE TEXTE/BILDER -->
     <div id="el-toolbar" class="el-toolbar" hidden>
-        <span>Größe</span>
+        <span class="tb-title">Größe</span>
         <button type="button" onclick="nudgeSelectedScale(-0.1)" title="Kleiner">−</button>
         <span class="el-scale-label" id="el-scale-label">100 %</span>
         <button type="button" onclick="nudgeSelectedScale(0.1)" title="Größer">+</button>
@@ -1888,6 +1940,8 @@
         <span class="tb-sep"></span>
         <button type="button" onclick="layerSelected(1)" title="Nach vorne holen">⬆</button>
         <button type="button" onclick="layerSelected(-1)" title="Nach hinten schieben">⬇</button>
+        <span class="tb-sep"></span>
+        <button type="button" id="el-sync-btn" onclick="toggleSyncFormats()" title="Beitrag & Story gemeinsam anpassen">🔗</button>
         <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
         <button type="button" onclick="selectElement(null)" title="Fertig">✓</button>
     </div>
@@ -1919,7 +1973,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.3";
+        const APP_VERSION = "18.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3145,6 +3199,9 @@
             { key: 'sponsorLayout', id: 'in-sponsor-layout', def: () => 'bottom' },
             { key: 'sponsorCols', id: 'in-sponsor-cols', def: () => '2' },
             { key: 'sponsorSize', id: 'in-sponsor-size', def: () => '100' },
+            { key: 'sponsorFree', id: 'in-sponsor-free', def: () => false, check: true },
+            { key: 'logoGap', id: 'in-logo-gap', def: () => '20' },
+            { key: 'logoDir', id: 'in-logo-dir', def: () => 'row' },
             { key: 'xp1', id: 'in-xp1', def: () => 'Keiner' },
             { key: 'xp2', id: 'in-xp2', def: () => 'Keiner' },
             { key: 'xp3', id: 'in-xp3', def: () => 'Keiner' },
@@ -3203,7 +3260,15 @@
                                 </select>
                             </div>
                             ${cfg.teamNames ? `
-                            <div class="control-group"><label>Logo-Größe</label><input type="range" id="in-logo-size-${tab}" min="50" max="150" step="5" value="75" oninput="updateTabDesign('${tab}')"></div>` : ''}
+                            <div class="control-group"><label>Wappen-Größe</label><input type="range" id="in-logo-size-${tab}" min="50" max="150" step="5" value="75" oninput="updateTabDesign('${tab}')"></div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Wappen-Anordnung</label>
+                                    <select id="in-logo-dir-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="row">↔️ Nebeneinander</option>
+                                        <option value="column">↕️ Übereinander</option>
+                                    </select></div>
+                                <div class="control-group"><label>Abstand der Wappen</label><input type="range" id="in-logo-gap-${tab}" min="0" max="140" step="5" value="20" oninput="updateTabDesign('${tab}')"></div>
+                            </div>` : ''}
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div class="control-group"><label>Rahmenfarbe</label><input type="color" id="in-color-frame-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
                                 <div class="control-group"><label>Schriftfarbe</label><input type="color" id="in-color-text-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
@@ -3307,6 +3372,8 @@
                         </div>
                         <div class="control-group" style="margin-top:6px;"><label>Größe der Sponsorenlogos</label>
                             <input type="range" id="in-sponsor-size-${tab}" min="60" max="160" step="5" value="100" oninput="renderSelectedSponsors('${tab}');"></div>
+                        <div class="control-group"><label><input type="checkbox" id="in-sponsor-free-${tab}" onchange="renderSelectedSponsors('${tab}'); scheduleSave();"> ✋ Logos einzeln verschieben</label>
+                            <span class="hint">Dann jedes Sponsorenlogo in der Vorschau antippen und frei verschieben oder größer/kleiner ziehen.</span></div>
                     </div>
                     <details class="design-details" id="ct-details-${tab}" data-section="ctexts">
                         <summary>✍️ Eigene Texte <span class="sd-count" id="ct-count-${tab}">0</span></summary>
@@ -3320,6 +3387,10 @@
                 $(`ct-list-${tab}`).addEventListener('input', onCustomTextInput);
                 $(`ct-list-${tab}`).addEventListener('change', onCustomTextInput);
 
+                // Erst die Inhalte (Gegner, Datum …), darunter gesammelt das Aussehen inkl. Zurücksetzen
+                const resetBtn = $(`editor-${tab}`)?.querySelector(`button[onclick="resetTabDefaults('${tab}')"]`);
+                if (resetBtn) { resetBtn.before(host); host.appendChild(resetBtn); }
+                host.insertAdjacentHTML('afterbegin', '<div class="design-head">🎨 Aussehen anpassen <small>– optional</small></div>');
                 $(`editor-${tab}`)?.insertAdjacentHTML('beforeend', captionHTML(tab) + tabCopyHTML(tab) + packButtonHTML(tab));
             });
             $('tabcopy-host-eckball').innerHTML = labelEditorHTML('eckball') + tabCopyHTML('eckball', false) + packButtonHTML('eckball');
@@ -3810,6 +3881,8 @@
                 viewContainer.classList.toggle('shape-free', shapeVal === 'free');
                 const logoSize = $(`in-logo-size-${tab}`) ? val(`in-logo-size-${tab}`) : '';
                 if (logoSize) viewContainer.style.setProperty('--logo-size', logoSize + 'px');
+                if ($(`in-logo-gap-${tab}`)) viewContainer.style.setProperty('--logos-gap', (parseFloat(val(`in-logo-gap-${tab}`)) || 0) + 'px');
+                viewContainer.classList.toggle('logos-stacked', val(`in-logo-dir-${tab}`) === 'column');
 
                 viewContainer.style.setProperty('--avatar-radius', radius);
                 viewContainer.style.setProperty('--avatar-border', border);
@@ -3879,11 +3952,13 @@
                 return isFeed ? sz.feed : sz.story;
             };
 
-            const buildHtml = ([h, w]) => tabSponsors.map(name => {
+            const free = !!$(`in-sponsor-free-${tab}`)?.checked;
+            const buildHtml = ([h, w], tplId) => tabSponsors.map(name => {
                 const s = findSponsor(name);
+                const idAttr = `id="${sponsorLogoId(tplId, name)}" data-sp-key="${esc(sponsorKey(name))}" data-sp-name="${esc(s.name)}"`;
                 return s.img
-                    ? `<img src="${s.img}" class="sponsor-logo" alt="" style="max-height:${(h * f).toFixed(1)}px; max-width:${(w * f).toFixed(1)}px;">`
-                    : `<span class="sponsor-text">${esc(s.name)}</span>`;
+                    ? `<img src="${s.img}" ${idAttr} class="sponsor-logo" alt="" style="max-height:${(h * f).toFixed(1)}px; max-width:${(w * f).toFixed(1)}px;">`
+                    : `<span ${idAttr} class="sponsor-text">${esc(s.name)}</span>`;
             }).join('');
             const visible = !!show && count > 0;
 
@@ -3894,7 +3969,20 @@
                 banner.classList.add('sb-' + layout);
                 banner.style.display = visible ? (layout === 'grid' ? 'grid' : 'flex') : 'none';
                 banner.style.gridTemplateColumns = layout === 'grid' ? `repeat(${cols}, auto)` : '';
-                banner.innerHTML = buildHtml([h, w]);
+                const tplId = banner.closest('.post-template, .story-template')?.id || tab;
+                // Einzeln verschobene Logos behalten ihre Position, auch wenn die Leiste neu aufgebaut wird
+                banner.querySelectorAll('.movable').forEach(el => {
+                    const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el);
+                    if (x || y || sc !== 1 || z) pendingPositions[el.id] = z ? { x, y, scale: sc, z } : { x, y, scale: sc };
+                    else delete pendingPositions[el.id];
+                });
+                if (selectedEl && banner.contains(selectedEl)) selectElement(null);
+                banner.innerHTML = buildHtml([h, w], tplId);
+                if (free) banner.querySelectorAll('.sponsor-logo, .sponsor-text').forEach(el => {
+                    el.classList.add('movable');
+                    bindDraggable(el);
+                    if (pendingPositions[el.id]) applyPosition(el, pendingPositions[el.id]);
+                });
                 // Platzbedarf für den Beitrag (Inhalt wird daneben/darüber eingepasst)
                 banner.dataset.pos = layout === 'grid' ? 'bottom' : layout;
                 if (layout === 'left' || layout === 'right') banner.dataset.extent = (w * f + 20).toFixed(1);
@@ -3903,6 +3991,9 @@
             });
             $(`view-${tab}`)?.querySelectorAll('.post-template').forEach(layoutFeedContent);
         }
+
+        function sponsorKey(name) { return String(name).toLowerCase().replace(/[^a-z0-9äöüß]+/g, '_').replace(/^_+|_+$/g, '') || 'x'; }
+        function sponsorLogoId(tplId, name) { return `spl-${tplId}-${sponsorKey(name)}`.replace(/[^\w-]/g, '_'); }
 
         /* Beiträge: Inhalt (400×400) wird mittig platziert (4:5) und bei Sponsoren passend verkleinert/verschoben */
         function layoutFeedContent(tpl) {
@@ -4006,7 +4097,7 @@
         function layerSelected(dir) {
             if (!selectedEl) return;
             const z = Math.max(-1, Math.min(1, getElLayer(selectedEl) + dir));
-            setElLayer(selectedEl, z);
+            forSelectedGroup(el => setElLayer(el, z));
             toast(z > 0 ? '⬆ Element liegt jetzt vorne' : z < 0 ? '⬇ Element liegt jetzt hinten' : 'Element liegt wieder auf der Standard-Ebene');
             scheduleSave();
         }
@@ -4050,6 +4141,53 @@
             setElScale(el, pos.scale || 1);
         }
 
+        /* Beitrag & Story gemeinsam bearbeiten: passendes Element in der jeweils anderen Vorlage finden */
+        function syncKeys(el) {
+            if (el.classList.contains('corner-logo')) return ['corner'];
+            if (el.classList.contains('sponsor-banner')) return ['banner'];
+            if (el.dataset.spKey) return ['spl:' + el.dataset.spKey];
+            if (el.dataset.xp) return ['xp:' + el.dataset.xp];
+            if (el.dataset.ctId) return ['ct:' + el.dataset.ctId];
+            const norm = id => 'id:' + id.replace(/-(feed|story)(?=-|$)/g, '');
+            const keys = [];
+            if (el.id && !/^(drag|mv)-/.test(el.id)) keys.push(norm(el.id));
+            const inner = el.querySelector('[id]');
+            if (inner) keys.push(norm(inner.id));
+            const lbl = el.dataset.label ? el : el.querySelector('[data-label]');
+            if (lbl) keys.push('lbl:' + lbl.dataset.label);
+            return keys;
+        }
+        function syncPartners(el) {
+            const tpl = el?.closest('.post-template, .story-template');
+            const view = el?.closest('.template-container');
+            if (!tpl || !view) return [];
+            const keys = syncKeys(el);
+            if (!keys.length) return [];
+            const other = tpl.classList.contains('post-template') ? '.story-template' : '.post-template';
+            const out = [];
+            view.querySelectorAll(other).forEach(t => t.querySelectorAll(DRAG_SEL).forEach(c => {
+                if (c !== el && c.closest('.post-template, .story-template') === t && syncKeys(c).some(k => keys.includes(k))) out.push(c);
+            }));
+            return out;
+        }
+        function syncOn() { return !!prefs.syncFormats; }
+        function activePartners(el) { return syncOn() ? syncPartners(el) : []; }
+        function markPartners() {
+            document.querySelectorAll('.el-sync-partner').forEach(p => p.classList.remove('el-sync-partner'));
+            activePartners(selectedEl).forEach(p => p.classList.add('el-sync-partner'));
+        }
+        function toggleSyncFormats() {
+            prefs.syncFormats = !prefs.syncFormats;
+            savePrefs();
+            updateToolbar();
+            toast(prefs.syncFormats ? '🔗 Beitrag & Story werden jetzt gemeinsam angepasst' : 'Beitrag & Story werden wieder getrennt angepasst');
+        }
+        /* Änderung am ausgewählten Element (inkl. Partner) ausführen */
+        function forSelectedGroup(fn) {
+            if (!selectedEl) return;
+            [selectedEl, ...activePartners(selectedEl)].forEach(fn);
+        }
+
         function selectElement(el) {
             if (selectedEl && selectedEl !== el) selectedEl.classList.remove('el-selected');
             selectedEl = el;
@@ -4063,20 +4201,35 @@
             if (!selectedEl) return;
             setText('el-scale-label', Math.round(getElScale(selectedEl) * 100) + ' %');
             $('el-delete-btn').hidden = !selectedEl.classList.contains('custom-text');
+            const syncBtn = $('el-sync-btn');
+            if (syncBtn) {
+                syncBtn.hidden = !syncPartners(selectedEl).length;
+                syncBtn.textContent = selectedEl.closest('.story-template') ? '🔗 Beitrag' : '🔗 Story';
+                syncBtn.classList.toggle('tb-on', syncOn());
+                syncBtn.title = syncOn() ? 'Beitrag & Story gemeinsam anpassen: AN' : 'Beitrag & Story gemeinsam anpassen: AUS';
+            }
+            markPartners();
         }
-        function nudgeSelectedScale(d) { if (selectedEl) { setElScale(selectedEl, getElScale(selectedEl) + d); scheduleSave(); } }
-        function setSelectedScale(s) { if (selectedEl) { setElScale(selectedEl, s); scheduleSave(); } }
-        function resetSelectedElement() {
-            const el = selectedEl;
-            if (!el) return;
+        function nudgeSelectedScale(d) {
+            if (!selectedEl) return;
+            const f = (getElScale(selectedEl) + d) / getElScale(selectedEl);
+            forSelectedGroup(el => setElScale(el, getElScale(el) * f));
+            scheduleSave();
+        }
+        function setSelectedScale(s) { if (selectedEl) { forSelectedGroup(el => setElScale(el, s)); scheduleSave(); } }
+        function resetElement(el) {
             if (el.classList.contains('movable')) setElOffset(el, 0, 0);
             else {
                 const defTop = el.getAttribute('data-default-top'), defLeft = el.getAttribute('data-default-left');
-                if (defTop !== null) el.style.top = defTop;
-                if (defLeft !== null) el.style.left = defLeft;
+                el.style.top = defTop !== null ? defTop : '';
+                el.style.left = defLeft !== null ? defLeft : '0px';
             }
             setElScale(el, 1);
             setElLayer(el, 0);
+        }
+        function resetSelectedElement() {
+            if (!selectedEl) return;
+            forSelectedGroup(resetElement);
             scheduleSave();
         }
         function deleteSelectedCustomText() {
@@ -4090,7 +4243,7 @@
             el._dragBound = true;
             const movable = el.classList.contains('movable');
             const pts = new Map();
-            let start = null;
+            let start = null, partners = [];
 
             const snapshot = () => {
                 const arr = [...pts.values()];
@@ -4109,6 +4262,7 @@
                 try { el.setPointerCapture(e.pointerId); } catch (err) {}
                 pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
                 start = snapshot();
+                partners = activePartners(el).map(p => ({ p, left: p.offsetLeft, top: p.offsetTop, ...getElOffset(p), s: getElScale(p) }));
             });
             el.addEventListener('pointermove', e => {
                 if (!pts.has(e.pointerId) || !start) return;
@@ -4121,9 +4275,20 @@
                         el.style.left = (start.left + dx) + 'px';
                         el.style.top = (start.top + dy) + 'px';
                     }
+                    // Partner in der anderen Vorlage um denselben Weg verschieben
+                    partners.forEach(q => {
+                        if (q.p.classList.contains('movable')) setElOffset(q.p, q.x + dx, q.y + dy);
+                        else { q.p.style.left = (q.left + dx) + 'px'; q.p.style.top = (q.top + dy) + 'px'; }
+                    });
                 };
                 place();
-                if (pts.size > 1 && start.dist > 0) { setElScale(el, start.s * (cur.dist / start.dist)); hideSnapGuides(); return; }
+                if (pts.size > 1 && start.dist > 0) {
+                    const f = cur.dist / start.dist;
+                    setElScale(el, start.s * f);
+                    partners.forEach(q => setElScale(q.p, q.s * f));
+                    hideSnapGuides();
+                    return;
+                }
                 // Einrasten (Desktop: mit gedrückter Alt-Taste frei platzieren)
                 const snap = e.altKey ? null : snapInfo(el);
                 if (snap && (snap.sx || snap.sy)) {
@@ -4138,6 +4303,7 @@
                 pts.delete(e.pointerId);
                 try { el.releasePointerCapture(e.pointerId); } catch (err) {}
                 start = pts.size ? snapshot() : null;
+                if (start) partners = partners.map(q => ({ ...q, left: q.p.offsetLeft, top: q.p.offsetTop, ...getElOffset(q.p), s: getElScale(q.p) }));
                 if (!pts.size) { hideSnapGuides(); scheduleSave(); }
             };
             el.addEventListener('pointerup', end);
@@ -4146,7 +4312,8 @@
             el.addEventListener('wheel', e => {
                 if (selectedEl !== el) return;
                 e.preventDefault();
-                setElScale(el, getElScale(el) * (e.deltaY < 0 ? 1.05 : 0.95));
+                const f = e.deltaY < 0 ? 1.05 : 0.95;
+                forSelectedGroup(x => setElScale(x, getElScale(x) * f));
                 scheduleSave();
             }, { passive: false });
         }
@@ -4206,19 +4373,18 @@
             });
         }
 
-        function resetTabDefaults(tab) {
-            $(`view-${tab}`)?.querySelectorAll('.draggable-text, .draggable-img').forEach(el => {
-                const defTop = el.getAttribute('data-default-top');
-                const defLeft = el.getAttribute('data-default-left');
-                el.style.top = defTop !== null ? defTop : '';
-                el.style.left = defLeft !== null ? defLeft : '0px';
-                setElScale(el, 1);
-                setElLayer(el, 0);
-            });
-            $(`view-${tab}`)?.querySelectorAll('.movable').forEach(el => { setElOffset(el, 0, 0); setElScale(el, 1); setElLayer(el, 0); });
-
+        function resetTabAll(tab) {
+            $(`view-${tab}`)?.querySelectorAll(DRAG_SEL).forEach(resetElement);
+            resetTabBackgrounds(tab);
+            resetTabStyle(tab);
+            resetTabSponsors(tab);
+            finishTabReset(tab);
+        }
+        function resetTabBackgrounds(tab) {
             setVal(`in-bg-${tab}-feed`, DEFAULT_BG);
             setVal(`in-bg-${tab}-story`, DEFAULT_BG);
+        }
+        function resetTabStyle(tab) {
             setVal(`in-frame-shape-${tab}`, 'circle');
             setVal(`in-color-frame-${tab}`, val('cfg-color-frame') || '#ffffff');
             setVal(`in-color-text-${tab}`, '#ffffff');
@@ -4226,21 +4392,131 @@
             setVal(`in-size-title-${tab}`, '2.0');
             setVal(`in-size-info-${tab}`, '1.1');
             setVal(`in-logo-size-${tab}`, '75');
-            // Text-Design, Foto-Art und Sponsoren-Anordnung zurücksetzen – zusätzliche Spieler bleiben ausgewählt
-            const keepXp = { xp1: val(`in-xp1-${tab}`), xp2: val(`in-xp2-${tab}`), xp3: val(`in-xp3-${tab}`), xpNames: $(`in-xp-names-${tab}`)?.checked };
-            applyExtraDesign(tab, keepXp);
-
-            const sp = $(`in-show-sponsors-${tab}`);
-            if (sp) sp.checked = false;
+            // Text-Design, Foto-Art und Wappen zurücksetzen – zusätzliche Spieler und Sponsoren-Einstellungen bleiben
+            const keep = {};
+            ['xp1', 'xp2', 'xp3', 'xpNames', 'sponsorLayout', 'sponsorCols', 'sponsorSize', 'sponsorFree'].forEach(k => {
+                const f = EXTRA_DESIGN.find(d => d.key === k), el = $(`${f.id}-${tab}`);
+                if (el) keep[k] = f.check ? el.checked : el.value;
+            });
+            applyExtraDesign(tab, keep);
             if ($(`in-logo-feed-${tab}`)) $(`in-logo-feed-${tab}`).checked = !!TAB_DESIGN[tab]?.logoFeed;
             if ($(`in-logo-story-${tab}`)) $(`in-logo-story-${tab}`).checked = TAB_DESIGN[tab]?.logoStory !== false;
+        }
+        function resetTabSponsors(tab) {
+            const sp = $(`in-show-sponsors-${tab}`);
+            if (sp) sp.checked = false;
             selectedSponsors[tab] = [];
             document.querySelectorAll(`#sponsor-checkbox-list-${tab} input[type="checkbox"]`).forEach(cb => cb.checked = false);
-
+            setVal(`in-sponsor-layout-${tab}`, 'bottom');
+            setVal(`in-sponsor-cols-${tab}`, '2');
+            setVal(`in-sponsor-size-${tab}`, '100');
+            if ($(`in-sponsor-free-${tab}`)) $(`in-sponsor-free-${tab}`).checked = false;
+            $(`view-${tab}`)?.querySelectorAll('.post-template, .story-template').forEach(tpl => {
+                for (const id in pendingPositions) if (id.startsWith(`spl-${tpl.id}-`)) delete pendingPositions[id];
+                tpl.querySelectorAll('.sponsor-banner .movable').forEach(resetElement);
+            });
+        }
+        function finishTabReset(tab) {
+            selectElement(null);
             updateTabDesign(tab);
             renderSelectedSponsors(tab);
             updateAllViews();
             scheduleSave();
+        }
+
+        /* ---------- Gezielt zurücksetzen: einzelne Elemente oder Design-Bereiche ---------- */
+        function isElementChanged(el) {
+            if (getElScale(el) !== 1 || getElLayer(el)) return true;
+            if (el.classList.contains('movable')) { const { x, y } = getElOffset(el); return !!(x || y); }
+            const defTop = el.getAttribute('data-default-top'), defLeft = el.getAttribute('data-default-left');
+            const near = (a, b) => Math.abs((parseFloat(a) || 0) - (parseFloat(b) || 0)) < 0.5;
+            return !near(el.style.top, defTop ?? el.style.top) || !near(el.style.left, defLeft ?? '0px');
+        }
+        function elementLabel(el) {
+            if (el.classList.contains('corner-logo')) return '🛡️ Vereinslogo (Ecke)';
+            if (el.classList.contains('sponsor-banner')) return '🤝 Sponsorenleiste (komplett)';
+            if (el.dataset.spName) return '🤝 Sponsor: ' + el.dataset.spName;
+            if (el.dataset.xp) return '👤 Zusätzlicher Spieler ' + el.dataset.xp;
+            if (el.classList.contains('custom-text')) return '✍️ Eigener Text: „' + (el.textContent.trim().slice(0, 22) || '…') + '“';
+            if (el.classList.contains('team-logos')) return '🛡️ Wappen';
+            if (el.classList.contains('pitch')) return '⚽ Spielfeld';
+            if (el.tagName === 'IMG' || (!el.textContent.trim() && el.querySelector('img'))) return '🖼️ Bild / Spielerfoto';
+            const t = el.textContent.replace(/\s+/g, ' ').trim();
+            return t ? '🔤 ' + (t.length > 26 ? t.slice(0, 25) + '…' : t) : 'Element';
+        }
+        function tplLabel(tpl) {
+            const tag = tpl.parentElement?.querySelector(':scope > .preview-label-tag')?.textContent || '';
+            return tag.replace(/^[^\wÄÖÜäöü]+/u, '').trim() || (tpl.classList.contains('story-template') ? 'Story' : 'Beitrag');
+        }
+        let resetTab = null;
+        function resetTabDefaults(tab) {
+            resetTab = tab;
+            selectElement(null);
+            const view = $(`view-${tab}`);
+            let html = '', idx = 0;
+            resetEls = [];
+            // Handy: Vorschau kurz (unsichtbar, ohne Neuzeichnen) einblenden, damit Lage und Größe messbar sind
+            const tmpPreview = !document.body.classList.contains('show-preview');
+            if (tmpPreview) document.body.classList.add('show-preview');
+            const hiddenInTpl = (el, tpl) => { for (let n = el; n && n !== tpl; n = n.parentElement) if (getComputedStyle(n).display === 'none' || n.classList.contains('logo-hidden')) return true; return false; };
+            view?.querySelectorAll('.post-template, .story-template').forEach(tpl => {
+                const tr = tpl.getBoundingClientRect();
+                const rows = Array.from(tpl.querySelectorAll(DRAG_SEL))
+                    .filter(el => el.closest('.post-template, .story-template') === tpl && isElementChanged(el))
+                    .map(el => {
+                        const i = idx++;
+                        resetEls[i] = el;
+                        const hidden = hiddenInTpl(el, tpl);
+                        const r = el.getBoundingClientRect();
+                        const outside = !hidden && (r.right < tr.left + 4 || r.left > tr.right - 4 || r.bottom < tr.top + 4 || r.top > tr.bottom - 4);
+                        const note = hidden ? ' <small>(ausgeblendet)</small>' : outside ? ' <small>⚠️ außerhalb des Bildes</small>' : '';
+                        return `<div class="reset-row"><label><input type="checkbox" data-el="${i}" ${outside ? 'checked' : ''}> ${esc(elementLabel(el))}${note}</label>`
+                            + (hidden ? '' : `<button type="button" class="reset-show" onclick="showResetElement(${i})">👁 Zeigen</button>`) + '</div>';
+                    });
+                if (rows.length) html += `<div class="reset-group"><b>${esc(tplLabel(tpl))}</b>${rows.join('')}</div>`;
+            });
+            if (tmpPreview) document.body.classList.remove('show-preview');
+            if (!html) html = '<p>✅ Kein Element ist verschoben oder vergrößert – alles steht auf Standard.</p>';
+            const hasSponsors = !!$(`in-show-sponsors-${tab}`);
+            html += `<div class="reset-group"><b>Design</b>
+                <div class="reset-row"><label><input type="checkbox" data-part="bg"> 🖼️ Hintergründe</label></div>
+                <div class="reset-row"><label><input type="checkbox" data-part="style"> 🎨 Rahmen, Farben, Schriften & Größen</label></div>
+                ${hasSponsors ? '<div class="reset-row"><label><input type="checkbox" data-part="sponsors"> 🤝 Sponsoren (Auswahl & Anordnung)</label></div>' : ''}
+            </div>`;
+            $('reset-list').innerHTML = html;
+            setText('reset-title', `🔄 Zurücksetzen – ${tabTitle(tab)}`);
+            $('reset-overlay').hidden = false;
+        }
+        let resetEls = [];
+        function showResetElement(i) {
+            const el = resetEls[i];
+            closeResetDialog();
+            if (!el) return;
+            if (window.matchMedia('(max-width: 850px)').matches && !document.body.classList.contains('show-preview')) toggleMobileView();
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            selectElement(el);
+        }
+        function closeResetDialog() { $('reset-overlay').hidden = true; }
+        function resetQuickSelect(all) { $('reset-list').querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = all); }
+        function runSelectedReset() {
+            const tab = resetTab;
+            const boxes = Array.from($('reset-list').querySelectorAll('input[type="checkbox"]:checked'));
+            if (!boxes.length) { toast('Bitte zuerst auswählen, was zurückgesetzt werden soll.'); return; }
+            boxes.forEach(cb => {
+                if (cb.dataset.el !== undefined) { const el = resetEls[+cb.dataset.el]; if (el) resetElement(el); }
+                else if (cb.dataset.part === 'bg') resetTabBackgrounds(tab);
+                else if (cb.dataset.part === 'style') resetTabStyle(tab);
+                else if (cb.dataset.part === 'sponsors') resetTabSponsors(tab);
+            });
+            closeResetDialog();
+            finishTabReset(tab);
+            toast(`🔄 ${boxes.length === 1 ? '1 Punkt' : boxes.length + ' Punkte'} zurückgesetzt – mit ↩️ rückgängig machen`);
+        }
+        function runFullReset() {
+            if (!confirm('Wirklich ALLE Positionen und das komplette Design dieses Reiters auf Standard setzen?\nMit ↩️ lässt sich das rückgängig machen.')) return;
+            closeResetDialog();
+            resetTabAll(resetTab);
+            toast('🔄 Reiter komplett auf Standard gesetzt');
         }
 
         function clearLineup() {
@@ -5140,8 +5416,10 @@
         function switchTab(tab) {
             if (!tabList.includes(tab)) tab = 'start';
             activeTab = tab;
+            document.body.dataset.tab = tab;
             selectElement(null);
             localforage.setItem(STORE.tab, tab).catch(() => {});
+            if (tab === 'start') renderCreateGrid();
             document.querySelectorAll('.template-container, .tab-btn, .editor-section').forEach(el => el.classList.remove('active'));
 
             if (isTabLocked(tab)) {
@@ -5159,6 +5437,19 @@
                 targetBtn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: appReady ? 'smooth' : 'auto' });
             }
             updateAllViews();
+        }
+
+        /* Startseite: Kacheln für alle sichtbaren Vorlagen */
+        function renderCreateGrid() {
+            const host = $('create-grid');
+            if (!host) return;
+            host.innerHTML = Array.from(document.querySelectorAll('.tab-btn'))
+                .filter(b => !['start', 'stammdaten'].includes(b.dataset.tab) && !b.hidden)
+                .map(b => {
+                    const t = b.dataset.tab, ico = b.querySelector('.tab-ico')?.textContent || '', name = b.querySelector('span:last-child')?.textContent || t;
+                    const locked = isTabLocked(t);
+                    return `<button type="button" class="create-tile${locked ? ' locked' : ''}" onclick="switchTab('${t}'); document.querySelector('.sidebar')?.scrollTo(0, 0); window.scrollTo(0, 0);"><span class="ct-ico">${ico}</span><span>${esc(name)}${locked ? ' 🔒' : ''}</span></button>`;
+                }).join('');
         }
 
         function setupTabBar() {
@@ -5309,6 +5600,10 @@
                 const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el);
                 if (x || y || sc !== 1 || z) data.positions[el.id] = z ? { x, y, scale: sc, z } : { x, y, scale: sc };
             });
+            // Einzeln verschobene Sponsorenlogos merken, auch wenn „einzeln verschieben“ gerade aus ist
+            for (const id in pendingPositions) {
+                if (id.startsWith('spl-') && !data.positions[id] && !$(id)?.classList.contains('movable')) data.positions[id] = pendingPositions[id];
+            }
 
             editorTabs.forEach(t => {
                 data.tabSettings[t] = {
@@ -6534,6 +6829,7 @@
                 $(`editor-${tab}`)?.querySelectorAll('[data-section]').forEach(el => { el.hidden = hidden.includes(el.dataset.section); });
             });
             if (ui.hiddenTabs.includes(activeTab)) switchTab('start');
+            renderCreateGrid();
         }
         function renderUiSettings() {
             const ui = uiPrefs();
@@ -6656,9 +6952,9 @@
            ========================================================= */
         const HELP_VIDEOS = {};
         const HELP_TEXTS = {
-            start: 'Hier legst du Vereinsname, Farben und das Format der Beiträge fest. Unter „Ansicht anpassen“ blendest du Reiter und Bereiche aus, die du nicht brauchst. Denk an regelmäßige Backups!',
+            start: 'Oben tippst du an, welche Grafik du erstellen möchtest. Darunter legst du Vereinsname, Farben und das Format der Beiträge fest. Unter „Ansicht anpassen“ blendest du Reiter und Bereiche aus, die du nicht brauchst. Denk an regelmäßige Backups!',
             stammdaten: 'Lege hier einmalig Spieler (mit Foto und Torjubel-Foto), Gegner, Sponsoren und eigene Hintergründe an. Alles steht danach in allen Reitern zur Auswahl. Mehrere Fotos auf einmal: Dateiname = Spielername.',
-            post: 'Gegner, Heim/Auswärts, Datum und Uhrzeit eintragen – oder mit „Nächsten Termin aus Kalender übernehmen“ automatisch füllen. Texte und Logos in der Vorschau antippen, verschieben und größer/kleiner ziehen.',
+            post: 'Gegner, Heim/Auswärts, Datum und Uhrzeit eintragen – oder mit „Nächsten Termin aus Kalender übernehmen“ automatisch füllen. Texte und Logos in der Vorschau antippen, verschieben und größer/kleiner ziehen – mit 🔗 in der Leiste oben bewegt sich das Gegenstück in der Story mit. Design, Wappen-Anordnung und Sponsoren findest du unten unter „Aussehen anpassen“, verlorene Elemente über „Zurücksetzen“.',
             story: 'Formation wählen und die Startelf eintragen. Mit „Nur Spieler aus dem Kader“ siehst du nur den aktuellen Kader. „Aufstellung leeren“ setzt alles zurück.',
             tor: 'Torschütze, Vorlage, Spielstand und Minute wählen. Standardmäßig wird das Torjubel-Foto genutzt – unter „Spielerfotos“ kannst du auf das normale Foto wechseln.',
             ergebnis: 'Endstand, Zusatztext und Torschützen eintragen. „Letztes Spiel aus Kalender übernehmen“ füllt Gegner und Heim/Auswärts automatisch.',
