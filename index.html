@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 18.6</title>
+    <title>ClubShot – Grafiken für Vereine 18.7</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -47,6 +47,9 @@
             --avatar-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
+        /* iPhone: keine automatische Schriftvergrößerung (verschiebt sonst Texte beim Bild-Erstellen) */
+        html, body { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+        .post-template, .story-template, .post-template *, .story-template * { -webkit-text-size-adjust: none; text-size-adjust: none; }
         body {
             font-family: var(--font-family);
             background-color: var(--bg-color);
@@ -271,11 +274,13 @@
         .pc-bignum { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); font-size: calc(40px * var(--pc-size, 1)); font-weight: 900; line-height: 1;
             color: rgba(255,255,255,0.3); z-index: 0; text-shadow: none; }
         .lineup-match { width: 100%; text-align: center; z-index: 6; }
-        .lineup-match .lm-teams { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 900; font-size: calc(var(--lm-size, 1) * 15px); line-height: 1.1; text-transform: var(--title-transform, uppercase); }
+        .lineup-match .lm-teams { display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 94%; margin: 0 auto; font-weight: 900; font-size: calc(var(--lm-size, 1) * 15px); line-height: 1.1; text-transform: var(--title-transform, uppercase); }
+        .lineup-match .lm-name { flex: 0 1 auto; min-width: 0; max-width: 40%; text-align: center; }
+        .lineup-match .lm-logo, .lineup-match .lm-vs { flex: 0 0 auto; }
         .lineup-match .lm-logo { width: calc(var(--lm-size, 1) * 30px); height: calc(var(--lm-size, 1) * 30px); object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); }
         .lineup-match .lm-vs { font-size: 0.7em; opacity: 0.75; font-weight: bold; }
         .lineup-match .lm-opp { opacity: 0.8; }
-        .lineup-match .lm-sub { font-size: calc(var(--lm-size, 1) * 10px); font-weight: bold; opacity: 0.85; margin-top: 3px; }
+        .lineup-match .lm-sub { font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.88); margin-top: 4px; white-space: nowrap; }
         .pitch-bench { width: 92%; margin: 0 0 18px; display: flex; flex-direction: column; gap: 3px; z-index: 2; font-size: 10px; text-align: center; }
         .pitch-bench .pb-line { background: rgba(0,0,0,0.55); border-radius: 4px; padding: 3px 6px; color: #fff; text-shadow: none; line-height: 1.35; }
         .pitch-bench .pb-line b { color: var(--title-color, #fff); margin-right: 4px; }
@@ -2018,7 +2023,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "18.6";
+        const APP_VERSION = "18.7";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4908,11 +4913,13 @@
             const isHome = val('in-post-venue') !== 'auswaerts';
             const own = getTeamName();
             const sub = [val('in-lineup-sub'), [val('in-post-date'), val('in-post-time')].filter(Boolean).join(' · ')].filter(Boolean).join('  |  ');
-            const ownItem = `<img class="lm-logo" src="${getClubLogoSrc()}" alt=""><span>${esc(own)}</span>`;
-            const oppItem = `<span class="lm-opp">${esc(opp || 'Gegner')}</span><img class="lm-logo" src="${getOpponentLogoSrc(opp || 'Gegner')}" alt="">`;
-            const oppItemL = `<img class="lm-logo" src="${getOpponentLogoSrc(opp || 'Gegner')}" alt=""><span class="lm-opp">${esc(opp || 'Gegner')}</span>`;
-            const ownItemR = `<span>${esc(own)}</span><img class="lm-logo" src="${getClubLogoSrc()}" alt="">`;
-            const matchHtml = `<div class="lm-teams">${isHome ? ownItem + '<span class="lm-vs">vs</span>' + oppItem : oppItemL + '<span class="lm-vs">vs</span>' + ownItemR}</div>`
+            const ownItem = `<img class="lm-logo" src="${getClubLogoSrc()}" alt=""><span class="lm-name">${esc(own)}</span>`;
+            const oppItem = `<span class="lm-name lm-opp">${esc(opp || 'Gegner')}</span><img class="lm-logo" src="${getOpponentLogoSrc(opp || 'Gegner')}" alt="">`;
+            const oppItemL = `<img class="lm-logo" src="${getOpponentLogoSrc(opp || 'Gegner')}" alt=""><span class="lm-name lm-opp">${esc(opp || 'Gegner')}</span>`;
+            const ownItemR = `<span class="lm-name">${esc(own)}</span><img class="lm-logo" src="${getClubLogoSrc()}" alt="">`;
+            // Lange Vereinsnamen: Schrift automatisch kleiner, damit beide Wappen im Bild bleiben
+            const lmSize = Math.max(0.68, Math.min(1.1, 30 / Math.max(1, own.length + (opp || 'Gegner').length)));
+            const matchHtml = `<div class="lm-teams" style="--lm-size:${lmSize.toFixed(2)}">${isHome ? ownItem + '<span class="lm-vs">vs</span>' + oppItem : oppItemL + '<span class="lm-vs">vs</span>' + ownItemR}</div>`
                 + (sub ? `<div class="lm-sub">${esc(sub)}</div>` : '');
             ['lineup-match', 'lineup-match-feed'].forEach(id => {
                 const el = $(id);
