@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 19.6</title>
+    <title>ClubShot – Grafiken für Vereine 19.7</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -489,6 +489,10 @@
         .style-row { display: flex; gap: 6px; margin-bottom: 6px; }
         .style-del { background: #fff; border: 1px solid #f1c0c0; border-radius: 10px; padding: 0 10px; cursor: pointer; }
         .style-scope { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 2px 0 6px; }
+        /* Ohne Kästen: Schrift bekommt den Text-Schatten, damit sie auf Fotos lesbar bleibt */
+        .no-boxes :is(.sponsor-text, .player-name, .pitch-bench .pb-line, .list-section-title, .list-item, .bench-tag, .tor-details, .xp-name, .potm-player-name,
+            .kal-row, .kal-empty, .spon-name, .wk-row, .scorer-box, .bday-name, .transfer-name, .transfer-chip, .kader-info-block, .kader-freetext, .kader-grid-name) {
+            text-shadow: var(--tpl-text-shadow, 1px 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.6)) !important; box-shadow: none !important; }
         .design-sub { margin: 12px 0 6px; font-size: 12px; font-weight: bold; color: #005f73; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid #e3e6ea; padding-bottom: 3px; }
         .design-sub:first-child { margin-top: 2px; }
         .design-sub small { text-transform: none; letter-spacing: 0; font-weight: normal; color: #888; }
@@ -669,6 +673,7 @@
         .modal-actions .primary { background: #2a9d8f; color: white; }
         .modal-actions .secondary { background: #e9ecef; color: #333; }
         .btn-action-group .video-btn { background: #5a4fcf; }
+        .pack-results .vid-thumb { display: flex; align-items: center; justify-content: center; aspect-ratio: 9 / 16; background: #222; color: #fff; font-size: 26px; border-radius: 6px; margin-bottom: 3px; }
         .modal-actions button:disabled { opacity: 0.6; cursor: default; }
         .storage-status { display: block; margin-top: 6px; font-weight: bold; }
         /* Pakete & Ansicht */
@@ -1467,6 +1472,7 @@
                 </div>
                 <div class="control-group"><label>Spieler</label><select id="in-new-player" class="player-select" onchange="updateNeuzugang();"></select></div>
                 <div class="control-group"><label><input type="checkbox" id="in-new-name-stack" onchange="updateNeuzugang(); scheduleSave();"> Vor- und Nachname untereinander</label></div>
+                <button type="button" class="copy-action-btn" style="background:#5a4fcf;" onclick="openBulkDialog()">👥 Für mehrere Spieler auf einmal erstellen (Bilder & Reels)</button>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-new-title" value="NEUZUGANG" oninput="updateNeuzugang();"></div>
                 <div style="display:flex; gap: 8px;">
                     <div class="control-group" style="flex:1;"><label>Position</label><input type="text" id="in-new-position" value="" placeholder="z.B. Stürmer" oninput="updateNeuzugang();"></div>
@@ -2028,6 +2034,36 @@
     </div>
 
     <!-- GRAFIK-PAKET -->
+    <div id="bulk-overlay" class="modal-overlay" hidden>
+        <div class="modal-card">
+            <div id="bulk-select">
+                <h2>👥 Für mehrere Spieler erstellen</h2>
+                <p>Für jeden ausgewählten Spieler wird die Grafik mit seinen Daten (Foto, Position, Nummer, Mannschaft) erstellt – Titel, Text und Design wie eingestellt.</p>
+                <div class="pack-group"><b>Was soll erstellt werden?</b>
+                    <label><input type="checkbox" data-bulk-fmt="feed" checked> 📷 Beitrag (Bild)</label>
+                    <label><input type="checkbox" data-bulk-fmt="story" checked> 📱 Story (Bild)</label>
+                    <label class="adv-only"><input type="checkbox" data-bulk-fmt="story-video"> 🎬 Story als Video (Reel) <small>– ca. 15 s pro Spieler</small></label>
+                    <label class="adv-only"><input type="checkbox" data-bulk-fmt="feed-video"> 🎬 Beitrag als Video <small>– ca. 15 s pro Spieler</small></label>
+                </div>
+                <div class="pack-quick" id="bulk-quick"></div>
+                <div id="bulk-list"></div>
+                <span class="hint" id="bulk-hint"></span>
+            </div>
+            <div id="bulk-result" hidden>
+                <h2>✅ Fertig</h2>
+                <p id="bulk-result-text"></p>
+                <div class="pack-results" id="bulk-results"></div>
+            </div>
+            <div class="pack-progress" id="bulk-progress"></div>
+            <div class="modal-actions">
+                <button type="button" class="primary" id="bulk-run" onclick="runBulkExport()">Erstellen</button>
+                <button type="button" class="primary" id="bulk-share" onclick="sharePackFiles()" hidden>📲 Alle teilen / in Fotos sichern</button>
+                <button type="button" class="primary" id="bulk-download" onclick="downloadPackFiles()" hidden>💾 Alle herunterladen</button>
+                <button type="button" class="secondary" id="bulk-close" onclick="closeBulkDialog()">Schließen</button>
+            </div>
+        </div>
+    </div>
+
     <div id="video-overlay" class="modal-overlay" hidden>
         <div class="modal-card">
             <h2>🎬 Dein Video</h2>
@@ -2144,7 +2180,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "19.6";
+        const APP_VERSION = "19.7";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3510,7 +3546,7 @@
             { id: 'retro', name: '📼 Retro', v: { frameShape: 'square', colorFrame: '#f1c40f', colorText: '#ffffff', font: F('Barlow'), titleFont: F('Graduate'), titleColorMode: 'custom', titleColor: '#f1c40f',
                 textEffect: 'outline', letterSpacing: '1', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#111111', boxText: '#f1c40f', boxOpacity: '85' } },
             { id: 'minimal', name: '◻️ Minimal', v: { frameShape: 'none', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Montserrat'), titleFont: '', titleColorMode: 'text',
-                textEffect: 'none', letterSpacing: '3', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#000000', boxText: '#ffffff', boxOpacity: '0' } },
+                textEffect: 'none', letterSpacing: '3', titleUpper: true, titleItalic: false, boxMode: 'none' } },
             { id: 'neon', name: '⚡ Leuchten', v: { frameShape: 'circle', colorFrame: '@jersey', colorText: '#ffffff', font: F('Kanit'), titleFont: F('Teko'), titleColorMode: 'text',
                 textEffect: 'glow', letterSpacing: '2', titleUpper: true, titleItalic: true, boxMode: 'custom', boxColor: '#000000', boxText: '#ffffff', boxOpacity: '70' } }
         ];
@@ -3700,6 +3736,7 @@
                             <div class="control-group">
                                 <select id="in-box-mode-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
                                     <option value="auto">Standard (passend je Vorlage)</option>
+                                    <option value="none">Ohne Kästen (nur Schrift)</option>
                                     <option value="custom">Eigene Farben ↓</option>
                                 </select></div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -4415,8 +4452,13 @@
                 setOrClear('--title-ls', ls ? ls + 'px' : '');
                 setOrClear('--title-transform', adv && $(`in-title-upper-${tab}`) && !$(`in-title-upper-${tab}`).checked ? 'none' : '');
                 setOrClear('--title-style', adv && $(`in-title-italic-${tab}`)?.checked ? 'italic' : '');
-                // Kästen (Namensschilder, Listen …): eigene Farbe, Schrift und Deckkraft
-                if (val(`in-box-mode-${tab}`) === 'custom') {
+                // Kästen (Namensschilder, Listen …): eigene Farbe, Schrift und Deckkraft – oder ganz ohne Kästen
+                const boxMode = val(`in-box-mode-${tab}`);
+                viewContainer.classList.toggle('no-boxes', boxMode === 'none');
+                if (boxMode === 'none') {
+                    viewContainer.style.setProperty('--box-bg', 'transparent');
+                    viewContainer.style.setProperty('--box-fg', textColVal);
+                } else if (boxMode === 'custom') {
                     const hx = /^#([0-9a-f]{6})$/i.exec(val(`in-box-color-${tab}`) || '#000000');
                     const n = hx ? parseInt(hx[1], 16) : 0, op = (parseFloat(val(`in-box-opacity-${tab}`)) || 0) / 100;
                     viewContainer.style.setProperty('--box-bg', `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${op})`);
@@ -8269,12 +8311,114 @@
             $('pack-download').hidden = false;
         }
 
+        /* ---------- Neuzugang/Spielervorstellung: für viele Spieler auf einmal ---------- */
+        let bulkCancel = false;
+        function openBulkDialog() {
+            clearPackFiles();
+            const players = stammdaten.players.filter(p => p.name);
+            if (!players.length) { alert('Bitte zuerst unter „🗃️ Daten“ Spieler anlegen.'); return; }
+            const groups = {};
+            players.forEach(p => {
+                const g = p.group === 'Trainer' ? 'Trainer' : (p.team && (stammdaten.teams || []).includes(p.team) ? p.team : 'Ohne Mannschaft');
+                (groups[g] = groups[g] || []).push(p);
+            });
+            const order = [...(stammdaten.teams || []), 'Ohne Mannschaft', 'Trainer'].filter(g => groups[g]);
+            const noConsent = p => consentEnabled() && !p.consent;
+            $('bulk-list').innerHTML = order.map(g => `
+                <div class="pack-group"><b>${esc(g)} <small>(${groups[g].length})</small></b>
+                    ${groups[g].map(p => `<label><input type="checkbox" data-bulk-player="${esc(p.name)}" data-bulk-group="${esc(g)}" ${g !== 'Trainer' && !noConsent(p) ? 'checked' : ''}> ${esc(p.name)}${noConsent(p) ? ' <small>⚠️ keine Einwilligung</small>' : ''}</label>`).join('')}
+                </div>`).join('');
+            $('bulk-quick').innerHTML = `<button type="button" onclick="bulkSelect('*')">Alle</button><button type="button" onclick="bulkSelect('')">Keine</button>`
+                + order.filter(g => g !== 'Trainer').map(g => `<button type="button" onclick="bulkSelect(this.dataset.g)" data-g="${esc(g)}">Nur ${esc(g)}</button>`).join('');
+            setText('bulk-hint', val('in-new-mode') === 'vorstellung' ? '' : 'Hinweis: „Kommt von“ ist für alle gleich. Für Neuzugänge von verschiedenen Vereinen am besten einzeln erstellen oder auf „Spielervorstellung“ umstellen.');
+            $('bulk-select').hidden = false; $('bulk-result').hidden = true;
+            $('bulk-run').hidden = false; $('bulk-run').disabled = false;
+            $('bulk-share').hidden = true; $('bulk-download').hidden = true;
+            setText('bulk-progress', '');
+            $('bulk-overlay').hidden = false;
+        }
+        function bulkSelect(g) {
+            $('bulk-list').querySelectorAll('input[data-bulk-player]').forEach(cb => { cb.checked = g === '*' ? true : g === '' ? false : cb.dataset.bulkGroup === g; });
+        }
+        function closeBulkDialog() {
+            bulkCancel = true;
+            $('bulk-overlay').hidden = true;
+            clearPackFiles();
+            $('bulk-results').innerHTML = '';
+        }
+        async function runBulkExport() {
+            const names = Array.from($('bulk-list').querySelectorAll('input[data-bulk-player]:checked')).map(cb => cb.dataset.bulkPlayer);
+            const fmts = Array.from(document.querySelectorAll('#bulk-overlay input[data-bulk-fmt]:checked')).filter(cb => cb.offsetParent !== null || !cb.closest('.adv-only')).map(cb => cb.dataset.bulkFmt);
+            if (!names.length) { setText('bulk-progress', 'Bitte mindestens einen Spieler auswählen.'); return; }
+            if (!fmts.length) { setText('bulk-progress', 'Bitte mindestens ein Format auswählen.'); return; }
+            if (fmts.some(f => f.endsWith('video')) && !videoSupported()) { setText('bulk-progress', 'Dieser Browser kann keine Videos aufnehmen – bitte nur Bilder wählen.'); return; }
+            const missing = consentEnabled() ? names.filter(n => !findPlayer(n)?.consent) : [];
+            if (missing.length && !confirm(`Ohne hinterlegte Einwilligung:\n\n${missing.join(', ')}\n\nTrotzdem erstellen?`)) return;
+            clearPackFiles();
+            bulkCancel = false;
+            $('bulk-run').disabled = true;
+            selectElement(null);
+            await saveSlotNow();
+            // Feste Eingaben (Spieler, Position, Nummer) merken – für jeden Spieler kommen sie aus den Spielerdaten
+            const keep = { player: val('in-new-player'), pos: val('in-new-position'), num: val('in-new-number') };
+            setVal('in-new-position', ''); setVal('in-new-number', '');
+            const slug = n => normName(n).toLowerCase().replace(/[^a-z0-9äöüß]+/g, '_').replace(/^_|_$/g, '');
+            const kind = val('in-new-mode') === 'vorstellung' ? 'vorstellung' : 'neuzugang';
+            const total = names.length * fmts.length;
+            let done = 0;
+            try {
+                for (const name of names) {
+                    if (bulkCancel) break;
+                    setVal('in-new-player', name);
+                    updateNeuzugang();
+                    for (const f of fmts) {
+                        if (bulkCancel) break;
+                        done++;
+                        const el = $(f.startsWith('feed') ? 'capture-neuzugang-feed' : 'capture-neuzugang');
+                        const base = `${kind}_${slug(name)}_${f.startsWith('feed') ? 'beitrag' : 'story'}`;
+                        if (f.endsWith('video')) {
+                            setText('bulk-progress', `⏳ ${done}/${total}: Video für ${name} …`);
+                            const { base: b, layers } = await renderVideoLayers(el);
+                            const blob = await recordVideo(b, layers, pct => setText('bulk-progress', `🎬 ${done}/${total}: Video für ${name} … ${pct} %`));
+                            packFiles.push(new File([blob], `${base}.${blob.type.includes('mp4') ? 'mp4' : 'webm'}`, { type: blob.type }));
+                        } else {
+                            setText('bulk-progress', `⏳ ${done}/${total}: Bild für ${name} …`);
+                            const canvas = await renderElementToCanvas(el);
+                            const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 1.0));
+                            canvas.width = canvas.height = 0;
+                            if (!blob) throw new Error('Grafik konnte nicht erstellt werden.');
+                            packFiles.push(new File([blob], `${base}.png`, { type: 'image/png' }));
+                        }
+                    }
+                }
+            } catch (err) {
+                setText('bulk-progress', '❌ Fehler: ' + err.message);
+            } finally {
+                setVal('in-new-player', keep.player); setVal('in-new-position', keep.pos); setVal('in-new-number', keep.num);
+                updateNeuzugang();
+                $('bulk-run').disabled = false;
+            }
+            if (bulkCancel || !packFiles.length) return;
+            setText('bulk-progress', '');
+            packUrls = packFiles.map(f => URL.createObjectURL(f));
+            $('bulk-results').innerHTML = packFiles.map((f, i) => `<a href="${packUrls[i]}" download="${esc(f.name)}">${f.type.startsWith('video')
+                ? '<div class="vid-thumb">🎬</div>' : `<img src="${packUrls[i]}" alt="">`}${esc(f.name)}</a>`).join('');
+            const canShare = !!(navigator.canShare && navigator.canShare({ files: packFiles }));
+            setText('bulk-result-text', `${packFiles.length} Datei${packFiles.length === 1 ? '' : 'en'} erstellt. ` + (canShare
+                ? 'Tippe auf „Alle teilen“ und wähle z.B. „Sichern“ (Fotos) oder direkt Instagram.'
+                : 'Tippe auf eine Datei, um sie einzeln zu speichern, oder lade alle herunter.'));
+            $('bulk-select').hidden = true; $('bulk-result').hidden = false;
+            $('bulk-run').hidden = true;
+            $('bulk-share').hidden = !canShare;
+            $('bulk-download').hidden = false;
+        }
+
         async function sharePackFiles() {
             if (!packFiles.length) return;
             try {
                 await navigator.share({ files: packFiles, title: 'ClubShot Grafiken' });
             } catch (err) {
-                if (err.name !== 'AbortError') setText('pack-progress', 'Teilen nicht möglich – bitte „Alle herunterladen“ verwenden.');
+                if (err.name !== 'AbortError') ['pack-progress', 'bulk-progress'].forEach(id => setText(id, 'Teilen nicht möglich – bitte „Alle herunterladen“ verwenden.'));
             }
         }
 
