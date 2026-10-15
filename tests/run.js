@@ -254,6 +254,9 @@ async function makePhotos(browser) {
         await page.evaluate(() => { setVal('in-color-text-story', '#111111'); setVal('in-box-mode-story', 'custom'); setVal('in-box-color-story', '#ffffff'); setVal('in-box-opacity-story', '80'); updateTabDesign('story'); });
         check('Schriftfarbe gilt auch für die Datumszeile', await page.$eval('#lm-date', e => getComputedStyle(e).color === 'rgb(17, 17, 17)'));
         check('Kästen-Farbe gilt für Namensschilder', await page.$eval('#pitch .player-name', e => getComputedStyle(e).backgroundColor === 'rgba(255, 255, 255, 0.8)'));
+        await page.evaluate(() => { setVal('in-pitch-namemode-story', 'stack'); buildFormation(); });
+        check('Spielernamen untereinander', await page.$eval('#pitch .player-name', e => e.innerHTML.includes('<br>')));
+        check('Neue Schriften in der Auswahl', await page.evaluate(() => ['Big Shoulders', 'Rubik Dirt'].every(f => [...$('in-font-story').options].some(o => o.value.includes(f)))));
         check('Titel standardmäßig „Startaufstellung“', /startaufstellung/i.test(await page.textContent('#out-story-title')));
         await page.evaluate(() => { setVal('in-player-style-story', 'pro'); setVal('in-field-style-story', 'grass'); setVal('in-field-view-story', 'persp'); $('in-pitch-bench-story').checked = true; buildFormation(); });
         check('Profi-Look mit gezeichnetem Spielfeld', await page.evaluate(() => $('pitch').classList.contains('pc-pro') && !!document.querySelector('#pitch .field-img') && $('pitch-bench').style.display === 'flex'));

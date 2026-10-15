@@ -3,7 +3,7 @@
    - Bibliotheken, Schriften, Icons: aus dem Zwischenspeicher
    - vereine.txt und Wappen: immer aus dem Netz (werden nie zwischengespeichert)
    Bei jeder neuen App-Version CACHE_VERSION erhöhen. */
-const CACHE_VERSION = 'clubshot-v19.3';
+const CACHE_VERSION = 'clubshot-v19.4';
 
 const CORE_FILES = [
     './',
@@ -14,6 +14,9 @@ const CORE_FILES = [
     './vendor/localforage.min.js',
     './vendor/fonts.css',
     './vendor/fonts/bebas-neue-latin-400-normal.woff2',
+    './vendor/fonts/big-shoulders-display-latin-800-normal.woff2',
+    './vendor/fonts/big-shoulders-display-latin-900-normal.woff2',
+    './vendor/fonts/rubik-dirt-latin-400-normal.woff2',
     './vendor/fonts/montserrat-latin-700-normal.woff2',
     './vendor/fonts/montserrat-latin-900-normal.woff2',
     './vendor/fonts/oswald-latin-600-normal.woff2',
