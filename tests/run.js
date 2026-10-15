@@ -53,7 +53,7 @@ async function newPage(browser, opts = {}) {
     page.answers = [];
     page.on('pageerror', e => page.errors.push(e.message));
     page.on('request', r => { const u = r.url(); if (!/^(http:\/\/localhost|data:|blob:)/.test(u)) page.external.push(u); });
-    page.on('dialog', d => { page.dialogs.push(d.message()); const a = page.answers.length ? page.answers.shift() : true; a ? d.accept() : d.dismiss(); });
+    page.on('dialog', d => { page.dialogs.push(d.message()); const a = page.answers.length ? page.answers.shift() : true; !a ? d.dismiss() : typeof a === 'string' ? d.accept(a) : d.accept(); });
     await page.route('**/vereine.txt*', r => r.fulfill({ status: 200, contentType: 'text/plain; charset=utf-8', body: FIXTURE_LIST }));
     return page;
 }
@@ -258,6 +258,30 @@ async function makePhotos(browser) {
         await page.evaluate(() => { setVal('in-player-style-story', 'pro'); setVal('in-field-style-story', 'grass'); setVal('in-field-view-story', 'persp'); $('in-pitch-bench-story').checked = true; buildFormation(); });
         check('Profi-Look mit gezeichnetem Spielfeld', await page.evaluate(() => $('pitch').classList.contains('pc-pro') && !!document.querySelector('#pitch .field-img') && $('pitch-bench').style.display === 'flex'));
         check('Export Aufstellung mit Spielfeld', (await exportSize(page, 'capture-story')) === '1200x2133');
+
+        // Design-Stile
+        await page.evaluate(() => { switchTab('post'); applyStyle('post', 'retro'); });
+        check('Design-Stil „Retro“ wirkt', await page.evaluate(() => val('in-frame-shape-post') === 'square' && val('in-box-mode-post') === 'custom'));
+        page.answers.push('Test-Stil');
+        await page.evaluate(() => saveCurrentStyle('post'));
+        await page.waitForTimeout(300);
+        check('Eigener Stil gespeichert', await page.evaluate(() => (stammdaten.designStyles || []).some(x => x.name === 'Test-Stil')));
+        // Video: Ebenen für die Animation
+        const layers = await page.evaluate(async () => { const r = await renderVideoLayers($('capture-ergebnis')); return { n: r.layers.length, w: r.base.width }; });
+        check('Video: Ebenen werden erzeugt', layers.n >= 4 && layers.w === 1080, JSON.stringify(layers));
+        check('Video-Knöpfe an den Vorlagen', (await page.$$eval('.video-btn', l => l.length)) >= 20);
+        // Import: Auswahl-Dialog und Zusammenführen
+        const backup = await page.evaluate(async () => await (await buildBackup()).blob.text());
+        fs.mkdirSync(TMP, { recursive: true });
+        fs.writeFileSync(path.join(TMP, 'backup.json'), backup);
+        await page.evaluate(async () => { stammdaten.players.push({ name: 'Nur Lokal', group: 'Spieler' }); await saveStammdaten(); });
+        await page.setInputFiles('#json-import-input', path.join(TMP, 'backup.json'));
+        await page.waitForTimeout(500);
+        check('Import zeigt Auswahl', await page.evaluate(() => !$('import-overlay').hidden));
+        await page.evaluate(() => document.querySelectorAll('#import-list input').forEach(cb => cb.checked = cb.dataset.imp === 'players'));
+        await page.click('#import-overlay button:has-text("Importieren")');
+        await page.waitForTimeout(800);
+        check('Zusammenführen behält lokale Spieler', await page.evaluate(() => !!findPlayer('Nur Lokal')));
 
         // Startseite: Kacheln
         await page.evaluate(() => switchTab('start'));

@@ -10,9 +10,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 19.0</title>
+    <title>ClubShot – Grafiken für Vereine 19.1</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ClubShot">
@@ -469,6 +469,13 @@
         /* Inhalt zuerst, Aussehen gesammelt darunter */
         .design-head { margin: 22px 0 10px; padding-top: 14px; border-top: 2px solid #e3e6ea; font-size: 15px; font-weight: bold; color: #123; }
         .design-head small { font-weight: normal; color: #888; }
+        .style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+        .style-chip { background: #eef2f5; color: #123; border: 1px solid #dfe5ea; border-radius: 10px; padding: 9px 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .style-chip:active { transform: scale(0.97); }
+        .style-chip.own { flex: 1; text-align: left; padding: 9px 10px; background: #f6f3ff; border-color: #ddd5ff; }
+        .style-row { display: flex; gap: 6px; margin-bottom: 6px; }
+        .style-del { background: #fff; border: 1px solid #f1c0c0; border-radius: 10px; padding: 0 10px; cursor: pointer; }
+        .style-scope { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 2px 0 6px; }
         .design-sub { margin: 12px 0 6px; font-size: 12px; font-weight: bold; color: #005f73; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid #e3e6ea; padding-bottom: 3px; }
         .design-sub:first-child { margin-top: 2px; }
         .design-sub small { text-transform: none; letter-spacing: 0; font-weight: normal; color: #888; }
@@ -648,6 +655,7 @@
         .modal-actions button { border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; }
         .modal-actions .primary { background: #2a9d8f; color: white; }
         .modal-actions .secondary { background: #e9ecef; color: #333; }
+        .btn-action-group .video-btn { background: #5a4fcf; }
         .modal-actions button:disabled { opacity: 0.6; cursor: default; }
         .storage-status { display: block; margin-top: 6px; font-weight: bold; }
         /* Pakete & Ansicht */
@@ -1002,7 +1010,7 @@
                 <div class="control-group" style="margin-top:10px;">
                     <label>JSON Datei importieren:</label>
                     <input type="file" id="json-import-input" accept=".json,application/json" onchange="importConfigJSON(event)">
-                    <span class="hint">Spieler, Gegner, Sponsoren, Hintergründe und alle 3 Versionen werden übertragen – z.B. auf ein anderes Handy.</span>
+                    <span class="hint">Danach wählst du aus, was übernommen wird (z.B. nur neue Spieler) – vorhandene Daten bleiben beim „Zusammenführen“ erhalten. Freigestellte Fotos und Positionen werden mit übertragen.</span>
                 </div>
 
                 <div class="app-footer">
@@ -1118,6 +1126,7 @@
                     </div>
                 </details>
 
+                <button type="button" class="copy-action-btn" style="background:#6c757d;" onclick="optimizeStorage(this)">🧹 Speicher optimieren (Fotos verkleinern)</button>
                 <span class="hint" id="storage-info"></span>
                 <input type="file" id="hidden-image-input" accept="image/*" style="display:none" onchange="handleHiddenImageInput(event)">
             </div>
@@ -1966,6 +1975,34 @@
     </div>
 
     <!-- GRAFIK-PAKET -->
+    <div id="video-overlay" class="modal-overlay" hidden>
+        <div class="modal-card">
+            <h2>🎬 Dein Video</h2>
+            <p id="video-info"></p>
+            <video id="video-preview" controls playsinline loop style="width:100%; max-height:60vh; border-radius:10px; background:#000;"></video>
+            <div class="modal-actions">
+                <a id="video-download" class="primary" style="display:block; text-align:center; text-decoration:none; color:#fff; background:#2a9d8f; border-radius:8px; padding:12px; font-weight:bold;">💾 Video speichern</a>
+                <button type="button" class="secondary" onclick="closeVideoPreview()">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="import-overlay" class="modal-overlay" hidden>
+        <div class="modal-card">
+            <h2>📥 Backup importieren</h2>
+            <p id="import-info"></p>
+            <div class="pack-group">
+                <label><input type="radio" name="imp-mode" value="merge" checked> ➕ <b>Zusammenführen</b> – Neues hinzufügen, Vorhandenes mit dem Backup aktualisieren</label>
+                <label><input type="radio" name="imp-mode" value="replace"> ♻️ <b>Ersetzen</b> – Ausgewähltes komplett durch das Backup ersetzen</label>
+            </div>
+            <div id="import-list"></div>
+            <div class="modal-actions">
+                <button type="button" class="primary" onclick="runImport()">Importieren</button>
+                <button type="button" class="secondary" onclick="closeImportDialog()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
     <div id="reset-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closeResetDialog()">
         <div class="modal-card">
             <h2 id="reset-title">🔄 Zurücksetzen</h2>
@@ -2054,7 +2091,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "19.0";
+        const APP_VERSION = "19.1";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2312,13 +2349,40 @@
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, w, h);
             // Bereits freigestellte Bilder (transparente PNGs) bleiben transparent
-            if (keepAlpha && canvasHasTransparency(canvas)) return canvas.toDataURL('image/png');
+            if (keepAlpha && canvasHasTransparency(canvas)) return encodeAlphaCanvas(canvas);
             if (type === 'image/jpeg') {
                 ctx.globalCompositeOperation = 'destination-over';
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, w, h);
             }
             return canvas.toDataURL(type, quality);
+        }
+
+        /* Transparente Bilder (freigestellte Spieler): als WebP speichern, wenn das Gerät das kann (meist 5–10× kleiner als PNG) */
+        let webpOk = null;
+        function canEncodeWebp() {
+            if (webpOk === null) {
+                try { const c = document.createElement('canvas'); c.width = c.height = 2; webpOk = c.toDataURL('image/webp', 0.8).startsWith('data:image/webp'); }
+                catch (e) { webpOk = false; }
+            }
+            return webpOk;
+        }
+        const CUT_MAX = { w: 640, h: 800 };
+        function encodeAlphaCanvas(canvas) {
+            let c = canvas;
+            const s = Math.min(1, CUT_MAX.w / c.width, CUT_MAX.h / c.height);
+            if (s < 1) {
+                const t = document.createElement('canvas');
+                t.width = Math.max(1, Math.round(c.width * s)); t.height = Math.max(1, Math.round(c.height * s));
+                const tc = t.getContext('2d');
+                tc.imageSmoothingQuality = 'high';
+                tc.drawImage(c, 0, 0, t.width, t.height);
+                c = t;
+            }
+            const png = c.toDataURL('image/png');
+            if (!canEncodeWebp()) return png;
+            const webp = c.toDataURL('image/webp', 0.9);
+            return webp.length < png.length ? webp : png;
         }
 
         function dataUrlToImage(dataUrl) {
@@ -2451,7 +2515,7 @@
             ctx.drawImage(maskCanvas, 0, 0, W, H);
             ctx.globalCompositeOperation = 'source-in';
             ctx.drawImage(img, 0, 0, W, H);
-            return trimTransparent(canvas).toDataURL('image/png');
+            return encodeAlphaCanvas(trimTransparent(canvas));
         }
 
         /* ---------- Logos: einfarbigen Hintergrund entfernen & zuschneiden ---------- */
@@ -2666,6 +2730,44 @@
             if (isStorageSafe()) return { ok: true, text: '✅ Deine Daten sind dauerhaft gespeichert.' };
             if (isIOS()) return { ok: false, text: '⚠️ Im Safari-Tab kann das iPhone deine Daten nach 7 Tagen ohne Nutzung löschen. Füge die App zum Home-Bildschirm hinzu und mache regelmäßig Backups.' };
             return { ok: false, text: '⚠️ Der Browser hat den dauerhaften Speicher noch nicht bestätigt und darf die Daten bei Platzmangel löschen. Installiere die App und mache regelmäßig Backups.' };
+        }
+
+        /* Vorhandene Fotos nachträglich verkleinern (Größe begrenzen, Freigestellte als WebP) */
+        async function optimizeStorage(btn) {
+            const size = () => JSON.stringify(stammdaten).length;
+            const before = size();
+            if (btn) { btn.disabled = true; btn.textContent = '⏳ Fotos werden optimiert …'; }
+            let changed = 0;
+            const redo = async (obj, key, opts, alpha) => {
+                const v = obj[key];
+                if (!v || typeof v !== 'string' || !v.startsWith('data:image/') || v.startsWith('data:image/svg')) return;
+                try {
+                    const img = await dataUrlToImage(v);
+                    let out;
+                    if (alpha) {
+                        const c = document.createElement('canvas');
+                        c.width = img.naturalWidth; c.height = img.naturalHeight;
+                        c.getContext('2d').drawImage(img, 0, 0);
+                        out = encodeAlphaCanvas(c);
+                    } else out = imageToDataURL(img, opts);
+                    if (out && out.length < v.length * 0.95) { obj[key] = out; changed++; }
+                } catch (e) { console.warn('Optimieren', e); }
+            };
+            for (const p of stammdaten.players) {
+                await redo(p, 'img', IMG_OPTS.photo, false);
+                await redo(p, 'torImg', IMG_OPTS.torPhoto, false);
+                await redo(p, 'cutImg', null, true);
+                await redo(p, 'torCutImg', null, true);
+            }
+            for (const t of stammdaten.templates) await redo(t, 'img', IMG_OPTS[t.format === 'story' ? 'story' : 'feed'], false);
+            await saveStammdaten();
+            renderStammdatenLists();
+            updateAllViews();
+            const mb = n => (n / 1048576).toFixed(1).replace('.', ',');
+            if (btn) { btn.disabled = false; btn.textContent = '🧹 Speicher optimieren (Fotos verkleinern)'; }
+            alert(changed
+                ? `✅ ${changed} Bild(er) verkleinert.\nVorher: ${mb(before)} MB · jetzt: ${mb(size())} MB\n\nBackups werden dadurch ebenfalls kleiner.`
+                : '✅ Alle Fotos sind bereits optimal gespeichert.');
         }
 
         function updateStorageInfo() {
@@ -3333,6 +3435,102 @@
             '3d': '2px 2px 0 var(--jersey-color), 4px 4px 0 rgba(0,0,0,0.65)'
         };
 
+        /* ---------- Design-Stile: fertige Looks und eigene, gespeicherte Stile ---------- */
+        const STYLE_BASE = [['frameShape', 'in-frame-shape'], ['colorFrame', 'in-color-frame'], ['colorText', 'in-color-text'], ['font', 'in-font'],
+            ['titleSize', 'in-size-title'], ['infoSize', 'in-size-info'], ['logoSize', 'in-logo-size']];
+        const STYLE_EXTRA = ['titleFont', 'titleColorMode', 'titleColor', 'textEffect', 'letterSpacing', 'titleUpper', 'titleItalic',
+            'boxMode', 'boxColor', 'boxText', 'boxOpacity', 'logoGap', 'logoDir',
+            'fieldStyle', 'fieldView', 'fieldShape', 'fieldOpacity', 'fieldSize', 'playerStyle', 'playerSize', 'pitchNameMode', 'pitchShadow', 'pitchBigNum',
+            'lmLayout', 'lmLogoSize', 'lmTextSize', 'lmVs'];
+        const F = n => FONT_LIST.find(f => f[0].includes(n))?.[0] || 'Arial, sans-serif';
+        const STYLE_PRESETS = [
+            { id: 'klassisch', name: '🏟️ Klassisch', v: { frameShape: 'circle', colorFrame: '#ffffff', colorText: '#ffffff', font: 'Arial, sans-serif', titleFont: '', titleColorMode: 'text',
+                textEffect: 'soft', letterSpacing: '0', titleUpper: true, titleItalic: false, boxMode: 'auto' } },
+            { id: 'modern', name: '✨ Modern', v: { frameShape: 'rounded', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Montserrat'), titleFont: F('Montserrat'), titleColorMode: 'text',
+                textEffect: 'strong', letterSpacing: '1', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#ffffff', boxText: '@primary', boxOpacity: '92' } },
+            { id: 'kraeftig', name: '💪 Kräftig', v: { frameShape: 'shield', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Oswald'), titleFont: F('Anton'), titleColorMode: 'text',
+                textEffect: '3d', letterSpacing: '1.5', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '@jersey', boxText: '#ffffff', boxOpacity: '95' } },
+            { id: 'retro', name: '📼 Retro', v: { frameShape: 'square', colorFrame: '#f1c40f', colorText: '#ffffff', font: F('Barlow'), titleFont: F('Graduate'), titleColorMode: 'custom', titleColor: '#f1c40f',
+                textEffect: 'outline', letterSpacing: '1', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#111111', boxText: '#f1c40f', boxOpacity: '85' } },
+            { id: 'minimal', name: '◻️ Minimal', v: { frameShape: 'none', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Montserrat'), titleFont: '', titleColorMode: 'text',
+                textEffect: 'none', letterSpacing: '3', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#000000', boxText: '#ffffff', boxOpacity: '0' } },
+            { id: 'neon', name: '⚡ Leuchten', v: { frameShape: 'circle', colorFrame: '@jersey', colorText: '#ffffff', font: F('Kanit'), titleFont: F('Teko'), titleColorMode: 'text',
+                textEffect: 'glow', letterSpacing: '2', titleUpper: true, titleItalic: true, boxMode: 'custom', boxColor: '#000000', boxText: '#ffffff', boxOpacity: '70' } }
+        ];
+        function styleDesignHTML(tab) {
+            return `
+                    <details class="design-details" data-section="styles">
+                        <summary>✨ Design-Stile</summary>
+                        <div class="details-body">
+                            <div class="style-grid">${STYLE_PRESETS.map(p => `<button type="button" class="style-chip" onclick="applyStyle('${tab}', '${p.id}')">${p.name}</button>`).join('')}</div>
+                            <label class="style-scope"><input type="checkbox" id="style-all-${tab}"> Auf alle Reiter anwenden</label>
+                            <div class="design-sub">Meine Stile</div>
+                            <div class="style-list" id="style-list-${tab}"></div>
+                            <button type="button" class="copy-action-btn" onclick="saveCurrentStyle('${tab}')">💾 Aktuelles Design als Stil speichern</button>
+                            <span class="hint">Ein Stil setzt Farben, Schriften, Kästen und Rahmen auf einmal. Eigene Stile enthalten auch Hintergrund und Spielfeld-Look und sind in allen Versionen verfügbar. Mit ↩️ machst du alles rückgängig.</span>
+                        </div>
+                    </details>`;
+        }
+        function collectStyle(tab) {
+            const v = {};
+            STYLE_BASE.forEach(([k, id]) => { const el = $(`${id}-${tab}`); if (el) v[k] = el.value; });
+            const extra = collectExtraDesign(tab);
+            STYLE_EXTRA.forEach(k => { if (extra[k] !== undefined) v[k] = extra[k]; });
+            v.bgFeed = val(`in-bg-${tab}-feed`); v.bgStory = val(`in-bg-${tab}-story`);
+            return v;
+        }
+        function setStyleValues(tab, v) {
+            const resolve = x => x === '@primary' ? (val('cfg-color-primary') || '#005f73') : x === '@jersey' ? (val('cfg-color-jersey') || '#bb3e03') : x;
+            STYLE_BASE.forEach(([k, id]) => { const el = $(`${id}-${tab}`); if (el && v[k] !== undefined) el.value = resolve(v[k]); });
+            EXTRA_DESIGN.forEach(f => {
+                if (!STYLE_EXTRA.includes(f.key) || v[f.key] === undefined) return;
+                const el = $(`${f.id}-${tab}`);
+                if (!el) return;
+                if (f.check) el.checked = !!v[f.key]; else el.value = resolve(v[f.key]);
+            });
+            if (v.bgFeed && $(`in-bg-${tab}-feed`)) setVal(`in-bg-${tab}-feed`, v.bgFeed);
+            if (v.bgStory && $(`in-bg-${tab}-story`)) setVal(`in-bg-${tab}-story`, v.bgStory);
+            updateTabDesign(tab);
+        }
+        function applyStyle(tab, id) {
+            const style = STYLE_PRESETS.find(p => p.id === id)?.v || (stammdaten.designStyles || []).find(x => x.id === id)?.v;
+            if (!style) return;
+            const all = $(`style-all-${tab}`)?.checked;
+            (all ? editorTabs : [tab]).forEach(t => setStyleValues(t, style));
+            updateAllViews();
+            scheduleSave();
+            toast(all ? '✨ Stil auf alle Reiter angewendet – mit ↩️ rückgängig' : '✨ Stil angewendet – mit ↩️ rückgängig');
+        }
+        async function saveCurrentStyle(tab) {
+            const name = normName(prompt('Name für deinen Stil (z.B. „Heimspiel blau“):', '') || '');
+            if (!name) return;
+            stammdaten.designStyles = stammdaten.designStyles || [];
+            const ex = stammdaten.designStyles.find(x => x.name.toLowerCase() === name.toLowerCase());
+            if (ex && !confirm(`„${name}“ gibt es schon. Überschreiben?`)) return;
+            const entry = { id: ex?.id || 'st_' + Date.now().toString(36), name, v: collectStyle(tab) };
+            if (ex) Object.assign(ex, entry); else stammdaten.designStyles.push(entry);
+            await saveStammdaten();
+            renderStyleList();
+            toast(`💾 Stil „${name}“ gespeichert`);
+        }
+        async function deleteStyle(id) {
+            const st = (stammdaten.designStyles || []).find(x => x.id === id);
+            if (!st || !confirm(`Stil „${st.name}“ löschen?`)) return;
+            stammdaten.designStyles = stammdaten.designStyles.filter(x => x.id !== id);
+            await saveStammdaten();
+            renderStyleList();
+        }
+        function renderStyleList() {
+            const list = stammdaten.designStyles || [];
+            editorTabs.forEach(tab => {
+                const host = $(`style-list-${tab}`);
+                if (!host) return;
+                host.innerHTML = list.length
+                    ? list.map(st => `<div class="style-row"><button type="button" class="style-chip own" onclick="applyStyle('${tab}', '${st.id}')">🎨 ${esc(st.name)}</button><button type="button" class="style-del" title="Löschen" onclick="deleteStyle('${st.id}')">🗑️</button></div>`).join('')
+                    : '<span class="hint">Noch keine eigenen Stile gespeichert.</span>';
+            });
+        }
+
         /* Aufstellung: Spielfeld zeichnen, Spielergröße, Profi-Look */
         function pitchDesignHTML(tab) {
             const on = `onchange="buildFormation(); scheduleSave();"`, live = `oninput="buildFormation();"`;
@@ -3394,7 +3592,7 @@
             Object.entries(TAB_DESIGN).forEach(([tab, cfg]) => {
                 const host = $(`design-controls-${tab}`);
                 if (!host) return;
-                host.innerHTML = (cfg.pitch ? pitchDesignHTML(tab) : '') + `
+                host.innerHTML = styleDesignHTML(tab) + (cfg.pitch ? pitchDesignHTML(tab) : '') + `
                     <details class="design-details" data-section="colors">
                         <summary>🎨 Farben & Schrift</summary>
                         <div class="details-body">
@@ -5821,6 +6019,7 @@
            ANSICHTEN / TABS
            ========================================================= */
         function renderAll() {
+            renderStyleList();
             applyFeedFormatClasses();
             applyLabels();
             updateNumberInputs();
@@ -6271,11 +6470,13 @@
             await exportConfigJSON();
         }
 
+        /* ---------- Backup importieren: Auswahl, was übernommen wird (zusammenführen oder ersetzen) ---------- */
+        let pendingImport = null;
+        const deepCopy = o => JSON.parse(JSON.stringify(o ?? null));
         async function importConfigJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
             event.target.value = '';
-            if (!confirm('Beim Import werden die aktuellen Spieler, Gegner, Sponsoren, Hintergründe und alle 3 Versionen auf diesem Gerät ersetzt. Fortfahren?')) return;
             try {
                 const data = JSON.parse(await file.text());
                 let sd, slots = {};
@@ -6294,35 +6495,105 @@
                         slots[currentVersion] = stripLegacySlot(data);
                     }
                 }
-
-                templateUrlCache.forEach(url => URL.revokeObjectURL(url));
-                templateUrlCache.clear();
-                stammdaten = sd;
+                pendingImport = { sd, slots, data };
+                openImportDialog();
+            } catch (err) {
+                alert("Fehler beim Import: " + err.message);
+            }
+        }
+        function openImportDialog() {
+            const { sd, slots, data } = pendingImport;
+            const pl = sd.players || [];
+            const cut = pl.filter(p => p.cutImg || p.torCutImg).length;
+            const row = (key, label, n, checked = true) => n ? `<label><input type="checkbox" data-imp="${key}" ${checked ? 'checked' : ''}> ${label}</label>` : '';
+            const vRows = ['v1', 'v2', 'v3'].filter(v => slots[v]).map(v => {
+                const name = data.versionNames?.[v] || ('Version ' + v.slice(1));
+                const pos = Object.keys(slots[v].positions || {}).length;
+                return row('slot_' + v, `📋 ${esc(name)} <small>(Inhalte, Design${pos ? ', ' + pos + ' Positionen' : ''})</small>`, 1, false);
+            }).join('');
+            $('import-list').innerHTML = `
+                <div class="pack-group"><b>Vereinsdaten</b>
+                    ${row('players', `👥 Spieler & Trainer: ${pl.length}${cut ? ` <small>(${cut} freigestellt)</small>` : ''}`, pl.length)}
+                    ${row('opponents', `🛡️ Gegner: ${(sd.opponents || []).length}`, (sd.opponents || []).length)}
+                    ${row('sponsors', `🤝 Sponsoren: ${(sd.sponsors || []).length}`, (sd.sponsors || []).length)}
+                    ${row('templates', `🖼️ Hintergründe: ${(sd.templates || []).length}`, (sd.templates || []).length)}
+                    ${row('styles', `✨ Gespeicherte Design-Stile: ${(sd.designStyles || []).length}`, (sd.designStyles || []).length)}
+                    ${row('lists', '🏷️ Mannschaften & Positionen (Auswahllisten)', 1)}
+                </div>
+                ${vRows ? `<div class="pack-group"><b>Grafiken (ersetzt die jeweilige Version)</b>${vRows}</div>` : ''}`;
+            const when = data.exportedAt ? new Date(data.exportedAt).toLocaleDateString('de-DE') : '';
+            setText('import-info', `Backup${data.appVersion ? ' aus Version ' + data.appVersion : ''}${when ? ' vom ' + when : ''}. Wähle aus, was übernommen werden soll.`);
+            document.querySelector('input[name="imp-mode"][value="merge"]').checked = true;
+            $('import-overlay').hidden = false;
+        }
+        function closeImportDialog() { $('import-overlay').hidden = true; pendingImport = null; }
+        function mergeEntries(target, incoming, keyFn, replace) {
+            const res = { added: 0, updated: 0 };
+            if (replace) { target.splice(0, target.length, ...deepCopy(incoming)); res.added = incoming.length; return res; }
+            incoming.forEach(it => {
+                const k = keyFn(it);
+                const ex = target.find(t => keyFn(t) === k);
+                if (!ex) { target.push(deepCopy(it)); res.added++; }
+                else { Object.assign(ex, deepCopy(it)); res.updated++; }
+            });
+            return res;
+        }
+        async function runImport() {
+            if (!pendingImport) return;
+            const { sd, slots, data } = pendingImport;
+            const pick = new Set(Array.from($('import-list').querySelectorAll('input:checked')).map(cb => cb.dataset.imp));
+            if (!pick.size) { alert('Bitte mindestens einen Punkt auswählen.'); return; }
+            const replace = document.querySelector('input[name="imp-mode"]:checked')?.value === 'replace';
+            if (replace && !confirm('„Ersetzen“ löscht die ausgewählten Bereiche auf diesem Gerät und übernimmt sie aus dem Backup. Fortfahren?')) return;
+            const lines = [];
+            try {
+                const nameKey = x => normName(x.name || '').toLowerCase();
+                const doList = (key, field, label, keyFn = nameKey) => {
+                    if (!pick.has(key)) return;
+                    stammdaten[field] = stammdaten[field] || [];
+                    const r = mergeEntries(stammdaten[field], sd[field] || [], keyFn, replace);
+                    lines.push(`${label}: ${replace ? r.added + ' übernommen' : r.added + ' neu, ' + r.updated + ' aktualisiert'}`);
+                };
+                doList('players', 'players', '👥 Spieler & Trainer');
+                doList('opponents', 'opponents', '🛡️ Gegner');
+                doList('sponsors', 'sponsors', '🤝 Sponsoren');
+                doList('templates', 'templates', '🖼️ Hintergründe', t => t.id || nameKey(t));
+                doList('styles', 'designStyles', '✨ Design-Stile');
+                if (pick.has('lists')) {
+                    ['teams', 'positions'].forEach(f => {
+                        const inc = sd[f] || [];
+                        stammdaten[f] = replace ? [...inc] : [...new Set([...(stammdaten[f] || []), ...inc])];
+                    });
+                    if (sd.consentCheck) stammdaten.consentCheck = true;
+                    lines.push('🏷️ Mannschaften & Positionen übernommen');
+                }
+                if (pick.has('templates')) { templateUrlCache.forEach(url => URL.revokeObjectURL(url)); templateUrlCache.clear(); }
                 sortStammdaten();
                 await saveStammdaten();
+                let importedActive = false;
                 for (const v of ['v1', 'v2', 'v3']) {
-                    if (slots[v]) await localforage.setItem(STORE.slot(v), slots[v]);
-                    else await localforage.removeItem(STORE.slot(v));
+                    if (!pick.has('slot_' + v) || !slots[v]) continue;
+                    await localforage.setItem(STORE.slot(v), slots[v]);
+                    if (data.versionNames?.[v]) prefs.versionNames = { ...prefs.versionNames, [v]: data.versionNames[v] };
+                    if (v === currentVersion) importedActive = true;
+                    lines.push(`📋 ${data.versionNames?.[v] || 'Version ' + v.slice(1)} übernommen (inkl. Positionen)`);
                 }
-                if (data.versionNames && typeof data.versionNames === 'object') {
-                    prefs.versionNames = data.versionNames;
-                    await savePrefs();
-                    applyVersionNames();
-                }
-                if (['v1', 'v2', 'v3'].includes(data.activeVersionSlot)) currentVersion = data.activeVersionSlot;
-                await localforage.setItem(STORE.version, currentVersion);
-                document.querySelectorAll('.team-tab-btn').forEach(b => b.classList.remove('active'));
-                $(`btn-${currentVersion}`)?.classList.add('active');
+                await savePrefs();
+                applyVersionNames();
+                const cutNow = stammdaten.players.filter(p => p.cutImg || p.torCutImg).length;
+                if (pick.has('players')) lines.push(`✂️ Freigestellte Fotos jetzt vorhanden: ${cutNow}`);
 
+                $('import-overlay').hidden = true;
+                pendingImport = null;
                 refreshPlayerOptions();
                 refreshOpponentDropdown();
                 refreshSponsorChecklists();
                 renderStammdatenLists();
                 editorTabs.forEach(renderBgThumbs);
-                applySlotData(await localforage.getItem(STORE.slot(currentVersion)));
+                if (importedActive) { applySlotData(await localforage.getItem(STORE.slot(currentVersion))); resetEckHistory(); }
                 renderAll();
-                resetEckHistory();
-                alert("Backup erfolgreich importiert!");
+                if (typeof renderStyleList === 'function') renderStyleList();
+                alert('✅ Import abgeschlossen\n\n' + lines.join('\n'));
             } catch (err) {
                 alert("Fehler beim Import: " + err.message);
             }
@@ -6808,6 +7079,18 @@
         }
 
         async function renderElementToCanvas(element) {
+            const { holder, clone } = await prepareExportClone(element);
+            try {
+                const canvas = await html2canvas(clone, { scale: EXPORT_SCALE, useCORS: true, logging: false, backgroundColor: null });
+                if (club && club.demo) drawDemoWatermark(canvas);
+                return canvas;
+            } finally {
+                holder.remove();
+            }
+        }
+
+        /* Unskalierte Kopie außerhalb des sichtbaren Bereichs vorbereiten (Bilder in Export-Auflösung) */
+        async function prepareExportClone(element) {
             if (document.fonts?.ready) await document.fonts.ready;
             const view = element.closest('.template-container');
             // Unskalierte Kopie außerhalb des sichtbaren Bereichs rendern (Handy-Vorschau ist verkleinert)
@@ -6827,12 +7110,206 @@
                 replaceObjectFitImages(clone);
                 await replaceBackgroundImages(clone);
                 await waitForImages(clone);
-                const canvas = await html2canvas(clone, { scale: EXPORT_SCALE, useCORS: true, logging: false, backgroundColor: null });
-                if (club && club.demo) drawDemoWatermark(canvas);
-                return canvas;
+            } catch (e) { holder.remove(); throw e; }
+            return { holder, clone };
+        }
+
+        /* =========================================================
+           VIDEO (Reel / Story): Elemente erscheinen nacheinander, Aufnahme direkt im Browser
+           ========================================================= */
+        const VIDEO_SCALE = 2.7;   // 400 px Vorlage → 1080 px Video
+        function videoSupported() {
+            return typeof MediaRecorder !== 'undefined' && !!HTMLCanvasElement.prototype.captureStream;
+        }
+        function pickVideoType() {
+            const types = ['video/mp4;codecs=avc1.42E01E', 'video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+            return types.find(t => { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } }) || '';
+        }
+        /* Animations-Einheiten: oberste verschiebbare Elemente; das Spielfeld wird in seine Reihen zerlegt */
+        function findAnimUnits(tpl) {
+            const all = Array.from(tpl.querySelectorAll(DRAG_SEL)).filter(el => el.closest('.post-template, .story-template') === tpl);
+            const top = all.filter(el => !all.some(o => o !== el && o.contains(el)));
+            const visible = el => { for (let n = el; n && n !== tpl; n = n.parentElement) { const cs = getComputedStyle(n); if (cs.display === 'none' || cs.visibility === 'hidden' || n.classList.contains('logo-hidden')) return false; } return el.offsetWidth > 0 || el.offsetHeight > 0; };
+            const tr = tpl.getBoundingClientRect();
+            const units = [];
+            top.filter(visible).forEach(el => {
+                if (el.classList.contains('pitch')) {
+                    // Reihen von hinten (Torwart) nach vorne
+                    Array.from(el.querySelectorAll(':scope > .row')).forEach((r, i) => units.push({ el: r, order: el.getBoundingClientRect().top - tr.top + 0.01 * i, row: true }));
+                } else units.push({ el, order: el.getBoundingClientRect().top - tr.top });
+            });
+            return units.sort((a, b) => a.order - b.order);
+        }
+        async function renderVideoLayers(element, onProgress) {
+            const { holder, clone } = await prepareExportClone(element);
+            try {
+                const units = findAnimUnits(clone);
+                units.forEach((u, i) => u.el.setAttribute('data-au', i));
+                const cr = clone.getBoundingClientRect();
+                const rects = units.map(u => { const r = u.el.getBoundingClientRect(); return { x: r.left - cr.left, y: r.top - cr.top, w: r.width, h: r.height }; });
+                const pass = async prep => {
+                    const c = clone.cloneNode(true);
+                    holder.appendChild(c);
+                    clone.style.display = 'none';
+                    try {
+                        prep(c);
+                        return await html2canvas(c, { scale: VIDEO_SCALE, useCORS: true, logging: false, backgroundColor: null });
+                    } finally { c.remove(); clone.style.display = ''; }
+                };
+                const total = units.length + 1;
+                onProgress?.(1, total);
+                // Grundbild: alles außer den Einheiten
+                const base = await pass(c => c.querySelectorAll('[data-au]').forEach(n => { n.style.visibility = 'hidden'; }));
+                const layers = [];
+                for (let i = 0; i < units.length; i++) {
+                    onProgress?.(i + 2, total);
+                    const full = await pass(c => {
+                        const unit = c.querySelector(`[data-au="${i}"]`);
+                        c.querySelectorAll('*').forEach(n => {
+                            if (n === unit || unit.contains(n)) return;
+                            if (n.contains(unit)) { n.style.background = 'transparent'; n.style.boxShadow = 'none'; return; }
+                            n.style.visibility = 'hidden';
+                        });
+                        c.style.background = 'transparent';
+                        c.style.boxShadow = 'none';
+                    });
+                    // Auf das Element zuschneiden (spart Speicher)
+                    const pad = 18, r = rects[i];
+                    const sx = Math.max(0, Math.floor((r.x - pad) * VIDEO_SCALE)), sy = Math.max(0, Math.floor((r.y - pad) * VIDEO_SCALE));
+                    const sw = Math.min(full.width - sx, Math.ceil((r.w + 2 * pad) * VIDEO_SCALE)), sh = Math.min(full.height - sy, Math.ceil((r.h + 2 * pad) * VIDEO_SCALE));
+                    const crop = document.createElement('canvas');
+                    crop.width = Math.max(1, sw); crop.height = Math.max(1, sh);
+                    crop.getContext('2d').drawImage(full, sx, sy, crop.width, crop.height, 0, 0, crop.width, crop.height);
+                    full.width = full.height = 0;
+                    layers.push({ canvas: crop, x: sx, y: sy, row: !!units[i].row });
+                }
+                return { base, layers };
             } finally {
                 holder.remove();
             }
+        }
+        const easeOutBack = t => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+        const easeOut = t => 1 - Math.pow(1 - t, 3);
+        async function recordVideo(base, layers, onStatus) {
+            // Videos brauchen gerade Maße (z.B. 1080×1920)
+            const W = base.width, H = base.height;
+            const cv = document.createElement('canvas');
+            cv.width = Math.round(W / 2) * 2; cv.height = Math.round(H / 2) * 2;
+            const gx = cv.width / W, gy = cv.height / H;
+            const ctx = cv.getContext('2d');
+            const setT = (a, d, e, f) => ctx.setTransform(a * gx, 0, 0, d * gy, e * gx, f * gy);
+            let wm = null;
+            if (club && club.demo) { wm = document.createElement('canvas'); wm.width = cv.width; wm.height = cv.height; drawDemoWatermark(wm); }
+            const n = layers.length;
+            const stagger = n ? Math.min(0.42, 3.6 / n) : 0, dur = 0.6, start = 0.45;
+            const appearEnd = start + Math.max(0, n - 1) * stagger + dur;
+            const total = Math.min(14, Math.max(5, appearEnd + 2.8));
+            const draw = t => {
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, cv.width, cv.height);
+                // leichter Zoom-Effekt auf dem Hintergrund
+                const z = 1.04 - 0.04 * easeOut(Math.min(1, t / total));
+                ctx.globalAlpha = Math.min(1, t / 0.35);
+                setT(z, z, W * (1 - z) / 2, H * (1 - z) / 2);
+                ctx.drawImage(base, 0, 0);
+                layers.forEach((L, i) => {
+                    const p = (t - start - i * stagger) / dur;
+                    if (p <= 0) return;
+                    const q = Math.min(1, p);
+                    const sc = L.row ? 0.7 + 0.3 * easeOutBack(q) : 0.85 + 0.15 * easeOutBack(q);
+                    const dy = (1 - easeOut(q)) * (L.row ? 40 : 28) * VIDEO_SCALE / 2.7;
+                    const cx = L.x + L.canvas.width / 2, cy = L.y + L.canvas.height / 2;
+                    ctx.globalAlpha = Math.min(1, q * 1.6);
+                    setT(z * sc, z * sc, W * (1 - z) / 2 + z * (cx - cx * sc), H * (1 - z) / 2 + z * (cy - cy * sc + dy));
+                    ctx.drawImage(L.canvas, L.x, L.y);
+                });
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.globalAlpha = 1;
+                if (wm) ctx.drawImage(wm, 0, 0);
+            };
+            draw(0);
+            const type = pickVideoType();
+            const stream = cv.captureStream(30);
+            const rec = new MediaRecorder(stream, type ? { mimeType: type, videoBitsPerSecond: 8000000 } : { videoBitsPerSecond: 8000000 });
+            const chunks = [];
+            rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+            const stopped = new Promise(res => { rec.onstop = res; });
+            rec.start(250);
+            const t0 = performance.now();
+            await new Promise(resolve => {
+                const tick = () => {
+                    const t = (performance.now() - t0) / 1000;
+                    draw(Math.min(t, total));
+                    onStatus?.(Math.min(100, Math.round(t / total * 100)));
+                    if (t >= total) resolve(); else requestAnimationFrame(tick);
+                };
+                requestAnimationFrame(tick);
+            });
+            rec.stop();
+            await stopped;
+            stream.getTracks().forEach(tr => tr.stop());
+            const mime = (rec.mimeType || type || 'video/webm').split(';')[0];
+            return new Blob(chunks, { type: mime });
+        }
+        async function shareVideo(elementId, baseName, btn) {
+            const element = $(elementId);
+            if (!element) return;
+            if (!isAdvanced()) { toast('🎬 Videos sind im Advanced-Paket enthalten.'); return; }
+            if (!videoSupported()) { alert('Dieser Browser kann leider keine Videos aufnehmen. Bitte Safari (iPhone) oder Chrome (Android) in aktueller Version verwenden.'); return; }
+            const tabOfEl = (element.closest('.template-container')?.id || '').replace(/^view-/, '');
+            if (tabOfEl && !confirmConsent([tabOfEl])) return;
+            const orig = btn ? btn.innerText : '';
+            const setBtn = t => { if (btn) btn.innerText = t; };
+            if (btn) btn.disabled = true;
+            try {
+                selectElement(null);
+                const { base, layers } = await renderVideoLayers(element, (i, n) => setBtn(`⏳ Video wird vorbereitet (${i}/${n})`));
+                const blob = await recordVideo(base, layers, pct => setBtn(`🎬 Aufnahme … ${pct} %`));
+                if (!blob.size) throw new Error('Das Video ist leer.');
+                const ext = blob.type.includes('mp4') ? 'mp4' : 'webm';
+                const file = new File([blob], `${baseName}.${ext}`, { type: blob.type });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try { await navigator.share({ files: [file], title: 'Video' }); return; }
+                    catch (err) { if (err.name === 'AbortError') return; }
+                }
+                showVideoPreview(blob, file.name);
+            } catch (err) {
+                alert('Video konnte nicht erstellt werden: ' + err.message);
+            } finally {
+                if (btn) { btn.innerText = orig; btn.disabled = false; }
+            }
+        }
+        function showVideoPreview(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            $('video-preview').src = url;
+            const a = $('video-download');
+            a.href = url;
+            a.download = filename;
+            setText('video-info', blob.type.includes('mp4') ? 'MP4-Video – kann direkt bei Instagram hochgeladen werden.' : 'WebM-Video – falls Instagram es nicht annimmt, bitte am iPhone (Safari) erstellen.');
+            $('video-overlay').hidden = false;
+        }
+        function closeVideoPreview() {
+            const v = $('video-preview');
+            const src = v.src;
+            v.pause(); v.removeAttribute('src'); v.load();
+            if (src) setTimeout(() => URL.revokeObjectURL(src), 1000);
+            $('video-overlay').hidden = true;
+        }
+        /* Neben jedem „In Fotos / Teilen“ einen Video-Knopf anlegen */
+        function addVideoButtons() {
+            document.querySelectorAll('.btn-action-group .download-btn[onclick^="shareImage"]').forEach(b => {
+                const m = /shareImage\('([^']+)',\s*'([^']+)'/.exec(b.getAttribute('onclick'));
+                const tpl = m && $(m[1]);
+                if (!tpl || !tpl.matches('.post-template, .story-template') || b.parentElement.querySelector('.video-btn')) return;
+                const vb = document.createElement('button');
+                vb.type = 'button';
+                vb.className = 'download-btn video-btn adv-only';
+                vb.textContent = '🎬 Als Video (Reel)';
+                vb.addEventListener('click', () => shareVideo(m[1], m[2].replace(/\.png$/i, ''), vb));
+                b.after(vb);
+            });
         }
 
         async function shareImage(elementId, filename, btn) {
@@ -7266,7 +7743,7 @@
            ========================================================= */
         const UI_FIXED_TABS = ['start', 'stammdaten'];
         const UI_SECTIONS = [
-            ['pitch', '⚽ Spielfeld & Spieler-Look'], ['colors', '🎨 Farben & Schrift'], ['design', '🖼️ Hintergrund & Formen'], ['photos', '👥 Spielerfotos & Zusatzspieler'],
+            ['styles', '✨ Design-Stile'], ['pitch', '⚽ Spielfeld & Spieler-Look'], ['colors', '🎨 Farben & Schrift'], ['design', '🖼️ Hintergrund & Formen'], ['photos', '👥 Spielerfotos & Zusatzspieler'],
             ['logo', '🏷️ Vereinslogo oben rechts'], ['sponsors', '🤝 Sponsoren'], ['ctexts', '✍️ Eigene Texte'], ['labels', '🔤 Feste Texte ändern'],
             ['caption', '💬 Text für den Beitrag'], ['tabcopy', '📋 Aus anderer Version übernehmen'], ['pack', '📦 Mehrere Grafiken teilen']
         ];
@@ -7415,7 +7892,7 @@
            ========================================================= */
         const HELP_VIDEOS = {};
         const HELP_TEXTS = {
-            start: 'Oben tippst du an, welche Grafik du erstellen möchtest. Darunter legst du Vereinsname, Farben und das Format der Beiträge fest. Unter „Ansicht anpassen“ blendest du Reiter und Bereiche aus, die du nicht brauchst. Denk an regelmäßige Backups!',
+            start: 'Oben tippst du an, welche Grafik du erstellen möchtest. Unter jeder Vorschau gibt es neben „In Fotos / Teilen“ auch „🎬 Als Video (Reel)“ – die Elemente erscheinen dann nacheinander. Darunter legst du Vereinsname, Farben und das Format der Beiträge fest. Unter „Ansicht anpassen“ blendest du Reiter und Bereiche aus, die du nicht brauchst. Denk an regelmäßige Backups!',
             stammdaten: 'Lege hier einmalig Spieler (mit Foto und Torjubel-Foto), Gegner, Sponsoren und eigene Hintergründe an. Alles steht danach in allen Reitern zur Auswahl. Mehrere Fotos auf einmal: Dateiname = Spielername.',
             post: 'Gegner, Heim/Auswärts, Datum und Uhrzeit eintragen – oder mit „Nächsten Termin aus Kalender übernehmen“ automatisch füllen. Texte und Logos in der Vorschau antippen, verschieben und größer/kleiner ziehen – mit 🔗 in der Leiste oben bewegt sich das Gegenstück in der Story mit. Design, Wappen-Anordnung und Sponsoren findest du unten unter „Aussehen anpassen“, verlorene Elemente über „Zurücksetzen“.',
             story: 'Formation wählen, Startelf und Kapitän eintragen. Mit „Gegner & Datum anzeigen“ erscheint die Paarung wie bei Profi-Grafiken (Gegner und Datum aus dem Reiter „Ankündigung“). Spieler in der Vorschau antippen und frei verschieben oder größer ziehen (🏷️ blendet den Namen aus). Unter „Spielfeld & Spieler-Look“ zeichnest du ein Fußballfeld (auch schräg wie im TV) und wählst den Profi-Look mit freigestellten Spielern. „Aufstellung leeren“ setzt alles zurück.',
@@ -7906,6 +8383,7 @@
                 renderStammdatenLists();
                 editorTabs.forEach(renderBgThumbs);
                 prepareTemplates();
+                addVideoButtons();
                 assignDraggableIds();
                 makeTextsDraggable();
                 addSafeZoneOverlays();
