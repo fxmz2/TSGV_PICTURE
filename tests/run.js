@@ -262,6 +262,9 @@ async function makePhotos(browser) {
         check('Profi-Look mit gezeichnetem Spielfeld', await page.evaluate(() => $('pitch').classList.contains('pc-pro') && !!document.querySelector('#pitch .field-img') && $('pitch-bench').style.display === 'flex'));
         check('Export Aufstellung mit Spielfeld', (await exportSize(page, 'capture-story')) === '1200x2133');
 
+        // Spielervorstellung: Position & Mannschaft optional
+        await page.evaluate(() => { switchTab('neuzugang'); const pl = stammdaten.players.find(x => x.position && x.team); setVal('in-new-player', pl.name); setVal('in-new-mode', 'vorstellung'); $('in-new-show-position').checked = false; $('in-new-show-team').checked = false; updateNeuzugang(); });
+        check('Spielervorstellung ohne Position & Mannschaft', await page.$eval('#out-new-chips', e => e.style.display === 'none'));
         // Design-Stile
         await page.evaluate(() => { switchTab('post'); applyStyle('post', 'retro'); });
         check('Design-Stil „Retro“ wirkt', await page.evaluate(() => val('in-frame-shape-post') === 'square' && val('in-box-mode-post') === 'custom'));
