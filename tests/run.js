@@ -270,6 +270,8 @@ async function makePhotos(browser) {
         // Kästen abschaltbar
         await page.evaluate(() => { setVal('in-box-mode-neuzugang', 'none'); updateTabDesign('neuzugang'); });
         check('Ohne Kästen hinter der Schrift', await page.$eval('#out-new-name', e => getComputedStyle(e).backgroundColor === 'rgba(0, 0, 0, 0)'));
+        await page.evaluate(() => { $('in-accent-line-neuzugang').checked = false; updateTabDesign('neuzugang'); });
+        check('Akzent-Linie unter dem Namen abschaltbar', await page.$eval('#out-new-name', e => getComputedStyle(e).borderBottomStyle === 'none'));
         // Für mehrere Spieler auf einmal (Bilder)
         await page.evaluate(() => { openBulkDialog(); [...document.querySelectorAll('#bulk-list input[data-bulk-player]')].forEach((cb, i) => cb.checked = i < 2);
             document.querySelector('[data-bulk-fmt="feed"]').checked = false; });
