@@ -39,7 +39,7 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Design-Stile | `STYLE_PRESETS`, `STYLE_BASE`/`STYLE_EXTRA`, eigene Stile in `stammdaten.designStyles` (`saveCurrentStyle()`, `applyStyle()`) |
 | Video (Reel) | `renderVideoLayers()` (Grundbild + je Element eine Ebene über html2canvas), `recordVideo()` (Canvas + MediaRecorder, MP4 bevorzugt), `addVideoButtons()`; CSP erlaubt dafür `media-src blob:` |
 | Import | `importConfigJSON()` → Auswahl-Dialog, `runImport()` (zusammenführen per Name oder ersetzen; Versionen werden ersetzt) |
-| Speicher | Freigestellte Bilder als WebP (`encodeAlphaCanvas()`, falls das Gerät es kann, sonst PNG max. 640×800), `optimizeStorage()` |
+| Speicher | Freigestellte Bilder als WebP 95 % (`encodeAlphaCanvas()`, falls das Gerät es kann, sonst PNG; max. 900×1100 wie die Originale), `optimizeStorage()` |
 | Zurücksetzen | Dialog `resetTabDefaults()` (einzelne Elemente + Bereiche), komplett `resetTabAll()` |
 | Feste Beschriftungen | `LABEL_DEFS`, `L(tab, key)`, `applyLabels()` |
 | Export | `renderElementToCanvas()` – Kopie außerhalb des Bildschirms, Bilder werden vorab in Export-Auflösung gerastert (`rasterizeFitImage`, `replaceBackgroundImages`), dann html2canvas mit Faktor 3 |

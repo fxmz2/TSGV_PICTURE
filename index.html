@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 19.1</title>
+    <title>ClubShot – Grafiken für Vereine 19.2</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2091,7 +2091,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "19.1";
+        const APP_VERSION = "19.2";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2367,7 +2367,7 @@
             }
             return webpOk;
         }
-        const CUT_MAX = { w: 640, h: 800 };
+        const CUT_MAX = { w: 900, h: 1100 };   // gleiche Auflösung wie die Original-Fotos – keine Qualitätseinbuße
         function encodeAlphaCanvas(canvas) {
             let c = canvas;
             const s = Math.min(1, CUT_MAX.w / c.width, CUT_MAX.h / c.height);
@@ -2381,7 +2381,7 @@
             }
             const png = c.toDataURL('image/png');
             if (!canEncodeWebp()) return png;
-            const webp = c.toDataURL('image/webp', 0.9);
+            const webp = c.toDataURL('image/webp', 0.95);
             return webp.length < png.length ? webp : png;
         }
 
@@ -2743,6 +2743,8 @@
                 if (!v || typeof v !== 'string' || !v.startsWith('data:image/') || v.startsWith('data:image/svg')) return;
                 try {
                     const img = await dataUrlToImage(v);
+                    // Normale Fotos nur verkleinern, wenn sie größer als nötig gespeichert sind (sonst unverändert lassen)
+                    if (!alpha && opts && img.naturalWidth <= opts.maxW && img.naturalHeight <= opts.maxH && !v.startsWith('data:image/png')) return;
                     let out;
                     if (alpha) {
                         const c = document.createElement('canvas');
@@ -2766,7 +2768,7 @@
             const mb = n => (n / 1048576).toFixed(1).replace('.', ',');
             if (btn) { btn.disabled = false; btn.textContent = '🧹 Speicher optimieren (Fotos verkleinern)'; }
             alert(changed
-                ? `✅ ${changed} Bild(er) verkleinert.\nVorher: ${mb(before)} MB · jetzt: ${mb(size())} MB\n\nBackups werden dadurch ebenfalls kleiner.`
+                ? `✅ ${changed} Bild(er) platzsparender gespeichert (gleiche Auflösung).\nVorher: ${mb(before)} MB · jetzt: ${mb(size())} MB\n\nBackups werden dadurch ebenfalls kleiner.`
                 : '✅ Alle Fotos sind bereits optimal gespeichert.');
         }
 
