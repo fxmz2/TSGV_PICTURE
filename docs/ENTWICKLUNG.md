@@ -36,6 +36,10 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Sponsorenlogos einzeln | Option `sponsorFree` (EXTRA_DESIGN), Logo-IDs `spl-<Vorlage>-<Sponsor>`, Positionen über `pendingPositions` |
 | Wappen-Anordnung | `logoDir` (row/column), `logoGap` (EXTRA_DESIGN) → CSS `--logos-gap`, Klasse `logos-stacked` |
 | Aufstellung | `buildFormation()`: Spieler als `.player-card.movable` (IDs `pc-<Feld>-<Formation>-<Nr>`, Positionen je Formation über `pendingPositions`), Kapitän `in-captain`, ausgeblendete Namen `pitchHideNames`, Spielfeld als SVG-Bild `fieldSvgUri()` (halb/ganz, von oben/schräg, Linien/dunkel/Rasen), Gegner-Kopf `lineup-match`, Namensformat `pitchNameMode`, Profi-Look `pc-pro` |
+| Design-Stile | `STYLE_PRESETS`, `STYLE_BASE`/`STYLE_EXTRA`, eigene Stile in `stammdaten.designStyles` (`saveCurrentStyle()`, `applyStyle()`) |
+| Video (Reel) | `renderVideoLayers()` (Grundbild + je Element eine Ebene über html2canvas), `recordVideo()` (Canvas + MediaRecorder, MP4 bevorzugt), `addVideoButtons()`; CSP erlaubt dafür `media-src blob:` |
+| Import | `importConfigJSON()` → Auswahl-Dialog, `runImport()` (zusammenführen per Name oder ersetzen; Versionen werden ersetzt) |
+| Speicher | Freigestellte Bilder als WebP (`encodeAlphaCanvas()`, falls das Gerät es kann, sonst PNG max. 640×800), `optimizeStorage()` |
 | Zurücksetzen | Dialog `resetTabDefaults()` (einzelne Elemente + Bereiche), komplett `resetTabAll()` |
 | Feste Beschriftungen | `LABEL_DEFS`, `L(tab, key)`, `applyLabels()` |
 | Export | `renderElementToCanvas()` – Kopie außerhalb des Bildschirms, Bilder werden vorab in Export-Auflösung gerastert (`rasterizeFitImage`, `replaceBackgroundImages`), dann html2canvas mit Faktor 3 |
