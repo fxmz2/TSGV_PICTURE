@@ -272,6 +272,12 @@ async function makePhotos(browser) {
         check('Ohne Kästen hinter der Schrift', await page.$eval('#out-new-name', e => getComputedStyle(e).backgroundColor === 'rgba(0, 0, 0, 0)'));
         await page.evaluate(() => { $('in-accent-line-neuzugang').checked = false; updateTabDesign('neuzugang'); });
         check('Akzent-Linie unter dem Namen abschaltbar', await page.$eval('#out-new-name', e => getComputedStyle(e).borderBottomStyle === 'none'));
+        // Textausrichtung: Reiter + einzelner Text
+        await page.evaluate(() => { setVal('in-text-align-neuzugang', 'left'); updateTabDesign('neuzugang'); });
+        check('Texte linksbündig (Reiter)', await page.$eval('#out-new-title', e => getComputedStyle(e).textAlign === 'left'));
+        await page.evaluate(() => { const t = $('out-new-text').closest('.draggable-text'); selectElement(t); cycleAlignSelected(); cycleAlignSelected(); selectElement(null); });
+        check('Einzelner Text rechtsbündig', await page.$eval('#out-new-text', e => getComputedStyle(e).textAlign === 'right'));
+        await page.evaluate(() => { setVal('in-text-align-neuzugang', 'center'); updateTabDesign('neuzugang'); });
         // Für mehrere Spieler auf einmal (Bilder)
         await page.evaluate(() => { openBulkDialog(); [...document.querySelectorAll('#bulk-list input[data-bulk-player]')].forEach((cb, i) => cb.checked = i < 2);
             document.querySelector('[data-bulk-fmt="feed"]').checked = false; });

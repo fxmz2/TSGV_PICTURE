@@ -38,6 +38,7 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Aufstellung | `buildFormation()`: Spieler als `.player-card.movable` (IDs `pc-<Feld>-<Formation>-<Nr>`, Positionen je Formation über `pendingPositions`), Kapitän `in-captain`, ausgeblendete Namen `pitchHideNames`, Spielfeld als SVG-Bild `fieldSvgUri()` (halb/ganz, von oben/schräg, Linien/dunkel/Rasen), Gegner-Kopf `lineup-match`, Namensformat `pitchNameMode`, Profi-Look `pc-pro` |
 | Design-Stile | `STYLE_PRESETS`, `STYLE_BASE`/`STYLE_EXTRA`, eigene Stile in `stammdaten.designStyles` (`saveCurrentStyle()`, `applyStyle()`) |
 | Video (Reel) | `renderVideoLayers()` (Grundbild + je Element eine Ebene über html2canvas), `recordVideo()` (Canvas + MediaRecorder, MP4 bevorzugt), `addVideoButtons()`; CSP erlaubt dafür `media-src blob:` |
+| Textausrichtung | Je Reiter `textAlign` (Klassen `talign-left/right` am Reiter), je Element `data-align` über den Knopf ⇔ in der Werkzeugleiste (`cycleAlignSelected()`, gespeichert in `positions[id].align`) |
 | Eigene Schriften | `stammdaten.fonts` (Daten-URL), `registerCustomFonts()` als `@font-face` im `<style>` (damit auch der Export sie kennt; CSP `font-src data:`), `refreshFontSelects()` |
 | Mehrere Spieler | `openBulkDialog()`, `runBulkExport()` (Neuzugang/Vorstellung je Spieler als Bild und/oder Video; nutzt `packFiles`) |
 | Import | `importConfigJSON()` → Auswahl-Dialog, `runImport()` (zusammenführen per Name oder ersetzen; Versionen werden ersetzt) |
