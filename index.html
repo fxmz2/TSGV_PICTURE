@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 19.8</title>
+    <title>ClubShot – Grafiken für Vereine 19.9</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -666,6 +666,7 @@
         .pack-group > b { display: block; font-size: 13px; margin-bottom: 4px; }
         .pack-group label { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; cursor: pointer; }
         .pack-group label input { width: 18px; height: 18px; }
+        .pack-link { display: block; width: 100%; margin-top: 4px; background: #f3f0ff; color: #3b2f8f; border: 1px solid #ddd5ff; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: left; }
         .pack-progress { font-size: 13px; font-weight: bold; color: #005f73; min-height: 18px; margin: 8px 0; }
         .pack-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
         .pack-results a { display: block; text-align: center; font-size: 10px; color: #333; text-decoration: none; word-break: break-all; }
@@ -2044,8 +2045,8 @@
                 <div class="pack-group"><b>Was soll erstellt werden?</b>
                     <label><input type="checkbox" data-bulk-fmt="feed" checked> 📷 Beitrag (Bild)</label>
                     <label><input type="checkbox" data-bulk-fmt="story" checked> 📱 Story (Bild)</label>
-                    <label class="adv-only"><input type="checkbox" data-bulk-fmt="story-video"> 🎬 Story als Video (Reel) <small>– ca. 15 s pro Spieler</small></label>
-                    <label class="adv-only"><input type="checkbox" data-bulk-fmt="feed-video"> 🎬 Beitrag als Video <small>– ca. 15 s pro Spieler</small></label>
+                    <label class="adv-only"><input type="checkbox" data-bulk-fmt="story-video"> <span>🎬 Story als Video (Reel) <small style="font-weight:normal; color:#888;">– ca. 15 s pro Spieler</small></span></label>
+                    <label class="adv-only"><input type="checkbox" data-bulk-fmt="feed-video"> <span>🎬 Beitrag als Video <small style="font-weight:normal; color:#888;">– ca. 15 s pro Spieler</small></span></label>
                 </div>
                 <div class="pack-quick" id="bulk-quick"></div>
                 <div id="bulk-list"></div>
@@ -2182,7 +2183,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "19.8";
+        const APP_VERSION = "19.9";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -8216,6 +8217,8 @@
         let packUrls = [];
 
         function packButtonHTML(tab) {
+            // Neuzugang/Spielervorstellung: „mehrere“ heißt hier mehrere Spieler
+            if (tab === 'neuzugang') return `<button type="button" class="copy-action-btn pack-btn" data-section="pack" style="margin-top:12px; background:#2a9d8f; font-size:12px; padding:10px;" onclick="openBulkDialog()">📦 Mehrere Spieler / Grafiken auf einmal teilen</button>`;
             return `<button type="button" class="copy-action-btn pack-btn adv-only" data-section="pack" style="margin-top:12px; background:#2a9d8f; font-size:12px; padding:10px;" onclick="openPackDialog('${tab}')">📦 Mehrere Grafiken auf einmal teilen</button>`;
         }
 
@@ -8249,6 +8252,7 @@
                 <div class="pack-group">
                     <b>${esc(tabTitle(t))}</b>
                     ${list.map(it => `<label><input type="checkbox" value="${it.id}" data-file="${esc(it.file)}" data-kind="${it.kind}" data-tab="${t}" ${tab && t === tab ? 'checked' : ''}> ${esc(it.label)}</label>`).join('')}
+                    ${t === 'neuzugang' ? `<button type="button" class="pack-link" onclick="closePackDialog(); switchTab('neuzugang'); openBulkDialog();">👥 Für mehrere Spieler auf einmal erstellen →</button>` : ''}
                 </div>`).join('');
             // Aktueller Reiter zuerst
             if (tab) {
