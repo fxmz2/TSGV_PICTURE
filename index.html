@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 19.2</title>
+    <title>ClubShot – Grafiken für Vereine 19.3</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -419,6 +419,19 @@
         .copy-action-btn:disabled { opacity: 0.45; cursor: default; }
 
         /* Design-Bereich einklappbar */
+        /* Aufklappbare Hauptbereiche im Menü */
+        .sect { border: 1px solid #d3e1e5; border-radius: 10px; margin-bottom: 12px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+        .sect > summary { cursor: pointer; padding: 12px 14px; font-weight: 800; font-size: 15px; list-style: none; display: flex; align-items: center; justify-content: space-between;
+            color: #0b3b45; background: #eef6f7; border-radius: 10px; user-select: none; }
+        .sect[open] > summary { border-radius: 10px 10px 0 0; border-bottom: 1px solid #dbe7ea; }
+        .sect > summary::-webkit-details-marker { display: none; }
+        .sect > summary::after { content: '▾'; color: #5c7f88; font-size: 16px; transition: transform 0.2s; }
+        .sect[open] > summary::after { transform: rotate(180deg); }
+        .sect > summary small { font-weight: normal; color: #6c8a91; margin-left: 6px; }
+        .sect > .details-body { padding: 10px 12px 12px; }
+        .sect.sect-design > summary { background: #f3f0ff; color: #3b2f8f; }
+        .sect-tools { display: flex; gap: 6px; margin: 0 0 10px; }
+        .sect-tools button { flex: 1; background: #f1f3f5; color: #334; border: 1px solid #e0e4e8; border-radius: 8px; padding: 7px 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .design-details, .sd-section { border: 1px solid #e2e4e8; border-radius: 8px; margin-bottom: 12px; background: #fbfbfc; }
         .design-details > summary, .sd-section > summary { cursor: pointer; padding: 10px 12px; font-weight: bold; font-size: 14px; list-style: none; display: flex; align-items: center; justify-content: space-between; }
         .design-details > summary::-webkit-details-marker, .sd-section > summary::-webkit-details-marker { display: none; }
@@ -877,7 +890,7 @@
             <div id="editor-start" class="editor-section active">
                 <h2 style="font-size:1.3rem; margin-bottom:8px;">✨ Was möchtest du erstellen?</h2>
                 <div id="create-grid" class="create-grid"></div>
-                <h2 style="font-size:1.3rem; margin-bottom:16px;">⚙️ Vereinseinstellungen</h2>
+                <h2 style="font-size:1.3rem; margin-bottom:12px;">⚙️ Einstellungen</h2>
 
                 <div id="install-card" class="notice-card info" hidden>
                     <b>📲 Als App installieren</b>
@@ -899,6 +912,9 @@
 
                 <button type="button" class="copy-action-btn pack-btn adv-only" style="background:#2a9d8f; font-size:13px; padding:10px;" onclick="openPackDialog()">📦 Spieltags-Paket: mehrere Grafiken auf einmal teilen</button>
 
+                <details class="sect" open>
+                    <summary>🏷️ Vereinsname, Wappen & Farben</summary>
+                    <div class="details-body">
                 <div class="control-group">
                     <label><input type="checkbox" id="cfg-crest-clean" onchange="updateCrestClean()"> ✨ Hintergrund des Vereinswappens entfernen</label>
                     <span class="hint">Entfernt einfarbige Ränder (z.B. weiße oder schwarze Ecken) um das Wappen. Das Original bleibt erhalten.</span>
@@ -928,6 +944,12 @@
                     <label>Kreis-/Rahmenfarbe</label>
                     <input type="color" id="cfg-color-frame" value="#ffffff" onchange="updateDesignSettings()">
                 </div>
+                    </div>
+                </details>
+
+                <details class="sect">
+                    <summary>📱 Beiträge & Instagram</summary>
+                    <div class="details-body">
 
                 <div class="control-group">
                     <label>Hashtags für die Beitragstexte</label>
@@ -943,6 +965,16 @@
                     </select>
                     <span class="hint">Instagram zeigt Beiträge im Profil inzwischen hochkant an – 4:5 wird dort nicht beschnitten.</span>
                 </div>
+                <div class="control-group">
+                    <label><input type="checkbox" id="cfg-safe-zones" onchange="updateSafeZones()"> Instagram-Hilfslinien in Storys anzeigen</label>
+                    <span class="hint">Markiert oben und unten die Bereiche, die Instagram mit Profilbild bzw. Antwortfeld überdeckt. Die Linien erscheinen nicht im gespeicherten Bild.</span>
+                </div>
+                    </div>
+                </details>
+
+                <details class="sect">
+                    <summary>📋 Versionen / Mannschaften</summary>
+                    <div class="details-body">
 
                 <div class="control-group">
                     <label>Namen der 3 Versionen / Mannschaften</label>
@@ -969,11 +1001,9 @@
                     <button type="button" class="copy-action-btn" style="margin-top:6px;" onclick="copyBetweenVersions()">📋 Kopieren</button>
                     <span class="hint">Spieler, Gegner, Sponsoren und Hintergründe gelten sowieso für alle Versionen.</span>
                 </div>
+                    </div>
+                </details>
 
-                <div class="control-group">
-                    <label><input type="checkbox" id="cfg-safe-zones" onchange="updateSafeZones()"> Instagram-Hilfslinien in Storys anzeigen</label>
-                    <span class="hint">Markiert oben und unten die Bereiche, die Instagram mit Profilbild bzw. Antwortfeld überdeckt. Die Linien erscheinen nicht im gespeicherten Bild.</span>
-                </div>
 
                 <!-- PAKET-HINWEIS (Basis) -->
                 <div id="tier-card" class="notice-card info" hidden>
@@ -983,7 +1013,7 @@
                     Für ein Upgrade wende dich an deinen Anbieter.
                 </div>
 
-                <details class="design-details" id="ui-settings">
+                <details class="sect" id="ui-settings">
                     <summary>👁️ Ansicht anpassen</summary>
                     <div class="details-body">
                         <label>Sichtbare Reiter</label>
@@ -1000,9 +1030,9 @@
                     </div>
                 </details>
 
-                <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
-
-                <h2 style="font-size:1.1rem; margin-bottom:10px;">💾 Backup & Export (Alle Versionen)</h2>
+                <details class="sect" id="sect-backup">
+                    <summary>💾 Backup & Export</summary>
+                    <div class="details-body">
                 <button type="button" class="copy-action-btn" style="background:#2a9d8f; font-size:14px; padding:12px;" onclick="exportConfigJSON()">📥 Alles als JSON sichern (inkl. Bilder)</button>
                 <button type="button" class="copy-action-btn" style="background:#5a4fcf; font-size:14px; padding:12px;" onclick="shareBackup()">📤 Backup teilen (WhatsApp, Mail, AirDrop …)</button>
                 <span class="hint" style="margin-bottom:8px;">Zum Übertragen auf ein anderes Handy oder an einen zweiten Admin: Datei teilen und dort unter „JSON Datei importieren“ einlesen.</span>
@@ -1012,6 +1042,8 @@
                     <input type="file" id="json-import-input" accept=".json,application/json" onchange="importConfigJSON(event)">
                     <span class="hint">Danach wählst du aus, was übernommen wird (z.B. nur neue Spieler) – vorhandene Daten bleiben beim „Zusammenführen“ erhalten. Freigestellte Fotos und Positionen werden mit übertragen.</span>
                 </div>
+                    </div>
+                </details>
 
                 <div class="app-footer">
                     ClubShot <span id="app-version-label"></span> · © [Anbieter]<br>
@@ -2091,7 +2123,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "19.2";
+        const APP_VERSION = "19.3";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3716,18 +3748,25 @@
                             </div>
                         </div>
                     </details>
+                    <details class="design-details" data-section="logo">
+                        <summary>🏷️ Vereinslogo${cfg.teamNames ? ' & Team-Namen' : ''}</summary>
+                        <div class="details-body">
                     ${cfg.teamNames ? `
                     <div class="control-group">
-                        <label><input type="checkbox" id="in-show-teamnames-${tab}" onchange="updateMatchup();" checked> Team-Namen unter Logos anzeigen</label>
+                        <label><input type="checkbox" id="in-show-teamnames-${tab}" onchange="updateMatchup();" checked> Team-Namen unter den Wappen anzeigen</label>
                     </div>` : ''}
-                    <div class="control-group" data-section="logo">
+                    <div class="control-group">
                         <label>Vereinslogo oben rechts</label>
                         <div class="ct-checks">
-                            <label><input type="checkbox" id="in-logo-feed-${tab}" ${cfg.logoFeed ? 'checked' : ''} onchange="updateTabDesign('${tab}');"> im Beitrag (1:1)</label>
+                            <label><input type="checkbox" id="in-logo-feed-${tab}" ${cfg.logoFeed ? 'checked' : ''} onchange="updateTabDesign('${tab}');"> im Beitrag</label>
                             <label><input type="checkbox" id="in-logo-story-${tab}" ${cfg.logoStory === false ? '' : 'checked'} onchange="updateTabDesign('${tab}');"> in der Story</label>
                         </div>
                     </div>
-                    <div class="control-group adv-only" data-section="sponsors">
+                        </div>
+                    </details>
+                    <details class="design-details adv-only" data-section="sponsors">
+                        <summary>🤝 Sponsoren</summary>
+                        <div class="details-body">
                         <label><input type="checkbox" id="in-show-sponsors-${tab}" onchange="renderSelectedSponsors('${tab}');"> ${cfg.sponsorLabel}</label>
                         <div class="sponsor-checkbox-list" id="sponsor-checkbox-list-${tab}"></div>
                         <div style="display:grid; grid-template-columns: 1fr 92px; gap: 6px; margin-top:6px;">
@@ -3746,7 +3785,8 @@
                             <input type="range" id="in-sponsor-size-${tab}" min="60" max="160" step="5" value="100" oninput="renderSelectedSponsors('${tab}');"></div>
                         <div class="control-group"><label><input type="checkbox" id="in-sponsor-free-${tab}" onchange="renderSelectedSponsors('${tab}'); scheduleSave();"> ✋ Logos einzeln verschieben</label>
                             <span class="hint">Dann jedes Sponsorenlogo in der Vorschau antippen und frei verschieben oder größer/kleiner ziehen.</span></div>
-                    </div>
+                        </div>
+                    </details>
                     <details class="design-details" id="ct-details-${tab}" data-section="ctexts">
                         <summary>✍️ Eigene Texte <span class="sd-count" id="ct-count-${tab}">0</span></summary>
                         <div class="details-body">
@@ -7918,6 +7958,83 @@
                 h2.insertAdjacentHTML('afterend', `<div class="help-box" id="help-${tab}" hidden>${esc(HELP_TEXTS[tab])}${video}</div>`);
             });
         }
+        /* ---------- Menü: alle Bereiche auf-/zuklappbar, Zustand wird gemerkt ---------- */
+        function wrapSection(nodes, cls, title, open) {
+            const d = document.createElement('details');
+            d.className = cls;
+            d.open = !!open;
+            d.innerHTML = `<summary>${title}</summary><div class="details-body"></div>`;
+            nodes.forEach(x => d.lastChild.appendChild(x));
+            return d;
+        }
+        function addSectionTools(ed, after) {
+            if (!ed || ed.querySelector(':scope > .sect-tools')) return;
+            const bar = document.createElement('div');
+            bar.className = 'sect-tools';
+            bar.innerHTML = `<button type="button" onclick="setAllSections('${ed.id}', false)">⊟ Alle zuklappen</button><button type="button" onclick="setAllSections('${ed.id}', true)">⊞ Alle aufklappen</button>`;
+            after ? after.after(bar) : ed.prepend(bar);
+        }
+        function setupCollapsibles() {
+            [...editorTabs, 'eckball'].forEach(tab => {
+                const ed = $(`editor-${tab}`);
+                if (!ed || ed.dataset.coll) return;
+                ed.dataset.coll = '1';
+                const h2 = ed.querySelector(':scope > h2');
+                const stop = tab === 'eckball' ? $('tabcopy-host-eckball') : $(`design-controls-${tab}`);
+                const nodes = [];
+                for (let n = h2 ? h2.nextSibling : ed.firstChild; n && n !== stop; ) {
+                    const next = n.nextSibling;
+                    if (!(n.nodeType === 1 && n.classList.contains('help-box'))) nodes.push(n);
+                    n = next;
+                }
+                const content = wrapSection(nodes, 'sect sect-content', '📝 Inhalt', true);
+                stop ? ed.insertBefore(content, stop) : ed.appendChild(content);
+                // Aussehen: alle Design-Bereiche in einem Hauptbereich
+                if (tab !== 'eckball' && stop) {
+                    stop.querySelector(':scope > .design-head')?.remove();
+                    const design = wrapSection(Array.from(stop.childNodes), 'sect sect-design', '🎨 Aussehen anpassen <small>optional</small>', false);
+                    stop.appendChild(design);
+                }
+                addSectionTools(ed, ed.querySelector(':scope > .help-box') || h2);
+            });
+            const start = $('editor-start');
+            addSectionTools(start, Array.from(start?.querySelectorAll(':scope > h2') || []).find(h => /Einstellungen/.test(h.textContent)));
+            const sd = $('editor-stammdaten');
+            addSectionTools(sd, sd?.querySelector(':scope > .help-box') || sd?.querySelector(':scope > h2'));
+            restoreSectionState();
+        }
+        function sectionKey(d) {
+            const ed = d.closest('.editor-section');
+            const sum = d.querySelector(':scope > summary');
+            const txt = (sum?.childNodes[0]?.textContent || sum?.textContent || '').replace(/\d+/g, '').trim();
+            return ed && txt ? ed.id + ':' + txt : null;
+        }
+        let sectionSaveTimer = null;
+        function rememberSection(d) {
+            const k = sectionKey(d);
+            if (!k) return;
+            const ui = uiPrefs();
+            ui.open = ui.open || {};
+            ui.open[k] = d.open;
+            clearTimeout(sectionSaveTimer);
+            sectionSaveTimer = setTimeout(savePrefs, 600);
+        }
+        function restoreSectionState() {
+            const map = uiPrefs().open || {};
+            document.querySelectorAll('.sidebar details').forEach(d => {
+                const k = sectionKey(d);
+                if (k && map[k] !== undefined) d.open = map[k];
+            });
+        }
+        function setAllSections(edId, open) {
+            const ed = $(edId);
+            if (!ed) return;
+            ed.querySelectorAll('details').forEach(d => {
+                if (!open) d.open = false;
+                else if (d.matches('.sect, .sd-section')) d.open = true;
+            });
+        }
+
         function toggleHelp(tab) { const b = $(`help-${tab}`); if (b) b.hidden = !b.hidden; }
 
         /* ---------- Grafik-Paket: mehrere Grafiken auf einmal ---------- */
@@ -8377,6 +8494,8 @@
 
                 buildDesignControls();
                 setupHelp();
+                setupCollapsibles();
+                document.addEventListener('toggle', e => { if (e.target.matches?.('.sidebar details')) rememberSection(e.target); }, true);
                 editorTabs.forEach(t => applyExtraDesign(t, null));   // Standardwerte (z.B. Tor-Reiter: Torjubel-Foto)
                 buildPlayerSelectControls();
                 refreshPlayerOptions();
@@ -8402,6 +8521,7 @@
                 applyTier();
                 renderUiSettings();
                 applyUiPrefs();
+                restoreSectionState();
                 switchTab(await localforage.getItem(STORE.tab) || 'start');
 
                 const sidebarEl = document.querySelector('.sidebar');
