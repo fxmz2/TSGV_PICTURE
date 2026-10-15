@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 19.9</title>
+    <title>ClubShot – Grafiken für Vereine 20.0</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -489,6 +489,17 @@
         .style-row { display: flex; gap: 6px; margin-bottom: 6px; }
         .style-del { background: #fff; border: 1px solid #f1c0c0; border-radius: 10px; padding: 0 10px; cursor: pointer; }
         .style-scope { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 2px 0 6px; }
+        /* Textausrichtung: je Text (data-align) oder für alle Texte eines Reiters (talign-*) */
+        [data-align="left"], .talign-left .draggable-text:not([data-align]) { text-align: left !important; align-self: flex-start !important; justify-content: flex-start !important; }
+        [data-align="right"], .talign-right .draggable-text:not([data-align]) { text-align: right !important; align-self: flex-end !important; justify-content: flex-end !important; }
+        [data-align="center"] { text-align: center !important; align-self: center !important; justify-content: center !important; }
+        :is([data-align="left"], .talign-left .draggable-text:not([data-align])) :is(h1, h2, h3, div, span, p, b) { text-align: left !important; justify-content: flex-start !important; }
+        :is([data-align="right"], .talign-right .draggable-text:not([data-align])) :is(h1, h2, h3, div, span, p, b) { text-align: right !important; justify-content: flex-end !important; }
+        [data-align="center"] :is(h1, h2, h3, div, span, p, b) { text-align: center !important; justify-content: center !important; }
+        /* Links/rechts ausgerichtete Texte halten Abstand zum Bildrand */
+        .draggable-text:is([data-align="left"], [data-align="right"]), :is(.talign-left, .talign-right) .draggable-text:not([data-align]) { padding-left: 22px; padding-right: 22px; box-sizing: border-box; }
+        :is([data-align="left"], .talign-left .draggable-text:not([data-align])) > :is(.lm-teams, .lm-sub) { margin-left: 0 !important; justify-content: flex-start !important; }
+        :is([data-align="right"], .talign-right .draggable-text:not([data-align])) > :is(.lm-teams, .lm-sub) { margin-right: 0 !important; justify-content: flex-end !important; }
         /* Akzent-Linie unter Namen abschaltbar */
         .no-accent :is(.potm-player-name, .spon-name, .bday-name, .transfer-name, .list-section-title, .pitch.pc-pro .player-name) { border-bottom: none !important; border-left: none !important; }
         /* Ohne Kästen: Schrift bekommt den Text-Schatten, damit sie auf Fotos lesbar bleibt */
@@ -2152,6 +2163,7 @@
         <span class="tb-sep"></span>
         <button type="button" id="el-sync-btn" onclick="toggleSyncFormats()" title="Beitrag & Story gemeinsam anpassen">🔗</button>
         <button type="button" id="el-name-btn" onclick="togglePitchName()" title="Namen dieses Spielers ein-/ausblenden" hidden>🏷️</button>
+        <button type="button" id="el-align-btn" onclick="cycleAlignSelected()" title="Text: mittig / links / rechts" hidden>⇔</button>
         <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
         <button type="button" onclick="selectElement(null)" title="Fertig">✓</button>
     </div>
@@ -2183,7 +2195,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "19.9";
+        const APP_VERSION = "20.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3489,6 +3501,7 @@
             { key: 'boxText', id: 'in-box-text', def: () => '#ffffff' },
             { key: 'boxOpacity', id: 'in-box-opacity', def: () => '60' },
             { key: 'accentLine', id: 'in-accent-line', def: () => true, check: true },
+            { key: 'textAlign', id: 'in-text-align', def: () => 'center' },
             { key: 'lmLogos', id: 'in-lm-logos', def: () => true, check: true },
             { key: 'lmNames', id: 'in-lm-names', def: () => true, check: true },
             { key: 'lmDate', id: 'in-lm-date', def: () => true, check: true },
@@ -3536,7 +3549,7 @@
         const STYLE_BASE = [['frameShape', 'in-frame-shape'], ['colorFrame', 'in-color-frame'], ['colorText', 'in-color-text'], ['font', 'in-font'],
             ['titleSize', 'in-size-title'], ['infoSize', 'in-size-info'], ['logoSize', 'in-logo-size']];
         const STYLE_EXTRA = ['titleFont', 'titleColorMode', 'titleColor', 'textEffect', 'letterSpacing', 'titleUpper', 'titleItalic',
-            'boxMode', 'boxColor', 'boxText', 'boxOpacity', 'accentLine', 'logoGap', 'logoDir',
+            'boxMode', 'boxColor', 'boxText', 'boxOpacity', 'accentLine', 'textAlign', 'logoGap', 'logoDir',
             'fieldStyle', 'fieldView', 'fieldShape', 'fieldOpacity', 'fieldSize', 'playerStyle', 'playerSize', 'pitchNameMode', 'pitchShadow', 'pitchBigNum',
             'lmLayout', 'lmLogoSize', 'lmTextSize', 'lmVs'];
         const F = n => FONT_LIST.find(f => f[0].includes(n))?.[0] || 'Arial, sans-serif';
@@ -3711,6 +3724,13 @@
                                     </select>
                                     <input type="color" id="in-color-title-${tab}" value="#f1c40f" style="margin-top:4px;" onchange="setVal('in-title-color-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
                             </div>
+                            <div class="control-group"><label>Ausrichtung der Texte</label>
+                                <select id="in-text-align-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                    <option value="center">⇔ Mittig</option>
+                                    <option value="left">⇤ Linksbündig</option>
+                                    <option value="right">⇥ Rechtsbündig</option>
+                                </select>
+                                <span class="hint">Einzelne Texte: in der Vorschau antippen und in der Leiste oben mit ⇔ umstellen.</span></div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div class="control-group"><label>Schriftart Texte</label><select id="in-font-${tab}" onchange="updateTabDesign('${tab}')">${fontOptions}</select></div>
                                 <div class="control-group adv-only"><label>Schriftart Überschriften</label><select id="in-font-title-${tab}" onchange="updateTabDesign('${tab}')"><option value="">Wie Texte</option>${fontOptions}</select></div>
@@ -4460,6 +4480,9 @@
                 // Kästen (Namensschilder, Listen …): eigene Farbe, Schrift und Deckkraft – oder ganz ohne Kästen
                 const boxMode = val(`in-box-mode-${tab}`);
                 viewContainer.classList.toggle('no-boxes', boxMode === 'none');
+                const ta = val(`in-text-align-${tab}`) || 'center';
+                viewContainer.classList.toggle('talign-left', ta === 'left');
+                viewContainer.classList.toggle('talign-right', ta === 'right');
                 viewContainer.classList.toggle('no-accent', $(`in-accent-line-${tab}`) ? !$(`in-accent-line-${tab}`).checked : false);
                 if (boxMode === 'none') {
                     viewContainer.style.setProperty('--box-bg', 'transparent');
@@ -4721,9 +4744,23 @@
             document.querySelectorAll('.snap-guide').forEach(g => { if (!except || g.parentElement !== except) g.hidden = true; });
         }
 
+        /* Textausrichtung eines einzelnen Elements ('' = wie Reiter) */
+        function getElAlign(el) { return el.dataset.align || ''; }
+        function setElAlign(el, a) { if (a) el.dataset.align = a; else delete el.dataset.align; }
+        const ALIGN_ORDER = ['', 'left', 'right', 'center'];
+        const ALIGN_LABEL = { '': '⇔ Text', left: '⇤ Links', right: '⇥ Rechts', center: '⇔ Mitte' };
+        function cycleAlignSelected() {
+            if (!selectedEl) return;
+            const next = ALIGN_ORDER[(ALIGN_ORDER.indexOf(getElAlign(selectedEl)) + 1) % ALIGN_ORDER.length];
+            forSelectedGroup(el => setElAlign(el, next));
+            updateToolbar();
+            toast(next ? `Text ${next === 'left' ? 'linksbündig' : next === 'right' ? 'rechtsbündig' : 'mittig'}` : 'Ausrichtung wie im Reiter eingestellt');
+            scheduleSave();
+        }
         function applyPosition(el, pos) {
             if (!pos) return;
             setElLayer(el, pos.z || 0);
+            setElAlign(el, pos.align || '');
             if (el.classList.contains('movable')) { setElOffset(el, pos.x || 0, pos.y || 0); setElScale(el, pos.scale || 1); return; }
             if (pos.top) el.style.top = pos.top;
             if (pos.left) el.style.left = pos.left;
@@ -4795,6 +4832,12 @@
             if (!selectedEl) return;
             setText('el-scale-label', Math.round(getElScale(selectedEl) * 100) + ' %');
             $('el-delete-btn').hidden = !selectedEl.classList.contains('custom-text');
+            const alignBtn = $('el-align-btn');
+            if (alignBtn) {
+                const hasText = !!selectedEl.textContent.trim() && !selectedEl.matches('img, .pitch, .player-card, .sponsor-banner');
+                alignBtn.hidden = !hasText;
+                alignBtn.textContent = ALIGN_LABEL[getElAlign(selectedEl)];
+            }
             const nameBtn = $('el-name-btn');
             if (nameBtn) nameBtn.hidden = !(selectedEl.dataset.pcName && selectedEl.dataset.pcName !== 'Keiner');
             const syncBtn = $('el-sync-btn');
@@ -4822,6 +4865,7 @@
             }
             setElScale(el, 1);
             setElLayer(el, 0);
+            setElAlign(el, '');
         }
         function resetSelectedElement() {
             if (!selectedEl) return;
@@ -5023,7 +5067,7 @@
 
         /* ---------- Gezielt zurücksetzen: einzelne Elemente oder Design-Bereiche ---------- */
         function isElementChanged(el) {
-            if (getElScale(el) !== 1 || getElLayer(el)) return true;
+            if (getElScale(el) !== 1 || getElLayer(el) || getElAlign(el)) return true;
             if (el.classList.contains('movable')) { const { x, y } = getElOffset(el); return !!(x || y); }
             const defTop = el.getAttribute('data-default-top'), defLeft = el.getAttribute('data-default-left');
             const near = (a, b) => Math.abs((parseFloat(a) || 0) - (parseFloat(b) || 0)) < 0.5;
@@ -6460,11 +6504,15 @@
                 if (!el.id) return;
                 data.positions[el.id] = { top: el.style.top, left: el.style.left, scale: getElScale(el) };
                 if (getElLayer(el)) data.positions[el.id].z = getElLayer(el);
+                if (getElAlign(el)) data.positions[el.id].align = getElAlign(el);
             });
             document.querySelectorAll('.movable').forEach(el => {
                 if (!el.id) return;
-                const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el);
-                if (x || y || sc !== 1 || z) data.positions[el.id] = z ? { x, y, scale: sc, z } : { x, y, scale: sc };
+                const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el), al = getElAlign(el);
+                if (x || y || sc !== 1 || z || al) {
+                    data.positions[el.id] = z ? { x, y, scale: sc, z } : { x, y, scale: sc };
+                    if (al) data.positions[el.id].align = al;
+                }
             });
             // Einzeln verschobene Sponsorenlogos merken, auch wenn „einzeln verschieben“ gerade aus ist
             for (const id in pendingPositions) {
@@ -6553,7 +6601,7 @@
             syncLabelInputs();
             applyLabels();
 
-            document.querySelectorAll('.movable').forEach(el => { setElOffset(el, 0, 0); setElScale(el, 1); setElLayer(el, 0); });
+            document.querySelectorAll('.movable').forEach(el => { setElOffset(el, 0, 0); setElScale(el, 1); setElLayer(el, 0); setElAlign(el, ''); });
             for (const id in pendingPositions) {
                 const el = $(id);
                 if (el) applyPosition(el, pendingPositions[id]);
