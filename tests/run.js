@@ -264,6 +264,8 @@ async function makePhotos(browser) {
 
         // Spielervorstellung: Position & Mannschaft optional
         await page.evaluate(() => { switchTab('neuzugang'); const pl = stammdaten.players.find(x => x.position && x.team); setVal('in-new-player', pl.name); setVal('in-new-mode', 'vorstellung'); $('in-new-show-position').checked = false; $('in-new-show-team').checked = false; updateNeuzugang(); });
+        await page.evaluate(() => { $('in-new-name-stack').checked = true; updateNeuzugang(); });
+        check('Neuzugang: Name untereinander', await page.$eval('#out-new-name', e => e.innerHTML.includes('<br>')));
         check('Spielervorstellung ohne Position & Mannschaft', await page.$eval('#out-new-chips', e => e.style.display === 'none'));
         // Design-Stile
         await page.evaluate(() => { switchTab('post'); applyStyle('post', 'retro'); });
