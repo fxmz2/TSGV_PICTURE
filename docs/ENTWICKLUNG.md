@@ -39,6 +39,7 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Design-Stile | `STYLE_PRESETS`, `STYLE_BASE`/`STYLE_EXTRA`, eigene Stile in `stammdaten.designStyles` (`saveCurrentStyle()`, `applyStyle()`) |
 | Video (Reel) | `renderVideoLayers()` (Grundbild + je Element eine Ebene über html2canvas), `recordVideo()` (Canvas + MediaRecorder, MP4 bevorzugt), `addVideoButtons()`; CSP erlaubt dafür `media-src blob:` |
 | Eigene Schriften | `stammdaten.fonts` (Daten-URL), `registerCustomFonts()` als `@font-face` im `<style>` (damit auch der Export sie kennt; CSP `font-src data:`), `refreshFontSelects()` |
+| Mehrere Spieler | `openBulkDialog()`, `runBulkExport()` (Neuzugang/Vorstellung je Spieler als Bild und/oder Video; nutzt `packFiles`) |
 | Import | `importConfigJSON()` → Auswahl-Dialog, `runImport()` (zusammenführen per Name oder ersetzen; Versionen werden ersetzt) |
 | Speicher | Freigestellte Bilder als WebP 95 % (`encodeAlphaCanvas()`, falls das Gerät es kann, sonst PNG; max. 900×1100 wie die Originale), `optimizeStorage()` |
 | Zurücksetzen | Dialog `resetTabDefaults()` (einzelne Elemente + Bereiche), komplett `resetTabAll()` |

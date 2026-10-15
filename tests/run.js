@@ -267,6 +267,16 @@ async function makePhotos(browser) {
         await page.evaluate(() => { $('in-new-name-stack').checked = true; updateNeuzugang(); });
         check('Neuzugang: Name untereinander', await page.$eval('#out-new-name', e => e.innerHTML.includes('<br>')));
         check('Spielervorstellung ohne Position & Mannschaft', await page.$eval('#out-new-chips', e => e.style.display === 'none'));
+        // Kästen abschaltbar
+        await page.evaluate(() => { setVal('in-box-mode-neuzugang', 'none'); updateTabDesign('neuzugang'); });
+        check('Ohne Kästen hinter der Schrift', await page.$eval('#out-new-name', e => getComputedStyle(e).backgroundColor === 'rgba(0, 0, 0, 0)'));
+        // Für mehrere Spieler auf einmal (Bilder)
+        await page.evaluate(() => { openBulkDialog(); [...document.querySelectorAll('#bulk-list input[data-bulk-player]')].forEach((cb, i) => cb.checked = i < 2);
+            document.querySelector('[data-bulk-fmt="feed"]').checked = false; });
+        await page.click('#bulk-run');
+        await page.waitForFunction(() => !$('bulk-result').hidden || /Fehler/.test($('bulk-progress').textContent), null, { timeout: 60000 });
+        check('Massenerstellung: 2 Spieler → 2 Story-Bilder', await page.evaluate(() => packFiles.length === 2 && packFiles[0].name !== packFiles[1].name));
+        await page.evaluate(() => closeBulkDialog());
         // Design-Stile
         await page.evaluate(() => { switchTab('post'); applyStyle('post', 'retro'); });
         check('Design-Stil „Retro“ wirkt', await page.evaluate(() => val('in-frame-shape-post') === 'square' && val('in-box-mode-post') === 'custom'));
