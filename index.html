@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 19.5</title>
+    <title>ClubShot – Grafiken für Vereine 19.6</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -726,7 +726,7 @@
 
         /* Neuzugang */
         .transfer-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-        .transfer-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--box-bg, rgba(0,0,0,0.62)); color: var(--box-fg, white); text-shadow: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .transfer-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--box-bg, rgba(0,0,0,0.62)); color: var(--box-fg, white); text-shadow: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: bold; }
         .transfer-chip img { width: 22px; height: 22px; object-fit: contain; background: white; border-radius: 50%; padding: 1px; box-sizing: border-box; }
         .transfer-number { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 22px; background: var(--jersey-color); border-radius: 4px; padding: 0 4px; }
 
@@ -1294,6 +1294,7 @@
 
                 <div class="control-group"><label>Torschütze</label><select id="in-tor-player" class="player-select" onchange="updateTor();"></select></div>
                 <div class="control-group"><label>Vorlagengeber (Optional)</label><select id="in-tor-assist" class="player-select" onchange="updateTor();"></select></div>
+                <div class="control-group"><label><input type="checkbox" id="in-tor-name-stack" onchange="updateTor(); scheduleSave();"> Vor- und Nachname untereinander</label></div>
                 <div class="control-group"><label>Spielstand</label><input type="text" id="in-tor-score" value="1 : 0" oninput="updateTor();"></div>
                 <div class="control-group"><label>Minute</label><input type="text" id="in-tor-minute" value="12. Min" oninput="updateTor();"></div>
 
@@ -1444,6 +1445,7 @@
                 <div id="design-controls-geburtstag"></div>
 
                 <div class="control-group"><label>Geburtstagskind</label><select id="in-bday-player" class="player-select" onchange="updateGeburtstag();"></select></div>
+                <div class="control-group"><label><input type="checkbox" id="in-bday-name-stack" onchange="updateGeburtstag(); scheduleSave();"> Vor- und Nachname untereinander</label></div>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-bday-title" value="HAPPY BIRTHDAY" oninput="updateGeburtstag();"></div>
                 <div class="control-group"><label>Text</label><input type="text" id="in-bday-text" value="Alles Gute zum Geburtstag!" oninput="updateGeburtstag();"></div>
                 <div class="control-group"><label><input type="checkbox" id="in-bday-confetti" checked onchange="updateGeburtstag();"> Konfetti anzeigen</label></div>
@@ -1464,6 +1466,7 @@
                     </select>
                 </div>
                 <div class="control-group"><label>Spieler</label><select id="in-new-player" class="player-select" onchange="updateNeuzugang();"></select></div>
+                <div class="control-group"><label><input type="checkbox" id="in-new-name-stack" onchange="updateNeuzugang(); scheduleSave();"> Vor- und Nachname untereinander</label></div>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-new-title" value="NEUZUGANG" oninput="updateNeuzugang();"></div>
                 <div style="display:flex; gap: 8px;">
                     <div class="control-group" style="flex:1;"><label>Position</label><input type="text" id="in-new-position" value="" placeholder="z.B. Stürmer" oninput="updateNeuzugang();"></div>
@@ -2141,7 +2144,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "19.5";
+        const APP_VERSION = "19.6";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3464,7 +3467,8 @@
             { key: 'xp1', id: 'in-xp1', def: () => 'Keiner' },
             { key: 'xp2', id: 'in-xp2', def: () => 'Keiner' },
             { key: 'xp3', id: 'in-xp3', def: () => 'Keiner' },
-            { key: 'xpNames', id: 'in-xp-names', def: () => true, check: true }
+            { key: 'xpNames', id: 'in-xp-names', def: () => true, check: true },
+            { key: 'xpStack', id: 'in-xp-stack', def: () => false, check: true }
         ];
         function collectExtraDesign(t) {
             const o = {};
@@ -3763,7 +3767,8 @@
                             <div class="adv-only">
                             <label>Zusätzliche Spieler im Bild (bis zu 3)</label>
                             ${[1, 2, 3].map(i => `<div class="control-group"><select id="in-xp${i}-${tab}" class="player-select" onchange="updateTabDesign('${tab}')"></select></div>`).join('')}
-                            <div class="control-group"><label><input type="checkbox" id="in-xp-names-${tab}" checked onchange="updateTabDesign('${tab}')"> Namen unter den Spielern anzeigen</label></div>
+                            <div class="control-group"><label><input type="checkbox" id="in-xp-names-${tab}" checked onchange="updateTabDesign('${tab}')"> Namen unter den Spielern anzeigen</label>
+                                <label><input type="checkbox" id="in-xp-stack-${tab}" onchange="updateTabDesign('${tab}')"> Vor- und Nachname untereinander</label></div>
                             <span class="hint">Die Spieler erscheinen in Beitrag und Story und lassen sich in der Vorschau verschieben und größer/kleiner ziehen.</span>
                             </div>
                         </div>
@@ -4013,12 +4018,12 @@
         const TAB_CONTENT = {
             post:       { keys: ['venue', 'opponentSelect', 'postTitle', 'postDate', 'postTime'], inputs: [] },
             story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly', 'captain', 'pitchHideNames', 'lineupMatch', 'lineupSub'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
-            tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute'], inputs: [] },
+            tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute', 'torNameStack'], inputs: [] },
             ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers'], inputs: [/^erg-/] },
             kader:      { keys: ['kaderMeeting', 'kaderJersey', 'kaderDuty1', 'kaderDuty2', 'kaderFreetext', 'kaderNameStack'], inputs: [/^kader-player-/] },
             potm:       { keys: ['potmPlayer', 'potmText', 'potmNameStack'], inputs: [] },
             kalender:   { keys: ['season'], inputs: [/^in-kal-(mode|title)$/, /^kal-/] },
-            geburtstag: { keys: ['bdayConfetti'], inputs: [/^in-bday-/] },
+            geburtstag: { keys: ['bdayConfetti', 'bdayNameStack'], inputs: [/^in-bday-/] },
             neuzugang:  { keys: [], inputs: [/^in-new-/] },
             sponsor:    { keys: [], inputs: [/^in-spon-/] },
             wochenende: { keys: [], inputs: [/^in-wk-/, /^wk-/] },
@@ -4026,7 +4031,7 @@
         };
         const TAB_DESIGN_EXTRA = {
             story:    { keys: ['pitchMode', 'showNumbers2'], inputs: [] },
-            neuzugang: { keys: ['newShowNumber', 'newShowPosition', 'newShowTeam'], inputs: [] },
+            neuzugang: { keys: ['newShowNumber', 'newShowPosition', 'newShowTeam', 'newNameStack'], inputs: [] },
             tor:      { keys: ['torImgSize'], inputs: [] },
             kalender: { keys: ['kalOwnLogo'], inputs: [/^in-kal-color-/] },
             wochenende: { keys: ['wkOwnLogo'], inputs: [] }
@@ -5096,7 +5101,7 @@
                 const src = getPlayerImageSrc(name, tab);
                 if (img.getAttribute('src') !== src) img.src = src;
                 const nm = el.querySelector('.xp-name');
-                nm.textContent = name;
+                nm.innerHTML = stackNameHtml(name, $(`in-xp-stack-${tab}`)?.checked);
                 nm.style.display = showNames ? '' : 'none';
             });
         }
@@ -5439,7 +5444,8 @@
             setText('out-tor-minute', minute);
             setText('out-tor-minute-feed', minute);
 
-            const shownName = name !== "Keiner" ? esc(name) : '-';
+            const torStack = !!$('in-tor-name-stack')?.checked;
+            const shownName = name !== "Keiner" ? stackNameHtml(name, torStack) : '-';
             const scorerLbl = L('tor', 'scorer');
             const scorerHtml = (scorerLbl ? esc(scorerLbl) + '<br>' : '') + shownName;
             if ($('out-tor-player-name')) $('out-tor-player-name').innerHTML = scorerHtml;
@@ -5455,7 +5461,8 @@
                 if (assistName !== "Keiner") {
                     wrap.style.display = "flex";
                     const parts = assistName.split(' ');
-                    nameEl.innerText = parts.length > 1 ? parts[0][0] + '. ' + parts.slice(1).join(' ') : assistName;
+                    if (torStack) nameEl.innerHTML = stackNameHtml(assistName, true);
+                    else nameEl.innerText = parts.length > 1 ? parts[0][0] + '. ' + parts.slice(1).join(' ') : assistName;
                     imgEl.src = getPlayerImageSrc(assistName, 'tor');
                 } else {
                     wrap.style.display = "none";
@@ -5540,7 +5547,7 @@
             const src = getPlayerImageSrc(name, 'geburtstag');
             ['', '-feed'].forEach(sfx => {
                 setText(`out-bday-title${sfx}`, val('in-bday-title'));
-                setText(`out-bday-name${sfx}`, name !== 'Keiner' ? name : '-');
+                if ($(`out-bday-name${sfx}`)) $(`out-bday-name${sfx}`).innerHTML = name !== 'Keiner' ? stackNameHtml(name, $('in-bday-name-stack')?.checked) : '-';
                 setText(`out-bday-text${sfx}`, val('in-bday-text'));
                 const img = $(`out-bday-img${sfx}`);
                 if (img && img.getAttribute('src') !== src) img.src = src;
@@ -5659,20 +5666,24 @@
             if ($('in-new-position')) $('in-new-position').placeholder = info.p?.position || 'z.B. Stürmer';
             if ($('in-new-number')) $('in-new-number').placeholder = info.p?.number || '9';
 
+            // Großbuchstaben direkt im Text (CSS-Umwandlung verschiebt beim Bild-Export die Wortabstände)
+            const up = t => String(t || '').toLocaleUpperCase('de-DE');
+            // Jeder Textteil in eigenem Element mit festen Leerzeichen – sonst verrutschen die Wortabstände im Export
+            const tx = t => `<span>${esc(up(t)).replace(/ /g, '&nbsp;')}</span>`;
             let chips = '';
             if (number || position) {
-                chips += `<span class="transfer-chip">${number ? `<span class="transfer-number">${esc(number)}</span>` : ''}${esc(position)}</span>`;
+                chips += `<span class="transfer-chip">${number ? `<span class="transfer-number">${esc(number)}</span>` : ''}${tx(position)}</span>`;
             }
             if (info.vorstellung && info.team) {
-                chips += `<span class="transfer-chip"><img src="${getClubLogoSrc()}" alt=""> ${esc(info.team)}</span>`;
+                chips += `<span class="transfer-chip"><img src="${getClubLogoSrc()}" alt="">${tx(info.team)}</span>`;
             }
             if (fromName) {
                 const logo = (!normName(val('in-new-from-text')) && fromOpp) ? getOpponentLogoSrc(fromOpp) : makeBadgeSvg(fromName);
-                chips += `<span class="transfer-chip">${esc(L('neuzugang', 'from'))} <img src="${logo}" alt=""> ${esc(fromName)}</span>`;
+                chips += `<span class="transfer-chip">${tx(L('neuzugang', 'from'))}<img src="${logo}" alt="">${tx(fromName)}</span>`;
             }
             ['', '-feed'].forEach(sfx => {
                 setText(`out-new-title${sfx}`, val('in-new-title'));
-                setText(`out-new-name${sfx}`, name !== 'Keiner' ? name : '-');
+                if ($(`out-new-name${sfx}`)) $(`out-new-name${sfx}`).innerHTML = name !== 'Keiner' ? stackNameHtml(name, $('in-new-name-stack')?.checked) : '-';
                 setText(`out-new-text${sfx}`, val('in-new-text'));
                 const chipsEl = $(`out-new-chips${sfx}`);
                 if (chipsEl) { chipsEl.innerHTML = chips; chipsEl.style.display = chips ? '' : 'none'; }
@@ -6327,6 +6338,9 @@
                 newShowTeam: $('in-new-show-team')?.checked ?? true,
                 kaderNameStack: !!$('in-kader-name-stack')?.checked,
                 potmNameStack: !!$('in-potm-name-stack')?.checked,
+                torNameStack: !!$('in-tor-name-stack')?.checked,
+                bdayNameStack: !!$('in-bday-name-stack')?.checked,
+                newNameStack: !!$('in-new-name-stack')?.checked,
 
                 venue: val('in-post-venue') || 'heim',
                 opponentSelect: val('in-post-opponent-select'),
@@ -6454,6 +6468,8 @@
             if ($('in-new-show-team')) $('in-new-show-team').checked = data.newShowTeam ?? true;
             if ($('in-kader-name-stack')) $('in-kader-name-stack').checked = !!data.kaderNameStack;
             if ($('in-potm-name-stack')) $('in-potm-name-stack').checked = !!data.potmNameStack;
+            [['in-tor-name-stack', 'torNameStack'], ['in-bday-name-stack', 'bdayNameStack'], ['in-new-name-stack', 'newNameStack']]
+                .forEach(([id, k]) => { if ($(id)) $(id).checked = !!data[k]; });
             updateNumberInputs();
             if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
             if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
