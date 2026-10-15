@@ -10,9 +10,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 19.3</title>
+    <title>ClubShot – Grafiken für Vereine 19.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ClubShot">
@@ -1139,6 +1139,18 @@
                 </details>
 
                 <details class="sd-section">
+                    <summary>🔤 Eigene Schriften <span class="sd-count" id="count-fonts">0</span></summary>
+                    <div class="details-body">
+                        <div class="control-group">
+                            <label>Schriftdatei hochladen (.ttf, .otf, .woff, .woff2)</label>
+                            <input type="file" id="new-font-file" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2" multiple onchange="handleFontUpload(event)">
+                            <span class="hint">Die Schrift erscheint danach in allen Schrift-Auswahlen (unter „Eigene Schriften“). Bitte nur Schriften hochladen, für die ihr eine Lizenz habt – z.B. gekaufte Schriften. Kostenlose ähnliche Schriften sind schon eingebaut, z.B. „Big Shoulders“ (ähnlich Zuume) und „Rubik Dirt“ (Used-Look).</span>
+                        </div>
+                        <div id="list-fonts" class="scrollable-controls-box"></div>
+                    </div>
+                </details>
+
+                <details class="sd-section">
                     <summary>🖼️ Eigene Hintergründe <span class="sd-count" id="count-templates">0</span></summary>
                     <div class="details-body">
                         <div class="control-group">
@@ -2123,7 +2135,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "19.3";
+        const APP_VERSION = "19.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3398,6 +3410,7 @@
             ["'Montserrat', sans-serif", 'Montserrat'], ["'Anton', sans-serif", 'Anton'], ["'Archivo Black', sans-serif", 'Archivo Black'],
             ["'Barlow Condensed', sans-serif", 'Barlow Condensed'], ["'Teko', sans-serif", 'Teko'], ["'Kanit', sans-serif", 'Kanit'],
             ["'Russo One', sans-serif", 'Russo One'], ["'Black Ops One', sans-serif", 'Black Ops One (Stencil)'], ["'Graduate', serif", 'Graduate (College)'],
+            ["'Big Shoulders Display', sans-serif", 'Big Shoulders (schmal & fett, ähnlich Zuume)'], ["'Rubik Dirt', sans-serif", 'Rubik Dirt (Used-Look, rau)'],
             ["'Bangers', sans-serif", 'Bangers (Comic)'], ["'Permanent Marker', sans-serif", 'Permanent Marker (Handschrift)'],
             ["'Impact', sans-serif", 'Impact (nicht auf jedem Gerät)']
         ];
@@ -3608,6 +3621,7 @@
                             <div class="control-group"><label>Namen auf dem Spielfeld</label>
                                 <select id="in-pitch-namemode-${tab}" ${on}>
                                     <option value="full">Vor- und Nachname</option>
+                                    <option value="stack">Vor- und Nachname untereinander</option>
                                     <option value="last">Nur Nachname</option>
                                     <option value="first">Nur Vorname</option>
                                 </select></div>
@@ -4081,7 +4095,76 @@
            EIGENE TEXTE (beliebig viele je Reiter)
            ========================================================= */
         function fontOptionsHTML(selected) {
-            return fontOptionList([['', 'Wie Reiter'], ...FONT_LIST], selected);
+            return fontOptionList([['', 'Wie Reiter'], ...FONT_LIST, ...customFontList()], selected);
+        }
+
+        /* ---------- Eigene Schriften (vom Verein hochgeladen, liegen in den Vereinsdaten) ---------- */
+        function customFontList() { return (stammdaten.fonts || []).map(f => [`'${f.family}', sans-serif`, '🔤 ' + f.name]); }
+        function registerCustomFonts() {
+            let st = $('custom-fonts-style');
+            if (!st) { st = document.createElement('style'); st.id = 'custom-fonts-style'; document.head.appendChild(st); }
+            // Als @font-face im <style>, damit auch der Bild-Export (html2canvas) die Schrift kennt
+            st.textContent = (stammdaten.fonts || []).map(f => `@font-face { font-family: '${f.family}'; font-weight: 100 900; font-style: normal; font-display: block; src: url(${f.data}); }`).join('\n');
+            (stammdaten.fonts || []).forEach(f => document.fonts?.load?.(`700 20px '${f.family}'`).catch(() => {}));
+        }
+        function refreshFontSelects() {
+            const extra = customFontList();
+            document.querySelectorAll('select[id^="in-font-"], .ct-font-select').forEach(sel => {
+                const v = sel.value;
+                sel.querySelector('optgroup.custom-fonts')?.remove();
+                if (extra.length) {
+                    const og = document.createElement('optgroup');
+                    og.className = 'custom-fonts';
+                    og.label = 'Eigene Schriften';
+                    og.innerHTML = extra.map(([val, l]) => `<option value="${esc(val)}">${esc(l)}</option>`).join('');
+                    sel.appendChild(og);
+                }
+                sel.value = v;
+                if (sel.value !== v) sel.selectedIndex = 0;
+            });
+            renderFontList();
+        }
+        function renderFontList() {
+            const host = $('list-fonts');
+            const list = stammdaten.fonts || [];
+            setText('count-fonts', list.length);
+            if (!host) return;
+            host.innerHTML = list.length
+                ? list.map(f => `<div class="sd-item"><span style="font-family:'${esc(f.family)}', sans-serif; font-size:18px; flex:1;">${esc(f.name)} – 1:0 STARTAUFSTELLUNG</span><button type="button" class="sd-btn danger" onclick="deleteCustomFont('${f.id}')" title="Löschen">🗑️</button></div>`).join('')
+                : '<span class="hint">Noch keine eigenen Schriften.</span>';
+        }
+        async function handleFontUpload(event) {
+            const files = Array.from(event.target.files || []);
+            event.target.value = '';
+            stammdaten.fonts = stammdaten.fonts || [];
+            let added = 0;
+            for (const file of files) {
+                if (!/\.(ttf|otf|woff2?)$/i.test(file.name)) { alert(`„${file.name}“ ist keine Schriftdatei (.ttf, .otf, .woff, .woff2).`); continue; }
+                if (file.size > 4 * 1024 * 1024) { alert(`„${file.name}“ ist zu groß (max. 4 MB).`); continue; }
+                const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(file); });
+                const name = normName(file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ')) || 'Schrift';
+                // Prüfen, ob der Browser die Schrift lesen kann
+                try { const ff = new FontFace('cs-test', `url(${data})`); await ff.load(); }
+                catch (e) { alert(`„${file.name}“ konnte nicht gelesen werden. Bitte eine andere Datei (am besten .ttf oder .woff2) versuchen.`); continue; }
+                const ex = stammdaten.fonts.find(f => f.name.toLowerCase() === name.toLowerCase());
+                const entry = { id: ex?.id || 'font_' + Date.now().toString(36) + added, name, family: 'CS ' + name.replace(/['"\\]/g, ''), data };
+                if (ex) Object.assign(ex, entry); else stammdaten.fonts.push(entry);
+                added++;
+            }
+            if (!added) return;
+            await saveStammdaten();
+            registerCustomFonts();
+            refreshFontSelects();
+            toast(`🔤 ${added === 1 ? 'Schrift' : added + ' Schriften'} hinzugefügt – jetzt in allen Schrift-Auswahlen`);
+        }
+        async function deleteCustomFont(id) {
+            const f = (stammdaten.fonts || []).find(x => x.id === id);
+            if (!f || !confirm(`Schrift „${f.name}“ löschen? Grafiken mit dieser Schrift nutzen dann wieder die Standardschrift.`)) return;
+            stammdaten.fonts = stammdaten.fonts.filter(x => x.id !== id);
+            await saveStammdaten();
+            registerCustomFonts();
+            refreshFontSelects();
+            editorTabs.forEach(updateTabDesign);
         }
 
         function addCustomText(tab) {
@@ -5146,7 +5229,12 @@
             const fieldStyle = val('in-field-style-story') || 'none';
             const persp = adv && val('in-field-view-story') === 'persp';
             const nameMode = val('in-pitch-namemode-story') || 'full';
-            const shortName = n => { const parts = String(n).trim().split(/\s+/); return nameMode === 'last' ? parts[parts.length - 1] : nameMode === 'first' ? parts[0] : n; };
+            const shortName = n => {
+                const parts = String(n).trim().split(/\s+/);
+                if (nameMode === 'stack') return parts.length > 1 ? parts[0] + '\n' + parts.slice(1).join(' ') : n;   // Vorname oben, Nachname darunter
+                return nameMode === 'last' ? parts[parts.length - 1] : nameMode === 'first' ? parts[0] : n;
+            };
+            const nameHtmlOf = t => esc(t).replace(/\n/g, '<br>');
             const formKey = formType.replace(/[^\w-]/g, '_');
 
             // Verschobene Spieler merken (auch die anderer Formationen), bevor das Feld neu aufgebaut wird
@@ -5197,8 +5285,8 @@
                     const label = showName ? shortName(name) + (isCap ? ' (C)' : '') : isCap ? '(C)' : '';
                     const nameHtml = name === 'Keiner' ? '<div class="player-name"></div>'
                         : !label ? ''
-                        : pro ? `<div class="player-name">${numVal && !bigNum && showName ? `<span class="pc-num">${numVal}</span>` : ''}<span>${esc(label.toUpperCase())}</span></div>`
-                        : `<div class="player-name">${esc(label)}</div>`;
+                        : pro ? `<div class="player-name">${numVal && !bigNum && showName ? `<span class="pc-num">${numVal}</span>` : ''}<span>${nameHtmlOf(label.toUpperCase())}</span></div>`
+                        : `<div class="player-name">${nameHtmlOf(label)}</div>`;
                     row.push({ slot: playerIdx, name, html: `<div class="pc-figure">${figure}</div>${nameHtml}` });
 
                     if (name !== "Keiner") {
@@ -5281,8 +5369,8 @@
                 // Spieler automatisch so verkleinern, dass alle Reihen ins Feld passen (leichte Überlappung erlaubt)
                 const isFeedP = pitch.id === 'pitch-feed';
                 const boxH = pitch.offsetHeight || ((isFeedP ? 365 : 616) - (headH ? headH * (isFeedP ? LM_FEED : 1) + (isFeedP ? 10 : 28) : 0) - (benchVisible ? (isFeedP ? 40 : 60) : 0));
-                const twoLines = showNamesAll && nameMode === 'full' && !pro;      // klassische Namen brechen oft in zwei Zeilen um
-                const cardH = (pro ? 94 : twoLines ? 72 : 60) * sizeF;
+                const twoLines = showNamesAll && (nameMode === 'stack' || (nameMode === 'full' && !pro));   // zweizeilige Namen
+                const cardH = (pro ? (nameMode === 'stack' ? 104 : 94) : twoLines ? 72 : 60) * sizeF;
                 const fit = Math.min(1, (boxH / rows.length) * 1.08 / cardH);
                 pitch.style.setProperty('--pc-size', (sizeF * fit).toFixed(3));
                 // Gezeichnetes Spielfeld
@@ -6560,6 +6648,7 @@
                     ${row('sponsors', `🤝 Sponsoren: ${(sd.sponsors || []).length}`, (sd.sponsors || []).length)}
                     ${row('templates', `🖼️ Hintergründe: ${(sd.templates || []).length}`, (sd.templates || []).length)}
                     ${row('styles', `✨ Gespeicherte Design-Stile: ${(sd.designStyles || []).length}`, (sd.designStyles || []).length)}
+                    ${row('fonts', `🔤 Eigene Schriften: ${(sd.fonts || []).length}`, (sd.fonts || []).length)}
                     ${row('lists', '🏷️ Mannschaften & Positionen (Auswahllisten)', 1)}
                 </div>
                 ${vRows ? `<div class="pack-group"><b>Grafiken (ersetzt die jeweilige Version)</b>${vRows}</div>` : ''}`;
@@ -6601,6 +6690,8 @@
                 doList('sponsors', 'sponsors', '🤝 Sponsoren');
                 doList('templates', 'templates', '🖼️ Hintergründe', t => t.id || nameKey(t));
                 doList('styles', 'designStyles', '✨ Design-Stile');
+                doList('fonts', 'fonts', '🔤 Eigene Schriften');
+                if (pick.has('fonts')) { registerCustomFonts(); refreshFontSelects(); }
                 if (pick.has('lists')) {
                     ['teams', 'positions'].forEach(f => {
                         const inc = sd[f] || [];
@@ -8493,6 +8584,8 @@
                 $(`btn-${currentVersion}`)?.classList.add('active');
 
                 buildDesignControls();
+                registerCustomFonts();
+                refreshFontSelects();
                 setupHelp();
                 setupCollapsibles();
                 document.addEventListener('toggle', e => { if (e.target.matches?.('.sidebar details')) rememberSection(e.target); }, true);
