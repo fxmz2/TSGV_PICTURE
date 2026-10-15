@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 19.7</title>
+    <title>ClubShot – Grafiken für Vereine 19.8</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -489,6 +489,8 @@
         .style-row { display: flex; gap: 6px; margin-bottom: 6px; }
         .style-del { background: #fff; border: 1px solid #f1c0c0; border-radius: 10px; padding: 0 10px; cursor: pointer; }
         .style-scope { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 2px 0 6px; }
+        /* Akzent-Linie unter Namen abschaltbar */
+        .no-accent :is(.potm-player-name, .spon-name, .bday-name, .transfer-name, .list-section-title, .pitch.pc-pro .player-name) { border-bottom: none !important; border-left: none !important; }
         /* Ohne Kästen: Schrift bekommt den Text-Schatten, damit sie auf Fotos lesbar bleibt */
         .no-boxes :is(.sponsor-text, .player-name, .pitch-bench .pb-line, .list-section-title, .list-item, .bench-tag, .tor-details, .xp-name, .potm-player-name,
             .kal-row, .kal-empty, .spon-name, .wk-row, .scorer-box, .bday-name, .transfer-name, .transfer-chip, .kader-info-block, .kader-freetext, .kader-grid-name) {
@@ -2180,7 +2182,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "19.7";
+        const APP_VERSION = "19.8";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3485,6 +3487,7 @@
             { key: 'boxColor', id: 'in-box-color', def: () => '#000000' },
             { key: 'boxText', id: 'in-box-text', def: () => '#ffffff' },
             { key: 'boxOpacity', id: 'in-box-opacity', def: () => '60' },
+            { key: 'accentLine', id: 'in-accent-line', def: () => true, check: true },
             { key: 'lmLogos', id: 'in-lm-logos', def: () => true, check: true },
             { key: 'lmNames', id: 'in-lm-names', def: () => true, check: true },
             { key: 'lmDate', id: 'in-lm-date', def: () => true, check: true },
@@ -3532,13 +3535,13 @@
         const STYLE_BASE = [['frameShape', 'in-frame-shape'], ['colorFrame', 'in-color-frame'], ['colorText', 'in-color-text'], ['font', 'in-font'],
             ['titleSize', 'in-size-title'], ['infoSize', 'in-size-info'], ['logoSize', 'in-logo-size']];
         const STYLE_EXTRA = ['titleFont', 'titleColorMode', 'titleColor', 'textEffect', 'letterSpacing', 'titleUpper', 'titleItalic',
-            'boxMode', 'boxColor', 'boxText', 'boxOpacity', 'logoGap', 'logoDir',
+            'boxMode', 'boxColor', 'boxText', 'boxOpacity', 'accentLine', 'logoGap', 'logoDir',
             'fieldStyle', 'fieldView', 'fieldShape', 'fieldOpacity', 'fieldSize', 'playerStyle', 'playerSize', 'pitchNameMode', 'pitchShadow', 'pitchBigNum',
             'lmLayout', 'lmLogoSize', 'lmTextSize', 'lmVs'];
         const F = n => FONT_LIST.find(f => f[0].includes(n))?.[0] || 'Arial, sans-serif';
         const STYLE_PRESETS = [
             { id: 'klassisch', name: '🏟️ Klassisch', v: { frameShape: 'circle', colorFrame: '#ffffff', colorText: '#ffffff', font: 'Arial, sans-serif', titleFont: '', titleColorMode: 'text',
-                textEffect: 'soft', letterSpacing: '0', titleUpper: true, titleItalic: false, boxMode: 'auto' } },
+                textEffect: 'soft', letterSpacing: '0', titleUpper: true, titleItalic: false, boxMode: 'auto', accentLine: true } },
             { id: 'modern', name: '✨ Modern', v: { frameShape: 'rounded', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Montserrat'), titleFont: F('Montserrat'), titleColorMode: 'text',
                 textEffect: 'strong', letterSpacing: '1', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#ffffff', boxText: '@primary', boxOpacity: '92' } },
             { id: 'kraeftig', name: '💪 Kräftig', v: { frameShape: 'shield', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Oswald'), titleFont: F('Anton'), titleColorMode: 'text',
@@ -3546,7 +3549,7 @@
             { id: 'retro', name: '📼 Retro', v: { frameShape: 'square', colorFrame: '#f1c40f', colorText: '#ffffff', font: F('Barlow'), titleFont: F('Graduate'), titleColorMode: 'custom', titleColor: '#f1c40f',
                 textEffect: 'outline', letterSpacing: '1', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#111111', boxText: '#f1c40f', boxOpacity: '85' } },
             { id: 'minimal', name: '◻️ Minimal', v: { frameShape: 'none', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Montserrat'), titleFont: '', titleColorMode: 'text',
-                textEffect: 'none', letterSpacing: '3', titleUpper: true, titleItalic: false, boxMode: 'none' } },
+                textEffect: 'none', letterSpacing: '3', titleUpper: true, titleItalic: false, boxMode: 'none', accentLine: false } },
             { id: 'neon', name: '⚡ Leuchten', v: { frameShape: 'circle', colorFrame: '@jersey', colorText: '#ffffff', font: F('Kanit'), titleFont: F('Teko'), titleColorMode: 'text',
                 textEffect: 'glow', letterSpacing: '2', titleUpper: true, titleItalic: true, boxMode: 'custom', boxColor: '#000000', boxText: '#ffffff', boxOpacity: '70' } }
         ];
@@ -3743,6 +3746,7 @@
                                 <div class="control-group"><label>Kasten-Farbe</label><input type="color" id="in-box-color-${tab}" value="#000000" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
                                 <div class="control-group"><label>Schrift im Kasten</label><input type="color" id="in-box-text-${tab}" value="#ffffff" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
                             </div>
+                            <div class="control-group"><label><input type="checkbox" id="in-accent-line-${tab}" checked onchange="updateTabDesign('${tab}'); scheduleSave();"> Akzent-Linie unter Namen (in Akzent-/Trikotfarbe)</label></div>
                             <div class="control-group"><label>Deckkraft der Kästen</label><input type="range" id="in-box-opacity-${tab}" min="0" max="100" step="5" value="60" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
                             <div class="design-sub">Rahmen <small>– um Fotos und Wappen</small></div>
                             <div class="control-group"><label>Rahmenfarbe</label><input type="color" id="in-color-frame-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
@@ -4455,6 +4459,7 @@
                 // Kästen (Namensschilder, Listen …): eigene Farbe, Schrift und Deckkraft – oder ganz ohne Kästen
                 const boxMode = val(`in-box-mode-${tab}`);
                 viewContainer.classList.toggle('no-boxes', boxMode === 'none');
+                viewContainer.classList.toggle('no-accent', $(`in-accent-line-${tab}`) ? !$(`in-accent-line-${tab}`).checked : false);
                 if (boxMode === 'none') {
                     viewContainer.style.setProperty('--box-bg', 'transparent');
                     viewContainer.style.setProperty('--box-fg', textColVal);
