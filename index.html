@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 20.0</title>
+    <title>ClubShot – Grafiken für Vereine 20.1</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -452,6 +452,7 @@
         .sd-meta select, .sd-meta input { font-size: 11px; padding: 2px 3px; border: 1px solid #ccc; border-radius: 4px; background: #fff; min-width: 0; }
         .sd-meta select { flex: 1 1 42%; max-width: 140px; }
         .sd-meta input { width: 38px; text-align: center; }
+        .sd-meta input.sd-nick { width: auto; flex: 1 1 42%; max-width: 140px; text-align: left; }
         .num-input[hidden], #new-number-field[hidden] { display: none; }
         .sd-group-head { position: sticky; top: 0; z-index: 1; background: #eef3f5; color: #0b3b47; font-size: 11px; font-weight: bold; text-transform: uppercase;
             letter-spacing: 0.5px; padding: 4px 6px; margin-top: 6px; border-radius: 4px; }
@@ -1109,6 +1110,7 @@
                             <span class="hint" id="consent-summary">Pro Spieler festhalten, ob eine Einwilligung zur Veröffentlichung von Foto und Name vorliegt. Beim Teilen warnt die App, wenn jemand ohne Einwilligung abgebildet ist.</span>
                         </div>
                         <div class="control-group"><label>Name</label><input type="text" id="new-player-name" placeholder="z.B. Max Mustermann"></div>
+                        <div class="control-group"><label>Spitzname (optional)</label><input type="text" id="new-player-nick" placeholder="z.B. Mäxle" maxlength="30"></div>
                         <div class="control-group">
                             <label>Rolle</label>
                             <select id="new-player-group">
@@ -1313,7 +1315,7 @@
 
                 <div class="control-group"><label>Torschütze</label><select id="in-tor-player" class="player-select" onchange="updateTor();"></select></div>
                 <div class="control-group"><label>Vorlagengeber (Optional)</label><select id="in-tor-assist" class="player-select" onchange="updateTor();"></select></div>
-                <div class="control-group"><label><input type="checkbox" id="in-tor-name-stack" onchange="updateTor(); scheduleSave();"> Vor- und Nachname untereinander</label></div>
+                <div class="control-group"><label>Name anzeigen als</label><select id="in-tor-namefmt" class="namefmt-select" onchange="updateTor(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
                 <div class="control-group"><label>Spielstand</label><input type="text" id="in-tor-score" value="1 : 0" oninput="updateTor();"></div>
                 <div class="control-group"><label>Minute</label><input type="text" id="in-tor-minute" value="12. Min" oninput="updateTor();"></div>
 
@@ -1334,6 +1336,7 @@
                 <div class="control-group">
                     <label><input type="checkbox" id="in-erg-show-scorers" checked onchange="updateErgebnis();"> Torschützen anzeigen</label>
                 </div>
+                <div class="control-group"><label>Torschützen anzeigen als</label><select id="in-erg-namefmt" class="namefmt-select" onchange="updateErgebnis(); scheduleSave();"><option value="short">Kurz (M. Mustermann)</option><option value="full">Vor- und Nachname</option><option value="last">Nur Nachname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
                 <label>Torschützen (Spieler + Minute)</label>
                 <div class="scrollable-controls-box" id="scorer-controls"></div>
 
@@ -1350,7 +1353,7 @@
                 <div class="control-group"><label>Spieltagsdienst 1</label><select id="in-kader-duty-1" class="player-select" onchange="updateKader();"></select></div>
                 <div class="control-group"><label>Spieltagsdienst 2</label><select id="in-kader-duty-2" class="player-select" onchange="updateKader();"></select></div>
                 <div class="control-group"><label>Zusatz / Fließtext</label><input type="text" id="in-kader-freetext" value="12 Bälle, Hütchen, Medi-Tasche" oninput="updateKader();"></div>
-                <div class="control-group"><label><input type="checkbox" id="in-kader-name-stack" onchange="updateKader(); scheduleSave();"> Vor- und Nachname untereinander</label></div>
+                <div class="control-group"><label>Name anzeigen als</label><select id="in-kader-namefmt" class="namefmt-select" onchange="updateKader(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
 
                 <button type="button" class="copy-action-btn" style="background:#c1121f;" onclick="clearKader()">🧹 Kader leeren (alle Spieler entfernen)</button>
                 <label>Spieler auswählen (Kader, max. 20)</label>
@@ -1371,6 +1374,7 @@
                 <button type="button" class="copy-action-btn" style="background:#005f73; font-size:13px; padding:10px;" onclick="copyS11ToEckball()">🔄 Startelf von Aufstellung übernehmen</button>
                 <hr style="margin:10px 0; border:none; border-top:1px solid #ccc;">
 
+                <div class="control-group"><label>Namen anzeigen als</label><select id="in-eck-namefmt" class="namefmt-select" onchange="updateEckball(); scheduleSave();"><option value="last">Nur Nachname</option><option value="full">Vor- und Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
                 <div class="control-group">
                     <label>Akteure an der Ecke</label>
                     <div class="player-input-row"><select id="eck-player-1" class="player-select eck-select"></select> <span style="font-size:10px; width:60px;">(Schütze)</span></div>
@@ -1403,7 +1407,7 @@
 
                 <div class="control-group"><label>Spieler</label><select id="in-potm-player" class="player-select" onchange="updatePotm();"></select></div>
                 <div class="control-group"><label>Match Info</label><input type="text" id="in-potm-text" value="3 Tore" oninput="updatePotm();"></div>
-                <div class="control-group"><label><input type="checkbox" id="in-potm-name-stack" onchange="updatePotm(); scheduleSave();"> Vor- und Nachname untereinander</label></div>
+                <div class="control-group"><label>Name anzeigen als</label><select id="in-potm-namefmt" class="namefmt-select" onchange="updatePotm(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('potm')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
@@ -1464,7 +1468,7 @@
                 <div id="design-controls-geburtstag"></div>
 
                 <div class="control-group"><label>Geburtstagskind</label><select id="in-bday-player" class="player-select" onchange="updateGeburtstag();"></select></div>
-                <div class="control-group"><label><input type="checkbox" id="in-bday-name-stack" onchange="updateGeburtstag(); scheduleSave();"> Vor- und Nachname untereinander</label></div>
+                <div class="control-group"><label>Name anzeigen als</label><select id="in-bday-namefmt" class="namefmt-select" onchange="updateGeburtstag(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-bday-title" value="HAPPY BIRTHDAY" oninput="updateGeburtstag();"></div>
                 <div class="control-group"><label>Text</label><input type="text" id="in-bday-text" value="Alles Gute zum Geburtstag!" oninput="updateGeburtstag();"></div>
                 <div class="control-group"><label><input type="checkbox" id="in-bday-confetti" checked onchange="updateGeburtstag();"> Konfetti anzeigen</label></div>
@@ -1485,7 +1489,7 @@
                     </select>
                 </div>
                 <div class="control-group"><label>Spieler</label><select id="in-new-player" class="player-select" onchange="updateNeuzugang();"></select></div>
-                <div class="control-group"><label><input type="checkbox" id="in-new-name-stack" onchange="updateNeuzugang(); scheduleSave();"> Vor- und Nachname untereinander</label></div>
+                <div class="control-group"><label>Name anzeigen als</label><select id="in-new-namefmt" class="namefmt-select" onchange="updateNeuzugang(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
                 <button type="button" class="copy-action-btn" style="background:#5a4fcf;" onclick="openBulkDialog()">👥 Für mehrere Spieler auf einmal erstellen (Bilder & Reels)</button>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-new-title" value="NEUZUGANG" oninput="updateNeuzugang();"></div>
                 <div style="display:flex; gap: 8px;">
@@ -2195,7 +2199,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "20.0";
+        const APP_VERSION = "20.1";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2892,6 +2896,7 @@
             if (!name) { alert("Bitte einen Namen eingeben!"); return; }
             const group = val('new-player-group') || 'Spieler';
             const team = val('new-player-team'), position = val('new-player-position'), number = normName(val('new-player-number'));
+            const nick = normName(val('new-player-nick'));
             const file = $('new-player-img').files[0];
             const torFile = $('new-player-torimg').files[0];
             try {
@@ -2903,6 +2908,7 @@
                     if (team) p.team = team;
                     if (position) p.position = position;
                     if (number) p.number = number;
+                    if (nick) p.nick = nick;
                     if (img) { p.img = img; delete p.cutImg; }
                     if (torImg) { p.torImg = torImg; delete p.torCutImg; }
                 } else {
@@ -2910,11 +2916,13 @@
                     if (team) np.team = team;
                     if (position) np.position = position;
                     if (number) np.number = number;
+                    if (nick) np.nick = nick;
                     stammdaten.players.push(np);
                 }
             } catch (e) { alert(e.message); return; }
             $('new-player-name').value = '';
             $('new-player-number').value = '';
+            $('new-player-nick').value = '';
             $('new-player-img').value = '';
             $('new-player-torimg').value = '';
             await onStammdatenChanged('players');
@@ -3125,8 +3133,9 @@
                             <select title="Mannschaft" onchange="setPlayerField(${i}, 'team', this.value)">${teamOptionsHTML(e.team, '– Mannschaft –')}</select>
                             ${(e.group || 'Spieler') === 'Spieler' ? `<select title="Position" onchange="setPlayerField(${i}, 'position', this.value)">${positionOptionsHTML(e.position, '– Position –')}</select>
                             <input type="text" title="Rückennummer" placeholder="Nr." maxlength="3" value="${esc(e.number || '')}" onchange="setPlayerField(${i}, 'number', this.value)">` : ''}
+                            <input type="text" class="sd-nick" title="Spitzname (optional)" placeholder="Spitzname" maxlength="30" value="${esc(e.nick || '')}" onchange="setPlayerField(${i}, 'nick', this.value)">
                         </div>`;
-                        btns = btn('📷', 'Foto ändern', `changeEntryImage('players', ${i}, 'img')`) + btn('⚽', 'Torjubel-Foto ändern', `changeEntryImage('players', ${i}, 'torImg')`)
+                        btns = btn('✏️', 'Namen ändern', `renamePlayer(${i})`) + btn('📷', 'Foto ändern', `changeEntryImage('players', ${i}, 'img')`) + btn('⚽', 'Torjubel-Foto ändern', `changeEntryImage('players', ${i}, 'torImg')`)
                             + (e.img || e.torImg ? btn('✂️', e.cutImg || e.torCutImg ? 'Freistellung entfernen' : 'Hintergrund entfernen', `togglePlayerCutout(${i})`, e.cutImg || e.torCutImg ? 'active' : '') : '');
                     } else if (type === 'templates') {
                         thumb = e.thumb; thumbCls = e.format === 'story' ? 'story' : '';
@@ -3177,6 +3186,37 @@
             value = normName(value);
             if (value) p[field] = value; else delete p[field];
             await onStammdatenChanged('players');
+        }
+        /* Spieler umbenennen – der neue Name wird auch in allen drei Versionen (Aufstellung, Tor, Kader …) übernommen */
+        async function renamePlayer(idx) {
+            const p = stammdaten.players[idx];
+            if (!p) return;
+            const oldName = p.name;
+            const input = prompt('Neuer Name für „' + oldName + '“:', oldName);
+            if (input === null) return;
+            const newName = normName(input);
+            if (!newName || newName === oldName) return;
+            if (newName === 'Keiner' || findPlayer(newName)) { alert(`„${newName}“ gibt es schon – bitte einen anderen Namen wählen.`); return; }
+            await saveSlotNow();
+            const swap = o => {
+                if (Array.isArray(o)) return o.map(swap);
+                if (o && typeof o === 'object') { for (const k in o) o[k] = swap(o[k]); return o; }
+                return o === oldName ? newName : o;
+            };
+            for (const v of ['v1', 'v2', 'v3']) {
+                const d = await localforage.getItem(STORE.slot(v));
+                if (d) await localforage.setItem(STORE.slot(v), swap(d));
+            }
+            p.name = newName;
+            const cur = await localforage.getItem(STORE.slot(currentVersion));
+            sortStammdaten();
+            await saveStammdaten();
+            refreshPlayerOptions();
+            if (cur) applySlotData(cur);
+            renderStammdatenLists();
+            renderAll();
+            resetHistory();
+            toast(`✅ „${oldName}“ heißt jetzt „${newName}“`);
         }
         function parseLines(text) {
             const out = [];
@@ -3521,7 +3561,7 @@
             { key: 'xp2', id: 'in-xp2', def: () => 'Keiner' },
             { key: 'xp3', id: 'in-xp3', def: () => 'Keiner' },
             { key: 'xpNames', id: 'in-xp-names', def: () => true, check: true },
-            { key: 'xpStack', id: 'in-xp-stack', def: () => false, check: true }
+            { key: 'xpNameFmt', id: 'in-xp-namefmt', def: () => 'full' }
         ];
         function collectExtraDesign(t) {
             const o = {};
@@ -3532,7 +3572,8 @@
             EXTRA_DESIGN.forEach(f => {
                 const el = $(`${f.id}-${t}`);
                 if (!el) return;
-                const v = s && s[f.key] !== undefined ? s[f.key] : f.def(t);
+                // Ältere Stände kannten nur „untereinander“ (xpStack) statt des Namensformats
+                const v = s && s[f.key] !== undefined ? s[f.key] : f.key === 'xpNameFmt' && s?.xpStack ? 'stack' : f.def(t);
                 if (f.check) el.checked = !!v; else el.value = v;
             });
         }
@@ -3687,7 +3728,9 @@
                                     <option value="stack">Vor- und Nachname untereinander</option>
                                     <option value="last">Nur Nachname</option>
                                     <option value="first">Nur Vorname</option>
-                                </select></div>
+                                    <option value="nick">Spitzname (sonst Nachname)</option>
+                                </select>
+                                <span class="hint">Gilt auch für Liste, Ersatzbank und Trainer.</span></div>
                             <div class="ct-checks">
                                 <label><input type="checkbox" id="in-pitch-names-${tab}" checked ${on}> Namen anzeigen</label>
                                 <label class="adv-only"><input type="checkbox" id="in-pitch-shadow-${tab}" checked ${on}> Schatten auf dem Rasen (Profi)</label>
@@ -3830,7 +3873,7 @@
                             <label>Zusätzliche Spieler im Bild (bis zu 3)</label>
                             ${[1, 2, 3].map(i => `<div class="control-group"><select id="in-xp${i}-${tab}" class="player-select" onchange="updateTabDesign('${tab}')"></select></div>`).join('')}
                             <div class="control-group"><label><input type="checkbox" id="in-xp-names-${tab}" checked onchange="updateTabDesign('${tab}')"> Namen unter den Spielern anzeigen</label>
-                                <label><input type="checkbox" id="in-xp-stack-${tab}" onchange="updateTabDesign('${tab}')"> Vor- und Nachname untereinander</label></div>
+                                <label>Name anzeigen als</label><select id="in-xp-namefmt-${tab}" class="namefmt-select" onchange="updateTabDesign('${tab}')"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
                             <span class="hint">Die Spieler erscheinen in Beitrag und Story und lassen sich in der Vorschau verschieben und größer/kleiner ziehen.</span>
                             </div>
                         </div>
@@ -4080,20 +4123,20 @@
         const TAB_CONTENT = {
             post:       { keys: ['venue', 'opponentSelect', 'postTitle', 'postDate', 'postTime'], inputs: [] },
             story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly', 'captain', 'pitchHideNames', 'lineupMatch', 'lineupSub'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
-            tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute', 'torNameStack'], inputs: [] },
-            ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers'], inputs: [/^erg-/] },
-            kader:      { keys: ['kaderMeeting', 'kaderJersey', 'kaderDuty1', 'kaderDuty2', 'kaderFreetext', 'kaderNameStack'], inputs: [/^kader-player-/] },
-            potm:       { keys: ['potmPlayer', 'potmText', 'potmNameStack'], inputs: [] },
+            tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute', 'torNameFmt'], inputs: [] },
+            ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers', 'ergNameFmt'], inputs: [/^erg-/] },
+            kader:      { keys: ['kaderMeeting', 'kaderJersey', 'kaderDuty1', 'kaderDuty2', 'kaderFreetext', 'kaderNameFmt'], inputs: [/^kader-player-/] },
+            potm:       { keys: ['potmPlayer', 'potmText', 'potmNameFmt'], inputs: [] },
             kalender:   { keys: ['season'], inputs: [/^in-kal-(mode|title)$/, /^kal-/] },
-            geburtstag: { keys: ['bdayConfetti', 'bdayNameStack'], inputs: [/^in-bday-/] },
+            geburtstag: { keys: ['bdayConfetti', 'bdayNameFmt'], inputs: [/^in-bday-/] },
             neuzugang:  { keys: [], inputs: [/^in-new-/] },
             sponsor:    { keys: [], inputs: [/^in-spon-/] },
             wochenende: { keys: [], inputs: [/^in-wk-/, /^wk-/] },
-            eckball:    { keys: ['eckArrows', 'eckNodes'], inputs: [/^eck-/] }
+            eckball:    { keys: ['eckArrows', 'eckNodes', 'eckNameFmt'], inputs: [/^eck-/] }
         };
         const TAB_DESIGN_EXTRA = {
             story:    { keys: ['pitchMode', 'showNumbers2'], inputs: [] },
-            neuzugang: { keys: ['newShowNumber', 'newShowPosition', 'newShowTeam', 'newNameStack'], inputs: [] },
+            neuzugang: { keys: ['newShowNumber', 'newShowPosition', 'newShowTeam', 'newNameFmt'], inputs: [] },
             tor:      { keys: ['torImgSize'], inputs: [] },
             kalender: { keys: ['kalOwnLogo'], inputs: [/^in-kal-color-/] },
             wochenende: { keys: ['wkOwnLogo'], inputs: [] }
@@ -4133,7 +4176,7 @@
             const what = $(`tabcopy-what-${tab}`) ? val(`tabcopy-what-${tab}`) : 'all';
             if (!from || from === currentVersion) return;
             await saveSlotNow();
-            const src = await localforage.getItem(STORE.slot(from));
+            const src = migrateNameFmt(await localforage.getItem(STORE.slot(from)));
             if (!src) { alert(`In „${versionLabel(from)}“ ist noch nichts gespeichert.`); return; }
             const copy = o => JSON.parse(JSON.stringify(o ?? null));
             const data = collectSlotData();
@@ -5193,7 +5236,7 @@
                 const src = getPlayerImageSrc(name, tab);
                 if (img.getAttribute('src') !== src) img.src = src;
                 const nm = el.querySelector('.xp-name');
-                nm.innerHTML = stackNameHtml(name, $(`in-xp-stack-${tab}`)?.checked);
+                nm.innerHTML = playerNameHtml(name, val(`in-xp-namefmt-${tab}`));
                 nm.style.display = showNames ? '' : 'none';
             });
         }
@@ -5332,11 +5375,8 @@
             const fieldStyle = val('in-field-style-story') || 'none';
             const persp = adv && val('in-field-view-story') === 'persp';
             const nameMode = val('in-pitch-namemode-story') || 'full';
-            const shortName = n => {
-                const parts = String(n).trim().split(/\s+/);
-                if (nameMode === 'stack') return parts.length > 1 ? parts[0] + '\n' + parts.slice(1).join(' ') : n;   // Vorname oben, Nachname darunter
-                return nameMode === 'last' ? parts[parts.length - 1] : nameMode === 'first' ? parts[0] : n;
-            };
+            const shortName = n => playerDisplayName(n, nameMode);
+            const lineName = n => esc(playerDisplayName(n, nameMode === 'stack' ? 'full' : nameMode));   // Liste, Bank, Trainer: einzeilig
             const nameHtmlOf = t => esc(t).replace(/\n/g, '<br>');
             const formKey = formType.replace(/[^\w-]/g, '_');
 
@@ -5396,7 +5436,7 @@
                         starterListHTML += `
                             <div class="list-item">
                                 <img class="list-item-img" src="${getPlayerImageSrc(name, 'story')}" alt="">
-                                <b>${numVal ? numVal + '.' : ''}</b> ${esc(name)}${isCap ? ' (C)' : ''}
+                                <b>${numVal ? numVal + '.' : ''}</b> ${lineName(name)}${isCap ? ' (C)' : ''}
                             </div>`;
                     }
                     playerIdx++;
@@ -5407,8 +5447,8 @@
             // Ersatzbank & Trainer unter dem Spielfeld (vor dem Zeichnen, damit das Feld nicht überlappt)
             const benchOn = !!$('in-pitch-bench-story')?.checked;
             const benchNames = [], coachNames = [];
-            for (let i = 1; i <= 7; i++) { const n = val(`bench-player-${i}`); if (n && n !== 'Keiner') benchNames.push(esc(n)); }
-            ['in-coach-1', 'in-coach-2'].forEach(id => { const n = val(id); if (n && n !== 'Keiner') coachNames.push(esc(n)); });
+            for (let i = 1; i <= 7; i++) { const n = val(`bench-player-${i}`); if (n && n !== 'Keiner') benchNames.push(lineName(n)); }
+            ['in-coach-1', 'in-coach-2'].forEach(id => { const n = val(id); if (n && n !== 'Keiner') coachNames.push(lineName(n)); });
             const benchHtml = (benchNames.length ? `<div class="pb-line"><b>${esc(L('story', 'bench'))}</b>${benchNames.join(' · ')}</div>` : '')
                 + (coachNames.length ? `<div class="pb-line"><b>${esc(L('story', 'coaches'))}</b>${coachNames.join(' · ')}</div>` : '');
             const benchVisible = benchOn && !!benchHtml;
@@ -5513,7 +5553,7 @@
             let benchListHTML = '';
             for (let i = 1; i <= 7; i++) {
                 let name = val(`bench-player-${i}`) || "Keiner";
-                if (name !== "Keiner") benchListHTML += `<span class="bench-tag">${esc(name)}</span>`;
+                if (name !== "Keiner") benchListHTML += `<span class="bench-tag">${lineName(name)}</span>`;
             }
             if ($('out-list-bench')) $('out-list-bench').innerHTML = benchListHTML || esc(L('story', 'noBench'));
 
@@ -5536,8 +5576,8 @@
             setText('out-tor-minute', minute);
             setText('out-tor-minute-feed', minute);
 
-            const torStack = !!$('in-tor-name-stack')?.checked;
-            const shownName = name !== "Keiner" ? stackNameHtml(name, torStack) : '-';
+            const torFmt = val('in-tor-namefmt') || 'full';
+            const shownName = name !== "Keiner" ? playerNameHtml(name, torFmt) : '-';
             const scorerLbl = L('tor', 'scorer');
             const scorerHtml = (scorerLbl ? esc(scorerLbl) + '<br>' : '') + shownName;
             if ($('out-tor-player-name')) $('out-tor-player-name').innerHTML = scorerHtml;
@@ -5552,9 +5592,8 @@
                 if (!wrap || !imgEl || !nameEl) return;
                 if (assistName !== "Keiner") {
                     wrap.style.display = "flex";
-                    const parts = assistName.split(' ');
-                    if (torStack) nameEl.innerHTML = stackNameHtml(assistName, true);
-                    else nameEl.innerText = parts.length > 1 ? parts[0][0] + '. ' + parts.slice(1).join(' ') : assistName;
+                    // Vorlagengeber: bei „Vor- und Nachname“ kurz als „M. Mustermann“, sonst wie der Torschütze
+                    nameEl.innerHTML = playerNameHtml(assistName, torFmt === 'full' ? 'short' : torFmt);
                     imgEl.src = getPlayerImageSrc(assistName, 'tor');
                 } else {
                     wrap.style.display = "none";
@@ -5577,11 +5616,6 @@
             updateScorers();
         }
 
-        function shortName(name) {
-            const parts = name.trim().split(/\s+/);
-            return parts.length > 1 ? `${parts[0][0]}. ${parts.slice(1).join(' ')}` : name;
-        }
-
         /* Torschützen gruppiert: "F. Munz 12', 56' · L. Bader 78'" */
         function updateScorers() {
             const groups = [];
@@ -5600,7 +5634,8 @@
             const head = headLbl ? `<div class="scorer-head">${esc(headLbl)}</div>` : '';
             const mins = g => g.minutes.length ? ' ' + g.minutes.map(m => esc(m) + "'").join(', ') : '';
 
-            const feedHtml = `${head}<div class="scorer-line">${groups.map(g => esc(g.name === OWN_GOAL ? label(g) : shortName(g.name)) + mins(g)).join(' · ')}</div>`;
+            const fmt = val('in-erg-namefmt') || 'short';
+            const feedHtml = `${head}<div class="scorer-line">${groups.map(g => esc(g.name === OWN_GOAL ? label(g) : playerDisplayName(g.name, fmt)) + mins(g)).join(' · ')}</div>`;
             const storyHtml = `${head}${groups.map(g => `<div class="scorer-line">${esc(label(g))}${mins(g)}</div>`).join('')}`;
             [['out-erg-scorers-wrap-feed', 'out-erg-scorers-feed', feedHtml], ['out-erg-scorers-wrap', 'out-erg-scorers', storyHtml]].forEach(([wrapId, boxId, html]) => {
                 const wrap = $(wrapId), box = $(boxId);
@@ -5639,7 +5674,7 @@
             const src = getPlayerImageSrc(name, 'geburtstag');
             ['', '-feed'].forEach(sfx => {
                 setText(`out-bday-title${sfx}`, val('in-bday-title'));
-                if ($(`out-bday-name${sfx}`)) $(`out-bday-name${sfx}`).innerHTML = name !== 'Keiner' ? stackNameHtml(name, $('in-bday-name-stack')?.checked) : '-';
+                if ($(`out-bday-name${sfx}`)) $(`out-bday-name${sfx}`).innerHTML = name !== 'Keiner' ? playerNameHtml(name, val('in-bday-namefmt')) : '-';
                 setText(`out-bday-text${sfx}`, val('in-bday-text'));
                 const img = $(`out-bday-img${sfx}`);
                 if (img && img.getAttribute('src') !== src) img.src = src;
@@ -5775,7 +5810,7 @@
             }
             ['', '-feed'].forEach(sfx => {
                 setText(`out-new-title${sfx}`, val('in-new-title'));
-                if ($(`out-new-name${sfx}`)) $(`out-new-name${sfx}`).innerHTML = name !== 'Keiner' ? stackNameHtml(name, $('in-new-name-stack')?.checked) : '-';
+                if ($(`out-new-name${sfx}`)) $(`out-new-name${sfx}`).innerHTML = name !== 'Keiner' ? playerNameHtml(name, val('in-new-namefmt')) : '-';
                 setText(`out-new-text${sfx}`, val('in-new-text'));
                 const chipsEl = $(`out-new-chips${sfx}`);
                 if (chipsEl) { chipsEl.innerHTML = chips; chipsEl.style.display = chips ? '' : 'none'; }
@@ -5794,7 +5829,7 @@
                     html += `
                         <div style="display:flex; flex-direction:column; align-items:center;">
                             <img class="kader-grid-img" src="${getPlayerImageSrc(name, 'kader')}" alt="">
-                            <div class="kader-grid-name">${stackNameHtml(name, $('in-kader-name-stack')?.checked)}</div>
+                            <div class="kader-grid-name">${playerNameHtml(name, val('in-kader-namefmt'))}</div>
                         </div>`;
                 }
             }
@@ -5821,16 +5856,37 @@
             }
         }
 
-        /* Name als HTML – optional Vorname oben, Nachname darunter */
-        function stackNameHtml(name, stack) {
-            const parts = String(name || '').trim().split(/\s+/);
-            return stack && parts.length > 1 ? esc(parts[0]) + '<br>' + esc(parts.slice(1).join(' ')) : esc(name);
+        /* Anzeigename eines Spielers: full = Vor- und Nachname, stack = untereinander (Zeilenumbruch \n),
+           last = Nachname, first = Vorname, short = „M. Mustermann“, nick = Spitzname (ohne Spitzname: Nachname) */
+        function playerDisplayName(name, fmt) {
+            const n = normName(name);
+            if (fmt === 'nick') {
+                const nick = normName(findPlayer(name)?.nick);
+                if (nick) return nick;
+                fmt = 'last';
+            }
+            const parts = n.split(' ');
+            if (parts.length < 2) return n;
+            const first = parts[0], last = parts.slice(1).join(' ');
+            return fmt === 'stack' ? first + '\n' + last : fmt === 'last' ? last : fmt === 'first' ? first : fmt === 'short' ? `${first[0]}. ${last}` : n;
+        }
+        function playerNameHtml(name, fmt) { return esc(playerDisplayName(name, fmt)).replace(/\n/g, '<br>'); }
+        // Namensformat je Reiter: [Auswahlfeld, Speicherschlüssel, alter Schlüssel „untereinander“, Standard]
+        const NAME_FMT_FIELDS = [
+            ['in-tor-namefmt', 'torNameFmt', 'torNameStack', 'full'], ['in-kader-namefmt', 'kaderNameFmt', 'kaderNameStack', 'full'],
+            ['in-potm-namefmt', 'potmNameFmt', 'potmNameStack', 'full'], ['in-bday-namefmt', 'bdayNameFmt', 'bdayNameStack', 'full'],
+            ['in-new-namefmt', 'newNameFmt', 'newNameStack', 'full'], ['in-erg-namefmt', 'ergNameFmt', null, 'short'],
+            ['in-eck-namefmt', 'eckNameFmt', null, 'last']
+        ];
+        function migrateNameFmt(d) {
+            if (d) NAME_FMT_FIELDS.forEach(([, k, legacy, def]) => { if (d[k] === undefined) d[k] = legacy && d[legacy] ? 'stack' : def; });
+            return d;
         }
         function updatePotm() {
             const name = val('in-potm-player') || "Keiner";
             const text = val('in-potm-text');
 
-            const potmName = name !== "Keiner" ? stackNameHtml(name, $('in-potm-name-stack')?.checked) : '-';
+            const potmName = name !== "Keiner" ? playerNameHtml(name, val('in-potm-namefmt')) : '-';
             ['out-potm-name', 'out-potm-name-feed'].forEach(id => { if ($(id)) $(id).innerHTML = potmName; });
             setText('out-potm-text', text);
             setText('out-potm-text-feed', text);
@@ -6102,8 +6158,7 @@
 
         function formatEckName(name) {
             if (!name || name === "Keiner") return "-";
-            let parts = name.trim().split(" ");
-            return parts.length > 1 ? parts[parts.length - 1].toUpperCase() : parts[0].toUpperCase();
+            return playerDisplayName(name, val('in-eck-namefmt') || 'last').toLocaleUpperCase('de-DE');
         }
 
         function getRoleIcon(role) {
@@ -6428,11 +6483,6 @@
                 newShowNumber: !!$('in-new-show-number')?.checked,
                 newShowPosition: $('in-new-show-position')?.checked ?? true,
                 newShowTeam: $('in-new-show-team')?.checked ?? true,
-                kaderNameStack: !!$('in-kader-name-stack')?.checked,
-                potmNameStack: !!$('in-potm-name-stack')?.checked,
-                torNameStack: !!$('in-tor-name-stack')?.checked,
-                bdayNameStack: !!$('in-bday-name-stack')?.checked,
-                newNameStack: !!$('in-new-name-stack')?.checked,
 
                 venue: val('in-post-venue') || 'heim',
                 opponentSelect: val('in-post-opponent-select'),
@@ -6486,6 +6536,10 @@
                 eckArrows: eckArrows,
                 eckNodes: eckNodes
             };
+            NAME_FMT_FIELDS.forEach(([id, k, legacy, def]) => {
+                data[k] = val(id) || def;
+                if (legacy) data[legacy] = data[k] === 'stack';   // für ältere App-Versionen
+            });
 
             const inputIds = ['in-kal-mode', 'in-kal-title', 'in-kal-color-home', 'in-kal-color-away',
                 'in-bday-player', 'in-bday-title', 'in-bday-text',
@@ -6562,10 +6616,8 @@
             if ($('in-new-show-number')) $('in-new-show-number').checked = !!data.newShowNumber;
             if ($('in-new-show-position')) $('in-new-show-position').checked = data.newShowPosition ?? true;
             if ($('in-new-show-team')) $('in-new-show-team').checked = data.newShowTeam ?? true;
-            if ($('in-kader-name-stack')) $('in-kader-name-stack').checked = !!data.kaderNameStack;
-            if ($('in-potm-name-stack')) $('in-potm-name-stack').checked = !!data.potmNameStack;
-            [['in-tor-name-stack', 'torNameStack'], ['in-bday-name-stack', 'bdayNameStack'], ['in-new-name-stack', 'newNameStack']]
-                .forEach(([id, k]) => { if ($(id)) $(id).checked = !!data[k]; });
+            migrateNameFmt(data);
+            NAME_FMT_FIELDS.forEach(([id, k]) => setVal(id, data[k]));
             updateNumberInputs();
             if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
             if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
@@ -8596,7 +8648,7 @@
             if (!confirm(`${whatLabel} von „${versionLabel(from)}“ nach „${versionLabel(to)}“ kopieren?\n\nDie entsprechenden Einstellungen in „${versionLabel(to)}“ werden dabei überschrieben.`)) return;
 
             await saveSlotNow();
-            const src = await localforage.getItem(STORE.slot(from));
+            const src = migrateNameFmt(await localforage.getItem(STORE.slot(from)));
             if (!src) { alert(`In „${versionLabel(from)}“ ist noch nichts gespeichert.`); return; }
             const tgt = await localforage.getItem(STORE.slot(to)) || {};
             const clone = o => JSON.parse(JSON.stringify(o ?? null));

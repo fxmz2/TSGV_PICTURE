@@ -264,8 +264,17 @@ async function makePhotos(browser) {
 
         // Spielervorstellung: Position & Mannschaft optional
         await page.evaluate(() => { switchTab('neuzugang'); const pl = stammdaten.players.find(x => x.position && x.team); setVal('in-new-player', pl.name); setVal('in-new-mode', 'vorstellung'); $('in-new-show-position').checked = false; $('in-new-show-team').checked = false; updateNeuzugang(); });
-        await page.evaluate(() => { $('in-new-name-stack').checked = true; updateNeuzugang(); });
+        await page.evaluate(() => { setVal('in-new-namefmt', 'stack'); updateNeuzugang(); });
         check('Neuzugang: Name untereinander', await page.$eval('#out-new-name', e => e.innerHTML.includes('<br>')));
+        // Spitzname & Namensformat
+        const nickInfo = await page.evaluate(() => { const pl = stammdaten.players.find(x => x.name === val('in-new-player')); pl.nick = 'Testi'; setVal('in-new-namefmt', 'nick'); updateNeuzugang();
+            const a = $('out-new-name').textContent; setVal('in-new-namefmt', 'last'); updateNeuzugang(); const b = $('out-new-name').textContent; delete pl.nick; setVal('in-new-namefmt', 'nick'); updateNeuzugang();
+            return { a, b, c: $('out-new-name').textContent, last: pl.name.split(' ').slice(1).join(' ') }; });
+        check('Spitzname als Name', nickInfo.a === 'Testi', JSON.stringify(nickInfo));
+        check('Nur Nachname', nickInfo.b === nickInfo.last, JSON.stringify(nickInfo));
+        check('Ohne Spitzname → Nachname', nickInfo.c === nickInfo.last, JSON.stringify(nickInfo));
+        check('Namensformat wird gespeichert', await page.evaluate(() => { const d = collectSlotData(); setVal('in-new-namefmt', 'full'); applySlotData(d); return val('in-new-namefmt') === 'nick'; }));
+        check('Alte Stände (untereinander) werden übernommen', await page.evaluate(() => { const d = collectSlotData(); delete d.newNameFmt; d.newNameStack = true; applySlotData(d); const ok = val('in-new-namefmt') === 'stack'; setVal('in-new-namefmt', 'full'); updateNeuzugang(); return ok; }));
         check('Spielervorstellung ohne Position & Mannschaft', await page.$eval('#out-new-chips', e => e.style.display === 'none'));
         // Kästen abschaltbar
         await page.evaluate(() => { setVal('in-box-mode-neuzugang', 'none'); updateTabDesign('neuzugang'); });
@@ -309,6 +318,14 @@ async function makePhotos(browser) {
         await page.waitForTimeout(800);
         check('Zusammenführen behält lokale Spieler', await page.evaluate(() => !!findPlayer('Nur Lokal')));
 
+        // Spieler umbenennen: Name wird in der Aufstellung mitgenommen
+        const oldName = await page.evaluate(() => val('player-1'));
+        page.answers.push('Umbenannt Neu');
+        await page.evaluate(n => renamePlayer(stammdaten.players.findIndex(p => p.name === n)), oldName);
+        await page.waitForTimeout(400);
+        check('Spieler umbenannt', await page.evaluate(n => !findPlayer(n) && !!findPlayer('Umbenannt Neu'), oldName));
+        check('Umbenannt auch in der Aufstellung', await page.evaluate(() => val('player-1') === 'Umbenannt Neu'));
+        check('Umbenannt auch im gespeicherten Stand', await page.evaluate(async () => (await localforage.getItem(STORE.slot(currentVersion))).inputs['player-1'] === 'Umbenannt Neu'));
         // Startseite: Kacheln
         await page.evaluate(() => switchTab('start'));
         check('Startseite zeigt Vorlagen-Kacheln', (await page.$$eval('#create-grid .create-tile', l => l.length)) >= 10);
