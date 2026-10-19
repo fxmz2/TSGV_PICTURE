@@ -321,11 +321,30 @@ async function makePhotos(browser) {
         // Spieler umbenennen: Name wird in der Aufstellung mitgenommen
         const oldName = await page.evaluate(() => val('player-1'));
         page.answers.push('Umbenannt Neu');
-        await page.evaluate(n => renamePlayer(stammdaten.players.findIndex(p => p.name === n)), oldName);
+        await page.evaluate(n => renameEntry('players', stammdaten.players.findIndex(p => p.name === n)), oldName);
         await page.waitForTimeout(400);
         check('Spieler umbenannt', await page.evaluate(n => !findPlayer(n) && !!findPlayer('Umbenannt Neu'), oldName));
         check('Umbenannt auch in der Aufstellung', await page.evaluate(() => val('player-1') === 'Umbenannt Neu'));
         check('Umbenannt auch im gespeicherten Stand', await page.evaluate(async () => (await localforage.getItem(STORE.slot(currentVersion))).inputs['player-1'] === 'Umbenannt Neu'));
+        // Gegner & Sponsoren umbenennen (inkl. einzeln verschobenem Sponsor-Logo)
+        const prep = await page.evaluate(async () => {
+            const opp = stammdaten.opponents[0].name; setVal('in-post-opponent-select', opp);
+            const sp = stammdaten.sponsors[0].name; selectedSponsors.post = [sp];
+            const id = sponsorLogoId('capture-post-feed', sp);
+            const d = collectSlotData(); d.positions[id] = { x: 15, y: 5, scale: 1 }; applySlotData(d); renderAll(); await saveSlotNow();
+            return { opp, sp };
+        });
+        page.answers.push('Gegner Neu');
+        await page.evaluate(n => renameEntry('opponents', stammdaten.opponents.findIndex(o => o.name === n)), prep.opp);
+        await page.waitForTimeout(300);
+        check('Gegner umbenannt (auch in der Ankündigung)', await page.evaluate(() => !!stammdaten.opponents.find(o => o.name === 'Gegner Neu') && val('in-post-opponent-select') === 'Gegner Neu'));
+        page.answers.push('Sponsor Neu');
+        await page.evaluate(n => renameEntry('sponsors', stammdaten.sponsors.findIndex(o => o.name === n)), prep.sp);
+        await page.waitForTimeout(300);
+        check('Sponsor umbenannt (Auswahl & Logo-Position bleiben)', await page.evaluate(async () => {
+            const d = await localforage.getItem(STORE.slot(currentVersion));
+            return !!stammdaten.sponsors.find(o => o.name === 'Sponsor Neu') && selectedSponsors.post.includes('Sponsor Neu') && d.positions[sponsorLogoId('capture-post-feed', 'Sponsor Neu')]?.x === 15;
+        }));
         // Startseite: Kacheln
         await page.evaluate(() => switchTab('start'));
         check('Startseite zeigt Vorlagen-Kacheln', (await page.$$eval('#create-grid .create-tile', l => l.length)) >= 10);

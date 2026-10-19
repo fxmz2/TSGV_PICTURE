@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 20.1</title>
+    <title>ClubShot – Grafiken für Vereine 20.2</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2199,7 +2199,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "20.1";
+        const APP_VERSION = "20.2";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3135,7 +3135,7 @@
                             <input type="text" title="Rückennummer" placeholder="Nr." maxlength="3" value="${esc(e.number || '')}" onchange="setPlayerField(${i}, 'number', this.value)">` : ''}
                             <input type="text" class="sd-nick" title="Spitzname (optional)" placeholder="Spitzname" maxlength="30" value="${esc(e.nick || '')}" onchange="setPlayerField(${i}, 'nick', this.value)">
                         </div>`;
-                        btns = btn('✏️', 'Namen ändern', `renamePlayer(${i})`) + btn('📷', 'Foto ändern', `changeEntryImage('players', ${i}, 'img')`) + btn('⚽', 'Torjubel-Foto ändern', `changeEntryImage('players', ${i}, 'torImg')`)
+                        btns = btn('✏️', 'Namen ändern', `renameEntry('players', ${i})`) + btn('📷', 'Foto ändern', `changeEntryImage('players', ${i}, 'img')`) + btn('⚽', 'Torjubel-Foto ändern', `changeEntryImage('players', ${i}, 'torImg')`)
                             + (e.img || e.torImg ? btn('✂️', e.cutImg || e.torCutImg ? 'Freistellung entfernen' : 'Hintergrund entfernen', `togglePlayerCutout(${i})`, e.cutImg || e.torCutImg ? 'active' : '') : '');
                     } else if (type === 'templates') {
                         thumb = e.thumb; thumbCls = e.format === 'story' ? 'story' : '';
@@ -3143,7 +3143,7 @@
                     } else {
                         thumb = e.img || makeBadgeSvg(e.name); thumbCls = 'logo-thumb cut-thumb';
                         sub = e.img ? (e.imgOrig ? 'Hintergrund entfernt ✓' : '') : 'kein Logo';
-                        btns = btn('🖼️', 'Logo ändern', `changeEntryImage('${type}', ${i}, 'img')`)
+                        btns = btn('✏️', 'Namen ändern', `renameEntry('${type}', ${i})`) + btn('🖼️', 'Logo ändern', `changeEntryImage('${type}', ${i}, 'img')`)
                             + (e.img ? (e.imgOrig
                                 ? btn('↩️', 'Original-Logo wiederherstellen', `toggleLogoClean('${type}', ${i})`, 'active')
                                 : btn('✨', 'Hintergrund entfernen & zuschneiden', `toggleLogoClean('${type}', ${i})`)) : '');
@@ -3187,32 +3187,50 @@
             if (value) p[field] = value; else delete p[field];
             await onStammdatenChanged('players');
         }
-        /* Spieler umbenennen – der neue Name wird auch in allen drei Versionen (Aufstellung, Tor, Kader …) übernommen */
-        async function renamePlayer(idx) {
-            const p = stammdaten.players[idx];
-            if (!p) return;
-            const oldName = p.name;
+        /* Spieler, Gegner oder Sponsor umbenennen – der neue Name wird auch in allen drei Versionen
+           übernommen (Aufstellung, Tor, Kalender, Ergebnisse, Sponsorenleisten …) */
+        async function renameEntry(type, idx) {
+            const list = stammdaten[type], e = list?.[idx];
+            if (!e) return;
+            const oldName = e.name;
             const input = prompt('Neuer Name für „' + oldName + '“:', oldName);
             if (input === null) return;
             const newName = normName(input);
             if (!newName || newName === oldName) return;
-            if (newName === 'Keiner' || findPlayer(newName)) { alert(`„${newName}“ gibt es schon – bitte einen anderen Namen wählen.`); return; }
+            if (newName === 'Keiner' || list.some(x => x.name === newName)) { alert(`„${newName}“ gibt es schon – bitte einen anderen Namen wählen.`); return; }
             await saveSlotNow();
             const swap = o => {
                 if (Array.isArray(o)) return o.map(swap);
                 if (o && typeof o === 'object') { for (const k in o) o[k] = swap(o[k]); return o; }
                 return o === oldName ? newName : o;
             };
+            // Einzeln verschobene Sponsor-Logos hängen am Namen (spl-<Vorlage>-<Name>) → Position mitnehmen
+            const oldEnd = type === 'sponsors' ? sponsorLogoId('', oldName).slice(4) : null, newEnd = oldEnd && sponsorLogoId('', newName).slice(4);
+            const movePositions = pos => {
+                if (!pos || !oldEnd || oldEnd === newEnd) return;
+                Object.keys(pos).forEach(k => {
+                    if (!k.startsWith('spl-') || !k.endsWith(oldEnd)) return;
+                    pos[k.slice(0, -oldEnd.length) + newEnd] = pos[k];
+                    delete pos[k];
+                });
+            };
             for (const v of ['v1', 'v2', 'v3']) {
                 const d = await localforage.getItem(STORE.slot(v));
-                if (d) await localforage.setItem(STORE.slot(v), swap(d));
+                if (!d) continue;
+                swap(d);
+                movePositions(d.positions);
+                await localforage.setItem(STORE.slot(v), d);
             }
-            p.name = newName;
+            movePositions(pendingPositions);
+            e.name = newName;
             const cur = await localforage.getItem(STORE.slot(currentVersion));
             sortStammdaten();
             await saveStammdaten();
-            refreshPlayerOptions();
+            if (type === 'players') refreshPlayerOptions();
+            if (type === 'opponents') refreshOpponentDropdown();
+            if (type === 'sponsors') refreshSponsorChecklists();
             if (cur) applySlotData(cur);
+            if (type === 'sponsors') refreshSponsorChecklists();
             renderStammdatenLists();
             renderAll();
             resetHistory();
