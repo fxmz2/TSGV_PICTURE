@@ -41,6 +41,7 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Textausrichtung | Je Reiter `textAlign` (Klassen `talign-left/right` am Reiter), je Element `data-align` über den Knopf ⇔ in der Werkzeugleiste (`cycleAlignSelected()`, gespeichert in `positions[id].align`) |
 | Eigene Schriften | `stammdaten.fonts` (Daten-URL), `registerCustomFonts()` als `@font-face` im `<style>` (damit auch der Export sie kennt; CSP `font-src data:`), `refreshFontSelects()` |
 | Mehrere Spieler | `openBulkDialog()`, `runBulkExport()` (Neuzugang/Vorstellung je Spieler als Bild und/oder Video; nutzt `packFiles`) |
+| Spielernamen | `playerDisplayName(name, fmt)` / `playerNameHtml()` mit `full`, `stack`, `last`, `first`, `short`, `nick` (Spitzname `p.nick`, sonst Nachname). Format je Reiter in `NAME_FMT_FIELDS` (`torNameFmt` …, alte `*NameStack`-Werte werden über `migrateNameFmt()` übernommen), Zusatzspieler `xpNameFmt`. `renamePlayer()` ersetzt den Namen auch in allen drei gespeicherten Versionen |
 | Import | `importConfigJSON()` → Auswahl-Dialog, `runImport()` (zusammenführen per Name oder ersetzen; Versionen werden ersetzt) |
 | Speicher | Freigestellte Bilder als WebP 95 % (`encodeAlphaCanvas()`, falls das Gerät es kann, sonst PNG; max. 900×1100 wie die Originale), `optimizeStorage()` |
 | Zurücksetzen | Dialog `resetTabDefaults()` (einzelne Elemente + Bereiche), komplett `resetTabAll()` |
