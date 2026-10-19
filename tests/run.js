@@ -97,8 +97,16 @@ async function makePhotos(browser) {
         await page.goto(BASE);
         await page.waitForTimeout(800);
         check('Freischalt-Fenster erscheint', await page.isVisible('#license-overlay'));
+        check('Landingpage beim ersten Besuch', await page.evaluate(() => $('license-overlay').classList.contains('landing-mode') && document.querySelectorAll('.lp-gallery img').length >= 6));
+        await page.evaluate(() => document.querySelectorAll('#license-overlay img[loading="lazy"]').forEach(i => i.loading = 'eager'));
+        await page.waitForTimeout(800);
+        check('Landingpage: alle Bilder geladen', await page.evaluate(() => [...document.querySelectorAll('.lp-gallery img, .lp-step img')].every(i => i.complete && i.naturalWidth > 0)));
+        check('Landingpage ohne seitliches Scrollen', await page.evaluate(() => $('license-overlay').scrollWidth <= $('license-overlay').clientWidth + 1));
         await page.click('#license-demo');
         await waitReady(page);
+        await page.reload();
+        await waitReady(page);
+        check('Nach dem Freischalten keine Landingpage mehr', await page.evaluate(() => $('license-overlay').hidden && !document.documentElement.classList.contains('lp-boot')));
         const counts = await page.evaluate(() => [stammdaten.players.length, stammdaten.opponents.length, stammdaten.sponsors.length]);
         check('Demo füllt Beispieldaten', counts[0] >= 18 && counts[1] >= 6 && counts[2] >= 3, counts.join('/'));
         check('Export Beitrag 4:5 = 1200x1500', (await exportSize(page, 'capture-post-feed')) === '1200x1500');
