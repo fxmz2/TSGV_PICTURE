@@ -18,9 +18,10 @@
 # - Wird eine Zeile gelöscht, ist der Code beim nächsten Start (mit Internet)
 #   automatisch gesperrt.
 # - "Paket" ist basis oder advanced. Ohne Angabe gilt advanced (alle Funktionen).
-#   Basis: Ankündigung, Aufstellung, Tor, Ergebnis, Kader, POTM, Kalender, Geburtstag.
+#   Basis: Ankündigung, Aufstellung (auch 7er/9er), Tor, Ergebnis (inkl. Halbzeit, Absage,
+#   Countdown), Kader, POTM, Kalender, Geburtstag, Teamfoto, Freie Vorlage.
 #   Advanced zusätzlich: Eckball, Neuzugang/Vorstellung, Danke-Sponsor, Wochenende,
-#   Sponsorenleisten, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte,
+#   Sponsorenleisten, „Präsentiert von“, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte,
 #   Spielplan-Import und Grafik-Paket.
 # - Der Code DEMO ist fest in der App eingebaut (Demo-Modus mit Wasserzeichen)
 #   und muss hier nicht eingetragen werden.

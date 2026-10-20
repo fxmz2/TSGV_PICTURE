@@ -43,6 +43,11 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Mehrere Spieler | `openBulkDialog()`, `runBulkExport()` (Neuzugang/Vorstellung je Spieler als Bild und/oder Video; nutzt `packFiles`) |
 | Spielernamen | `playerDisplayName(name, fmt)` / `playerNameHtml()` mit `full`, `stack`, `last`, `first`, `short`, `nick` (Spitzname `p.nick`, sonst Nachname). Format je Reiter in `NAME_FMT_FIELDS` (`torNameFmt` …, alte `*NameStack`-Werte werden über `migrateNameFmt()` übernommen), Zusatzspieler `xpNameFmt`. `renameEntry(type, idx)` (Spieler, Gegner, Sponsoren) ersetzt den Namen auch in allen drei gespeicherten Versionen und nimmt bei Sponsoren die Logo-Positionen (`spl-…`) mit |
 | Landingpage | Im `#license-overlay` (Klasse `landing-mode`, Abschnitte `.landing-only`): erscheint nur, solange auf dem Gerät kein Verein freigeschaltet ist (`localStorage.vg_unlocked`, gesetzt über `markUnlocked()`; `html.lp-boot` zeigt sie schon vor dem App-Start). Bilder in `landing/` (aus dem Demo-Verein erzeugt, keine echten Personen). Links für Bestellung und Instagram in `LANDING_LINKS` eintragen |
+| Spielform 7er/9er | Ergibt sich aus der Formation (`formations`, Summe der Reihen); `fillFormationOptions()`, `setFormation()`, `setTeamSize()`, `lineupSize()`. Überzählige Eingabezeilen werden ausgeblendet |
+| Präsentiert von | Je Vorlage ein `.presented-by` (`createPresentedBy()`, id `pb-<Vorlage>`), Inhalt aus `pbSponsor`/`pbText` (EXTRA_DESIGN), `renderPresentedBy()` in `updateTabDesign()` |
+| Ergebnis-Modi | `ERG_MODES` (ergebnis, halbzeit, absage, countdown), `setErgMode()`, gespeichert als `ergMode`; Countdown-Datum `erg-cd-date` |
+| Freie Vorlage | Reiter `frei`, `updateFrei()`, Eingaben `in-frei-*` |
+| Mannschaftsfoto | Reiter `teamfoto`, Fotos in `stammdaten.teamPhotos` [{id,name,img}] (Backup/Import „Mannschaftsfotos“), `updateTeamfoto()`, `fillTeamfotoNames()`, Eingaben `in-tf-*` |
 | Import | `importConfigJSON()` → Auswahl-Dialog, `runImport()` (zusammenführen per Name oder ersetzen; Versionen werden ersetzt) |
 | Speicher | Freigestellte Bilder als WebP 95 % (`encodeAlphaCanvas()`, falls das Gerät es kann, sonst PNG; max. 900×1100 wie die Originale), `optimizeStorage()` |
 | Zurücksetzen | Dialog `resetTabDefaults()` (einzelne Elemente + Bereiche), komplett `resetTabAll()` |
