@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 20.3</title>
+    <title>ClubShot – Grafiken für Vereine 20.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -473,6 +473,40 @@
         /* Lizenz-Overlay */
         .license-overlay { position: fixed; inset: 0; background: linear-gradient(160deg, #0b2530, #05090c); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .license-overlay[hidden] { display: none; }
+        /* Freie Vorlage */
+        .frei-icon { font-size: 78px; line-height: 1.1; text-align: center; }
+        .story-template .frei-icon { font-size: 120px; }
+        .frei-icon img { width: 110px; height: 110px; object-fit: contain; display: block; margin: 0 auto; }
+        .story-template .frei-icon img { width: 170px; height: 170px; }
+        #editor-frei:not(.frei-mode-emoji) .frei-emoji-only { display: none; }
+        .frei-text { white-space: pre-line; }
+        /* Mannschaftsfoto */
+        .tf-photo-wrap { position: absolute; left: 0; right: 0; top: 74px; width: 92%; margin: 0 auto; z-index: 1; }
+        .tf-photo-wrap.tf-story { top: 125px; }
+        .tf-photo { width: 100%; display: block; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.45); border: 3px solid var(--frame-color, #fff); box-sizing: border-box; }
+        .tf-photo[hidden] { display: none; }
+        .tf-placeholder { aspect-ratio: 3 / 2; display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(255,255,255,0.6); border-radius: 8px; color: rgba(255,255,255,0.85); font-weight: bold; font-size: 14px; }
+        .tf-names { position: absolute; left: 0; right: 0; top: 330px; width: 92%; margin: 0 auto; z-index: 1; background: var(--box-bg, rgba(0,0,0,0.72)); color: var(--box-fg, #fff);
+            border-radius: 8px; padding: 6px 9px; box-sizing: border-box; font-size: 8.5px; line-height: 1.35; text-align: center; text-shadow: none; }
+        .tf-names.tf-story { top: 400px; font-size: 12px; padding: 9px 12px; }
+        .tf-names .tf-row + .tf-row { margin-top: 3px; }
+        .tf-names b { color: var(--jersey-color); letter-spacing: 0.5px; }
+        .presented-by { position: absolute; left: 0; right: 0; bottom: 70px; margin: 0 auto; width: max-content; max-width: 88%; z-index: 6; display: flex; align-items: center; gap: 9px;
+            background: rgba(255,255,255,0.96); color: #111; border-radius: 10px; padding: 6px 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.35); box-sizing: border-box; }
+        .post-template .presented-by { bottom: 12px; padding: 4px 10px; gap: 7px; }
+        .presented-by, .presented-by * { text-shadow: none !important; -webkit-text-stroke: 0 !important; }
+        .presented-by .pb-text { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; white-space: nowrap; font-family: Arial, sans-serif; }
+        .presented-by .pb-logo { max-height: 36px; max-width: 130px; display: block; }
+        .post-template .presented-by .pb-logo { max-height: 28px; max-width: 100px; }
+        .presented-by .pb-name { font-weight: 900; font-size: 15px; }
+        /* Ergebnis: Endergebnis / Halbzeit / Spielabsage / Countdown */
+        .erg-mode-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .erg-mode-btns button { padding: 9px 6px; border: 1px solid #cfd8dc; border-radius: 10px; background: #fff; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .erg-mode-btns button.active { background: #005f73; color: #fff; border-color: #005f73; }
+        #editor-ergebnis:not(.erg-mode-countdown) .erg-cd-only, #editor-ergebnis:is(.erg-mode-absage, .erg-mode-countdown) .erg-goals-only { display: none; }
+        .erg-stamp { display: inline-block; color: #e63946; border: 0.09em solid currentColor; border-radius: 0.12em; padding: 0.02em 0.25em; transform: rotate(-8deg); letter-spacing: 0.04em; text-shadow: none; background: rgba(255,255,255,0.92); line-height: 1.1; font-size: 0.72em; }
+        .erg-cd-num { display: block; font-size: 1.6em; line-height: 0.95; }
+        .erg-cd-unit { display: block; font-size: 0.38em; letter-spacing: 0.15em; }
         /* Landingpage: erscheint, solange auf diesem Gerät noch kein Verein freigeschaltet ist */
         .license-overlay:not(.landing-mode) .landing-only { display: none; }
         html.lp-boot #license-overlay, .license-overlay.landing-mode { display: block; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 0 calc(80px + env(safe-area-inset-bottom)); color: #e8f1f4; font-family: 'Montserrat', Arial, sans-serif; }
@@ -562,7 +596,7 @@
         .no-accent :is(.potm-player-name, .spon-name, .bday-name, .transfer-name, .list-section-title, .pitch.pc-pro .player-name) { border-bottom: none !important; border-left: none !important; }
         /* Ohne Kästen: Schrift bekommt den Text-Schatten, damit sie auf Fotos lesbar bleibt */
         .no-boxes :is(.sponsor-text, .player-name, .pitch-bench .pb-line, .list-section-title, .list-item, .bench-tag, .tor-details, .xp-name, .potm-player-name,
-            .kal-row, .kal-empty, .spon-name, .wk-row, .scorer-box, .bday-name, .transfer-name, .transfer-chip, .kader-info-block, .kader-freetext, .kader-grid-name) {
+            .kal-row, .kal-empty, .spon-name, .wk-row, .scorer-box, .tf-names, .bday-name, .transfer-name, .transfer-chip, .kader-info-block, .kader-freetext, .kader-grid-name) {
             text-shadow: var(--tpl-text-shadow, 1px 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.6)) !important; box-shadow: none !important; }
         .design-sub { margin: 12px 0 6px; font-size: 12px; font-weight: bold; color: #005f73; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid #e3e6ea; padding-bottom: 3px; }
         .design-sub:first-child { margin-top: 2px; }
@@ -1375,22 +1409,16 @@
                 <div class="control-group"><label>Trainer 1</label><select id="in-coach-1" class="player-select" onchange="buildFormation();"></select></div>
                 <div class="control-group"><label>Trainer 2</label><select id="in-coach-2" class="player-select" onchange="buildFormation();"></select></div>
                 <div class="control-group">
-                    <label>Formation</label>
-                    <select id="formation-select" onchange="buildFormation();">
-                        <option value="4-4-2">4-4-2</option>
-                        <option value="4-2-3-1">4-2-3-1</option>
-                        <option value="4-3-3">4-3-3</option>
-                        <option value="3-5-2">3-5-2</option>
-                        <option value="5-3-2">5-3-2</option>
-                        <option value="3-4-3">3-4-3</option>
-                        <option value="4-1-4-1">4-1-4-1</option>
-                        <option value="4-2-2-2">4-2-2-2</option>
-                        <option value="4-5-1">4-5-1</option>
-                        <option value="5-4-1">5-4-1</option>
-                        <option value="4-3-2-1">4-3-2-1</option>
-                        <option value="3-4-1-2">3-4-1-2</option>
-                        <option value="4-1-2-1-2">4-1-2-1-2</option>
+                    <label>Spielform</label>
+                    <select id="in-team-size" onchange="setTeamSize(this.value);">
+                        <option value="11">11er (Großfeld)</option>
+                        <option value="9">9er (Jugend)</option>
+                        <option value="7">7er (Jugend)</option>
                     </select>
+                </div>
+                <div class="control-group">
+                    <label>Formation</label>
+                    <select id="formation-select" onchange="buildFormation();"></select>
                 </div>
 
                 <div class="control-group">
@@ -1430,7 +1458,7 @@
                     <button type="button" class="copy-action-btn" id="btn-show-all-names" onclick="showAllPitchNames()" hidden>🏷️ Alle Namen wieder einblenden</button>
                 </div>
                 <button type="button" class="copy-action-btn" style="background:#c1121f;" onclick="clearLineup()">🧹 Aufstellung leeren (Startelf & Ersatzbank)</button>
-                <label>Startelf & Rückennummern</label>
+                <label>Startaufstellung & Rückennummern</label>
                 <div class="scrollable-controls-box" id="starter-controls"></div>
 
                 <label>Ersatzbank</label>
@@ -1463,18 +1491,31 @@
                 <h2>Ergebnis Einstellungen</h2>
                 <div id="design-controls-ergebnis"></div>
 
+                <div class="control-group">
+                    <label>Art der Grafik</label>
+                    <div class="erg-mode-btns" id="erg-mode-btns">
+                        <button type="button" data-erg-mode="ergebnis" onclick="setErgMode('ergebnis')">🏁 Endergebnis</button>
+                        <button type="button" data-erg-mode="halbzeit" onclick="setErgMode('halbzeit')">⏸️ Halbzeit</button>
+                        <button type="button" data-erg-mode="absage" onclick="setErgMode('absage')">❌ Spielabsage</button>
+                        <button type="button" data-erg-mode="countdown" onclick="setErgMode('countdown')">⏳ Countdown</button>
+                    </div>
+                    <input type="hidden" id="in-erg-mode" value="ergebnis">
+                </div>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-ergebnis-title" value="ENDERGEBNIS" oninput="updateErgebnis();"></div>
-                <div class="control-group"><label>Spielstand</label><input type="text" id="in-ergebnis-score" value="3 : 1" oninput="updateErgebnis();"></div>
-                <div class="control-group"><label>Zusatztext</label><input type="text" id="in-ergebnis-text" value="Auswärtssieg!" oninput="updateErgebnis();"></div>
+                <div class="control-group erg-cd-only"><label>Spieltag (zählt die Tage automatisch herunter)</label><input type="date" id="erg-cd-date" onchange="updateErgebnis(); scheduleSave();"></div>
+                <div class="control-group"><label id="erg-score-label">Spielstand</label><input type="text" id="in-ergebnis-score" value="3 : 1" oninput="updateErgebnis();"></div>
+                <div class="control-group"><label id="erg-text-label">Zusatztext</label><input type="text" id="in-ergebnis-text" value="Auswärtssieg!" oninput="updateErgebnis();"></div>
                 <button type="button" class="copy-action-btn" style="background:#2a9d8f; font-size:13px; padding:10px;" onclick="applyLastKalenderToErgebnis()">📅 Letztes Spiel aus Kalender übernehmen</button>
                 <span class="hint" style="margin-bottom:10px;">Gegner und Heim/Auswärts werden aus „Ankündigung“ übernommen (und dort mit geändert).</span>
 
+                <div class="erg-goals-only">
                 <div class="control-group">
                     <label><input type="checkbox" id="in-erg-show-scorers" checked onchange="updateErgebnis();"> Torschützen anzeigen</label>
                 </div>
                 <div class="control-group"><label>Torschützen anzeigen als</label><select id="in-erg-namefmt" class="namefmt-select" onchange="updateErgebnis(); scheduleSave();"><option value="short">Kurz (M. Mustermann)</option><option value="full">Vor- und Nachname</option><option value="last">Nur Nachname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
                 <label>Torschützen (Spieler + Minute)</label>
                 <div class="scrollable-controls-box" id="scorer-controls"></div>
+                </div>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('ergebnis')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
@@ -1681,6 +1722,55 @@
                 <span class="hint" style="margin-bottom:10px;">Ergebnis immer aus eigener Sicht eintragen (eigene Tore zuerst), z.B. 3:1. Sieg, Remis und Niederlage werden automatisch farbig markiert.</span>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('wochenende')">🔄 Zurücksetzen (Positionen & Design) …</button>
+            </div>
+
+            <!-- EDITOR: FREIE VORLAGE -->
+            <div id="editor-frei" class="editor-section">
+                <h2>✏️ Freie Vorlage</h2>
+                <span class="hint" style="margin-bottom:8px;">Für alles neben dem Spielbetrieb: Vereinsfest, Trainingszeiten, Versammlung, Ehrungen, Spendenaufruf … Eigene Fotos als Hintergrund unter „Aussehen anpassen“ wählen.</span>
+                <div id="design-controls-frei"></div>
+
+                <div class="control-group"><label>Titel</label><input type="text" id="in-frei-title" value="VEREINSFEST" oninput="updateFrei();"></div>
+                <div class="control-group"><label>Bild in der Mitte</label>
+                    <select id="in-frei-icon-mode" onchange="updateFrei(); scheduleSave();">
+                        <option value="emoji">Symbol / Emoji</option>
+                        <option value="crest">Vereinswappen</option>
+                        <option value="none">Kein Bild</option>
+                    </select></div>
+                <div class="control-group frei-emoji-only"><label>Symbol / Emoji</label><input type="text" id="in-frei-icon" value="🎉" maxlength="8" oninput="updateFrei();"></div>
+                <div class="control-group"><label>Hervorgehobene Zeile</label><input type="text" id="in-frei-sub" value="Samstag, 12. Juli · ab 14 Uhr" oninput="updateFrei();"></div>
+                <div class="control-group"><label>Text (mehrere Zeilen möglich)</label><textarea id="in-frei-text" rows="4" oninput="updateFrei();">Hüpfburg, Grill &amp; Torwandschießen
+Alle sind herzlich eingeladen!</textarea></div>
+
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('frei')">🔄 Zurücksetzen (Positionen & Design) …</button>
+            </div>
+
+            <!-- EDITOR: MANNSCHAFTSFOTO -->
+            <div id="editor-teamfoto" class="editor-section">
+                <h2>📸 Mannschaftsfoto</h2>
+                <div id="design-controls-teamfoto"></div>
+
+                <div class="control-group"><label>Foto</label>
+                    <select id="in-tf-photo" onchange="updateTeamfoto(); scheduleSave();"></select>
+                    <input type="file" id="tf-upload" accept="image/*" style="margin-top:6px;" onchange="uploadTeamPhoto(event)">
+                    <button type="button" class="copy-action-btn" id="tf-delete-btn" style="background:#c1121f; margin-top:6px;" onclick="deleteTeamPhoto()">🗑️ Ausgewähltes Foto löschen</button>
+                    <span class="hint">Am besten ein Foto im Querformat. Es bleibt auf diesem Gerät (und im Backup) gespeichert und steht in allen Versionen zur Auswahl.</span></div>
+                <div class="control-group"><label>Titel</label><input type="text" id="in-tf-title" value="1. MANNSCHAFT" oninput="updateTeamfoto();"></div>
+                <div class="control-group"><label>Untertitel</label><input type="text" id="in-tf-sub" value="SAISON 2026/27" oninput="updateTeamfoto();"></div>
+                <div class="control-group"><label>Namen aus einer Mannschaft übernehmen</label>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                        <select id="in-tf-team" class="team-select" title="Mannschaft"></select>
+                        <select id="in-tf-namefmt" title="Name anzeigen als"><option value="full">Vor- und Nachname</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select>
+                    </div>
+                    <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin-top:6px;" onclick="fillTeamfotoNames()">👥 Namen eintragen</button>
+                    <span class="hint">Trägt alle Spieler in die hintere Reihe und Trainer/Betreuer unten ein – danach einfach auf die Reihen verteilen. Namen mit Komma trennen, leere Reihen werden ausgeblendet.</span></div>
+                <div class="control-group"><label>Hintere Reihe (von links)</label><textarea id="in-tf-row1" rows="2" oninput="updateTeamfoto();"></textarea></div>
+                <div class="control-group"><label>Mittlere Reihe (von links)</label><textarea id="in-tf-row2" rows="2" oninput="updateTeamfoto();"></textarea></div>
+                <div class="control-group"><label>Vordere Reihe (von links)</label><textarea id="in-tf-row3" rows="2" oninput="updateTeamfoto();"></textarea></div>
+                <div class="control-group"><label>Trainer & Betreuer</label><input type="text" id="in-tf-coaches" oninput="updateTeamfoto();"></div>
+                <div class="control-group"><label>Es fehlen (optional)</label><input type="text" id="in-tf-missing" oninput="updateTeamfoto();"></div>
+
+                <button type="button" class="copy-action-btn" onclick="resetTabDefaults('teamfoto')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
         </div>
 
@@ -2184,6 +2274,74 @@
                     </div>
                 </div>
             </div>
+
+            <!-- FREIE VORLAGE -->
+            <div id="view-frei" class="template-container">
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📷 Freie Vorlage Beitrag</div>
+                    <div id="capture-frei-feed" class="post-template">
+                        <div class="draggable-text" data-default-top="28px" data-default-left="0px" style="top:28px; left:0px;"><h1 class="title-dyn" id="out-frei-title-feed">VEREINSFEST</h1></div>
+                        <div class="draggable-text" id="out-frei-icon-wrap-feed" data-fixed-id data-default-top="95px" data-default-left="0px" style="top:95px; left:0px;"><div class="frei-icon" id="out-frei-icon-feed"></div></div>
+                        <div class="draggable-text" data-default-top="215px" data-default-left="0px" style="top:215px; left:0px;"><div class="bday-name frei-sub" id="out-frei-sub-feed"></div></div>
+                        <div class="draggable-text" data-default-top="268px" data-default-left="0px" style="top:268px; left:0px;"><p class="info-dyn frei-text" id="out-frei-text-feed"></p></div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-frei-feed', 'grafik_feed.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">✏️ Freie Vorlage Story (9:16)</div>
+                    <div id="capture-frei" class="story-template">
+                        <img class="story-wappen-top-right club-logo-img" alt="">
+                        <div class="draggable-text" data-default-top="110px" data-default-left="0px" style="top:110px; left:0px;"><h1 class="title-dyn" id="out-frei-title">VEREINSFEST</h1></div>
+                        <div class="draggable-text" id="out-frei-icon-wrap" data-fixed-id data-default-top="195px" data-default-left="0px" style="top:195px; left:0px;"><div class="frei-icon" id="out-frei-icon"></div></div>
+                        <div class="draggable-text" data-default-top="380px" data-default-left="0px" style="top:380px; left:0px;"><div class="bday-name frei-sub" id="out-frei-sub"></div></div>
+                        <div class="draggable-text" data-default-top="440px" data-default-left="0px" style="top:440px; left:0px;"><p class="info-dyn frei-text" id="out-frei-text"></p></div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-frei', 'grafik_story.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MANNSCHAFTSFOTO -->
+            <div id="view-teamfoto" class="template-container">
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📷 Mannschaftsfoto Beitrag</div>
+                    <div id="capture-teamfoto-feed" class="post-template">
+                        <div class="draggable-text" data-default-top="10px" data-default-left="0px" style="top:10px; left:0px;">
+                            <h2 class="title-dyn" id="out-tf-title-feed">1. MANNSCHAFT</h2>
+                            <div class="kal-sub" id="out-tf-sub-feed"></div>
+                        </div>
+                        <div class="tf-photo-wrap movable" id="tf-photo-box-feed"><img class="tf-photo" id="out-tf-photo-feed" alt=""><div class="tf-placeholder" id="out-tf-placeholder-feed">📸 Mannschaftsfoto hochladen</div></div>
+                        <div class="tf-names movable" id="out-tf-names-feed"></div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-teamfoto-feed', 'mannschaftsfoto_feed.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+
+                <div class="preview-wrapper">
+                    <div class="preview-label-tag">📸 Mannschaftsfoto Story (9:16)</div>
+                    <div id="capture-teamfoto" class="story-template">
+                        <img class="story-wappen-top-right club-logo-img" alt="">
+                        <div class="draggable-text" data-default-top="40px" data-default-left="0px" style="top:40px; left:0px;">
+                            <h2 class="title-dyn" id="out-tf-title">1. MANNSCHAFT</h2>
+                            <div class="kal-sub" id="out-tf-sub"></div>
+                        </div>
+                        <div class="tf-photo-wrap tf-story movable" id="tf-photo-box"><img class="tf-photo" id="out-tf-photo" alt=""><div class="tf-placeholder" id="out-tf-placeholder">📸 Mannschaftsfoto hochladen</div></div>
+                        <div class="tf-names tf-story movable" id="out-tf-names"></div>
+                        <div class="sponsor-banner" style="display:none;"></div>
+                    </div>
+                    <div class="btn-action-group">
+                        <button class="download-btn" onclick="shareImage('capture-teamfoto', 'mannschaftsfoto_story.png', this)">📲 In Fotos / Teilen</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2325,6 +2483,8 @@
             <button class="tab-btn" data-tab="neuzugang" onclick="switchTab('neuzugang')"><span class="tab-ico">🆕</span><span>Neuzugang</span></button>
             <button class="tab-btn" data-tab="sponsor" onclick="switchTab('sponsor')"><span class="tab-ico">🤝</span><span>Sponsor</span></button>
             <button class="tab-btn" data-tab="wochenende" onclick="switchTab('wochenende')"><span class="tab-ico">📊</span><span>Wochenende</span></button>
+            <button class="tab-btn" data-tab="teamfoto" onclick="switchTab('teamfoto')"><span class="tab-ico">📸</span><span>Teamfoto</span></button>
+            <button class="tab-btn" data-tab="frei" onclick="switchTab('frei')"><span class="tab-ico">✏️</span><span>Frei</span></button>
         </nav>
         <button id="mobile-toggle" class="mobile-toggle-btn" onclick="toggleMobileView()">👁️ Vorschau ansehen</button>
     </div>
@@ -2335,7 +2495,7 @@
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "20.3";
+        const APP_VERSION = "20.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2381,7 +2541,8 @@
             logo:     { maxW: 800,  maxH: 800,  type: 'image/png' },
             feed:     { maxW: 1200, maxH: 1200, type: 'image/jpeg', quality: 0.85 },
             story:    { maxW: 1200, maxH: 2134, type: 'image/jpeg', quality: 0.85 },
-            thumb:    { maxW: 120,  maxH: 214,  type: 'image/jpeg', quality: 0.7 }
+            thumb:    { maxW: 120,  maxH: 214,  type: 'image/jpeg', quality: 0.7 },
+            teamPhoto: { maxW: 1600, maxH: 1600, type: 'image/jpeg', quality: 0.88 }
         };
 
         const BUILTIN_BGS = [
@@ -2409,8 +2570,8 @@
 
         const WK_MAX = 6;
 
-        const tabList = ['start', 'stammdaten', 'post', 'story', 'tor', 'ergebnis', 'kader', 'eckball', 'potm', 'kalender', 'geburtstag', 'neuzugang', 'sponsor', 'wochenende'];
-        const editorTabs = ['post', 'story', 'tor', 'ergebnis', 'kader', 'potm', 'kalender', 'geburtstag', 'neuzugang', 'sponsor', 'wochenende'];
+        const tabList = ['start', 'stammdaten', 'post', 'story', 'tor', 'ergebnis', 'kader', 'eckball', 'potm', 'kalender', 'geburtstag', 'neuzugang', 'sponsor', 'wochenende', 'teamfoto', 'frei'];
+        const editorTabs = ['post', 'story', 'tor', 'ergebnis', 'kader', 'potm', 'kalender', 'geburtstag', 'neuzugang', 'sponsor', 'wochenende', 'teamfoto', 'frei'];
 
         const TAB_DESIGN = {
             post:     { frameLabel: 'Rahmenform Logos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
@@ -2423,7 +2584,9 @@
             geburtstag: { frameLabel: 'Rahmenform Foto', sizes: true, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             neuzugang: { frameLabel: 'Rahmenform Foto', sizes: true, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             sponsor: { frameLabel: 'Rahmenform (nicht verwendet)', sizes: true, sponsorLabel: 'Zusätzliche Sponsoren-Leiste anzeigen' },
-            wochenende: { frameLabel: 'Rahmenform Gegner-Logos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' }
+            wochenende: { frameLabel: 'Rahmenform Gegner-Logos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            teamfoto: { frameLabel: 'Rahmenform (nicht verwendet)', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            frei:     { frameLabel: 'Rahmenform Wappen', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' }
         };
 
         /* Feste Beschriftungen in den Vorlagen – je Reiter überschreibbar (leer = Standard, „-“ = ausblenden) */
@@ -2439,7 +2602,8 @@
             potm:       { title: 'PLAYER OF THE MATCH' },
             kalender:   { home: 'HEIM', away: 'AUSWÄRTS', vs: 'vs', time: 'UHR', empty: 'Keine kommenden Termine eingetragen' },
             neuzugang:  { from: 'Kommt von' },
-            wochenende: { home: 'HEIM', away: 'AUSWÄRTS', vs: 'vs', empty: 'Noch keine Ergebnisse eingetragen' }
+            wochenende: { home: 'HEIM', away: 'AUSWÄRTS', vs: 'vs', empty: 'Noch keine Ergebnisse eingetragen' },
+            teamfoto:   { back: 'HINTEN V. L.:', middle: 'MITTE V. L.:', front: 'VORNE V. L.:', coaches: 'TRAINER:', missing: 'ES FEHLEN:' }
         };
 
         const formations = {
@@ -2455,8 +2619,40 @@
             "5-4-1": [1, 5, 4, 1],
             "4-3-2-1": [1, 4, 3, 2, 1],
             "3-4-1-2": [1, 3, 4, 1, 2],
-            "4-1-2-1-2": [1, 4, 1, 2, 1, 2]
+            "4-1-2-1-2": [1, 4, 1, 2, 1, 2],
+            // 9er (Torwart + 8)
+            "3-3-2": [1, 3, 3, 2],
+            "3-2-3": [1, 3, 2, 3],
+            "2-4-2": [1, 2, 4, 2],
+            "3-4-1": [1, 3, 4, 1],
+            "4-3-1": [1, 4, 3, 1],
+            "3-1-3-1": [1, 3, 1, 3, 1],
+            "2-3-2-1": [1, 2, 3, 2, 1],
+            // 7er (Torwart + 6)
+            "2-3-1": [1, 2, 3, 1],
+            "3-2-1": [1, 3, 2, 1],
+            "2-1-2-1": [1, 2, 1, 2, 1],
+            "3-1-2": [1, 3, 1, 2],
+            "2-2-2": [1, 2, 2, 2],
+            "1-3-2": [1, 1, 3, 2]
         };
+        // Spielform ergibt sich aus der Formation (11er, 9er, 7er)
+        function formationSize(f) { return (formations[f] || formations['4-4-2']).reduce((a, b) => a + b, 0); }
+        function lineupSize() { return formationSize(val('formation-select') || '4-4-2'); }
+        function fillFormationOptions(size, selected) {
+            const sel = $('formation-select');
+            if (!sel) return;
+            const list = Object.keys(formations).filter(f => formationSize(f) === size);
+            sel.innerHTML = list.map(f => `<option value="${f}">${f}</option>`).join('');
+            sel.value = list.includes(selected) ? selected : list[0];
+            setVal('in-team-size', String(size));
+        }
+        function setFormation(f) { fillFormationOptions(formationSize(f), f); }
+        function setTeamSize(size) {
+            fillFormationOptions(parseInt(size, 10) || 11, val('formation-select'));
+            buildFormation();
+            scheduleSave();
+        }
 
         const defaultArrows = [
             { id: 'a1', type: 'blue', x1: 50, y1: 500, x2: 50, y2: 450 },
@@ -3520,6 +3716,7 @@
         }
 
         function refreshPlayerOptions() {
+            refreshTeamPhotoSelect();
             const html = getPlayersOptionsHTML();
             const scorerHtml = html + `<option value="${OWN_GOAL}">Eigentor (Gegner)</option>`;
             document.querySelectorAll('select.player-select').forEach(sel => {
@@ -3624,7 +3821,8 @@
             date: 'Datum', meeting: 'Treffpunkt', jersey: 'Trikots', duty: 'Dienst',
             banner: 'Banner', bannerSub: 'Banner-Untertitel', legend: 'Legende', taker: 'Schütze', onetwo: 'Doppelpass', target: 'Zielspieler',
             guard: 'Bodyguard', runners: 'Einläufer', cover: 'Absicherung',
-            home: 'Heim', away: 'Auswärts', time: 'Uhrzeit-Zusatz', empty: 'Hinweis ohne Einträge', from: 'Wechsel „Kommt von“'
+            home: 'Heim', away: 'Auswärts', time: 'Uhrzeit-Zusatz', empty: 'Hinweis ohne Einträge', from: 'Wechsel „Kommt von“',
+            back: 'Hintere Reihe', middle: 'Mittlere Reihe', front: 'Vordere Reihe', missing: 'Es fehlen'
         };
         function labelEditorHTML(tab) {
             const defs = LABEL_DEFS[tab];
@@ -3715,7 +3913,9 @@
             { key: 'xp2', id: 'in-xp2', def: () => 'Keiner' },
             { key: 'xp3', id: 'in-xp3', def: () => 'Keiner' },
             { key: 'xpNames', id: 'in-xp-names', def: () => true, check: true },
-            { key: 'xpNameFmt', id: 'in-xp-namefmt', def: () => 'full' }
+            { key: 'xpNameFmt', id: 'in-xp-namefmt', def: () => 'full' },
+            { key: 'pbSponsor', id: 'in-pb-sponsor', def: () => '' },
+            { key: 'pbText', id: 'in-pb-text', def: () => 'Präsentiert von' }
         ];
         function collectExtraDesign(t) {
             const o = {};
@@ -4051,6 +4251,10 @@
                     <details class="design-details adv-only" data-section="sponsors">
                         <summary>🤝 Sponsoren</summary>
                         <div class="details-body">
+                        <div class="control-group"><label>⭐ „Präsentiert von“ (Hauptsponsor)</label>
+                            <select id="in-pb-sponsor-${tab}" class="sponsor-select" onchange="updateTabDesign('${tab}'); scheduleSave();"></select>
+                            <input type="text" id="in-pb-text-${tab}" value="Präsentiert von" placeholder="Präsentiert von" style="margin-top:6px;" oninput="updateTabDesign('${tab}'); scheduleSave();">
+                            <span class="hint">Erscheint groß mit Logo im Bild – antippen zum Verschieben und Größer-Ziehen.</span></div>
                         <label><input type="checkbox" id="in-show-sponsors-${tab}" onchange="renderSelectedSponsors('${tab}');"> ${cfg.sponsorLabel}</label>
                         <div class="sponsor-checkbox-list" id="sponsor-checkbox-list-${tab}"></div>
                         <div style="display:grid; grid-template-columns: 1fr 92px; gap: 6px; margin-top:6px;">
@@ -4154,7 +4358,7 @@
                 }
                 case 'story': {
                     const starters = [], bench = [], coaches = [];
-                    for (let i = 1; i <= 11; i++) { const n = playerLabel(val(`player-${i}`)); if (n) starters.push(n); }
+                    for (let i = 1; i <= lineupSize(); i++) { const n = playerLabel(val(`player-${i}`)); if (n) starters.push(n); }
                     for (let i = 1; i <= 7; i++) { const n = playerLabel(val(`bench-player-${i}`)); if (n) bench.push(n); }
                     ['in-coach-1', 'in-coach-2'].forEach(id => { const n = playerLabel(val(id)); if (n) coaches.push(n); });
                     lines.push(`📋 Unsere Aufstellung${oppSel ? ` gegen ${oppSel}` : ''}:`, '', starters.join(', ') || '–');
@@ -4171,9 +4375,25 @@
                 }
                 case 'ergebnis': {
                     const scorers = getScorerGroups().map(g => (g.name === OWN_GOAL ? L('ergebnis', 'ownGoal') : g.name) + (g.minutes.length ? ` (${g.minutes.map(m => m + "'").join(', ')})` : '')).join(', ');
-                    lines.push(`🏁 ${niceCase(val('in-ergebnis-title')) || 'Endergebnis'}: ${match} ${normName(val('in-ergebnis-score'))}`);
+                    const mode = ergMode(), title = niceCase(val('in-ergebnis-title'));
+                    if (mode === 'absage') lines.push(`❌ ${title || 'Spielabsage'}: ${match}${normName(val('in-post-date')) ? ` (${normName(val('in-post-date'))})` : ''}`);
+                    else if (mode === 'countdown') { const d = countdownDays(), n = d === null ? normName(val('in-ergebnis-score')) : String(Math.max(0, d)); lines.push(n === '0' ? `🔥 Heute ist Spieltag: ${match}!` : `⏳ Noch ${n} ${n === '1' ? 'Tag' : 'Tage'}: ${match}`); }
+                    else lines.push(`${mode === 'halbzeit' ? '⏸️' : '🏁'} ${title || 'Endergebnis'}: ${match} ${normName(val('in-ergebnis-score'))}`);
                     if (normName(val('in-ergebnis-text'))) lines.push(normName(val('in-ergebnis-text')));
-                    if (scorers && $('in-erg-show-scorers')?.checked) lines.push('', `⚽ Tore: ${scorers}`);
+                    if (scorers && $('in-erg-show-scorers')?.checked && ['ergebnis', 'halbzeit'].includes(mode)) lines.push('', `⚽ Tore: ${scorers}`);
+                    break;
+                }
+                case 'frei': {
+                    [niceCase(val('in-frei-title')), normName(val('in-frei-sub'))].filter(Boolean).forEach(l => lines.push(l));
+                    const t = String(val('in-frei-text') || '').trim();
+                    if (t) lines.push('', t);
+                    break;
+                }
+                case 'teamfoto': {
+                    lines.push(`📸 ${[niceCase(val('in-tf-title')), normName(val('in-tf-sub'))].filter(Boolean).join(' – ') || 'Unser Mannschaftsfoto'}`);
+                    const all = ['in-tf-row1', 'in-tf-row2', 'in-tf-row3'].map(id => normName(String(val(id) || '').replace(/\s*\n\s*/g, ', '))).filter(Boolean);
+                    if (all.length) lines.push('', all.join(', '));
+                    if (normName(val('in-tf-coaches'))) lines.push(`Trainer: ${normName(val('in-tf-coaches'))}`);
                     break;
                 }
                 case 'kader': {
@@ -4278,7 +4498,7 @@
             post:       { keys: ['venue', 'opponentSelect', 'postTitle', 'postDate', 'postTime'], inputs: [] },
             story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly', 'captain', 'pitchHideNames', 'lineupMatch', 'lineupSub'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
             tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute', 'torNameFmt'], inputs: [] },
-            ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers', 'ergNameFmt'], inputs: [/^erg-/] },
+            ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers', 'ergNameFmt', 'ergMode'], inputs: [/^erg-/] },
             kader:      { keys: ['kaderMeeting', 'kaderJersey', 'kaderDuty1', 'kaderDuty2', 'kaderFreetext', 'kaderNameFmt'], inputs: [/^kader-player-/] },
             potm:       { keys: ['potmPlayer', 'potmText', 'potmNameFmt'], inputs: [] },
             kalender:   { keys: ['season'], inputs: [/^in-kal-(mode|title)$/, /^kal-/] },
@@ -4286,6 +4506,8 @@
             neuzugang:  { keys: [], inputs: [/^in-new-/] },
             sponsor:    { keys: [], inputs: [/^in-spon-/] },
             wochenende: { keys: [], inputs: [/^in-wk-/, /^wk-/] },
+            teamfoto:   { keys: [], inputs: [/^in-tf-/] },
+            frei:       { keys: [], inputs: [/^in-frei-/] },
             eckball:    { keys: ['eckArrows', 'eckNodes', 'eckNameFmt'], inputs: [/^eck-/] }
         };
         const TAB_DESIGN_EXTRA = {
@@ -4623,6 +4845,7 @@
 
         function updateTabDesign(tab) {
             if (!editorTabs.includes(tab)) return;
+            renderPresentedBy(tab);
 
             const shapeVal = val(`in-frame-shape-${tab}`) || 'circle';
             const textColVal = val(`in-color-text-${tab}`) || '#ffffff';
@@ -4787,6 +5010,128 @@
                 else banner.dataset.extent = (h * f + 26).toFixed(1);
             });
             $(`view-${tab}`)?.querySelectorAll('.post-template').forEach(layoutFeedContent);
+        }
+
+        /* Freie Vorlage: Titel, Symbol/Wappen, hervorgehobene Zeile, freier Text */
+        function updateFrei() {
+            const mode = val('in-frei-icon-mode') || 'emoji';
+            $('editor-frei')?.classList.toggle('frei-mode-emoji', mode === 'emoji');
+            const crest = club?.logoClean || club?.logo || '';
+            const iconHtml = mode === 'crest' ? (crest ? `<img src="${crest}" alt="">` : '') : mode === 'emoji' ? esc(normName(val('in-frei-icon'))) : '';
+            const sub = normName(val('in-frei-sub')), text = String(val('in-frei-text') || '').trim();
+            ['', '-feed'].forEach(sfx => {
+                setText('out-frei-title' + sfx, val('in-frei-title'));
+                const ic = $('out-frei-icon' + sfx);
+                if (ic && ic.innerHTML !== iconHtml) ic.innerHTML = iconHtml;
+                if (ic) ic.closest('.draggable-text').style.display = iconHtml ? '' : 'none';
+                const sb = $('out-frei-sub' + sfx);
+                if (sb) { sb.textContent = sub; sb.style.display = sub ? '' : 'none'; }
+                setText('out-frei-text' + sfx, text);
+            });
+        }
+
+        /* Mannschaftsfoto: Fotos liegen in den Vereinsdaten (stammdaten.teamPhotos), Auswahl je Version */
+        function refreshTeamPhotoSelect() {
+            const sel = $('in-tf-photo');
+            if (!sel) return;
+            const list = stammdaten.teamPhotos || [];
+            const v = sel.value;
+            sel.innerHTML = '<option value="">– kein Foto –</option>' + list.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
+            sel.value = list.some(t => t.id === v) ? v : (list.length ? list[list.length - 1].id : '');
+            if ($('tf-delete-btn')) $('tf-delete-btn').hidden = !sel.value;
+        }
+        async function uploadTeamPhoto(ev) {
+            const file = ev.target.files[0];
+            ev.target.value = '';
+            if (!file) return;
+            try {
+                const img = await compressImage(file, IMG_OPTS.teamPhoto);
+                const id = 'tf' + Date.now().toString(36);
+                const name = normName(file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ')).slice(0, 40) || 'Mannschaftsfoto';
+                stammdaten.teamPhotos = stammdaten.teamPhotos || [];
+                stammdaten.teamPhotos.push({ id, name, img });
+                await saveStammdaten();
+                refreshTeamPhotoSelect();
+                setVal('in-tf-photo', id);
+                updateTeamfoto();
+                scheduleSave();
+                updateStorageInfo();
+                toast('✅ Mannschaftsfoto gespeichert');
+            } catch (e) { alert(e.message); }
+        }
+        async function deleteTeamPhoto() {
+            const id = val('in-tf-photo');
+            const t = (stammdaten.teamPhotos || []).find(x => x.id === id);
+            if (!t || !confirm(`Foto „${t.name}“ löschen? Es verschwindet dann aus allen Versionen.`)) return;
+            stammdaten.teamPhotos = stammdaten.teamPhotos.filter(x => x.id !== id);
+            await saveStammdaten();
+            setVal('in-tf-photo', '');
+            refreshTeamPhotoSelect();
+            updateTeamfoto();
+            scheduleSave();
+        }
+        function fillTeamfotoNames() {
+            const team = val('in-tf-team'), fmt = val('in-tf-namefmt') || 'full';
+            const inTeam = p => !team || p.team === team;
+            const players = stammdaten.players.filter(p => inTeam(p) && (p.group || 'Spieler') === 'Spieler');
+            const staff = stammdaten.players.filter(p => inTeam(p) && (p.group || 'Spieler') !== 'Spieler');
+            if (!players.length && !staff.length) { alert('In dieser Mannschaft sind noch keine Spieler angelegt (unter „🗃️ Daten“).'); return; }
+            const filled = ['in-tf-row1', 'in-tf-row2', 'in-tf-row3', 'in-tf-coaches'].some(id => normName(val(id)));
+            if (filled && !confirm('Die eingetragenen Namen werden ersetzt. Fortfahren?')) return;
+            const names = list => list.map(p => playerDisplayName(p.name, fmt)).join(', ');
+            setVal('in-tf-row1', names(players));
+            setVal('in-tf-row2', '');
+            setVal('in-tf-row3', '');
+            setVal('in-tf-coaches', names(staff));
+            if (team && ['', '1. MANNSCHAFT'].includes(normName(val('in-tf-title')))) setVal('in-tf-title', team.toLocaleUpperCase('de-DE'));
+            updateTeamfoto();
+            scheduleSave();
+        }
+        function updateTeamfoto() {
+            const ph = (stammdaten.teamPhotos || []).find(t => t.id === val('in-tf-photo'));
+            if ($('tf-delete-btn')) $('tf-delete-btn').hidden = !ph;
+            const rows = [['back', 'in-tf-row1'], ['middle', 'in-tf-row2'], ['front', 'in-tf-row3'], ['coaches', 'in-tf-coaches'], ['missing', 'in-tf-missing']]
+                .map(([k, id]) => [L('teamfoto', k), normName(String(val(id) || '').replace(/\s*\n\s*/g, ', '))]).filter(r => r[1]);
+            const namesHtml = rows.map(([lbl, txt]) => `<div class="tf-row">${lbl ? `<b>${esc(lbl)}</b> ` : ''}${esc(txt)}</div>`).join('');
+            ['', '-feed'].forEach(sfx => {
+                setText('out-tf-title' + sfx, val('in-tf-title'));
+                setText('out-tf-sub' + sfx, val('in-tf-sub'));
+                const img = $('out-tf-photo' + sfx);
+                if (img) {
+                    if (ph) { if (img.getAttribute('src') !== ph.img) img.src = ph.img; img.hidden = false; }
+                    else { img.removeAttribute('src'); img.hidden = true; }
+                }
+                if ($('out-tf-placeholder' + sfx)) $('out-tf-placeholder' + sfx).style.display = ph ? 'none' : '';
+                const box = $('out-tf-names' + sfx);
+                if (box) { box.innerHTML = namesHtml; box.style.display = namesHtml ? '' : 'none'; }
+            });
+        }
+
+        /* „Präsentiert von“: Hauptsponsor groß mit Logo – ein verschiebbares Element je Vorlage */
+        function createPresentedBy() {
+            editorTabs.forEach(tab => $(`view-${tab}`)?.querySelectorAll('.post-template, .story-template').forEach(tpl => {
+                if (!tpl.id || tpl.querySelector(':scope > .presented-by')) return;
+                const el = document.createElement('div');
+                el.className = 'presented-by movable';
+                el.id = 'pb-' + tpl.id;
+                el.style.display = 'none';
+                tpl.appendChild(el);
+                bindDraggable(el);
+            }));
+        }
+        function renderPresentedBy(tab) {
+            const name = isAdvanced() ? val(`in-pb-sponsor-${tab}`) : '';
+            const sp = name ? findSponsor(name) : null;
+            const text = normName(val(`in-pb-text-${tab}`)).toLocaleUpperCase('de-DE');
+            $(`view-${tab}`)?.querySelectorAll('.presented-by').forEach(el => {
+                el.style.display = sp ? '' : 'none';
+                if (!sp) { if (selectedEl === el) selectElement(null); return; }
+                const key = sp.name + '|' + text + '|' + (sp.img || '').length;
+                if (el.dataset.pbKey === key) return;
+                el.dataset.pbKey = key;
+                el.innerHTML = (text ? `<span class="pb-text">${esc(text).replace(/ /g, '&nbsp;')}</span>` : '')
+                    + (sp.img ? `<img class="pb-logo" src="${sp.img}" alt="">` : `<span class="pb-name">${esc(sp.name)}</span>`);
+            });
         }
 
         function sponsorKey(name) { return String(name).toLowerCase().replace(/[^a-z0-9äöüß]+/g, '_').replace(/^_+|_+$/g, '') || 'x'; }
@@ -5273,6 +5618,7 @@
         function elementLabel(el) {
             if (el.classList.contains('corner-logo')) return '🛡️ Vereinslogo (Ecke)';
             if (el.classList.contains('sponsor-banner')) return '🤝 Sponsorenleiste (komplett)';
+            if (el.classList.contains('presented-by')) return '⭐ Präsentiert von';
             if (el.dataset.spName) return '🤝 Sponsor: ' + el.dataset.spName;
             if (el.dataset.pcKey) return '👤 ' + (el.dataset.pcName && el.dataset.pcName !== 'Keiner' ? el.dataset.pcName : 'Spieler-Position ' + el.dataset.pcKey.split('-').pop());
             if (el.dataset.xp) return '👤 Zusätzlicher Spieler ' + el.dataset.xp;
@@ -5513,7 +5859,10 @@
         }
 
         function buildFormation() {
+            if ($('formation-select') && !$('formation-select').options.length) fillFormationOptions(11, '4-4-2');
             const formType = val('formation-select') || '4-4-2';
+            const teamSize = formationSize(formType);
+            document.querySelectorAll('#starter-controls .player-input-row').forEach((r, i) => { r.style.display = i < teamSize ? '' : 'none'; });
             const pitchMode = val('in-pitch-mode') || 'photos';
             const rows = formations[formType] || [1, 4, 4, 2];
             const pitchStory = $('pitch');
@@ -5755,15 +6104,56 @@
             });
         }
 
+        /* Ergebnis-Reiter: Endergebnis, Halbzeit, Spielabsage oder Countdown (gleiche Vorlage, andere Texte) */
+        const ERG_MODES = {
+            ergebnis:  { title: 'ENDERGEBNIS', score: '3 : 1', text: 'Heimsieg!', scoreLabel: 'Spielstand', textLabel: 'Zusatztext' },
+            halbzeit:  { title: 'HALBZEIT', score: '1 : 0', text: 'Weiter geht\'s!', scoreLabel: 'Spielstand zur Pause', textLabel: 'Zusatztext' },
+            absage:    { title: 'SPIELABSAGE', score: 'ABGESAGT', text: 'Neuer Termin folgt', scoreLabel: 'Stempel (z. B. ABGESAGT, VERLEGT)', textLabel: 'Grund / neuer Termin' },
+            countdown: { title: 'NOCH', score: '3', text: 'bis zum Spiel – kommt vorbei!', scoreLabel: 'Anzahl Tage (ohne Datum oben)', textLabel: 'Zusatztext' }
+        };
+        function ergMode() { return ERG_MODES[val('in-erg-mode')] ? val('in-erg-mode') : 'ergebnis'; }
+        function setErgMode(mode) {
+            const old = ergMode();
+            if (!ERG_MODES[mode]) mode = 'ergebnis';
+            setVal('in-erg-mode', mode);
+            if (mode !== old) {
+                // Nur Texte ersetzen, die noch der Vorgabe entsprechen – Eigenes bleibt stehen
+                const presets = k => Object.values(ERG_MODES).map(m => m[k]).concat(['', 'Auswärtssieg!']);
+                const keepScore = ['ergebnis', 'halbzeit'].includes(mode) && ['ergebnis', 'halbzeit'].includes(old);
+                [['in-ergebnis-title', 'title'], ['in-ergebnis-text', 'text'], ['in-ergebnis-score', 'score']].forEach(([id, k]) => {
+                    if (k === 'score' && keepScore) return;
+                    if (presets(k).includes(normName(val(id))) || k === 'score') setVal(id, ERG_MODES[mode][k]);
+                });
+            }
+            updateErgebnis();
+            scheduleSave();
+        }
+        function countdownDays() {
+            const d = parseISODate(val('erg-cd-date')), t = parseISODate(todayISO());
+            return d && t ? Math.round((d - t) / 86400000) : null;
+        }
         function updateErgebnis() {
+            const mode = ergMode(), M = ERG_MODES[mode];
             const title = val('in-ergebnis-title');
             const score = val('in-ergebnis-score');
             const text = val('in-ergebnis-text');
+            const ed = $('editor-ergebnis');
+            if (ed) Object.keys(ERG_MODES).forEach(m => ed.classList.toggle('erg-mode-' + m, m === mode));
+            document.querySelectorAll('#erg-mode-btns button').forEach(b => b.classList.toggle('active', b.dataset.ergMode === mode));
+            setText('erg-score-label', M.scoreLabel);
+            setText('erg-text-label', M.textLabel);
 
+            let scoreHtml = esc(score);
+            if (mode === 'absage') scoreHtml = `<span class="erg-stamp">${esc(normName(score).toLocaleUpperCase('de-DE'))}</span>`;
+            if (mode === 'countdown') {
+                const days = countdownDays();
+                const n = days === null ? normName(score) : String(Math.max(0, days));
+                scoreHtml = n === '0' ? '<span class="erg-cd-num">HEUTE</span>'
+                    : `<span class="erg-cd-num">${esc(n)}</span><span class="erg-cd-unit">${n === '1' ? 'TAG' : 'TAGE'}</span>`;
+            }
             setText('out-ergebnis-title', title);
             setText('out-ergebnis-title-feed', title);
-            setText('out-ergebnis-score', score);
-            setText('out-ergebnis-score-feed', score);
+            ['out-ergebnis-score', 'out-ergebnis-score-feed'].forEach(id => { if ($(id)) $(id).innerHTML = scoreHtml; });
             setText('out-ergebnis-text', text);
             setText('out-ergebnis-text-feed', text);
             updateMatchup();
@@ -5782,7 +6172,7 @@
                 if (minute) g.minutes.push(minute);
             }
             groups.forEach(g => g.minutes.sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0)));
-            const show = $('in-erg-show-scorers')?.checked && groups.length > 0;
+            const show = $('in-erg-show-scorers')?.checked && groups.length > 0 && ['ergebnis', 'halbzeit'].includes(ergMode());
             const label = g => g.name === OWN_GOAL ? L('ergebnis', 'ownGoal') : g.name;
             const headLbl = L('ergebnis', 'scorers');
             const head = headLbl ? `<div class="scorer-head">${esc(headLbl)}</div>` : '';
@@ -6301,10 +6691,11 @@
         }
 
         function copyS11ToEckball() {
+            const size = lineupSize();
             for (let i = 1; i <= 11; i++) {
-                const p = $(`player-${12 - i}`);
+                const p = $(`player-${size + 1 - i}`);
                 const e = $(`eck-player-${i}`);
-                if (p && e) e.value = p.value;
+                if (e) e.value = p && i <= size ? p.value : 'Keiner';
             }
             updateEckball();
             commitEckHistory();
@@ -6517,6 +6908,8 @@
                 case 'neuzugang': updateNeuzugang(); break;
                 case 'sponsor': updateSponsorPost(); break;
                 case 'wochenende': updateWochenende(); break;
+                case 'teamfoto': updateTeamfoto(); break;
+                case 'frei': updateFrei(); break;
             }
             if (editorTabs.includes(activeTab)) updateCaption(activeTab);
         }
@@ -6674,6 +7067,7 @@
                 potmText: val('in-potm-text'),
 
                 ergShowScorers: $('in-erg-show-scorers')?.checked ?? true,
+                ergMode: ergMode(),
                 lineupKaderOnly: !!$('in-lineup-kader-only')?.checked,
                 feedFormat: getFeedFormat(),
                 hashtags: val('cfg-hashtags'),
@@ -6701,6 +7095,8 @@
                 'in-spon-select', 'in-spon-title', 'in-spon-text', 'in-spon-extra', 'in-wk-title', 'in-wk-sub'];
             for (let i = 1; i <= WK_MAX; i++) inputIds.push(`wk-team-${i}`, `wk-score-${i}`, `wk-opp-${i}`, `wk-venue-${i}`);
             for (let i = 1; i <= SCORER_MAX; i++) inputIds.push(`erg-scorer-${i}`, `erg-minute-${i}`);
+            inputIds.push('erg-cd-date', 'in-frei-title', 'in-frei-icon-mode', 'in-frei-icon', 'in-frei-sub', 'in-frei-text',
+                'in-tf-photo', 'in-tf-title', 'in-tf-sub', 'in-tf-team', 'in-tf-namefmt', 'in-tf-row1', 'in-tf-row2', 'in-tf-row3', 'in-tf-coaches', 'in-tf-missing');
             for (let i = 1; i <= 11; i++) inputIds.push(`player-${i}`, `num-player-${i}`, `eck-player-${i}`);
             for (let i = 1; i <= 7; i++) inputIds.push(`bench-player-${i}`);
             for (let i = 1; i <= KADER_MAX; i++) inputIds.push(`kader-player-${i}`);
@@ -6760,6 +7156,7 @@
                 kaderMeeting: 'in-kader-meeting', kaderJersey: 'in-kader-jersey', kaderDuty1: 'in-kader-duty-1', kaderDuty2: 'in-kader-duty-2', kaderFreetext: 'in-kader-freetext',
                 potmPlayer: 'in-potm-player', potmText: 'in-potm-text'
             };
+            if (data.formation) setFormation(data.formation);
             for (const key in map) {
                 if (data[key] !== undefined) setVal(map[key], data[key]);
             }
@@ -6774,6 +7171,7 @@
             NAME_FMT_FIELDS.forEach(([id, k]) => setVal(id, data[k]));
             updateNumberInputs();
             if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
+            setVal('in-erg-mode', ERG_MODES[data.ergMode] ? data.ergMode : 'ergebnis');
             if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
             if ($('in-kal-own-logo')) $('in-kal-own-logo').checked = data.kalOwnLogo ?? true;
             if ($('in-wk-own-logo')) $('in-wk-own-logo').checked = data.wkOwnLogo ?? true;
@@ -6987,6 +7385,7 @@
                     ${row('templates', `🖼️ Hintergründe: ${(sd.templates || []).length}`, (sd.templates || []).length)}
                     ${row('styles', `✨ Gespeicherte Design-Stile: ${(sd.designStyles || []).length}`, (sd.designStyles || []).length)}
                     ${row('fonts', `🔤 Eigene Schriften: ${(sd.fonts || []).length}`, (sd.fonts || []).length)}
+                    ${row('teamphotos', `📸 Mannschaftsfotos: ${(sd.teamPhotos || []).length}`, (sd.teamPhotos || []).length)}
                     ${row('lists', '🏷️ Mannschaften & Positionen (Auswahllisten)', 1)}
                 </div>
                 ${vRows ? `<div class="pack-group"><b>Grafiken (ersetzt die jeweilige Version)</b>${vRows}</div>` : ''}`;
@@ -7029,6 +7428,7 @@
                 doList('templates', 'templates', '🖼️ Hintergründe', t => t.id || nameKey(t));
                 doList('styles', 'designStyles', '✨ Design-Stile');
                 doList('fonts', 'fonts', '🔤 Eigene Schriften');
+                doList('teamphotos', 'teamPhotos', '📸 Mannschaftsfotos', t => t.id);
                 if (pick.has('fonts')) { registerCustomFonts(); refreshFontSelects(); }
                 if (pick.has('lists')) {
                     ['teams', 'positions'].forEach(f => {
@@ -7961,7 +8361,7 @@
             set('in-post-venue', 'heim'); set('in-post-opponent-select', 'FC Musterstadt'); set('in-post-title', 'HEIMSPIEL');
             set('in-post-date', `${WEEKDAYS_LONG[sat.getDay()]}, ${pad(sat.getDate())}.${pad(sat.getMonth() + 1)}.`); set('in-post-time', '15:00 Uhr');
             // Aufstellung
-            set('formation-select', '4-2-3-1');
+            setFormation('4-2-3-1');
             const nums = [1, 2, 4, 5, 3, 6, 8, 7, 10, 11, 9];
             for (let i = 1; i <= 11; i++) { set(`player-${i}`, P[i - 1]); set(`num-player-${i}`, String(nums[i - 1])); }
             for (let i = 1; i <= 7; i++) set(`bench-player-${i}`, P[10 + i] || 'Keiner');
@@ -8419,6 +8819,8 @@
             geburtstag: 'Geburtstagskind wählen und Glückwunsch eintragen. Konfetti lässt sich abschalten.',
             neuzugang: 'Neuzugang oder Spielervorstellung wählen. Position, Nummer und Mannschaft kommen automatisch aus den Spielerdaten.',
             sponsor: 'Sponsor wählen und Dankestext eintragen – ideal z.B. für neue Trikots oder Bälle.',
+            teamfoto: 'Mannschaftsfoto hochladen, Titel eintragen und mit „Namen eintragen“ die Spieler einer Mannschaft übernehmen – dann auf hintere, mittlere und vordere Reihe verteilen.',
+            frei: 'Für alles neben dem Spielbetrieb: Titel, Symbol oder Wappen, eine hervorgehobene Zeile und freier Text. Eigene Fotos als Hintergrund unter „Aussehen anpassen“ wählen.',
             wochenende: 'Ergebnisse aller Mannschaften vom Wochenende eintragen (eigene Tore zuerst). Sieg, Remis und Niederlage werden farbig markiert.'
         };
         function setupHelp() {
@@ -9077,6 +9479,8 @@
                 document.addEventListener('toggle', e => { if (e.target.matches?.('.sidebar details')) rememberSection(e.target); }, true);
                 editorTabs.forEach(t => applyExtraDesign(t, null));   // Standardwerte (z.B. Tor-Reiter: Torjubel-Foto)
                 buildPlayerSelectControls();
+                fillFormationOptions(11, '4-4-2');
+                createPresentedBy();
                 refreshPlayerOptions();
                 refreshOpponentDropdown();
                 refreshSponsorChecklists();

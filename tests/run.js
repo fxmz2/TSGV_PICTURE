@@ -326,6 +326,35 @@ async function makePhotos(browser) {
         await page.waitForTimeout(800);
         check('Zusammenführen behält lokale Spieler', await page.evaluate(() => !!findPlayer('Nur Lokal')));
 
+        // 7er / 9er
+        const small = await page.evaluate(() => { switchTab('story'); setTeamSize('7'); const r = { f: val('formation-select'), cards: document.querySelectorAll('#pitch .player-card').length };
+            const d = collectSlotData(); setTeamSize('11'); applySlotData(d); buildFormation(); r.restored = val('formation-select') + '/' + val('in-team-size'); setTeamSize('11'); return r; });
+        check('7er-Aufstellung mit 7 Spielern', small.cards === 7 && small.f === '2-3-1', JSON.stringify(small));
+        check('Spielform wird gespeichert', small.restored === '2-3-1/7', small.restored);
+        // Präsentiert von
+        check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
+            const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
+            setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
+        // Ergebnis: Spielabsage, Countdown
+        const modes = await page.evaluate(() => { switchTab('ergebnis'); setErgMode('absage'); const a = [val('in-ergebnis-title'), !!document.querySelector('#out-ergebnis-score .erg-stamp'), $('out-erg-scorers-wrap').style.display];
+            setErgMode('countdown'); const d = new Date(); d.setDate(d.getDate() + 4); setVal('erg-cd-date', d.toISOString().slice(0, 10)); updateErgebnis(); const c = $('out-ergebnis-score').textContent;
+            setVal('erg-cd-date', ''); setErgMode('ergebnis'); return { a, c, back: val('in-ergebnis-title') }; });
+        check('Spielabsage mit Stempel, ohne Torschützen', modes.a[0] === 'SPIELABSAGE' && modes.a[1] && modes.a[2] === 'none', JSON.stringify(modes));
+        check('Countdown zählt Tage bis zum Datum', /^4\s*TAGE$/.test(modes.c), modes.c);
+        check('Zurück zum Endergebnis', modes.back === 'ENDERGEBNIS');
+        // Freie Vorlage & Mannschaftsfoto
+        check('Freie Vorlage', await page.evaluate(() => { switchTab('frei'); setVal('in-frei-title', 'SOMMERFEST'); setVal('in-frei-icon-mode', 'emoji'); updateFrei(); return $('out-frei-title').textContent === 'SOMMERFEST' && $('out-frei-icon-feed').textContent.length > 0; }));
+        check('Export freie Vorlage', (await exportSize(page, 'capture-frei')) === '1200x2133');
+        const tf = await page.evaluate(async () => {
+            switchTab('teamfoto');
+            const c = document.createElement('canvas'); c.width = 600; c.height = 400; c.getContext('2d').fillStyle = '#3d8b37'; c.getContext('2d').fillRect(0, 0, 600, 400);
+            const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
+            await uploadTeamPhoto({ target: { files: [new File([blob], 'Team.jpg', { type: 'image/jpeg' })], value: '' } });
+            setVal('in-tf-team', ''); fillTeamfotoNames();
+            return { photos: (stammdaten.teamPhotos || []).length, src: !!$('out-tf-photo').getAttribute('src'), names: /HINTEN/.test($('out-tf-names').textContent) };
+        });
+        check('Mannschaftsfoto mit Foto und Namen', tf.photos === 1 && tf.src && tf.names, JSON.stringify(tf));
+        check('Export Mannschaftsfoto', (await exportSize(page, 'capture-teamfoto-feed')) === '1200x1500');
         // Spieler umbenennen: Name wird in der Aufstellung mitgenommen
         const oldName = await page.evaluate(() => val('player-1'));
         page.answers.push('Umbenannt Neu');
