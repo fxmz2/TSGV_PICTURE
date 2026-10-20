@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 20.4</title>
+    <title>ClubShot – Grafiken für Vereine 20.5</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -823,6 +823,9 @@
         .scorer-box { display: block; width: fit-content; margin: 0 auto; background: var(--box-bg, rgba(0,0,0,0.6)); color: var(--box-fg, white); text-shadow: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; line-height: 1.5; max-width: 88%; }
         .scorer-box .scorer-head { font-size: 10px; letter-spacing: 1.5px; color: rgba(255,255,255,0.8); font-weight: bold; }
         .scorer-box .scorer-line { font-weight: bold; }
+        .scorer-box.scorer-cols { column-count: 2; column-gap: 14px; max-width: 94%; }
+        .scorer-box.scorer-cols .scorer-head { column-span: all; }
+        .scorer-box.scorer-cols .scorer-line { break-inside: avoid; }
         .scorer-row { display: grid; grid-template-columns: 1fr 70px; gap: 6px; margin-bottom: 6px; }
 
         /* Geburtstag */
@@ -2495,7 +2498,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "20.4";
+        const APP_VERSION = "20.5";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2565,7 +2568,9 @@ Alle sind herzlich eingeladen!</textarea></div>
         const KAL_MAX = 6;
         const KADER_MAX = 20;
 
-        const SCORER_MAX = 10;
+        const SCORER_MAX = 25;   // Torschützen-Zeilen (sichtbar zuerst 10, mehr per Knopf)
+        const SCORER_START = 10;
+        let scorersShown = SCORER_START;
         const OWN_GOAL = '__eigentor';
 
         const WK_MAX = 6;
@@ -3694,6 +3699,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                         <input type="text" id="erg-minute-${i}" placeholder="Min." oninput="updateErgebnis();">
                     </div>`;
             }
+            scorerHtml += `<button type="button" id="erg-more-scorers" class="copy-action-btn" style="background:#2a9d8f; margin-top:4px;" onclick="showMoreScorers()">➕ Weitere Torschützen</button>`;
             $('scorer-controls').innerHTML = scorerHtml;
 
             let wkHtml = '';
@@ -6161,7 +6167,23 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         /* Torschützen gruppiert: "F. Munz 12', 56' · L. Bader 78'" */
+        /* Nur so viele Torschützen-Zeilen zeigen wie nötig (mind. 10, ausgefüllte immer) */
+        function updateScorerRows() {
+            let last = 0;
+            for (let i = 1; i <= SCORER_MAX; i++) {
+                const n = val(`erg-scorer-${i}`);
+                if ((n && n !== 'Keiner') || normName(val(`erg-minute-${i}`))) last = i;
+            }
+            const shown = Math.min(SCORER_MAX, Math.max(scorersShown, SCORER_START, Math.ceil((last + 1) / 5) * 5));
+            document.querySelectorAll('#scorer-controls .scorer-row').forEach((r, i) => { r.style.display = i < shown ? '' : 'none'; });
+            if ($('erg-more-scorers')) $('erg-more-scorers').hidden = shown >= SCORER_MAX;
+        }
+        function showMoreScorers() {
+            scorersShown = Math.min(SCORER_MAX, Math.max(scorersShown, [...document.querySelectorAll('#scorer-controls .scorer-row')].filter(r => r.style.display !== 'none').length) + 5);
+            updateScorerRows();
+        }
         function updateScorers() {
+            updateScorerRows();
             const groups = [];
             for (let i = 1; i <= SCORER_MAX; i++) {
                 const name = val(`erg-scorer-${i}`);
@@ -6181,11 +6203,17 @@ Alle sind herzlich eingeladen!</textarea></div>
             const fmt = val('in-erg-namefmt') || 'short';
             const feedHtml = `${head}<div class="scorer-line">${groups.map(g => esc(g.name === OWN_GOAL ? label(g) : playerDisplayName(g.name, fmt)) + mins(g)).join(' · ')}</div>`;
             const storyHtml = `${head}${groups.map(g => `<div class="scorer-line">${esc(label(g))}${mins(g)}</div>`).join('')}`;
+            const n = groups.length;
             [['out-erg-scorers-wrap-feed', 'out-erg-scorers-feed', feedHtml], ['out-erg-scorers-wrap', 'out-erg-scorers', storyHtml]].forEach(([wrapId, boxId, html]) => {
                 const wrap = $(wrapId), box = $(boxId);
                 if (!wrap || !box) return;
                 wrap.style.display = show ? '' : 'none';
                 box.innerHTML = show ? html : '';
+                // Viele Torschützen: kleinere Schrift, in der Story zweispaltig
+                const isFeed = wrapId.endsWith('-feed');
+                const fs = isFeed ? (n > 8 ? 9 : n > 5 ? 10.5 : 0) : (n > 12 ? 10 : n > 7 ? 11 : 0);
+                box.style.fontSize = fs ? fs + 'px' : '';
+                box.classList.toggle('scorer-cols', !isFeed && n > 7);
             });
         }
 
@@ -7188,6 +7216,9 @@ Alle sind herzlich eingeladen!</textarea></div>
             // Vor dem Setzen der Werte: volle Spielerliste in der Aufstellung, sonst gehen Namen verloren
             refreshLineupOptions(true);
             if (data.inputs) {
+                // Ältere Stände kannten nur 10 Torschützen-Zeilen → übrige leeren
+                for (let i = 1; i <= SCORER_MAX; i++) if (!(`erg-scorer-${i}` in data.inputs)) { setVal(`erg-scorer-${i}`, 'Keiner'); setVal(`erg-minute-${i}`, ''); }
+                scorersShown = SCORER_START;
                 for (const k in data.inputs) setVal(k, data.inputs[k]);
             }
             if (data.lineupKaderOnly !== undefined && $('in-lineup-kader-only')) $('in-lineup-kader-only').checked = data.lineupKaderOnly;

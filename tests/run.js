@@ -342,6 +342,14 @@ async function makePhotos(browser) {
         check('Spielabsage mit Stempel, ohne Torschützen', modes.a[0] === 'SPIELABSAGE' && modes.a[1] && modes.a[2] === 'none', JSON.stringify(modes));
         check('Countdown zählt Tage bis zum Datum', /^4\s*TAGE$/.test(modes.c), modes.c);
         check('Zurück zum Endergebnis', modes.back === 'ENDERGEBNIS');
+        const many = await page.evaluate(() => { const P = stammdaten.players.filter(x => (x.group || 'Spieler') === 'Spieler').map(x => x.name);
+            const visible = () => [...document.querySelectorAll('#scorer-controls .scorer-row')].filter(r => r.style.display !== 'none').length;
+            const start = visible(); showMoreScorers(); const more = visible();
+            for (let i = 1; i <= 20; i++) { setVal('erg-scorer-' + i, P[i % P.length]); setVal('erg-minute-' + i, String(i * 4)); } updateErgebnis();
+            const saved = Object.keys(collectSlotData().inputs).filter(k => /^erg-scorer-/.test(k)).length;
+            const r = { start, more, filled: visible(), saved, lines: document.querySelectorAll('#out-erg-scorers .scorer-line').length };
+            for (let i = 1; i <= SCORER_MAX; i++) { setVal('erg-scorer-' + i, 'Keiner'); setVal('erg-minute-' + i, ''); } updateErgebnis(); return r; });
+        check('Bis zu 25 Torschützen (zuerst 10, mehr per Knopf)', many.start === 10 && many.more === 15 && many.filled >= 20 && many.saved === 25 && many.lines > 0, JSON.stringify(many));
         // Freie Vorlage & Mannschaftsfoto
         check('Freie Vorlage', await page.evaluate(() => { switchTab('frei'); setVal('in-frei-title', 'SOMMERFEST'); setVal('in-frei-icon-mode', 'emoji'); updateFrei(); return $('out-frei-title').textContent === 'SOMMERFEST' && $('out-frei-icon-feed').textContent.length > 0; }));
         check('Export freie Vorlage', (await exportSize(page, 'capture-frei')) === '1200x2133');
