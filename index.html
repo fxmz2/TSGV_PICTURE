@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 21.1</title>
+    <title>Match-Shot – Grafiken für Vereine 21.2</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1247,7 +1247,8 @@
                 <div class="app-footer">
                     Match-Shot <span id="app-version-label"></span> · © [Anbieter]<br>
                     <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a><br>
-                    Hilfe & Kontakt: <a href="mailto:clubshotinfo@gmail.com">clubshotinfo@gmail.com</a>
+                    Hilfe & Kontakt: <a href="mailto:clubshotinfo@gmail.com">clubshotinfo@gmail.com</a><br>
+                    Tipps & Beispiele auf Instagram: <a href="https://www.instagram.com/match_shot_de/" target="_blank" rel="noopener">@match_shot_de</a>
                 </div>
             </div>
 
@@ -2505,7 +2506,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "21.1";
+        const APP_VERSION = "21.2";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -7620,7 +7621,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         const CONTACT_EMAIL = 'clubshotinfo@gmail.com';
         /* Landingpage: Links für Bestellung und Instagram – sobald vorhanden hier eintragen.
            Ohne Bestell-Link öffnet „Testmonat anfragen“ eine vorausgefüllte E-Mail. */
-        const LANDING_LINKS = { kaufen: '', instagram: '' };
+        const LANDING_LINKS = { kaufen: '', instagram: 'https://www.instagram.com/match_shot_de/' };
         const ORDER_MAIL = {
             subject: 'Match-Shot – Testmonat für unseren Verein',
             body: 'Hallo Match-Shot-Team,\n\nwir möchten Match-Shot einen Monat kostenlos mit unseren eigenen Daten testen.\n\n'
@@ -7632,7 +7633,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         function setupLandingLinks() {
             const buy = $('lp-buy-btn');
             if (buy && !LANDING_LINKS.kaufen) buy.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(ORDER_MAIL.subject)}&body=${encodeURIComponent(ORDER_MAIL.body)}`;
-            [['lp-buy-btn', LANDING_LINKS.kaufen, '🛒 Jetzt bestellen'], ['lp-insta-btn', LANDING_LINKS.instagram, '📸 Zu Instagram']].forEach(([id, url, label]) => {
+            [['lp-buy-btn', LANDING_LINKS.kaufen, '🛒 Jetzt bestellen'], ['lp-insta-btn', LANDING_LINKS.instagram, '📸 @match_shot_de folgen']].forEach(([id, url, label]) => {
                 const a = $(id);
                 if (!a || !url) return;
                 a.href = url; a.textContent = label; a.removeAttribute('aria-disabled');
