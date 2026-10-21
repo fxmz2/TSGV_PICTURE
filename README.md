@@ -1,6 +1,6 @@
-# ClubShot – Social-Media-Grafiken für Vereine
+# MatchShot – Social-Media-Grafiken für Vereine
 
-ClubShot ist eine Web-App, mit der Fußballvereine auf dem Handy Instagram-Grafiken erstellen:
+MatchShot ist eine Web-App, mit der Fußballvereine auf dem Handy Instagram-Grafiken erstellen:
 Spielankündigung, Aufstellung, Tor, Ergebnis, Kader, Player of the Match, Kalender, Geburtstag,
 Neuzugang/Spielervorstellung, Danke an Sponsor, Wochenend-Ergebnisse und Eckball-Taktik.
 
@@ -14,7 +14,7 @@ Neuzugang/Spielervorstellung, Danke an Sponsor, Wochenend-Ergebnisse und Eckball
 |---|---|
 | `index.html` | Die komplette App (eine Datei) |
 | `sw.js` | Service Worker (Offline-Betrieb, Updates) |
-| `manifest.json`, `icons/`, `clubshot.png` | App-Name, Icons, Logo |
+| `manifest.json`, `icons/`, `matchshot.png` | App-Name, Icons, Logo |
 | `vendor/` | Bibliotheken, Schriften, Freistell-Modell (alles lokal, keine Verbindung zu Google & Co.) |
 | `vereine.txt` | Liste der freigeschalteten Vereine (siehe unten) |
 | `Wappen/` | Vereinswappen der Kunden |

@@ -1,6 +1,6 @@
 {
-  "name": "ClubShot – Grafiken für Vereine",
-  "short_name": "ClubShot",
+  "name": "MatchShot – Grafiken für Vereine",
+  "short_name": "MatchShot",
   "description": "Social-Media-Grafiken für Fußballvereine direkt auf dem Handy erstellen.",
   "lang": "de",
   "start_url": "./index.html",

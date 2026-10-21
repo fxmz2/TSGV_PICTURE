@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-    ClubShot – Social-Media-Grafiken für Vereine
+    MatchShot – Social-Media-Grafiken für Vereine
     © [Jahr] [Vorname Nachname / Firma]. Alle Rechte vorbehalten.
     Diese Software ist urheberrechtlich geschützt. Kopieren, Verändern, Weiterverbreiten oder eigenes Hosten –
     auch in Teilen – ist ohne schriftliche Zustimmung untersagt. Nutzung nur mit gültigem Vereinscode
@@ -10,12 +10,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 20.7</title>
+    <title>MatchShot – Grafiken für Vereine 21.0</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ClubShot">
+    <meta name="apple-mobile-web-app-title" content="MatchShot">
 
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -66,10 +66,12 @@
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #003f4d; }
 
-        /* Kopfzeile mit ClubShot-Logo (immer sichtbar) */
+        /* Kopfzeile mit MatchShot-Logo (immer sichtbar) */
         .app-header { display: flex; align-items: center; gap: 10px; padding: 6px 14px; background: #0b1d26; color: #fff; flex-shrink: 0; min-height: 44px; box-sizing: border-box; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 20; }
         .app-header .brand-logo { height: 32px; width: auto; max-width: 120px; object-fit: contain; border-radius: 6px; }
         .app-header .brand-name { font-family: 'Montserrat', Arial, sans-serif; font-weight: 900; font-size: 19px; letter-spacing: 0.5px; }
+        .brand-accent { color: #4f8bff; }
+        .brand-hero .brand-accent { color: #1f5cf0; }
         .app-header .brand-club { margin-left: auto; font-size: 12px; font-weight: bold; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
         .brand-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 6px; }
         .brand-hero img { height: 72px; width: auto; max-width: 200px; object-fit: contain; border-radius: 12px; }
@@ -873,7 +875,7 @@
     <div id="license-overlay" class="license-overlay" hidden>
         <div class="landing-only">
             <header class="lp-hero lp-wrap">
-                <div class="lp-brand"><img src="clubshot.png" alt="" onerror="this.hidden = true">ClubShot</div>
+                <div class="lp-brand"><img src="matchshot.png" alt="" onerror="this.hidden = true"><span>Match<span class="brand-accent">Shot</span></span></div>
                 <h1>Profi-Grafiken für deinen Verein – <span>direkt am Handy</span></h1>
                 <p>Spieltag, Aufstellung, Tor, Ergebnis und mehr: In wenigen Minuten fertige Instagram-Beiträge, Storys und Reels in euren Vereinsfarben – ganz ohne Designkenntnisse.</p>
                 <div class="lp-cta">
@@ -885,7 +887,7 @@
 
             <section class="lp-section lp-wrap">
                 <h2>Das kommt dabei raus</h2>
-                <p class="lp-sub">Echte Ergebnisse aus ClubShot – mit erfundenem Beispielverein</p>
+                <p class="lp-sub">Echte Ergebnisse aus MatchShot – mit erfundenem Beispielverein</p>
                 <div class="lp-gallery">
                     <figure><img src="landing/post-feed.webp" alt="Beispiel: Spieltag-Ankündigung" loading="lazy" onclick="lpZoom(this)"><figcaption>Spieltag-Ankündigung</figcaption></figure>
                     <figure><img src="landing/aufstellung.webp" alt="Beispiel: Startaufstellung im Profi-Look" loading="lazy" onclick="lpZoom(this)"><figcaption>Startaufstellung im Profi-Look</figcaption></figure>
@@ -903,9 +905,9 @@
                 <h2>So einfach geht's</h2>
                 <p class="lp-sub">Alles im Browser – am Handy, Tablet oder PC</p>
                 <div class="lp-steps">
-                    <figure class="lp-step"><img src="landing/app-start.webp" alt="ClubShot: Vorlage auswählen" loading="lazy" onclick="lpZoom(this)"><b><i>1</i>Vorlage wählen</b><figcaption>Ankündigung, Aufstellung, Tor, Ergebnis … mit einem Tipp starten. Spieler und Gegner sind einmal angelegt und immer parat.</figcaption></figure>
-                    <figure class="lp-step"><img src="landing/app-editor.webp" alt="ClubShot: Grafik bearbeiten" loading="lazy" onclick="lpZoom(this)"><b><i>2</i>Anpassen</b><figcaption>Spieler, Texte und Logos mit dem Finger verschieben und größer oder kleiner ziehen.</figcaption></figure>
-                    <figure class="lp-step"><img src="landing/app-design.webp" alt="ClubShot: Design wählen" loading="lazy" onclick="lpZoom(this)"><b><i>3</i>Design wählen &amp; teilen</b><figcaption>Fertige Stile, Vereinsfarben, eigene Schriften – dann direkt auf Instagram teilen, als Bild oder Reel.</figcaption></figure>
+                    <figure class="lp-step"><img src="landing/app-start.webp" alt="MatchShot: Vorlage auswählen" loading="lazy" onclick="lpZoom(this)"><b><i>1</i>Vorlage wählen</b><figcaption>Ankündigung, Aufstellung, Tor, Ergebnis … mit einem Tipp starten. Spieler und Gegner sind einmal angelegt und immer parat.</figcaption></figure>
+                    <figure class="lp-step"><img src="landing/app-editor.webp" alt="MatchShot: Grafik bearbeiten" loading="lazy" onclick="lpZoom(this)"><b><i>2</i>Anpassen</b><figcaption>Spieler, Texte und Logos mit dem Finger verschieben und größer oder kleiner ziehen.</figcaption></figure>
+                    <figure class="lp-step"><img src="landing/app-design.webp" alt="MatchShot: Design wählen" loading="lazy" onclick="lpZoom(this)"><b><i>3</i>Design wählen &amp; teilen</b><figcaption>Fertige Stile, Vereinsfarben, eigene Schriften – dann direkt auf Instagram teilen, als Bild oder Reel.</figcaption></figure>
                 </div>
             </section>
 
@@ -927,13 +929,13 @@
             <section class="lp-section lp-wrap">
                 <div class="lp-two">
                     <div class="lp-box">
-                        <h2>ClubShot für deinen Verein</h2>
-                        <p id="lp-buy-text">Testet ClubShot einen Monat kostenlos mit euren eigenen Spielern und Fotos – ohne Wasserzeichen und unverbindlich. Einfach per E-Mail anfragen und das Vereinswappen anhängen: Freischaltung innerhalb von 48 Stunden.</p>
+                        <h2>MatchShot für deinen Verein</h2>
+                        <p id="lp-buy-text">Testet MatchShot einen Monat kostenlos mit euren eigenen Spielern und Fotos – ohne Wasserzeichen und unverbindlich. Einfach per E-Mail anfragen und das Vereinswappen anhängen: Freischaltung innerhalb von 48 Stunden.</p>
                         <a id="lp-buy-btn" class="lp-btn primary" href="mailto:clubshotinfo@gmail.com">✉️ Testmonat anfragen</a>
                         <div class="lp-note">oder direkt an <a href="mailto:clubshotinfo@gmail.com" style="color:inherit;">clubshotinfo@gmail.com</a></div>
                     </div>
                     <div class="lp-box">
-                        <h2>ClubShot auf Instagram</h2>
+                        <h2>MatchShot auf Instagram</h2>
                         <p>Beispiele, Tipps und neue Funktionen – folg uns, um nichts zu verpassen.</p>
                         <a id="lp-insta-btn" class="lp-btn ghost" href="#" target="_blank" rel="noopener" aria-disabled="true">📸 Kanal startet in Kürze</a>
                     </div>
@@ -943,7 +945,7 @@
 
         <div class="landing-only lp-section lp-code" id="lp-code"><h2 style="text-align:center; margin:0 0 12px; color:#fff;">Schon dabei?</h2></div>
         <div class="license-card">
-            <div class="brand-hero"><img src="clubshot.png" alt="" onerror="this.hidden = true"><span>ClubShot</span></div>
+            <div class="brand-hero"><img src="matchshot.png" alt="" onerror="this.hidden = true"><span>Match<span class="brand-accent">Shot</span></span></div>
             <h2>Vereinscode eingeben</h2>
             <p id="license-text">Bitte gib den Code ein, den du für deinen Verein erhalten hast. Zum Ausprobieren gibt es den Demo-Modus.</p>
             <input type="text" id="license-input" placeholder="XXXX-XXXX" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false">
@@ -974,8 +976,8 @@
             <div class="wz-dots" id="wz-dots"></div>
 
             <div class="wz-step" data-step="1">
-                <div class="brand-hero"><img src="clubshot.png" alt="" onerror="this.hidden = true"></div>
-                <h2>Willkommen bei ClubShot<span id="wz-club-name"></span>!</h2>
+                <div class="brand-hero"><img src="matchshot.png" alt="" onerror="this.hidden = true"></div>
+                <h2>Willkommen bei MatchShot<span id="wz-club-name"></span>!</h2>
                 <p>In wenigen Schritten ist deine App startklar. Alles lässt sich später jederzeit ändern.</p>
                 <label for="wz-team">Wie soll dein Verein auf den Grafiken heißen?</label>
                 <input type="text" id="wz-team" placeholder="z.B. TSGV Rechberg" oninput="wizardSync()">
@@ -1032,8 +1034,8 @@
 
     <!-- KOPFZEILE -->
     <header class="app-header">
-        <img class="brand-logo" src="clubshot.png" alt="ClubShot" onerror="this.hidden = true">
-        <span class="brand-name">ClubShot</span>
+        <img class="brand-logo" src="matchshot.png" alt="MatchShot" onerror="this.hidden = true">
+        <span class="brand-name">Match<span class="brand-accent">Shot</span></span>
         <span class="brand-club" id="brand-club"></span>
         <div id="undo-bar" class="undo-bar">
             <button type="button" id="undo-btn" onclick="undoAction()" title="Rückgängig (Strg+Z)" disabled>↩️</button>
@@ -1207,7 +1209,7 @@
                     <b>📦 Basis-Paket</b>
                     Im Advanced-Paket zusätzlich enthalten: Eckbälle, Neuzugang/Spielervorstellung, Danke-Sponsor, Wochenend-Ergebnisse,
                     Sponsorenleisten, „Präsentiert von“, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte, Spielplan-Import und Grafik-Paket.
-                    Für ein Upgrade schreib uns: <a href="mailto:clubshotinfo@gmail.com?subject=ClubShot%20Upgrade%20auf%20Advanced">clubshotinfo@gmail.com</a>
+                    Für ein Upgrade schreib uns: <a href="mailto:clubshotinfo@gmail.com?subject=MatchShot%20Upgrade%20auf%20Advanced">clubshotinfo@gmail.com</a>
                 </div>
 
                 <details class="sect" id="ui-settings">
@@ -1243,7 +1245,7 @@
                 </details>
 
                 <div class="app-footer">
-                    ClubShot <span id="app-version-label"></span> · © [Anbieter]<br>
+                    MatchShot <span id="app-version-label"></span> · © [Anbieter]<br>
                     <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a><br>
                     Hilfe & Kontakt: <a href="mailto:clubshotinfo@gmail.com">clubshotinfo@gmail.com</a>
                 </div>
@@ -1254,7 +1256,7 @@
                 <div class="notice-card info" style="margin-top:20px;">
                     <b>🔒 Advanced-Funktion</b>
                     <span id="locked-text">Dieser Reiter ist im Advanced-Paket enthalten.</span>
-                    Für ein Upgrade schreib uns an <a href="mailto:clubshotinfo@gmail.com?subject=ClubShot%20Upgrade%20auf%20Advanced">clubshotinfo@gmail.com</a> – deine Daten bleiben erhalten.
+                    Für ein Upgrade schreib uns an <a href="mailto:clubshotinfo@gmail.com?subject=MatchShot%20Upgrade%20auf%20Advanced">clubshotinfo@gmail.com</a> – deine Daten bleiben erhalten.
                 </div>
             </div>
 
@@ -2503,7 +2505,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "20.7";
+        const APP_VERSION = "21.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -7325,7 +7327,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             for (const v of ['v1', 'v2', 'v3']) slots[v] = await localforage.getItem(STORE.slot(v)) || null;
 
             const data = {
-                app: 'ClubShot',
+                app: 'MatchShot',
                 formatVersion: 2,
                 appVersion: APP_VERSION,
                 exportedAt: new Date().toISOString(),
@@ -7360,7 +7362,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const file = new File([blob], filename, { type: 'application/json' });
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
-                    await navigator.share({ files: [file], title: 'ClubShot-Backup' });
+                    await navigator.share({ files: [file], title: 'MatchShot-Backup' });
                     await markBackupDone();
                     toast('✅ Backup geteilt');
                     return;
@@ -7620,11 +7622,11 @@ Alle sind herzlich eingeladen!</textarea></div>
            Ohne Bestell-Link öffnet „Testmonat anfragen“ eine vorausgefüllte E-Mail. */
         const LANDING_LINKS = { kaufen: '', instagram: '' };
         const ORDER_MAIL = {
-            subject: 'ClubShot – Testmonat für unseren Verein',
-            body: 'Hallo ClubShot-Team,\n\nwir möchten ClubShot einen Monat kostenlos mit unseren eigenen Daten testen.\n\n'
+            subject: 'MatchShot – Testmonat für unseren Verein',
+            body: 'Hallo MatchShot-Team,\n\nwir möchten MatchShot einen Monat kostenlos mit unseren eigenen Daten testen.\n\n'
                 + 'Verein:\nAnsprechpartner:\nRechnungsadresse:\nTelefon (optional):\nPaket (Basis oder Advanced):\n\n'
                 + 'Unser Vereinswappen hängt an (PNG oder JPG, am besten ohne Hintergrund).\n'
-                + 'Wir bestätigen, dass wir berechtigt sind, das Wappen im Namen des Vereins zu verwenden, und erlauben ClubShot, es für die Bereitstellung der App zu speichern und anzuzeigen.\n\n'
+                + 'Wir bestätigen, dass wir berechtigt sind, das Wappen im Namen des Vereins zu verwenden, und erlauben MatchShot, es für die Bereitstellung der App zu speichern und anzuzeigen.\n\n'
                 + 'Viele Grüße'
         };
         function setupLandingLinks() {
@@ -7636,7 +7638,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 a.href = url; a.textContent = label; a.removeAttribute('aria-disabled');
                 a.target = '_blank';
             });
-            if (LANDING_LINKS.kaufen) setText('lp-buy-text', 'Mit eurem Vereinscode nutzt ihr ClubShot ohne Wasserzeichen. Alle Infos zu Preisen und Bestellung findest du hier:');
+            if (LANDING_LINKS.kaufen) setText('lp-buy-text', 'Mit eurem Vereinscode nutzt ihr MatchShot ohne Wasserzeichen. Alle Infos zu Preisen und Bestellung findest du hier:');
         }
         setupLandingLinks();   // sofort, die Landingpage ist schon vor dem App-Start sichtbar
         function lpScroll(dir) {
@@ -8038,7 +8040,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             ctx.font = `bold ${Math.round(bh * 0.45)}px Arial, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('ClubShot DEMO – mit Vereinscode ohne Wasserzeichen', w / 2, h - bh / 2);
+            ctx.fillText('MatchShot DEMO – mit Vereinscode ohne Wasserzeichen', w / 2, h - bh / 2);
             ctx.restore();
         }
 
@@ -9174,7 +9176,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function sharePackFiles() {
             if (!packFiles.length) return;
             try {
-                await navigator.share({ files: packFiles, title: 'ClubShot Grafiken' });
+                await navigator.share({ files: packFiles, title: 'MatchShot Grafiken' });
             } catch (err) {
                 if (err.name !== 'AbortError') ['pack-progress', 'bulk-progress'].forEach(id => setText(id, 'Teilen nicht möglich – bitte „Alle herunterladen“ verwenden.'));
             }

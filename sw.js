@@ -3,13 +3,13 @@
    - Bibliotheken, Schriften, Icons: aus dem Zwischenspeicher
    - vereine.txt und Wappen: immer aus dem Netz (werden nie zwischengespeichert)
    Bei jeder neuen App-Version CACHE_VERSION erhöhen. */
-const CACHE_VERSION = 'clubshot-v20.7';
+const CACHE_VERSION = 'matchshot-v21.0';
 
 const CORE_FILES = [
     './',
     './index.html',
     './manifest.json',
-    './clubshot.png',
+    './matchshot.png',
     './vendor/html2canvas.min.js',
     './vendor/localforage.min.js',
     './vendor/fonts.css',
@@ -57,14 +57,14 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
     event.waitUntil((async () => {
         const keys = await caches.keys();
-        await Promise.all(keys.filter(k => (k.startsWith('clubshot-') || k.startsWith('clubsnap-') || k.startsWith('vereinsgrafik-')) && k !== CACHE_VERSION).map(k => caches.delete(k)));
+        await Promise.all(keys.filter(k => (k.startsWith('matchshot-') || k.startsWith('clubshot-') || k.startsWith('clubsnap-') || k.startsWith('vereinsgrafik-')) && k !== CACHE_VERSION).map(k => caches.delete(k)));
         await self.clients.claim();
     })());
 });
 
 function isCoreAsset(url) {
     const path = url.pathname;
-    return path.includes('/vendor/') || path.includes('/icons/') || path.endsWith('/clubshot.png');
+    return path.includes('/vendor/') || path.includes('/icons/') || path.endsWith('/matchshot.png');
 }
 
 self.addEventListener('fetch', event => {
