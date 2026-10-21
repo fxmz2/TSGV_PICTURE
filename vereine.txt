@@ -29,5 +29,5 @@
 
 60d96de6c546de03961e73890cb9653c218d111117fdb68376c348ee28fa8362 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg = 2050-12-31 = advanced
 db084c40900afa5a276169ff266987e6035d7ebc3e6806b896c081865b1363a3 = TSV Grünwald = Wappen/TSV_Grünwald.jpg = 2050-12-31 = basis
-66798bc9aca5814fd567bf98fa773349d680dd6eb21e0851a7e3a66be66dc566 = SG Dornstetten = Wappen/SG Dornstetten = 2050-12-31 = advanced
+66798bc9aca5814fd567bf98fa773349d680dd6eb21e0851a7e3a66be66dc566 = SG Dornstetten = Wappen/SG_Dornstetten.png = 2050-12-31 = advanced
 8bf4b429d2db12de0047803815ab3d32f23f5edac507abe7380520f5e2c51000 = SC Lilaheim = Wappen/SC_Lilaheim.jpg = 2050-12-31 = advanced
