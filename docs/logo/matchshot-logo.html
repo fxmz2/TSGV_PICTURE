@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../vendor/fonts.css">
+<style>body{margin:0;background:#888}svg{display:block}</style>
+</head><body>
+<svg id="logo" xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b2147"/><stop offset="0.55" stop-color="#06122a"/><stop offset="1" stop-color="#030812"/>
+    </linearGradient>
+    <linearGradient id="streak" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2f6bff" stop-opacity="0"/><stop offset="0.35" stop-color="#2f6bff" stop-opacity="0.95"/>
+      <stop offset="0.8" stop-color="#1747c9" stop-opacity="0.85"/><stop offset="1" stop-color="#1747c9" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="sfill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4f8bff"/><stop offset="0.55" stop-color="#1f5cf0"/><stop offset="1" stop-color="#0d36a8"/>
+    </linearGradient>
+    <radialGradient id="ballshade" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="0.7" stop-color="#9aa6b8" stop-opacity="0.15"/><stop offset="1" stop-color="#3b4658" stop-opacity="0.55"/>
+    </radialGradient>
+    <filter id="rough" x="-10%" y="-30%" width="120%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.35" numOctaves="3" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+    <clipPath id="tile"><rect id="tilerect" width="512" height="512" rx="104"/></clipPath>
+    <clipPath id="ballclip"><circle cx="0" cy="0" r="74"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <rect width="512" height="512" fill="url(#bg)"/>
+    <g transform="rotate(-38 256 256)" filter="url(#rough)" opacity="0.9">
+      <rect x="-80" y="40" width="700" height="34" fill="url(#streak)" opacity="0.55"/>
+      <rect x="-60" y="96" width="680" height="16" fill="url(#streak)" opacity="0.7"/>
+      <rect x="120" y="128" width="520" height="54" fill="url(#streak)" opacity="0.5"/>
+      <rect x="-120" y="350" width="560" height="60" fill="url(#streak)" opacity="0.6"/>
+      <rect x="-40" y="430" width="640" height="22" fill="url(#streak)" opacity="0.75"/>
+      <rect x="60" y="476" width="560" height="40" fill="url(#streak)" opacity="0.45"/>
+      <rect x="-90" y="540" width="600" height="18" fill="url(#streak)" opacity="0.6"/>
+    </g>
+    <rect id="tileborder" width="512" height="512" fill="none" stroke="#2f6bff" stroke-opacity="0.35" stroke-width="6" rx="104"/>
+  </g>
+
+  <g id="fg" filter="url(#glow)">
+    <!-- Kamera: Sucher oben als „M“ -->
+    <path d="M120 188 V146 L161 92 L201 142 L241 92 L282 146 V188" fill="none" stroke="#fff" stroke-width="30" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="56" y="180" width="306" height="222" rx="58" fill="none" stroke="#fff" stroke-width="30"/>
+    <!-- Linse mit Ball -->
+    <circle cx="210" cy="292" r="98" fill="#0a1d42" stroke="#fff" stroke-width="14"/>
+    <g transform="translate(210 292)">
+      <circle r="74" fill="#fff"/>
+      <g clip-path="url(#ballclip)" id="ball"></g>
+      <circle r="74" fill="url(#ballshade)" opacity="0.8"/>
+      <circle r="74" fill="none" stroke="#c9d3e3" stroke-width="2.5"/>
+    </g>
+    <!-- S -->
+    <text x="392" y="410" text-anchor="middle" font-family="Montserrat" font-weight="900" font-size="292" fill="url(#sfill)"
+          stroke="#fff" stroke-width="12" paint-order="stroke" stroke-linejoin="round">S</text>
+  </g>
+</svg>
+<script>
+  // Fußball (Ikosaeder-Ansicht): Fünfeck in der Mitte, 5 Nähte zu angeschnittenen Fünfecken am Rand
+  const g = document.getElementById('ball'), NS = 'http://www.w3.org/2000/svg', INK = '#0a1d42';
+  const pent = (cx, cy, r, rot) => Array.from({ length: 5 }, (_, i) => { const a = rot + i * 2 * Math.PI / 5; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; });
+  const el = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); g.appendChild(e); return e; };
+  const pts = a => a.map(q => q.map(v => v.toFixed(1)).join(',')).join(' ');
+  const rot = -Math.PI / 2, R0 = 25, c = pent(0, 0, R0, rot);
+  for (let i = 0; i < 5; i++) {
+    const a = rot + i * 2 * Math.PI / 5;
+    // äußeres Fünfeck in Richtung der Ecke, Spitze zeigt zur Mitte
+    const d = 82, o = [Math.cos(a) * d, Math.sin(a) * d];
+    const op = pent(o[0], o[1], 22, a + Math.PI);
+    el('polygon', { points: pts(op), fill: INK });
+    // Naht: Ecke des Mittel-Fünfecks → innere Spitze des äußeren Fünfecks
+    el('line', { x1: c[i][0], y1: c[i][1], x2: op[0][0], y2: op[0][1], stroke: INK, 'stroke-width': 5, 'stroke-linecap': 'round' });
+    // Nähte zwischen benachbarten äußeren Fünfecken
+    const b = rot + (i + 1) * 2 * Math.PI / 5, ob = [Math.cos(b) * d, Math.sin(b) * d];
+    const opb = pent(ob[0], ob[1], 22, b + Math.PI);
+    el('line', { x1: op[1][0], y1: op[1][1], x2: opb[4][0], y2: opb[4][1], stroke: INK, 'stroke-width': 5, 'stroke-linecap': 'round' });
+  }
+  el('polygon', { points: pts(c), fill: INK });
+</script>
+</body></html>
