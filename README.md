@@ -60,6 +60,10 @@ CODE-HASH = Vereinsname = Wappen-Datei = gültig bis = Paket
 `netlify.toml` legt fest: kein Build, Hauptordner veröffentlichen, App/`sw.js`/`vereine.txt` immer frisch laden,
 interne Dateien (`tests/`, `docs/`, `code-generator.html`, `README.md`, `CLAUDE.md`) auf Netlify nicht ausliefern.
 
+**Code-Vorrat:** In `code-generator.html` unter „Code-Vorrat erzeugen“ z.B. 30 Codes auf einmal erstellen.
+Die Codes kommen als CSV in die private Tabelle, die Hash-Zeilen als gesperrte Einträge (`# R07 = HASH`) in `vereine.txt`.
+Zum Freischalten wird `# R07 = HASH` durch `HASH = Verein = Wappen/Datei.png = gültig bis = Paket` ersetzt.
+
 **Neuen Verein freischalten:** Zeile aus `code-generator.html` in `vereine.txt` eintragen und Wappen in `Wappen/` legen –
 auf `live` (sofort für den Kunden) **und** auf `main` (damit beide Listen gleich bleiben).
 
