@@ -1,5 +1,5 @@
 /*
- * MatchShot – automatische Tests (Playwright / Chromium)
+ * Match-Shot – automatische Tests (Playwright / Chromium)
  *
  * Start:  cd tests && npm install && npx playwright install chromium && npm test
  * Optional: HEADED=1 npm test   (Browser sichtbar)
@@ -90,7 +90,7 @@ async function makePhotos(browser) {
     await new Promise(r => server.listen(PORT, r));
     const browser = await chromium.launch({ headless: !process.env.HEADED });
     const photos = await makePhotos(browser);
-    console.log(`MatchShot-Tests auf ${BASE}`);
+    console.log(`Match-Shot-Tests auf ${BASE}`);
 
     await section('Start, Sicherheit, Demo-Modus', async () => {
         const page = await newPage(browser);

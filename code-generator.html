@@ -29,9 +29,9 @@
     <div class="box">
         <h2 style="margin-top:0;">Neuen Verein anlegen</h2>
         <label for="club-name">Vereinsname</label>
-        <input id="club-name" placeholder="z.B. TSGV Rechberg">
+        <input id="club-name" placeholder="z.B. SC Lilaheim">
         <label for="club-logo">Wappen-Datei auf dem Server</label>
-        <input id="club-logo" placeholder="z.B. Wappen/TSGV_Rechberg.jpg">
+        <input id="club-logo" placeholder="z.B. Wappen/SC_Lilaheim.jpg">
         <label for="club-valid">Lizenz gültig bis</label>
         <input id="club-valid" type="date" value="2050-12-31">
         <label for="club-tier">Paket</label>
@@ -78,9 +78,9 @@
 
     <div class="box">
         <h2 style="margin-top:0;">Bestehende Liste umwandeln</h2>
-        <p class="hint">Füge hier deine bisherige vereine.txt mit lesbaren Codes ein (z.B. <code>548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg</code>).
+        <p class="hint">Füge hier deine bisherige vereine.txt mit lesbaren Codes ein (z.B. <code>123-456 = SC Lilaheim = Wappen/SC_Lilaheim.jpg</code>).
             Die Codes der Vereine bleiben gleich – nur die Datei wird unlesbar. Zeilen ohne Ablaufdatum bekommen das Datum aus „Lizenz gültig bis“ (oben).</p>
-        <textarea id="convert-in" placeholder="548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg"></textarea>
+        <textarea id="convert-in" placeholder="123-456 = SC Lilaheim = Wappen/SC_Lilaheim.jpg"></textarea>
         <button type="button" onclick="convertList()">Umwandeln</button>
         <div class="result" id="convert-out" hidden></div>
         <button type="button" class="secondary" id="convert-copy" onclick="copy('convert-out')" hidden>📋 Ergebnis kopieren</button>
