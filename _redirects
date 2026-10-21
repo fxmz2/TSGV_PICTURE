@@ -1,0 +1,7 @@
+# Cloudflare Pages: interne Dateien des Projekts nicht ausliefern – Aufruf führt zur Startseite
+/tests/*             /  301
+/docs/*              /  301
+/code-generator.html /  301
+/README.md           /  301
+/CLAUDE.md           /  301
+/netlify.toml        /  301

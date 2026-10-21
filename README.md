@@ -57,6 +57,8 @@ CODE-HASH = Vereinsname = Wappen-Datei = gültig bis = Paket
 | `main` | Testversion | GitHub Pages |
 | `live` | Kundenversion | Netlify (verbunden mit GitHub, Einstellungen in `netlify.toml`) |
 
+Für **Cloudflare Pages** gelten dieselben Regeln über `_headers` (Zwischenspeicher) und `_redirects` (interne Dateien sperren).
+
 `netlify.toml` legt fest: kein Build, Hauptordner veröffentlichen, App/`sw.js`/`vereine.txt` immer frisch laden,
 interne Dateien (`tests/`, `docs/`, `code-generator.html`, `README.md`, `CLAUDE.md`) auf Netlify nicht ausliefern.
 
