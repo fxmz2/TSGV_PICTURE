@@ -1,6 +1,6 @@
-# Hinweise für die Arbeit an MatchShot
+# Hinweise für die Arbeit an Match-Shot
 
-- Produkt: MatchShot (Web-App für Vereinsgrafiken). Inhaber und Ansprechpartner spricht Deutsch – Oberfläche, Texte und Antworten auf Deutsch, laienverständlich.
+- Produkt: Match-Shot (Web-App für Vereinsgrafiken). Inhaber und Ansprechpartner spricht Deutsch – Oberfläche, Texte und Antworten auf Deutsch, laienverständlich.
 - Die App bleibt **eine Datei** (`index.html`); keine Build-Tools, keine externen CDNs oder Fonts (CSP und DSGVO).
 - Bei jeder Änderung: `APP_VERSION` und `<title>` in `index.html` sowie `CACHE_VERSION` in `sw.js` erhöhen.
 - Vor dem Abschluss die Tests laufen lassen: `cd tests && npm test` (siehe `README.md`). Neue Funktionen bekommen einen Testfall in `tests/run.js`.

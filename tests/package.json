@@ -1,7 +1,7 @@
 {
   "name": "matchshot-tests",
   "private": true,
-  "description": "Automatische Browser-Tests für MatchShot",
+  "description": "Automatische Browser-Tests für Match-Shot",
   "scripts": {
     "test": "node run.js"
   },

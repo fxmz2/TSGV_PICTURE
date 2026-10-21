@@ -1,4 +1,4 @@
-# MatchShot – technische Dokumentation
+# Match-Shot – technische Dokumentation
 
 ## Aufbau
 

@@ -3,7 +3,7 @@
    - Bibliotheken, Schriften, Icons: aus dem Zwischenspeicher
    - vereine.txt und Wappen: immer aus dem Netz (werden nie zwischengespeichert)
    Bei jeder neuen App-Version CACHE_VERSION erhöhen. */
-const CACHE_VERSION = 'matchshot-v21.0';
+const CACHE_VERSION = 'matchshot-v21.1';
 
 const CORE_FILES = [
     './',
@@ -57,7 +57,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
     event.waitUntil((async () => {
         const keys = await caches.keys();
-        await Promise.all(keys.filter(k => (k.startsWith('matchshot-') || k.startsWith('clubshot-') || k.startsWith('clubsnap-') || k.startsWith('vereinsgrafik-')) && k !== CACHE_VERSION).map(k => caches.delete(k)));
+        await Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)));
         await self.clients.claim();
     })());
 });
