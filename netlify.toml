@@ -1,0 +1,65 @@
+# Einstellungen für Netlify (Kundenversion = Zweig "live").
+# GitHub Pages (Testversion = Zweig "main") ignoriert diese Datei.
+
+[build]
+  # Kein Build nötig – die App wird so veröffentlicht, wie sie im Hauptordner liegt
+  publish = "."
+
+# App, Service Worker und Vereinsliste immer frisch vom Server prüfen,
+# damit Updates und neu freigeschaltete Vereine sofort ankommen
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/vereine.txt"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# Interne Dateien des Projekts nicht öffentlich ausliefern
+[[redirects]]
+  from = "/tests/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/docs/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/code-generator.html"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/README.md"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/CLAUDE.md"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/netlify.toml"
+  to = "/404"
+  status = 404
+  force = true

@@ -48,6 +48,7 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Ergebnis-Modi | `ERG_MODES` (ergebnis, halbzeit, absage, countdown), `setErgMode()`, gespeichert als `ergMode`; Countdown-Datum `erg-cd-date` |
 | Freie Vorlage | Reiter `frei`, `updateFrei()`, Eingaben `in-frei-*` |
 | Mannschaftsfoto | Reiter `teamfoto`, Fotos in `stammdaten.teamPhotos` [{id,name,img}] (Backup/Import „Mannschaftsfotos“), `updateTeamfoto()`, `fillTeamfotoNames()`, Eingaben `in-tf-*` |
+| Veröffentlichen | `main` = Testversion (GitHub Pages), `live` = Kundenversion (Netlify, `netlify.toml`). App-Änderungen nur nach ausdrücklicher Freigabe von `main` nach `live` übernehmen; neue Vereine (`vereine.txt`, `Wappen/`) auf beiden Zweigen eintragen |
 | Import | `importConfigJSON()` → Auswahl-Dialog, `runImport()` (zusammenführen per Name oder ersetzen; Versionen werden ersetzt) |
 | Speicher | Freigestellte Bilder als WebP 95 % (`encodeAlphaCanvas()`, falls das Gerät es kann, sonst PNG; max. 900×1100 wie die Originale), `optimizeStorage()` |
 | Zurücksetzen | Dialog `resetTabDefaults()` (einzelne Elemente + Bereiche), komplett `resetTabAll()` |
