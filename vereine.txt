@@ -31,3 +31,11 @@
 db084c40900afa5a276169ff266987e6035d7ebc3e6806b896c081865b1363a3 = TSV Grünwald = Wappen/TSV_Grünwald.jpg = 2050-12-31 = basis
 66798bc9aca5814fd567bf98fa773349d680dd6eb21e0851a7e3a66be66dc566 = SG Dornstetten = Wappen/SG_Dornstetten.png = 2050-12-31 = advanced
 8bf4b429d2db12de0047803815ab3d32f23f5edac507abe7380520f5e2c51000 = SC Lilaheim = Wappen/SC_Lilaheim.jpg = 2050-12-31 = advanced
+
+# --- Code-Vorrat (noch gesperrt; zum Freischalten „# Offen X = “ durch die Vereinszeile ersetzen) ---
+# Offen 1 = cbc04e303715ce9f4486dc0c3cc0e7ffc759f00b5b8d4edba5a9d577d10eeb05
+# Offen 2 = d46b2a8346c8d03573e05bdec42a573e1eb294d93b1f2d332b9621dc7bf0c23d
+# Offen 3 = cb37e0482569461b9053c9d909a420778894541c56ba99a059c2ee424cbc1281
+# Offen 4 = 2988b5b86c771a6c2aa290557b9acd2626befc12aea55eee4a5fed46f86546b8
+# Offen 5 = 322ae189ef07994caa480e38b9b8ccc09daf76be5a99a82997c89ab345e15127
+# Offen 6 = 51d461726f41888187b2b1af8ff21d7ff410065763be5ab6c459c95eb39f14a1
