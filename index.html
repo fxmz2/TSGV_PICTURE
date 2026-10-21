@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClubShot – Grafiken für Vereine 20.6</title>
+    <title>ClubShot – Grafiken für Vereine 20.7</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -618,6 +618,8 @@
         .license-error { color: #c1121f; font-size: 13px; margin-top: 10px; min-height: 18px; }
         .license-cancel { margin-top: 6px; background: none; border: none; color: #666; font-size: 13px; cursor: pointer; text-decoration: underline; }
         .license-cancel[hidden] { display: none; }
+        .license-card .license-contact { font-size: 12px; color: #666; margin: 12px 0 0; }
+        .license-contact a { color: #005f73; font-weight: bold; }
         #license-backup, #license-demo { display: block; margin: 8px auto 0; }
         #license-backup[hidden], #license-demo[hidden] { display: none; }
 
@@ -926,8 +928,9 @@
                 <div class="lp-two">
                     <div class="lp-box">
                         <h2>ClubShot für deinen Verein</h2>
-                        <p id="lp-buy-text">Mit eurem Vereinscode nutzt ihr ClubShot ohne Wasserzeichen. Preise und Bestellung folgen in Kürze – bis dahin einfach kostenlos testen.</p>
-                        <a id="lp-buy-btn" class="lp-btn primary" href="#" target="_blank" rel="noopener" aria-disabled="true">🛒 Bestellung folgt in Kürze</a>
+                        <p id="lp-buy-text">Testet ClubShot einen Monat kostenlos mit euren eigenen Spielern und Fotos – ohne Wasserzeichen und unverbindlich. Einfach per E-Mail anfragen und das Vereinswappen anhängen: Freischaltung innerhalb von 48 Stunden.</p>
+                        <a id="lp-buy-btn" class="lp-btn primary" href="mailto:clubshotinfo@gmail.com">✉️ Testmonat anfragen</a>
+                        <div class="lp-note">oder direkt an <a href="mailto:clubshotinfo@gmail.com" style="color:inherit;">clubshotinfo@gmail.com</a></div>
                     </div>
                     <div class="lp-box">
                         <h2>ClubShot auf Instagram</h2>
@@ -949,6 +952,7 @@
             <button type="button" id="license-cancel" class="license-cancel" onclick="hideLicenseOverlay()" hidden>Abbrechen</button>
             <button type="button" id="license-backup" class="license-cancel" onclick="exportConfigJSON()" hidden>💾 Trotzdem Backup meiner Daten sichern</button>
             <button type="button" id="license-demo" class="license-cancel" onclick="setVal('license-input', DEMO_CODE); submitLicenseCode();">🧪 Erst einmal testen (Demo-Modus)</button>
+            <p class="license-contact">Noch keinen Code oder Fragen? ✉️ <a href="mailto:clubshotinfo@gmail.com">clubshotinfo@gmail.com</a></p>
             <div class="app-footer" style="margin-top:14px;">
                 <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a>
             </div>
@@ -1202,8 +1206,8 @@
                 <div id="tier-card" class="notice-card info" hidden>
                     <b>📦 Basis-Paket</b>
                     Im Advanced-Paket zusätzlich enthalten: Eckbälle, Neuzugang/Spielervorstellung, Danke-Sponsor, Wochenend-Ergebnisse,
-                    Sponsorenleisten, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte, Spielplan-Import und Grafik-Paket.
-                    Für ein Upgrade wende dich an deinen Anbieter.
+                    Sponsorenleisten, „Präsentiert von“, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte, Spielplan-Import und Grafik-Paket.
+                    Für ein Upgrade schreib uns: <a href="mailto:clubshotinfo@gmail.com?subject=ClubShot%20Upgrade%20auf%20Advanced">clubshotinfo@gmail.com</a>
                 </div>
 
                 <details class="sect" id="ui-settings">
@@ -1240,7 +1244,8 @@
 
                 <div class="app-footer">
                     ClubShot <span id="app-version-label"></span> · © [Anbieter]<br>
-                    <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a>
+                    <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a><br>
+                    Hilfe & Kontakt: <a href="mailto:clubshotinfo@gmail.com">clubshotinfo@gmail.com</a>
                 </div>
             </div>
 
@@ -1249,7 +1254,7 @@
                 <div class="notice-card info" style="margin-top:20px;">
                     <b>🔒 Advanced-Funktion</b>
                     <span id="locked-text">Dieser Reiter ist im Advanced-Paket enthalten.</span>
-                    Für ein Upgrade wende dich an deinen Anbieter – deine Daten bleiben erhalten.
+                    Für ein Upgrade schreib uns an <a href="mailto:clubshotinfo@gmail.com?subject=ClubShot%20Upgrade%20auf%20Advanced">clubshotinfo@gmail.com</a> – deine Daten bleiben erhalten.
                 </div>
             </div>
 
@@ -2498,7 +2503,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "20.6";
+        const APP_VERSION = "20.7";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -7600,7 +7605,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (warn) warn.hidden = true;
             if (!club || club.demo || !club.validUntil) return;
             if (isLicenseExpired(club)) {
-                showLicenseOverlay(false, `Die Saisonlizenz für ${club.name} ist am ${formatIsoDate(club.validUntil)} abgelaufen. Bitte wende dich an den Anbieter, um sie zu verlängern. Deine Daten bleiben auf diesem Gerät erhalten.`, { expired: true });
+                showLicenseOverlay(false, `Die Saisonlizenz für ${club.name} ist am ${formatIsoDate(club.validUntil)} abgelaufen. Zum Verlängern schreib uns an ${CONTACT_EMAIL}. Deine Daten bleiben auf diesem Gerät erhalten.`, { expired: true });
                 return;
             }
             const days = daysUntil(club.validUntil);
@@ -7610,16 +7615,30 @@ Alle sind herzlich eingeladen!</textarea></div>
             }
         }
 
-        /* Landingpage: Links für Bestellung und Instagram – sobald vorhanden hier eintragen */
+        const CONTACT_EMAIL = 'clubshotinfo@gmail.com';
+        /* Landingpage: Links für Bestellung und Instagram – sobald vorhanden hier eintragen.
+           Ohne Bestell-Link öffnet „Testmonat anfragen“ eine vorausgefüllte E-Mail. */
         const LANDING_LINKS = { kaufen: '', instagram: '' };
+        const ORDER_MAIL = {
+            subject: 'ClubShot – Testmonat für unseren Verein',
+            body: 'Hallo ClubShot-Team,\n\nwir möchten ClubShot einen Monat kostenlos mit unseren eigenen Daten testen.\n\n'
+                + 'Verein:\nAnsprechpartner:\nRechnungsadresse:\nTelefon (optional):\nPaket (Basis oder Advanced):\n\n'
+                + 'Unser Vereinswappen hängt an (PNG oder JPG, am besten ohne Hintergrund).\n'
+                + 'Wir bestätigen, dass wir berechtigt sind, das Wappen im Namen des Vereins zu verwenden, und erlauben ClubShot, es für die Bereitstellung der App zu speichern und anzuzeigen.\n\n'
+                + 'Viele Grüße'
+        };
         function setupLandingLinks() {
+            const buy = $('lp-buy-btn');
+            if (buy && !LANDING_LINKS.kaufen) buy.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(ORDER_MAIL.subject)}&body=${encodeURIComponent(ORDER_MAIL.body)}`;
             [['lp-buy-btn', LANDING_LINKS.kaufen, '🛒 Jetzt bestellen'], ['lp-insta-btn', LANDING_LINKS.instagram, '📸 Zu Instagram']].forEach(([id, url, label]) => {
                 const a = $(id);
                 if (!a || !url) return;
                 a.href = url; a.textContent = label; a.removeAttribute('aria-disabled');
+                a.target = '_blank';
             });
             if (LANDING_LINKS.kaufen) setText('lp-buy-text', 'Mit eurem Vereinscode nutzt ihr ClubShot ohne Wasserzeichen. Alle Infos zu Preisen und Bestellung findest du hier:');
         }
+        setupLandingLinks();   // sofort, die Landingpage ist schon vor dem App-Start sichtbar
         function lpScroll(dir) {
             const g = document.querySelector('.lp-gallery');
             g.scrollBy({ left: dir * g.clientWidth * 0.8, behavior: 'smooth' });
@@ -7704,7 +7723,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const entry = await findLicenseEntry(map, code);
                 if (!entry) { errEl.textContent = 'Dieser Code ist unbekannt.'; return; }
                 if (entry.validUntil && todayISO() > entry.validUntil) {
-                    errEl.textContent = `Die Lizenz für diesen Code ist am ${formatIsoDate(entry.validUntil)} abgelaufen. Bitte wende dich an den Anbieter.`;
+                    errEl.textContent = `Die Lizenz für diesen Code ist am ${formatIsoDate(entry.validUntil)} abgelaufen. Zum Verlängern schreib uns an ${CONTACT_EMAIL}.`;
                     return;
                 }
                 const previousName = club ? club.name : null;
@@ -7738,7 +7757,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 await localforage.removeItem(STORE.club);
                 markUnlocked(false);
                 renderAll();
-                if (LICENSE_REQUIRED) showLicenseOverlay(false, 'Dein Vereinscode ist nicht mehr gültig. Bitte wende dich an den Anbieter.');
+                if (LICENSE_REQUIRED) showLicenseOverlay(false, `Dein Vereinscode ist nicht mehr gültig. Bei Fragen schreib uns an ${CONTACT_EMAIL}.`);
                 return;
             }
             let changed = false;
