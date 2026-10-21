@@ -1,0 +1,10 @@
+# Cloudflare Pages: App, Update-Steuerung und Vereinsliste immer frisch vom Server prüfen,
+# damit Updates und neu freigeschaltete Vereine sofort ankommen
+/
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache
+/vereine.txt
+  Cache-Control: no-cache
