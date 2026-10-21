@@ -1,5 +1,5 @@
 /*
- * ClubShot – automatische Tests (Playwright / Chromium)
+ * Match-Shot – automatische Tests (Playwright / Chromium)
  *
  * Start:  cd tests && npm install && npx playwright install chromium && npm test
  * Optional: HEADED=1 npm test   (Browser sichtbar)
@@ -90,7 +90,7 @@ async function makePhotos(browser) {
     await new Promise(r => server.listen(PORT, r));
     const browser = await chromium.launch({ headless: !process.env.HEADED });
     const photos = await makePhotos(browser);
-    console.log(`ClubShot-Tests auf ${BASE}`);
+    console.log(`Match-Shot-Tests auf ${BASE}`);
 
     await section('Start, Sicherheit, Demo-Modus', async () => {
         const page = await newPage(browser);
@@ -101,6 +101,8 @@ async function makePhotos(browser) {
         await page.evaluate(() => document.querySelectorAll('#license-overlay img[loading="lazy"]').forEach(i => i.loading = 'eager'));
         await page.waitForTimeout(800);
         check('Landingpage: alle Bilder geladen', await page.evaluate(() => [...document.querySelectorAll('.lp-gallery img, .lp-step img')].every(i => i.complete && i.naturalWidth > 0)));
+        check('Landingpage: Testmonat per E-Mail anfragen', await page.evaluate(() => /^mailto:clubshotinfo@gmail\.com\?subject=[\s\S]*Testmonat[\s\S]*&body=[\s\S]*Wappen/.test(decodeURIComponent($('lp-buy-btn').href))));
+        check('Landingpage: Instagram-Link aktiv', await page.evaluate(() => $('lp-insta-btn').href === 'https://www.instagram.com/match_shot_de/' && !$('lp-insta-btn').hasAttribute('aria-disabled')));
         check('Landingpage ohne seitliches Scrollen', await page.evaluate(() => $('license-overlay').scrollWidth <= $('license-overlay').clientWidth + 1));
         await page.click('#license-demo');
         await waitReady(page);

@@ -1,4 +1,4 @@
-# ClubShot – technische Dokumentation
+# Match-Shot – technische Dokumentation
 
 ## Aufbau
 
@@ -49,6 +49,7 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Freie Vorlage | Reiter `frei`, `updateFrei()`, Eingaben `in-frei-*` |
 | Mannschaftsfoto | Reiter `teamfoto`, Fotos in `stammdaten.teamPhotos` [{id,name,img}] (Backup/Import „Mannschaftsfotos“), `updateTeamfoto()`, `fillTeamfotoNames()`, Eingaben `in-tf-*` |
 | Veröffentlichen | `main` = Testversion (GitHub Pages), `live` = Kundenversion (Netlify, `netlify.toml`). App-Änderungen nur nach ausdrücklicher Freigabe von `main` nach `live` übernehmen; neue Vereine (`vereine.txt`, `Wappen/`) auf beiden Zweigen eintragen |
+| Logo | Quelle als SVG in `docs/logo/matchshot-logo.html` (im Browser über den Testserver öffnen). Daraus erzeugt: `matchshot.png` (256), `icons/` (32, 180, 192, 512, maskable 512) |
 | Import | `importConfigJSON()` → Auswahl-Dialog, `runImport()` (zusammenführen per Name oder ersetzen; Versionen werden ersetzt) |
 | Speicher | Freigestellte Bilder als WebP 95 % (`encodeAlphaCanvas()`, falls das Gerät es kann, sonst PNG; max. 900×1100 wie die Originale), `optimizeStorage()` |
 | Zurücksetzen | Dialog `resetTabDefaults()` (einzelne Elemente + Bereiche), komplett `resetTabAll()` |

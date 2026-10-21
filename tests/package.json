@@ -1,7 +1,7 @@
 {
-  "name": "clubshot-tests",
+  "name": "matchshot-tests",
   "private": true,
-  "description": "Automatische Browser-Tests für ClubShot",
+  "description": "Automatische Browser-Tests für Match-Shot",
   "scripts": {
     "test": "node run.js"
   },

@@ -29,9 +29,9 @@
     <div class="box">
         <h2 style="margin-top:0;">Neuen Verein anlegen</h2>
         <label for="club-name">Vereinsname</label>
-        <input id="club-name" placeholder="z.B. TSGV Rechberg">
+        <input id="club-name" placeholder="z.B. SC Lilaheim">
         <label for="club-logo">Wappen-Datei auf dem Server</label>
-        <input id="club-logo" placeholder="z.B. Wappen/TSGV_Rechberg.jpg">
+        <input id="club-logo" placeholder="z.B. Wappen/SC_Lilaheim.jpg">
         <label for="club-valid">Lizenz gültig bis</label>
         <input id="club-valid" type="date" value="2050-12-31">
         <label for="club-tier">Paket</label>
@@ -55,10 +55,32 @@
     </div>
 
     <div class="box">
+        <h2 style="margin-top:0;">Code-Vorrat erzeugen</h2>
+        <p class="hint">Erzeugt mehrere Codes auf einmal – z.B. 30 Stück. Die Codes kommen in deine private Tabelle (Google Sheets),
+            die Hash-Zeilen als <b>noch gesperrte</b> Einträge in vereine.txt. Kommt ein Verein, gibst du ihm sofort einen freien Code
+            und sagst nur: „R07 = FC Beispiel, advanced, gültig bis …“ (+ Wappen) – dann wird der Eintrag freigeschaltet.</p>
+        <div class="row">
+            <div style="flex:1; min-width:140px;"><label for="pool-count">Anzahl</label><input id="pool-count" type="number" min="1" max="200" value="30"></div>
+            <div style="flex:1; min-width:140px;"><label for="pool-start">Erste Nummer</label><input id="pool-start" type="number" min="1" value="1"></div>
+        </div>
+        <button type="button" onclick="generatePool()">Codes erzeugen</button>
+        <div id="pool-progress" class="hint" style="margin-top:8px;"></div>
+        <div id="pool-out" hidden>
+            <label>1. Für deine Tabelle (Codes im Klartext – nur privat speichern!)</label>
+            <button type="button" onclick="downloadPoolCsv()">📥 Tabelle herunterladen (CSV für Google Sheets / Excel)</button>
+            <div class="warn">🔒 Diese Datei enthält die echten Codes. Nur in deiner privaten Tabelle speichern, niemandem schicken – auch nicht an Claude.
+                In Google Sheets: Datei → Importieren → Hochladen.</div>
+            <label>2. Für vereine.txt (nur Hashes, noch gesperrt – darf weitergegeben werden)</label>
+            <div class="result" id="pool-lines"></div>
+            <button type="button" class="secondary" onclick="copy('pool-lines')">📋 Zeilen kopieren</button>
+        </div>
+    </div>
+
+    <div class="box">
         <h2 style="margin-top:0;">Bestehende Liste umwandeln</h2>
-        <p class="hint">Füge hier deine bisherige vereine.txt mit lesbaren Codes ein (z.B. <code>548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg</code>).
+        <p class="hint">Füge hier deine bisherige vereine.txt mit lesbaren Codes ein (z.B. <code>123-456 = SC Lilaheim = Wappen/SC_Lilaheim.jpg</code>).
             Die Codes der Vereine bleiben gleich – nur die Datei wird unlesbar. Zeilen ohne Ablaufdatum bekommen das Datum aus „Lizenz gültig bis“ (oben).</p>
-        <textarea id="convert-in" placeholder="548-962 = TSGV Rechberg = Wappen/TSGV_Rechberg.jpg"></textarea>
+        <textarea id="convert-in" placeholder="123-456 = SC Lilaheim = Wappen/SC_Lilaheim.jpg"></textarea>
         <button type="button" onclick="convertList()">Umwandeln</button>
         <div class="result" id="convert-out" hidden></div>
         <button type="button" class="secondary" id="convert-copy" onclick="copy('convert-out')" hidden>📋 Ergebnis kopieren</button>
@@ -124,6 +146,41 @@
             el.textContent = out.join('\n');
             el.hidden = false;
             document.getElementById('convert-copy').hidden = false;
+        }
+
+        /* Code-Vorrat: Codes für die private Tabelle, gesperrte Hash-Zeilen (# R01 = HASH) für vereine.txt */
+        let poolRows = [];
+        async function generatePool() {
+            if (!window.crypto?.subtle) { alert('Dein Browser unterstützt die Verschlüsselung hier nicht. Bitte Chrome, Edge oder Firefox verwenden.'); return; }
+            const count = Math.min(200, Math.max(1, parseInt(document.getElementById('pool-count').value, 10) || 30));
+            const start = Math.max(1, parseInt(document.getElementById('pool-start').value, 10) || 1);
+            const width = String(start + count - 1).length < 2 ? 2 : String(start + count - 1).length;
+            const progress = document.getElementById('pool-progress');
+            const seen = new Set();
+            poolRows = [];
+            for (let i = 0; i < count; i++) {
+                let code;
+                do code = randomCode(); while (seen.has(code));
+                seen.add(code);
+                const nr = 'R' + String(start + i).padStart(width, '0');
+                progress.textContent = `Erzeuge ${i + 1} von ${count} …`;
+                poolRows.push({ nr, code: formatCode(code), hash: await hashLicenseCode(code) });
+            }
+            progress.textContent = `✅ ${count} Codes erzeugt (${poolRows[0].nr} bis ${poolRows[poolRows.length - 1].nr}).`;
+            document.getElementById('pool-lines').textContent = `# --- Code-Vorrat ${poolRows[0].nr}–${poolRows[poolRows.length - 1].nr} (noch gesperrt; zum Freischalten „# Rxx = “ durch die Vereinszeile ersetzen) ---\n`
+                + poolRows.map(r => `# ${r.nr} = ${r.hash}`).join('\n');
+            document.getElementById('pool-out').hidden = false;
+        }
+        function downloadPoolCsv() {
+            if (!poolRows.length) return;
+            const head = ['Nr', 'Code', 'Status', 'Verein', 'Paket', 'gültig bis', 'Ansprechpartner', 'E-Mail', 'Bemerkung'];
+            const csv = [head, ...poolRows.map(r => [r.nr, r.code, 'frei', '', '', '', '', '', ''])].map(row => row.map(v => `"${v}"`).join(',')).join('\r\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+            a.download = `matchshot-codes_${poolRows[0].nr}-${poolRows[poolRows.length - 1].nr}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
         }
 
         function copy(id) {

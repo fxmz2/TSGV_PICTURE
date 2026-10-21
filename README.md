@@ -1,6 +1,6 @@
-# ClubShot – Social-Media-Grafiken für Vereine
+# Match-Shot – Social-Media-Grafiken für Vereine
 
-ClubShot ist eine Web-App, mit der Fußballvereine auf dem Handy Instagram-Grafiken erstellen:
+Match-Shot ist eine Web-App, mit der Fußballvereine auf dem Handy Instagram-Grafiken erstellen:
 Spielankündigung, Aufstellung, Tor, Ergebnis, Kader, Player of the Match, Kalender, Geburtstag,
 Neuzugang/Spielervorstellung, Danke an Sponsor, Wochenend-Ergebnisse und Eckball-Taktik.
 
@@ -14,7 +14,7 @@ Neuzugang/Spielervorstellung, Danke an Sponsor, Wochenend-Ergebnisse und Eckball
 |---|---|
 | `index.html` | Die komplette App (eine Datei) |
 | `sw.js` | Service Worker (Offline-Betrieb, Updates) |
-| `manifest.json`, `icons/`, `clubshot.png` | App-Name, Icons, Logo |
+| `manifest.json`, `icons/`, `matchshot.png` | App-Name, Icons, Logo |
 | `vendor/` | Bibliotheken, Schriften, Freistell-Modell (alles lokal, keine Verbindung zu Google & Co.) |
 | `vereine.txt` | Liste der freigeschalteten Vereine (siehe unten) |
 | `Wappen/` | Vereinswappen der Kunden |
@@ -32,7 +32,7 @@ CODE-HASH = Vereinsname = Wappen-Datei = gültig bis = Paket
 ```
 
 - **CODE-HASH**: mit `code-generator.html` erzeugen (lokal im Browser öffnen). So steht der Code nicht lesbar in der Datei.
-- **Wappen-Datei**: z.B. `Wappen/TSGV_Rechberg.jpg` (Groß-/Kleinschreibung beachten, keine Umlaute).
+- **Wappen-Datei**: z.B. `Wappen/SC_Lilaheim.jpg` (Groß-/Kleinschreibung beachten, keine Umlaute).
 - **gültig bis**: Ende der Saisonlizenz, z.B. `2050-12-31`. Zum Verlängern nur das Datum ändern.
 - **Paket**: `basis` oder `advanced` (ohne Angabe: advanced).
   - Basis: Ankündigung, Aufstellung (auch 7er/9er), Tor, Ergebnis (inkl. Halbzeit, Absage, Countdown),
@@ -57,8 +57,14 @@ CODE-HASH = Vereinsname = Wappen-Datei = gültig bis = Paket
 | `main` | Testversion | GitHub Pages |
 | `live` | Kundenversion | Netlify (verbunden mit GitHub, Einstellungen in `netlify.toml`) |
 
+Für **Cloudflare Pages** gelten dieselben Regeln über `_headers` (Zwischenspeicher) und `_redirects` (interne Dateien sperren).
+
 `netlify.toml` legt fest: kein Build, Hauptordner veröffentlichen, App/`sw.js`/`vereine.txt` immer frisch laden,
 interne Dateien (`tests/`, `docs/`, `code-generator.html`, `README.md`, `CLAUDE.md`) auf Netlify nicht ausliefern.
+
+**Code-Vorrat:** In `code-generator.html` unter „Code-Vorrat erzeugen“ z.B. 30 Codes auf einmal erstellen.
+Die Codes kommen als CSV in die private Tabelle, die Hash-Zeilen als gesperrte Einträge (`# R07 = HASH`) in `vereine.txt`.
+Zum Freischalten wird `# R07 = HASH` durch `HASH = Verein = Wappen/Datei.png = gültig bis = Paket` ersetzt.
 
 **Neuen Verein freischalten:** Zeile aus `code-generator.html` in `vereine.txt` eintragen und Wappen in `Wappen/` legen –
 auf `live` (sofort für den Kunden) **und** auf `main` (damit beide Listen gleich bleiben).
