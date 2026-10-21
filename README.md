@@ -35,9 +35,10 @@ CODE-HASH = Vereinsname = Wappen-Datei = gültig bis = Paket
 - **Wappen-Datei**: z.B. `Wappen/TSGV_Rechberg.jpg` (Groß-/Kleinschreibung beachten, keine Umlaute).
 - **gültig bis**: Ende der Saisonlizenz, z.B. `2050-12-31`. Zum Verlängern nur das Datum ändern.
 - **Paket**: `basis` oder `advanced` (ohne Angabe: advanced).
-  - Basis: Ankündigung, Aufstellung, Tor, Ergebnis, Kader, POTM, Kalender, Geburtstag.
+  - Basis: Ankündigung, Aufstellung (auch 7er/9er), Tor, Ergebnis (inkl. Halbzeit, Absage, Countdown),
+    Kader, POTM, Kalender, Geburtstag, Teamfoto, Freie Vorlage.
   - Advanced zusätzlich: Eckball, Neuzugang/Vorstellung, Danke-Sponsor, Wochenende, Sponsorenleisten,
-    zusätzliche Spieler, Freistellen (KI), Schrift-Effekte, Spielplan-Import, Grafik-Paket.
+    „Präsentiert von“, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte, Spielplan-Import, Grafik-Paket.
 - Zeile löschen = Code beim nächsten Start (mit Internet) gesperrt.
 - `DEMO` ist fest eingebaut (alle Funktionen, Grafiken mit Wasserzeichen).
 
@@ -46,7 +47,21 @@ CODE-HASH = Vereinsname = Wappen-Datei = gültig bis = Paket
 1. In `index.html` die Versionsnummer erhöhen (`APP_VERSION` und `<title>`).
 2. In `sw.js` `CACHE_VERSION` erhöhen – sonst bekommen installierte Apps das Update nicht.
 3. Tests laufen lassen (siehe unten).
-4. Geänderte Dateien hochladen.
+4. Auf `main` veröffentlichen → **Testversion** (GitHub Pages).
+5. Wenn alles passt: `main` in den Zweig `live` übernehmen → **Kundenversion** (Netlify veröffentlicht automatisch).
+
+### Zweige
+
+| Zweig | Wofür | Wo |
+|---|---|---|
+| `main` | Testversion | GitHub Pages |
+| `live` | Kundenversion | Netlify (verbunden mit GitHub, Einstellungen in `netlify.toml`) |
+
+`netlify.toml` legt fest: kein Build, Hauptordner veröffentlichen, App/`sw.js`/`vereine.txt` immer frisch laden,
+interne Dateien (`tests/`, `docs/`, `code-generator.html`, `README.md`, `CLAUDE.md`) auf Netlify nicht ausliefern.
+
+**Neuen Verein freischalten:** Zeile aus `code-generator.html` in `vereine.txt` eintragen und Wappen in `Wappen/` legen –
+auf `live` (sofort für den Kunden) **und** auf `main` (damit beide Listen gleich bleiben).
 
 ## Hilfe-Videos verlinken
 
