@@ -325,6 +325,11 @@ async function makePhotos(browser) {
         // Video: Ebenen für die Animation
         const layers = await page.evaluate(async () => { const r = await renderVideoLayers($('capture-ergebnis')); return { n: r.layers.length, w: r.base.width }; });
         check('Video: Ebenen werden erzeugt', layers.n >= 4 && layers.w === 1080, JSON.stringify(layers));
+        const vo = await page.evaluate(() => { const def = videoOptions('ergebnis'); setVal('in-vid-speed-ergebnis', 'xslow'); setVal('in-vid-gap-ergebnis', 'long'); setVal('in-vid-dist-ergebnis', 'far');
+            const slow = videoOptions('ergebnis'); const saved = collectSlotData().tabSettings.ergebnis;
+            ['speed', 'gap', 'dist'].forEach(k => setVal(`in-vid-${k}-ergebnis`, k === 'dist' ? 'short' : 'normal'));
+            return { def: def.dur, slow: slow.dur, gap: slow.gap[0], dist: slow.dist, saved: saved.vidSpeed + '/' + saved.vidGap + '/' + saved.vidDist }; });
+        check('Video: Tempo, Abstand und Einflug-Weg einstellbar', vo.def === 0.6 && vo.slow === 1.5 && vo.gap === 0.75 && vo.dist === 6 && vo.saved === 'xslow/long/far', JSON.stringify(vo));
         check('Video-Knöpfe an den Vorlagen', (await page.$$eval('.video-btn', l => l.length)) >= 20);
         // Import: Auswahl-Dialog und Zusammenführen
         const backup = await page.evaluate(async () => await (await buildBackup()).blob.text());
