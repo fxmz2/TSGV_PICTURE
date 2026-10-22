@@ -168,6 +168,9 @@ async function makePhotos(browser) {
         check('Spezial-Foto: Upload, Auswahl und Ersatz durch normales Foto', sp.has && sp.shown && sp.fallback, JSON.stringify(sp));
         check('Foto-Fenster mit drei Fotos', await page.evaluate(() => { openPhotoDialog(stammdaten.players.findIndex(x => x.name === 'Max Muster'));
             const n = document.querySelectorAll('#photo-rows .photo-row').length; const ok = !$('photo-overlay').hidden; closePhotoDialog(); return n === 3 && ok; }));
+        check('Freistellung je Foto entfernbar (andere bleiben)', await page.evaluate(async () => { const i = stammdaten.players.findIndex(x => x.name === 'Max Muster'), p = stammdaten.players[i];
+            p.cutImg = p.img; p.torCutImg = p.torImg; openPhotoDialog(i); const btns = document.querySelectorAll('#photo-rows .sd-btn.active').length;
+            await togglePhotoCutout('img'); const r = !p.cutImg && !!p.torCutImg && btns === 2; delete p.torCutImg; closePhotoDialog(); return r; }));
         // Zusatzspieler
         await page.click('.tab-btn[data-tab="post"]');
         await page.evaluate(() => { setVal('in-xp1-post', 'Tim Test'); updateTabDesign('post'); });
@@ -376,6 +379,13 @@ async function makePhotos(browser) {
             const r = { front: tfBoard.front.join(), text: val('in-tf-row3'), saved: (collectSlotData().tfBoard?.front || []).join(), n };
             tfMove(n, 'missing', 0); r.missing = val('in-tf-missing'); r.front2 = tfBoard.front.length; return r; });
         check('Teamfoto: Spieler auf Reihen verteilen (gespeichert, Text befüllt)', board.front === board.n && board.text.length > 0 && board.saved === board.n && board.missing.length > 0 && board.front2 === 0, JSON.stringify(board));
+        const tfl = await page.evaluate(() => { tfClearBoard(); const [a, b2] = tfPool();
+            tfToggleRow('middle', false); const zones = [...document.querySelectorAll('#tf-board .tf-zone')].map(z => z.dataset.zone).join();
+            tfBoard.view = 'list'; renderTfBoard(); const sels = document.querySelectorAll('#tf-board select[data-tf-player]').length;
+            tfMove(a, 'front', null); tfMove(b2, 'front', null); tfReorder('front', 0, 1);
+            const r = { zones, sels, order: tfBoard.front.join() === [b2, a].join(), mid: val('in-tf-row2') };
+            tfToggleRow('middle', true); tfBoard.view = 'board'; renderTfBoard(); return r; });
+        check('Teamfoto: Reihe ausblenden, Liste zuweisen, Reihenfolge ▲▼', !tfl.zones.includes('middle') && tfl.sels > 0 && tfl.order && tfl.mid === '', JSON.stringify(tfl));
         check('Export Mannschaftsfoto', (await exportSize(page, 'capture-teamfoto-feed')) === '1200x1500');
         // Spieler umbenennen: Name wird in der Aufstellung mitgenommen
         const oldName = await page.evaluate(() => val('player-1'));
