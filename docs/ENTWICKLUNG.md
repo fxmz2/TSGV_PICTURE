@@ -47,7 +47,8 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Präsentiert von | Je Vorlage ein `.presented-by` (`createPresentedBy()`, id `pb-<Vorlage>`), Inhalt aus `pbSponsor`/`pbText` (EXTRA_DESIGN), `renderPresentedBy()` in `updateTabDesign()` |
 | Ergebnis-Modi | `ERG_MODES` (ergebnis, halbzeit, absage, countdown), `setErgMode()`, gespeichert als `ergMode`; Countdown-Datum `erg-cd-date` |
 | Freie Vorlage | Reiter `frei`, `updateFrei()`, Eingaben `in-frei-*` |
-| Mannschaftsfoto | Reiter `teamfoto`, Fotos in `stammdaten.teamPhotos` [{id,name,img}] (Backup/Import „Mannschaftsfotos“), `updateTeamfoto()`, `fillTeamfotoNames()`, Eingaben `in-tf-*` |
+| Spezial-Foto | Drittes Spielerfoto `specialImg`/`specialCutImg`, Auswahl je Reiter „⭐ Spezial-Foto“ (`photoTypeOf` = `special`, ohne Spezial-Foto → normales Foto), Foto-Fenster `openPhotoDialog()`, Mehrfach-Upload `_SPEZIAL` |
+| Mannschaftsfoto | Reiter `teamfoto`, Fotos in `stammdaten.teamPhotos` [{id,name,img}] (Backup/Import „Mannschaftsfotos“), `updateTeamfoto()`, Eingaben `in-tf-*`. Verteilen per Ziehen: `tfBoard` {back, middle, front, coaches, missing} (Spielernamen, von links), `renderTfBoard()`, `tfMove()`, `tfAutoFill()`; befüllt die Textfelder über `tfSyncText()` |
 | Veröffentlichen | `main` = Testversion (GitHub Pages), `live` = Kundenversion (Netlify, `netlify.toml`). App-Änderungen nur nach ausdrücklicher Freigabe von `main` nach `live` übernehmen; neue Vereine (`vereine.txt`, `Wappen/`) auf beiden Zweigen eintragen |
 | Logo | Quelle als SVG in `docs/logo/matchshot-logo.html` (im Browser über den Testserver öffnen). Daraus erzeugt: `matchshot.png` (256), `icons/` (32, 180, 192, 512, maskable 512) |
 | Import | `importConfigJSON()` → Auswahl-Dialog, `runImport()` (zusammenführen per Name oder ersetzen; Versionen werden ersetzt) |
