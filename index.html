@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 21.2</title>
+    <title>Match-Shot – Grafiken für Vereine 21.3</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -492,6 +492,22 @@
             border-radius: 8px; padding: 6px 9px; box-sizing: border-box; font-size: 8.5px; line-height: 1.35; text-align: center; text-shadow: none; }
         .tf-names.tf-story { top: 400px; font-size: 12px; padding: 9px 12px; }
         .tf-names .tf-row + .tf-row { margin-top: 3px; }
+        /* Teamfoto: Spieler per Ziehen auf Reihen verteilen */
+        .tf-board { display: grid; gap: 7px; margin-top: 8px; }
+        .tf-zone { border: 2px dashed #cfd8dc; border-radius: 10px; padding: 6px 7px; background: #fafbfc; }
+        .tf-zone[data-zone="pool"] { border-style: solid; background: #eef6f7; }
+        .tf-zone.over { border-color: #005f73; background: #e1f1f3; }
+        .tf-zone-head { font-size: 11px; font-weight: bold; color: #005f73; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 5px; display: flex; justify-content: space-between; cursor: pointer; }
+        .tf-zone-head span { background: #005f73; color: #fff; border-radius: 9px; padding: 0 7px; font-size: 10px; }
+        .tf-chips { display: flex; flex-wrap: wrap; gap: 5px; min-height: 26px; align-items: center; }
+        .tf-chip { background: #fff; border: 1px solid #b0bec5; border-radius: 14px; padding: 5px 10px; font-size: 12px; font-weight: bold; color: #123; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; line-height: 1.2; }
+        .tf-chip.staff { border-style: dashed; color: #555; }
+        .tf-chip.selected { background: #005f73; color: #fff; border-color: #005f73; }
+        .tf-chip.dragging { opacity: 0.3; }
+        .tf-chip.ins-before { box-shadow: -4px 0 0 #e07a2f; }
+        .tf-chip.ins-after { box-shadow: 4px 0 0 #e07a2f; }
+        .tf-ghost { position: fixed; z-index: 10002; pointer-events: none; transform: translate(-50%, -60%) scale(1.08); box-shadow: 0 8px 18px rgba(0,0,0,0.3); }
+        .tf-empty { font-size: 11px; color: #9aa5ad; }
         .tf-names b { color: var(--jersey-color); letter-spacing: 0.5px; }
         .presented-by { position: absolute; left: 0; right: 0; bottom: 70px; margin: 0 auto; width: max-content; max-width: 88%; z-index: 6; display: flex; align-items: center; gap: 9px;
             background: rgba(255,255,255,0.96); color: #111; border-radius: 10px; padding: 6px 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.35); box-sizing: border-box; }
@@ -767,6 +783,12 @@
         .modal-card { background: white; color: #222; border-radius: 14px; padding: 18px; width: 100%; max-width: 440px; max-height: 88vh; overflow: auto; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
         .modal-card h2 { margin: 0 0 6px; font-size: 1.15rem; }
         .modal-card p { margin: 0 0 10px; font-size: 13px; color: #555; line-height: 1.4; }
+        .photo-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .photo-row img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; background: #e9edf1; }
+        .photo-row img.cut { object-fit: contain; background: repeating-conic-gradient(#e9edf1 0% 25%, #fff 0% 50%) 50% / 12px 12px; }
+        .photo-row b { display: block; font-size: 14px; }
+        .photo-row small { color: #777; font-size: 11px; }
+        .photo-row .pr-btns { display: flex; gap: 6px; }
         .pack-quick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
         .pack-quick button { flex: 1; min-width: 90px; background: #eef2f5; color: #123; border: none; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .pack-group { border: 1px solid #e3e6ea; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
@@ -1307,12 +1329,13 @@
                         </div>
                         <div class="control-group"><label>Foto</label><input type="file" id="new-player-img" accept="image/*"></div>
                         <div class="control-group"><label>Torjubel-Foto (optional, für „Tor“)</label><input type="file" id="new-player-torimg" accept="image/*"></div>
+                        <div class="control-group"><label>⭐ Spezial-Foto (optional, z.B. Spieltag-Pose)</label><input type="file" id="new-player-specialimg" accept="image/*"></div>
                         <button type="button" class="copy-action-btn" onclick="addPlayer()">➕ Spieler speichern</button>
 
                         <div class="control-group" style="margin-top:8px;">
                             <label>Mehrere Fotos auf einmal</label>
                             <input type="file" id="bulk-photo-upload" accept="image/*" multiple onchange="handleBulkPhotoUpload(event)">
-                            <span class="hint">Dateiname = Spielername, z.B. <b>Max_Mustermann.jpg</b>. Torjubel-Foto: <b>Max_Mustermann_TOR.jpg</b>. Fehlende Spieler werden automatisch angelegt.</span>
+                            <span class="hint">Dateiname = Spielername, z.B. <b>Max_Mustermann.jpg</b>. Torjubel-Foto: <b>Max_Mustermann_TOR.jpg</b>, Spezial-Foto: <b>Max_Mustermann_SPEZIAL.jpg</b>. Fehlende Spieler werden automatisch angelegt.</span>
                         </div>
                         <button type="button" class="copy-action-btn" style="background:#2a9d8f;" onclick="cutOutAllPlayers()">✂️ Hintergrund bei allen Spielern entfernen</button>
                         <span class="hint" style="margin-bottom:8px;">Die KI läuft direkt auf dem Gerät – es werden keine Fotos übertragen. Einzelne Spieler stellst du mit ✂️ in der Liste frei. Tipp: Auf dem iPhone kannst du Personen auch in der Fotos-App freistellen (Motiv lange drücken → „Kopieren“ bzw. „Sticker hinzufügen“) und das Ergebnis als PNG hochladen.</span>
@@ -1768,18 +1791,28 @@ Alle sind herzlich eingeladen!</textarea></div>
                     <span class="hint">Am besten ein Foto im Querformat. Es bleibt auf diesem Gerät (und im Backup) gespeichert und steht in allen Versionen zur Auswahl.</span></div>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-tf-title" value="1. MANNSCHAFT" oninput="updateTeamfoto();"></div>
                 <div class="control-group"><label>Untertitel</label><input type="text" id="in-tf-sub" value="SAISON 2026/27" oninput="updateTeamfoto();"></div>
-                <div class="control-group"><label>Namen aus einer Mannschaft übernehmen</label>
+                <div class="control-group"><label>Spieler auf die Reihen verteilen</label>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
-                        <select id="in-tf-team" class="team-select" title="Mannschaft"></select>
-                        <select id="in-tf-namefmt" title="Name anzeigen als"><option value="full">Vor- und Nachname</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select>
+                        <select id="in-tf-team" title="Mannschaft" onchange="renderTfBoard(); scheduleSave();"></select>
+                        <select id="in-tf-namefmt" title="Name anzeigen als" onchange="tfSyncText(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select>
                     </div>
-                    <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin-top:6px;" onclick="fillTeamfotoNames()">👥 Namen eintragen</button>
-                    <span class="hint">Trägt alle Spieler in die hintere Reihe und Trainer/Betreuer unten ein – danach einfach auf die Reihen verteilen. Namen mit Komma trennen, leere Reihen werden ausgeblendet.</span></div>
-                <div class="control-group"><label>Hintere Reihe (von links)</label><textarea id="in-tf-row1" rows="2" oninput="updateTeamfoto();"></textarea></div>
-                <div class="control-group"><label>Mittlere Reihe (von links)</label><textarea id="in-tf-row2" rows="2" oninput="updateTeamfoto();"></textarea></div>
-                <div class="control-group"><label>Vordere Reihe (von links)</label><textarea id="in-tf-row3" rows="2" oninput="updateTeamfoto();"></textarea></div>
-                <div class="control-group"><label>Trainer & Betreuer</label><input type="text" id="in-tf-coaches" oninput="updateTeamfoto();"></div>
-                <div class="control-group"><label>Es fehlen (optional)</label><input type="text" id="in-tf-missing" oninput="updateTeamfoto();"></div>
+                    <div class="tf-board" id="tf-board"></div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                        <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin:6px 0 0;" onclick="tfAutoFill()">🔀 Automatisch verteilen</button>
+                        <button type="button" class="copy-action-btn" style="background:#6c757d; margin:6px 0 0;" onclick="tfClearBoard()">↩️ Alle zurück</button>
+                    </div>
+                    <span class="hint">Namen mit dem Finger in eine Reihe ziehen – oder antippen und dann die Reihe antippen. Die Reihenfolge entspricht „von links“ auf dem Foto.</span></div>
+                <details class="design-details" id="tf-manual">
+                    <summary>✍️ Namen von Hand bearbeiten</summary>
+                    <div class="details-body">
+                        <span class="hint" style="margin-bottom:6px;">Für Namen, die nicht in den Daten stehen. Achtung: Wird oben wieder verschoben, werden diese Felder neu befüllt.</span>
+                        <div class="control-group"><label>Hintere Reihe (von links)</label><textarea id="in-tf-row1" rows="2" oninput="updateTeamfoto();"></textarea></div>
+                        <div class="control-group"><label>Mittlere Reihe (von links)</label><textarea id="in-tf-row2" rows="2" oninput="updateTeamfoto();"></textarea></div>
+                        <div class="control-group"><label>Vordere Reihe (von links)</label><textarea id="in-tf-row3" rows="2" oninput="updateTeamfoto();"></textarea></div>
+                        <div class="control-group"><label>Trainer & Betreuer</label><input type="text" id="in-tf-coaches" oninput="updateTeamfoto();"></div>
+                        <div class="control-group"><label>Es fehlen</label><input type="text" id="in-tf-missing" oninput="updateTeamfoto();"></div>
+                    </div>
+                </details>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('teamfoto')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
@@ -2357,6 +2390,15 @@ Alle sind herzlich eingeladen!</textarea></div>
     </div>
 
     <!-- GRAFIK-PAKET -->
+    <div id="photo-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closePhotoDialog()">
+        <div class="modal-card">
+            <h2 id="photo-title">📷 Fotos</h2>
+            <p>Normales Foto für alle Grafiken. Torjubel- und Spezial-Foto sind optional und lassen sich je Reiter unter „Spielerfotos“ auswählen – fehlen sie, wird das normale Foto genommen.</p>
+            <div id="photo-rows"></div>
+            <button type="button" class="copy-action-btn" style="margin-top:10px;" onclick="closePhotoDialog()">Fertig</button>
+        </div>
+    </div>
+
     <div id="bulk-overlay" class="modal-overlay" hidden>
         <div class="modal-card">
             <div id="bulk-select">
@@ -2506,7 +2548,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "21.2";
+        const APP_VERSION = "21.3";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3078,6 +3120,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (photoTypeOf(tab) === 'tor') return getPlayerTorImageSrc(name, tab);
             const p = findPlayer(name);
             if (!p) return PLAYER_FALLBACK;
+            // Spezial-Foto (falls vorhanden), sonst normales Foto
+            if (photoTypeOf(tab) === 'special' && p.specialImg) return (useCutout(tab) && p.specialCutImg) || p.specialImg;
             if (useCutout(tab) && p.cutImg) return p.cutImg;
             return p.img || PLAYER_FALLBACK;
         }
@@ -3213,6 +3257,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 await redo(p, 'torImg', IMG_OPTS.torPhoto, false);
                 await redo(p, 'cutImg', null, true);
                 await redo(p, 'torCutImg', null, true);
+                await redo(p, 'specialImg', IMG_OPTS.photo, false);
+                await redo(p, 'specialCutImg', null, true);
             }
             for (const t of stammdaten.templates) await redo(t, 'img', IMG_OPTS[t.format === 'story' ? 'story' : 'feed'], false);
             await saveStammdaten();
@@ -3244,9 +3290,11 @@ Alle sind herzlich eingeladen!</textarea></div>
             const nick = normName(val('new-player-nick'));
             const file = $('new-player-img').files[0];
             const torFile = $('new-player-torimg').files[0];
+            const specialFile = $('new-player-specialimg').files[0];
             try {
                 const img = file ? await compressImage(file, IMG_OPTS.photo) : null;
                 const torImg = torFile ? await compressImage(torFile, IMG_OPTS.torPhoto) : null;
+                const specialImg = specialFile ? await compressImage(specialFile, IMG_OPTS.photo) : null;
                 let p = findPlayer(name);
                 if (p) {
                     p.group = group;
@@ -3256,8 +3304,10 @@ Alle sind herzlich eingeladen!</textarea></div>
                     if (nick) p.nick = nick;
                     if (img) { p.img = img; delete p.cutImg; }
                     if (torImg) { p.torImg = torImg; delete p.torCutImg; }
+                    if (specialImg) { p.specialImg = specialImg; delete p.specialCutImg; }
                 } else {
                     const np = { name, group, img, torImg };
+                    if (specialImg) np.specialImg = specialImg;
                     if (team) np.team = team;
                     if (position) np.position = position;
                     if (number) np.number = number;
@@ -3270,6 +3320,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             $('new-player-nick').value = '';
             $('new-player-img').value = '';
             $('new-player-torimg').value = '';
+            $('new-player-specialimg').value = '';
             await onStammdatenChanged('players');
             toast(`✅ ${name} gespeichert`);
         }
@@ -3300,14 +3351,17 @@ Alle sind herzlich eingeladen!</textarea></div>
             for (const file of files) {
                 let base = file.name.replace(/\.[^.]+$/, '');
                 const isTor = /[_\s-]tor$/i.test(base);
-                if (isTor) base = base.replace(/[_\s-]tor$/i, '');
+                const isSpecial = /[_\s-]spezial$/i.test(base);
+                base = base.replace(/[_\s-](tor|spezial)$/i, '');
                 const name = normName(base.replace(/_/g, ' '));
                 if (!name) continue;
                 try {
                     const data = await compressImage(file, isTor ? IMG_OPTS.torPhoto : IMG_OPTS.photo);
                     let p = stammdaten.players.find(pl => pl.name.toLowerCase() === name.toLowerCase());
                     if (!p) { p = { name, group: 'Spieler', img: null, torImg: null }; stammdaten.players.push(p); created++; }
-                    if (isTor) { p.torImg = data; delete p.torCutImg; } else { p.img = data; delete p.cutImg; }
+                    if (isTor) { p.torImg = data; delete p.torCutImg; }
+                    else if (isSpecial) { p.specialImg = data; delete p.specialCutImg; }
+                    else { p.img = data; delete p.cutImg; }
                     processed++;
                 } catch (e) { console.warn(file.name, e); }
             }
@@ -3347,14 +3401,15 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function cutOutPlayer(p) {
             if (p.img) p.cutImg = await cutOutPerson(p.img);
             if (p.torImg) p.torCutImg = await cutOutPerson(p.torImg);
+            if (p.specialImg) p.specialCutImg = await cutOutPerson(p.specialImg);
         }
 
         async function togglePlayerCutout(idx) {
             const p = stammdaten.players[idx];
             if (!p) return;
-            if (p.cutImg || p.torCutImg) {
+            if (p.cutImg || p.torCutImg || p.specialCutImg) {
                 if (!confirm(`Freigestellte Fotos von „${p.name}“ löschen? (Die Originalfotos bleiben erhalten.)`)) return;
-                delete p.cutImg; delete p.torCutImg;
+                delete p.cutImg; delete p.torCutImg; delete p.specialCutImg;
                 await onStammdatenChanged('players');
                 return;
             }
@@ -3372,7 +3427,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         async function cutOutAllPlayers() {
-            const todo = stammdaten.players.filter(p => (p.img && !p.cutImg) || (p.torImg && !p.torCutImg));
+            const todo = stammdaten.players.filter(p => (p.img && !p.cutImg) || (p.torImg && !p.torCutImg) || (p.specialImg && !p.specialCutImg));
             if (!todo.length) { toast('Alle Spieler sind bereits freigestellt'); return; }
             if (!confirm(`${todo.length} Spieler freistellen? Das dauert ca. 1–3 Sekunden pro Spieler. Beim ersten Mal wird zusätzlich die KI geladen (ca. 30 MB, danach offline verfügbar).`)) return;
             showBusy('KI wird geladen …');
@@ -3384,6 +3439,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     await new Promise(r => setTimeout(r, 30));   // Anzeige aktualisieren lassen
                     if (p.img && !p.cutImg) p.cutImg = await cutOutPerson(p.img);
                     if (p.torImg && !p.torCutImg) p.torCutImg = await cutOutPerson(p.torImg);
+                    if (p.specialImg && !p.specialCutImg) p.specialCutImg = await cutOutPerson(p.specialImg);
                 }
             } catch (e) {
                 console.warn(e);
@@ -3420,6 +3476,37 @@ Alle sind herzlich eingeladen!</textarea></div>
             input.click();
         }
 
+        // Foto-Feld → zugehöriges freigestelltes Foto
+        const PHOTO_CUT_FIELD = { img: 'cutImg', torImg: 'torCutImg', specialImg: 'specialCutImg' };
+        let photoDialogIdx = null;
+        function openPhotoDialog(idx) {
+            photoDialogIdx = idx;
+            renderPhotoDialog();
+            $('photo-overlay').hidden = false;
+        }
+        function closePhotoDialog() { $('photo-overlay').hidden = true; photoDialogIdx = null; }
+        function renderPhotoDialog() {
+            const p = stammdaten.players[photoDialogIdx];
+            if (!p) { closePhotoDialog(); return; }
+            setText('photo-title', `📷 Fotos von ${p.name}`);
+            const rows = [['img', '📷 Normales Foto', 'für alle Grafiken'], ['torImg', '⚽ Torjubel-Foto', 'optional, z.B. für „Tor“'], ['specialImg', '⭐ Spezial-Foto', 'optional, z.B. Spieltag-Pose']];
+            $('photo-rows').innerHTML = rows.map(([f, label, hint]) => {
+                const cut = p[PHOTO_CUT_FIELD[f]];
+                const src = cut || p[f] || PLAYER_FALLBACK;
+                return `<div class="photo-row"><img src="${src}" class="${cut ? 'cut' : ''}" alt="">
+                    <div><b>${label}</b><small>${p[f] ? (cut ? 'vorhanden · freigestellt ✓' : 'vorhanden') : hint}</small></div>
+                    <div class="pr-btns"><button type="button" class="sd-btn" title="${p[f] ? 'Ändern' : 'Hochladen'}" onclick="changeEntryImage('players', ${photoDialogIdx}, '${f}')">${p[f] ? '🔄' : '➕'}</button>
+                    ${p[f] && f !== 'img' ? `<button type="button" class="sd-btn danger" title="Löschen" onclick="deletePlayerPhoto('${f}')">🗑️</button>` : ''}</div></div>`;
+            }).join('');
+        }
+        async function deletePlayerPhoto(field) {
+            const p = stammdaten.players[photoDialogIdx];
+            if (!p || !confirm('Dieses Foto löschen?')) return;
+            delete p[field]; delete p[PHOTO_CUT_FIELD[field]];
+            await onStammdatenChanged('players');
+            renderPhotoDialog();
+        }
+
         async function handleHiddenImageInput(event) {
             const file = event.target.files[0];
             const target = pendingImageTarget;
@@ -3431,9 +3518,10 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (target.type === 'players') opts = target.field === 'torImg' ? IMG_OPTS.torPhoto : IMG_OPTS.photo;
             try { entry[target.field] = await compressImage(file, opts); }
             catch (e) { alert(e.message); return; }
-            if (target.type === 'players') delete entry[target.field === 'torImg' ? 'torCutImg' : 'cutImg'];
+            if (target.type === 'players') delete entry[PHOTO_CUT_FIELD[target.field] || 'cutImg'];
             else delete entry.imgOrig;
             await onStammdatenChanged(target.type);
+            if (!$('photo-overlay').hidden) renderPhotoDialog();
             toast('✅ Bild aktualisiert');
         }
 
@@ -3471,7 +3559,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     if (type === 'players') {
                         thumb = e.cutImg || e.img || PLAYER_FALLBACK;
                         thumbCls = e.cutImg ? 'cut-thumb' : '';
-                        sub = (e.group || 'Spieler') + (e.torImg ? ' · Torjubel-Foto ✓' : '') + (e.cutImg || e.torCutImg ? ' · freigestellt ✓' : '');
+                        sub = (e.group || 'Spieler') + (e.torImg ? ' · Torjubel ✓' : '') + (e.specialImg ? ' · Spezial ✓' : '') + (e.cutImg || e.torCutImg || e.specialCutImg ? ' · freigestellt ✓' : '');
                         const consentBtn = consentEnabled()
                             ? `<button type="button" class="consent-btn ${e.consent ? 'ok' : 'missing'}" onclick="togglePlayerConsent(${i})">${e.consent ? `✅ Einwilligung${e.consentDate ? ' ' + formatIsoDate(e.consentDate) : ''}` : '⚠️ keine Einwilligung'}</button>` : '';
                         meta = `<div class="sd-meta">${consentBtn}
@@ -3480,8 +3568,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                             <input type="text" title="Rückennummer" placeholder="Nr." maxlength="3" value="${esc(e.number || '')}" onchange="setPlayerField(${i}, 'number', this.value)">` : ''}
                             <input type="text" class="sd-nick" title="Spitzname (optional)" placeholder="Spitzname" maxlength="30" value="${esc(e.nick || '')}" onchange="setPlayerField(${i}, 'nick', this.value)">
                         </div>`;
-                        btns = btn('✏️', 'Namen ändern', `renameEntry('players', ${i})`) + btn('📷', 'Foto ändern', `changeEntryImage('players', ${i}, 'img')`) + btn('⚽', 'Torjubel-Foto ändern', `changeEntryImage('players', ${i}, 'torImg')`)
-                            + (e.img || e.torImg ? btn('✂️', e.cutImg || e.torCutImg ? 'Freistellung entfernen' : 'Hintergrund entfernen', `togglePlayerCutout(${i})`, e.cutImg || e.torCutImg ? 'active' : '') : '');
+                        const anyCut = e.cutImg || e.torCutImg || e.specialCutImg;
+                        btns = btn('✏️', 'Namen ändern', `renameEntry('players', ${i})`) + btn('📷', 'Fotos (Normal, Torjubel, Spezial)', `openPhotoDialog(${i})`)
+                            + (e.img || e.torImg || e.specialImg ? btn('✂️', anyCut ? 'Freistellung entfernen' : 'Hintergrund entfernen', `togglePlayerCutout(${i})`, anyCut ? 'active' : '') : '');
                     } else if (type === 'templates') {
                         thumb = e.thumb; thumbCls = e.format === 'story' ? 'story' : '';
                         sub = e.format === 'story' ? 'Story (9:16)' : 'Feed (1:1)';
@@ -3520,6 +3609,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             return `<option value="">${esc(emptyLabel)}</option>` + list.map(t => `<option value="${esc(t)}" ${t === selected ? 'selected' : ''}>${esc(t)}</option>`).join('');
         }
         function refreshTeamPositionSelects() {
+            fillTfTeamOptions();
             document.querySelectorAll('select.team-select').forEach(sel => { const v = sel.value; sel.innerHTML = teamOptionsHTML(v, '– keine –'); sel.value = v; });
             document.querySelectorAll('select.position-select').forEach(sel => { const v = sel.value; sel.innerHTML = positionOptionsHTML(v, '– keine –'); sel.value = v; });
             setVal('sd-teams', (stammdaten.teams || []).join('\n'));
@@ -4231,6 +4321,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <select id="in-photo-type-${tab}" onchange="updateAllViews();">
                                     <option value="normal">📷 Normales Foto</option>
                                     <option value="tor">⚽ Torjubel-Foto (falls vorhanden)</option>
+                                    <option value="special">⭐ Spezial-Foto (falls vorhanden)</option>
                                 </select>
                             </div>
                             <div class="control-group adv-only">
@@ -4520,7 +4611,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             neuzugang:  { keys: [], inputs: [/^in-new-/] },
             sponsor:    { keys: [], inputs: [/^in-spon-/] },
             wochenende: { keys: [], inputs: [/^in-wk-/, /^wk-/] },
-            teamfoto:   { keys: [], inputs: [/^in-tf-/] },
+            teamfoto:   { keys: ['tfBoard'], inputs: [/^in-tf-/] },
             frei:       { keys: [], inputs: [/^in-frei-/] },
             eckball:    { keys: ['eckArrows', 'eckNodes', 'eckNameFmt'], inputs: [/^eck-/] }
         };
@@ -5084,24 +5175,163 @@ Alle sind herzlich eingeladen!</textarea></div>
             updateTeamfoto();
             scheduleSave();
         }
-        function fillTeamfotoNames() {
-            const team = val('in-tf-team'), fmt = val('in-tf-namefmt') || 'full';
-            const inTeam = p => !team || p.team === team;
-            const players = stammdaten.players.filter(p => inTeam(p) && (p.group || 'Spieler') === 'Spieler');
-            const staff = stammdaten.players.filter(p => inTeam(p) && (p.group || 'Spieler') !== 'Spieler');
-            if (!players.length && !staff.length) { alert('In dieser Mannschaft sind noch keine Spieler angelegt (unter „🗃️ Daten“).'); return; }
-            const filled = ['in-tf-row1', 'in-tf-row2', 'in-tf-row3', 'in-tf-coaches'].some(id => normName(val(id)));
-            if (filled && !confirm('Die eingetragenen Namen werden ersetzt. Fortfahren?')) return;
-            const names = list => list.map(p => playerDisplayName(p.name, fmt)).join(', ');
-            setVal('in-tf-row1', names(players));
-            setVal('in-tf-row2', '');
-            setVal('in-tf-row3', '');
-            setVal('in-tf-coaches', names(staff));
-            if (team && ['', '1. MANNSCHAFT'].includes(normName(val('in-tf-title')))) setVal('in-tf-title', team.toLocaleUpperCase('de-DE'));
-            updateTeamfoto();
+        /* Teamfoto: Spieler per Ziehen (oder Antippen) auf Reihen verteilen. Gespeichert als tfBoard (Namen je Reihe, von links). */
+        const TF_ZONES = [['back', 'Hintere Reihe'], ['middle', 'Mittlere Reihe'], ['front', 'Vordere Reihe'], ['coaches', 'Trainer & Betreuer'], ['missing', 'Es fehlen']];
+        let tfBoard = normTfBoard(null);
+        let tfSelected = null, tfDrag = null;
+        function normTfBoard(b) {
+            const o = {};
+            TF_ZONES.forEach(([z]) => { o[z] = Array.isArray(b?.[z]) ? b[z].filter(n => typeof n === 'string' && n) : []; });
+            return o;
+        }
+        function tfAssigned() { return new Set(TF_ZONES.flatMap(([z]) => tfBoard[z])); }
+        function tfPool() {
+            const team = val('in-tf-team'), used = tfAssigned();
+            return stammdaten.players.filter(p => (!team || p.team === team) && !used.has(p.name)).map(p => p.name);
+        }
+        function fillTfTeamOptions() {
+            const sel = $('in-tf-team');
+            if (!sel) return;
+            const v = sel.value;
+            sel.innerHTML = '<option value="">– alle Spieler –</option>' + (stammdaten.teams || []).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+            sel.value = (stammdaten.teams || []).includes(v) ? v : '';
+        }
+        function renderTfBoard() {
+            const host = $('tf-board');
+            if (!host) return;
+            fillTfTeamOptions();
+            const staff = n => (findPlayer(n)?.group || 'Spieler') !== 'Spieler';
+            const chips = list => list.length
+                ? list.map(n => `<span class="tf-chip${staff(n) ? ' staff' : ''}${tfSelected === n ? ' selected' : ''}" data-name="${esc(n)}">${esc(n)}</span>`).join('')
+                : '<span class="tf-empty">hierher ziehen</span>';
+            const zones = [['pool', 'Verfügbar', tfPool()], ...TF_ZONES.map(([z, l]) => [z, l, tfBoard[z]])];
+            host.innerHTML = zones.map(([z, label, list]) =>
+                `<div class="tf-zone" data-zone="${z}"><div class="tf-zone-head">${label}<span>${list.length}</span></div><div class="tf-chips">${z === 'pool' && !list.length ? '<span class="tf-empty">Alle Spieler sind verteilt</span>' : chips(list)}</div></div>`).join('');
+        }
+        function tfMove(name, zone, index) {
+            TF_ZONES.forEach(([z]) => { tfBoard[z] = tfBoard[z].filter(n => n !== name); });
+            if (zone !== 'pool' && tfBoard[zone]) {
+                const list = tfBoard[zone];
+                list.splice(index == null || index < 0 || index > list.length ? list.length : index, 0, name);
+            }
+            tfSelected = null;
+            tfBoardChanged();
+        }
+        function tfBoardChanged() {
+            renderTfBoard();
+            tfSyncText();
             scheduleSave();
         }
+        /* Reihen als Text in die Felder schreiben (im gewählten Namensformat) */
+        function tfSyncText() {
+            if (!tfAssigned().size) { updateTeamfoto(); return; }
+            const fmt = val('in-tf-namefmt') || 'full';
+            const txt = list => list.map(n => findPlayer(n) ? playerDisplayName(n, fmt) : n).join(', ');
+            [['back', 'in-tf-row1'], ['middle', 'in-tf-row2'], ['front', 'in-tf-row3'], ['coaches', 'in-tf-coaches'], ['missing', 'in-tf-missing']]
+                .forEach(([z, id]) => setVal(id, txt(tfBoard[z])));
+            updateTeamfoto();
+        }
+        function tfAutoFill() {
+            const pool = tfPool();
+            const players = pool.filter(n => (findPlayer(n)?.group || 'Spieler') === 'Spieler');
+            const staff = pool.filter(n => !players.includes(n));
+            if (!pool.length) { toast('Keine freien Spieler – mit „Alle zurück“ neu beginnen'); return; }
+            const rows = players.length > 8 ? ['back', 'middle', 'front'] : ['back', 'front'];
+            const per = Math.ceil(players.length / rows.length);
+            rows.forEach((z, i) => tfBoard[z].push(...players.slice(i * per, (i + 1) * per)));
+            tfBoard.coaches.push(...staff);
+            const team = val('in-tf-team');
+            if (team && ['', '1. MANNSCHAFT'].includes(normName(val('in-tf-title')))) setVal('in-tf-title', team.toLocaleUpperCase('de-DE'));
+            tfSelected = null;
+            tfBoardChanged();
+        }
+        function fillTeamfotoNames() { tfAutoFill(); }
+        function tfClearBoard() {
+            if (tfAssigned().size && !confirm('Alle Spieler zurück in „Verfügbar“ legen?')) return;
+            tfBoard = normTfBoard(null);
+            tfSelected = null;
+            ['in-tf-row1', 'in-tf-row2', 'in-tf-row3', 'in-tf-coaches', 'in-tf-missing'].forEach(id => setVal(id, ''));
+            tfBoardChanged();
+        }
+        /* Ziehen mit Finger oder Maus; kurzes Antippen wählt aus, Antippen einer Reihe legt den gewählten Spieler dorthin */
+        function tfDropTarget(x, y) {
+            const el = document.elementFromPoint(x, y);
+            const zone = el?.closest('#tf-board .tf-zone');
+            if (!zone) return null;
+            const chip = el.closest('.tf-chip');
+            const z = zone.dataset.zone;
+            let index = null, before = true;
+            if (chip && chip.dataset.name !== tfDrag?.name && z !== 'pool') {
+                const r = chip.getBoundingClientRect();
+                before = x < r.left + r.width / 2;
+                const list = tfBoard[z].filter(n => n !== tfDrag?.name);
+                index = list.indexOf(chip.dataset.name) + (before ? 0 : 1);
+            }
+            return { zone, z, chip, index, before };
+        }
+        function tfClearMarks() {
+            document.querySelectorAll('#tf-board .over, #tf-board .ins-before, #tf-board .ins-after').forEach(e => e.classList.remove('over', 'ins-before', 'ins-after'));
+        }
+        function setupTfBoard() {
+            const host = $('tf-board');
+            if (!host || host._tfBound) return;
+            host._tfBound = true;
+            host.addEventListener('pointerdown', e => {
+                const chip = e.target.closest('.tf-chip');
+                if (!chip || e.button > 0) return;
+                tfDrag = { name: chip.dataset.name, chip, x: e.clientX, y: e.clientY, id: e.pointerId, started: false };
+            });
+            document.addEventListener('pointermove', e => {
+                if (!tfDrag || e.pointerId !== tfDrag.id) return;
+                if (!tfDrag.started) {
+                    if (Math.hypot(e.clientX - tfDrag.x, e.clientY - tfDrag.y) < 6) return;
+                    tfDrag.started = true;
+                    const g = tfDrag.chip.cloneNode(true);
+                    g.classList.add('tf-ghost');
+                    document.body.appendChild(g);
+                    tfDrag.ghost = g;
+                    tfDrag.chip.classList.add('dragging');
+                }
+                e.preventDefault();
+                tfDrag.ghost.style.left = e.clientX + 'px';
+                tfDrag.ghost.style.top = e.clientY + 'px';
+                tfClearMarks();
+                const t = tfDropTarget(e.clientX, e.clientY);
+                if (t) { t.zone.classList.add('over'); if (t.chip && t.index !== null) t.chip.classList.add(t.before ? 'ins-before' : 'ins-after'); }
+                // Am Rand automatisch weiterscrollen
+                const edge = 60, sb = document.querySelector('.sidebar');
+                const dy = e.clientY < edge ? -12 : e.clientY > innerHeight - edge ? 12 : 0;
+                if (dy) { if (sb && sb.scrollHeight > sb.clientHeight) sb.scrollTop += dy; else window.scrollBy(0, dy); }
+            }, { passive: false });
+            const end = e => {
+                if (!tfDrag || e.pointerId !== tfDrag.id) return;
+                const d = tfDrag;
+                tfDrag = null;
+                tfClearMarks();
+                if (d.ghost) d.ghost.remove();
+                d.chip.classList.remove('dragging');
+                if (e.type === 'pointercancel') return;
+                if (d.started) {
+                    tfDrag = d;   // für tfDropTarget (eigener Chip wird ignoriert)
+                    const t = tfDropTarget(e.clientX, e.clientY);
+                    tfDrag = null;
+                    if (t) tfMove(d.name, t.z, t.index);
+                } else {
+                    tfSelected = tfSelected === d.name ? null : d.name;
+                    renderTfBoard();
+                }
+            };
+            document.addEventListener('pointerup', end);
+            document.addEventListener('pointercancel', end);
+            // Antippen einer Reihe: ausgewählten Spieler dorthin legen
+            host.addEventListener('click', e => {
+                if (!tfSelected || e.target.closest('.tf-chip')) return;
+                const zone = e.target.closest('.tf-zone');
+                if (zone) tfMove(tfSelected, zone.dataset.zone, null);
+            });
+        }
         function updateTeamfoto() {
+            if ($('tf-board') && !$('tf-board').innerHTML) { setupTfBoard(); renderTfBoard(); }
             const ph = (stammdaten.teamPhotos || []).find(t => t.id === val('in-tf-photo'));
             if ($('tf-delete-btn')) $('tf-delete-btn').hidden = !ph;
             const rows = [['back', 'in-tf-row1'], ['middle', 'in-tf-row2'], ['front', 'in-tf-row3'], ['coaches', 'in-tf-coaches'], ['missing', 'in-tf-missing']]
@@ -5913,7 +6143,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const p = findPlayer(name);
                 if (!p) return '';
                 if (p.demo && !p.cutImg && /^data:image\/svg\+xml/.test(p.img || '')) return demoCutout(p.img);
-                return photoTypeOf('story') === 'tor' ? (p.torCutImg || (!p.torImg && p.cutImg) || '') : (p.cutImg || '');
+                const type = photoTypeOf('story');
+                if (type === 'special' && p.specialImg) return p.specialCutImg || '';
+                return type === 'tor' ? (p.torCutImg || (!p.torImg && p.cutImg) || '') : (p.cutImg || '');
             };
 
             rows.forEach(count => {
@@ -6944,7 +7176,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 case 'neuzugang': updateNeuzugang(); break;
                 case 'sponsor': updateSponsorPost(); break;
                 case 'wochenende': updateWochenende(); break;
-                case 'teamfoto': updateTeamfoto(); break;
+                case 'teamfoto': setupTfBoard(); renderTfBoard(); updateTeamfoto(); break;
                 case 'frei': updateFrei(); break;
             }
             if (editorTabs.includes(activeTab)) updateCaption(activeTab);
@@ -7118,7 +7350,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 positions: {},
                 tabSettings: {},
                 eckArrows: eckArrows,
-                eckNodes: eckNodes
+                eckNodes: eckNodes,
+                tfBoard: JSON.parse(JSON.stringify(tfBoard))
             };
             NAME_FMT_FIELDS.forEach(([id, k, legacy, def]) => {
                 data[k] = val(id) || def;
@@ -7208,6 +7441,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             updateNumberInputs();
             if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
             setVal('in-erg-mode', ERG_MODES[data.ergMode] ? data.ergMode : 'ergebnis');
+            tfBoard = normTfBoard(data.tfBoard);
             if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
             if ($('in-kal-own-logo')) $('in-kal-own-logo').checked = data.kalOwnLogo ?? true;
             if ($('in-wk-own-logo')) $('in-wk-own-logo').checked = data.wkOwnLogo ?? true;
