@@ -77,7 +77,7 @@ async function exportSize(page, id) {
 async function makePhotos(browser) {
     fs.mkdirSync(TMP, { recursive: true });
     const page = await browser.newPage();
-    const names = ['Max_Muster', 'Max_Muster_TOR', 'Tim_Test', 'Ben_Beispiel'];
+    const names = ['Max_Muster', 'Max_Muster_TOR', 'Max_Muster_SPEZIAL', 'Tim_Test', 'Ben_Beispiel'];
     for (const [i, n] of names.entries()) {
         await page.setContent(`<div id=p style="width:300px;height:380px;background:hsl(${i * 80},60%,45%);display:flex;align-items:center;justify-content:center;font:bold 60px Arial;color:#fff">${n[0]}${n.includes('TOR') ? '⚽' : ''}</div>`);
         await page.locator('#p').screenshot({ path: path.join(TMP, n + '.png') });
@@ -160,6 +160,14 @@ async function makePhotos(browser) {
         await page.selectOption('#in-potm-player', 'Max Muster');
         await page.evaluate(() => { setVal('in-photo-type-potm', 'tor'); updateAllViews(); });
         check('Torjubel-Foto umschaltbar', await page.evaluate(() => $('out-potm-img').src === findPlayer('Max Muster').torImg));
+        // Spezial-Foto (3. Bild): per Mehrfach-Upload, umschaltbar, ohne Spezial-Foto → normales Foto
+        const sp = await page.evaluate(() => { const r = { has: !!findPlayer('Max Muster').specialImg };
+            setVal('in-photo-type-potm', 'special'); updateAllViews(); r.shown = $('out-potm-img').src === findPlayer('Max Muster').specialImg;
+            setVal('in-potm-player', 'Tim Test'); updatePotm(); r.fallback = $('out-potm-img').src === findPlayer('Tim Test').img;
+            setVal('in-photo-type-potm', 'normal'); setVal('in-potm-player', 'Max Muster'); updateAllViews(); return r; });
+        check('Spezial-Foto: Upload, Auswahl und Ersatz durch normales Foto', sp.has && sp.shown && sp.fallback, JSON.stringify(sp));
+        check('Foto-Fenster mit drei Fotos', await page.evaluate(() => { openPhotoDialog(stammdaten.players.findIndex(x => x.name === 'Max Muster'));
+            const n = document.querySelectorAll('#photo-rows .photo-row').length; const ok = !$('photo-overlay').hidden; closePhotoDialog(); return n === 3 && ok; }));
         // Zusatzspieler
         await page.click('.tab-btn[data-tab="post"]');
         await page.evaluate(() => { setVal('in-xp1-post', 'Tim Test'); updateTabDesign('post'); });
@@ -364,6 +372,10 @@ async function makePhotos(browser) {
             return { photos: (stammdaten.teamPhotos || []).length, src: !!$('out-tf-photo').getAttribute('src'), names: /HINTEN/.test($('out-tf-names').textContent) };
         });
         check('Mannschaftsfoto mit Foto und Namen', tf.photos === 1 && tf.src && tf.names, JSON.stringify(tf));
+        const board = await page.evaluate(() => { tfClearBoard(); const n = tfPool()[0]; tfMove(n, 'front', null);
+            const r = { front: tfBoard.front.join(), text: val('in-tf-row3'), saved: (collectSlotData().tfBoard?.front || []).join(), n };
+            tfMove(n, 'missing', 0); r.missing = val('in-tf-missing'); r.front2 = tfBoard.front.length; return r; });
+        check('Teamfoto: Spieler auf Reihen verteilen (gespeichert, Text befüllt)', board.front === board.n && board.text.length > 0 && board.saved === board.n && board.missing.length > 0 && board.front2 === 0, JSON.stringify(board));
         check('Export Mannschaftsfoto', (await exportSize(page, 'capture-teamfoto-feed')) === '1200x1500');
         // Spieler umbenennen: Name wird in der Aufstellung mitgenommen
         const oldName = await page.evaluate(() => val('player-1'));
