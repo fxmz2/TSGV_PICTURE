@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 21.5</title>
+    <title>Match-Shot – Grafiken für Vereine 21.6</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2574,7 +2574,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "21.5";
+        const APP_VERSION = "21.6";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4070,7 +4070,10 @@ Alle sind herzlich eingeladen!</textarea></div>
             { key: 'xpNames', id: 'in-xp-names', def: () => true, check: true },
             { key: 'xpNameFmt', id: 'in-xp-namefmt', def: () => 'full' },
             { key: 'pbSponsor', id: 'in-pb-sponsor', def: () => '' },
-            { key: 'pbText', id: 'in-pb-text', def: () => 'Präsentiert von' }
+            { key: 'pbText', id: 'in-pb-text', def: () => 'Präsentiert von' },
+            { key: 'vidSpeed', id: 'in-vid-speed', def: () => 'normal' },
+            { key: 'vidGap', id: 'in-vid-gap', def: () => 'normal' },
+            { key: 'vidDist', id: 'in-vid-dist', def: () => 'short' }
         ];
         function collectExtraDesign(t) {
             const o = {};
@@ -4437,6 +4440,24 @@ Alle sind herzlich eingeladen!</textarea></div>
                             <div id="ct-list-${tab}" data-tab="${tab}"></div>
                             <button type="button" class="copy-action-btn" onclick="addCustomText('${tab}')">➕ Text hinzufügen</button>
                             <span class="hint">Tipp: In der Vorschau jeden Text antippen, verschieben und mit zwei Fingern (oder über die Leiste oben) größer/kleiner ziehen. Größere Blöcke (Bilder, Logos, Listen, Spielfeld) erst antippen, dann verschieben.</span>
+                        </div>
+                    </details>
+                    <details class="design-details adv-only" data-section="video">
+                        <summary>🎬 Video (Reel)</summary>
+                        <div class="details-body">
+                            <div class="control-group"><label>Tempo beim Einfliegen</label>
+                                <select id="in-vid-speed-${tab}" onchange="scheduleSave();">
+                                    <option value="fast">Schnell</option><option value="normal">Normal</option><option value="slow">Langsam</option><option value="xslow">Sehr langsam</option>
+                                </select></div>
+                            <div class="control-group"><label>Zeit zwischen den Elementen</label>
+                                <select id="in-vid-gap-${tab}" onchange="scheduleSave();">
+                                    <option value="short">Kurz</option><option value="normal">Normal</option><option value="long">Lang</option><option value="xlong">Sehr lang</option>
+                                </select></div>
+                            <div class="control-group"><label>Einflug-Weg</label>
+                                <select id="in-vid-dist-${tab}" onchange="scheduleSave();">
+                                    <option value="short">Kurz (sanft)</option><option value="mid">Mittel</option><option value="far">Weit (von unten)</option>
+                                </select></div>
+                            <span class="hint">Gilt für „🎬 Als Video (Reel)“ in diesem Reiter. Langsamer und mit mehr Abstand wird das Video länger (max. 25 Sekunden).</span>
                         </div>
                     </details>
                     ${labelEditorHTML(tab)}`;
@@ -8498,7 +8519,16 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
         const easeOutBack = t => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
         const easeOut = t => 1 - Math.pow(1 - t, 3);
-        async function recordVideo(base, layers, onStatus) {
+        /* Video-Einstellungen je Reiter: Tempo, Zeit zwischen den Elementen, Einflug-Weg */
+        function videoOptions(tab) {
+            const v = id => (tab && val(`in-vid-${id}-${tab}`)) || '';
+            return {
+                dur: { fast: 0.4, normal: 0.6, slow: 1.0, xslow: 1.5 }[v('speed')] || 0.6,
+                gap: { short: [0.25, 3], normal: [0.42, 3.6], long: [0.75, 7], xlong: [1.1, 10] }[v('gap')] || [0.42, 3.6],
+                dist: { short: 1, mid: 2.5, far: 6 }[v('dist')] || 1
+            };
+        }
+        async function recordVideo(base, layers, onStatus, opts = videoOptions(null)) {
             // Videos brauchen gerade Maße (z.B. 1080×1920)
             const W = base.width, H = base.height;
             const cv = document.createElement('canvas');
@@ -8509,9 +8539,9 @@ Alle sind herzlich eingeladen!</textarea></div>
             let wm = null;
             if (club && club.demo) { wm = document.createElement('canvas'); wm.width = cv.width; wm.height = cv.height; drawDemoWatermark(wm); }
             const n = layers.length;
-            const stagger = n ? Math.min(0.42, 3.6 / n) : 0, dur = 0.6, start = 0.45;
+            const stagger = n ? Math.min(opts.gap[0], opts.gap[1] / n) : 0, dur = opts.dur, start = 0.45;
             const appearEnd = start + Math.max(0, n - 1) * stagger + dur;
-            const total = Math.min(14, Math.max(5, appearEnd + 2.8));
+            const total = Math.min(25, Math.max(5, appearEnd + 2.8));
             const draw = t => {
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.globalAlpha = 1;
@@ -8527,7 +8557,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     if (p <= 0) return;
                     const q = Math.min(1, p);
                     const sc = L.row ? 0.7 + 0.3 * easeOutBack(q) : 0.85 + 0.15 * easeOutBack(q);
-                    const dy = (1 - easeOut(q)) * (L.row ? 40 : 28) * VIDEO_SCALE / 2.7;
+                    const dy = (1 - easeOut(q)) * (L.row ? 40 : 28) * opts.dist * VIDEO_SCALE / 2.7;
                     const cx = L.x + L.canvas.width / 2, cy = L.y + L.canvas.height / 2;
                     ctx.globalAlpha = Math.min(1, q * 1.6);
                     setT(z * sc, z * sc, W * (1 - z) / 2 + z * (cx - cx * sc), H * (1 - z) / 2 + z * (cy - cy * sc + dy));
@@ -8574,7 +8604,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             try {
                 selectElement(null);
                 const { base, layers } = await renderVideoLayers(element, (i, n) => setBtn(`⏳ Video wird vorbereitet (${i}/${n})`));
-                const blob = await recordVideo(base, layers, pct => setBtn(`🎬 Aufnahme … ${pct} %`));
+                const blob = await recordVideo(base, layers, pct => setBtn(`🎬 Aufnahme … ${pct} %`), videoOptions(tabOfEl));
                 if (!blob.size) throw new Error('Das Video ist leer.');
                 const ext = blob.type.includes('mp4') ? 'mp4' : 'webm';
                 const file = new File([blob], `${baseName}.${ext}`, { type: blob.type });
@@ -9481,7 +9511,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                         if (f.endsWith('video')) {
                             setText('bulk-progress', `⏳ ${done}/${total}: Video für ${name} …`);
                             const { base: b, layers } = await renderVideoLayers(el);
-                            const blob = await recordVideo(b, layers, pct => setText('bulk-progress', `🎬 ${done}/${total}: Video für ${name} … ${pct} %`));
+                            const blob = await recordVideo(b, layers, pct => setText('bulk-progress', `🎬 ${done}/${total}: Video für ${name} … ${pct} %`), videoOptions('neuzugang'));
                             packFiles.push(new File([blob], `${base}.${blob.type.includes('mp4') ? 'mp4' : 'webm'}`, { type: blob.type }));
                         } else {
                             setText('bulk-progress', `⏳ ${done}/${total}: Bild für ${name} …`);
