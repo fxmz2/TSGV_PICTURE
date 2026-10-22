@@ -379,6 +379,13 @@ async function makePhotos(browser) {
             const r = { front: tfBoard.front.join(), text: val('in-tf-row3'), saved: (collectSlotData().tfBoard?.front || []).join(), n };
             tfMove(n, 'missing', 0); r.missing = val('in-tf-missing'); r.front2 = tfBoard.front.length; return r; });
         check('Teamfoto: Spieler auf Reihen verteilen (gespeichert, Text befüllt)', board.front === board.n && board.text.length > 0 && board.saved === board.n && board.missing.length > 0 && board.front2 === 0, JSON.stringify(board));
+        const tfl = await page.evaluate(() => { tfClearBoard(); const [a, b2] = tfPool();
+            tfToggleRow('middle', false); const zones = [...document.querySelectorAll('#tf-board .tf-zone')].map(z => z.dataset.zone).join();
+            tfBoard.view = 'list'; renderTfBoard(); const sels = document.querySelectorAll('#tf-board select[data-tf-player]').length;
+            tfMove(a, 'front', null); tfMove(b2, 'front', null); tfReorder('front', 0, 1);
+            const r = { zones, sels, order: tfBoard.front.join() === [b2, a].join(), mid: val('in-tf-row2') };
+            tfToggleRow('middle', true); tfBoard.view = 'board'; renderTfBoard(); return r; });
+        check('Teamfoto: Reihe ausblenden, Liste zuweisen, Reihenfolge ▲▼', !tfl.zones.includes('middle') && tfl.sels > 0 && tfl.order && tfl.mid === '', JSON.stringify(tfl));
         check('Export Mannschaftsfoto', (await exportSize(page, 'capture-teamfoto-feed')) === '1200x1500');
         // Spieler umbenennen: Name wird in der Aufstellung mitgenommen
         const oldName = await page.evaluate(() => val('player-1'));

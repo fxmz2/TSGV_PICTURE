@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 21.4</title>
+    <title>Match-Shot – Grafiken für Vereine 21.5</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -508,6 +508,25 @@
         .tf-chip.ins-after { box-shadow: 4px 0 0 #e07a2f; }
         .tf-ghost { position: fixed; z-index: 10002; pointer-events: none; transform: translate(-50%, -60%) scale(1.08); box-shadow: 0 8px 18px rgba(0,0,0,0.3); }
         .tf-empty { font-size: 11px; color: #9aa5ad; }
+        .tf-tools { display: grid; gap: 6px; }
+        .tf-views { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .tf-views button { padding: 8px; border: 1px solid #cfd8dc; border-radius: 9px; background: #fff; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .tf-views button.active { background: #005f73; color: #fff; border-color: #005f73; }
+        .tf-rowtoggles { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; }
+        .tf-rowtoggles label { display: inline-flex; align-items: center; gap: 4px; font-weight: normal; margin: 0; }
+        .tf-fold { border: none; background: none; color: #005f73; font-size: 14px; padding: 0 6px 0 0; cursor: pointer; line-height: 1; }
+        .tf-zone-head { align-items: center; }
+        .tf-zone-head span { margin-left: auto; }
+        .tf-zone.folded { padding-bottom: 2px; }
+        .tf-list { display: grid; gap: 4px; max-height: 360px; overflow: auto; border: 1px solid #e3e6ea; border-radius: 10px; padding: 6px; background: #fafbfc; }
+        .tf-lrow { display: grid; grid-template-columns: 1fr 140px; gap: 6px; align-items: center; font-size: 13px; font-weight: bold; }
+        .tf-lrow .staff { color: #666; font-style: italic; }
+        .tf-lrow select { font-size: 12px; padding: 4px; }
+        .tf-order { display: grid; gap: 6px; font-size: 13px; }
+        .tf-ozone { border: 1px solid #e3e6ea; border-radius: 10px; padding: 6px 8px; background: #fff; }
+        .tf-oitem { display: grid; grid-template-columns: 1fr 34px 34px; gap: 4px; align-items: center; padding: 2px 0; }
+        .tf-oitem button { padding: 4px 0; border: 1px solid #cfd8dc; border-radius: 6px; background: #f4f6f8; cursor: pointer; }
+        .tf-oitem button:disabled { opacity: 0.3; }
         .tf-names b { color: var(--jersey-color); letter-spacing: 0.5px; }
         .presented-by { position: absolute; left: 0; right: 0; bottom: 70px; margin: 0 auto; width: max-content; max-width: 88%; z-index: 6; display: flex; align-items: center; gap: 9px;
             background: rgba(255,255,255,0.96); color: #111; border-radius: 10px; padding: 6px 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.35); box-sizing: border-box; }
@@ -1807,7 +1826,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                         <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin:6px 0 0;" onclick="tfAutoFill()">🔀 Automatisch verteilen</button>
                         <button type="button" class="copy-action-btn" style="background:#6c757d; margin:6px 0 0;" onclick="tfClearBoard()">↩️ Alle zurück</button>
                     </div>
-                    <span class="hint">Namen mit dem Finger in eine Reihe ziehen – oder antippen und dann die Reihe antippen. Die Reihenfolge entspricht „von links“ auf dem Foto.</span></div>
+                    <span class="hint">„🖐️ Ziehen“: Namen mit dem Finger in eine Reihe ziehen (oder antippen, dann die Reihe antippen); ▾ klappt eine Reihe zu. „📋 Liste“: jedem Spieler eine Reihe zuweisen und die Reihenfolge mit ▲▼ festlegen. Die Häkchen blenden ganze Reihen aus. Reihenfolge = „von links“ auf dem Foto.</span></div>
                 <details class="design-details" id="tf-manual">
                     <summary>✍️ Namen von Hand bearbeiten</summary>
                     <div class="details-body">
@@ -2555,7 +2574,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "21.4";
+        const APP_VERSION = "21.5";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -5214,8 +5233,13 @@ Alle sind herzlich eingeladen!</textarea></div>
         function normTfBoard(b) {
             const o = {};
             TF_ZONES.forEach(([z]) => { o[z] = Array.isArray(b?.[z]) ? b[z].filter(n => typeof n === 'string' && n) : []; });
+            const keys = TF_ZONES.map(([z]) => z);
+            o.off = (Array.isArray(b?.off) ? b.off : []).filter(z => keys.includes(z));        // ausgeblendete Reihen
+            o.folded = (Array.isArray(b?.folded) ? b.folded : []).filter(z => keys.includes(z) || z === 'pool');   // zugeklappt
+            o.view = b?.view === 'list' ? 'list' : 'board';
             return o;
         }
+        const tfActiveZones = () => TF_ZONES.filter(([z]) => !tfBoard.off.includes(z));
         function tfAssigned() { return new Set(TF_ZONES.flatMap(([z]) => tfBoard[z])); }
         function tfPool() {
             const team = val('in-tf-team'), used = tfAssigned();
@@ -5236,9 +5260,43 @@ Alle sind herzlich eingeladen!</textarea></div>
             const chips = list => list.length
                 ? list.map(n => `<span class="tf-chip${staff(n) ? ' staff' : ''}${tfSelected === n ? ' selected' : ''}" data-name="${esc(n)}">${esc(n)}</span>`).join('')
                 : '<span class="tf-empty">hierher ziehen</span>';
-            const zones = [['pool', 'Verfügbar', tfPool()], ...TF_ZONES.map(([z, l]) => [z, l, tfBoard[z]])];
-            host.innerHTML = zones.map(([z, label, list]) =>
-                `<div class="tf-zone" data-zone="${z}"><div class="tf-zone-head">${label}<span>${list.length}</span></div><div class="tf-chips">${z === 'pool' && !list.length ? '<span class="tf-empty">Alle Spieler sind verteilt</span>' : chips(list)}</div></div>`).join('');
+            const active = tfActiveZones();
+            const tools = `<div class="tf-tools">
+                    <div class="tf-views"><button type="button" data-tf-view="board" class="${tfBoard.view === 'board' ? 'active' : ''}">🖐️ Ziehen</button><button type="button" data-tf-view="list" class="${tfBoard.view === 'list' ? 'active' : ''}">📋 Liste</button></div>
+                    <div class="tf-rowtoggles">${TF_ZONES.map(([z, l]) => `<label><input type="checkbox" data-tf-row="${z}" ${tfBoard.off.includes(z) ? '' : 'checked'}> ${l.replace(' Reihe', '')}</label>`).join('')}</div>
+                </div>`;
+            let body;
+            if (tfBoard.view === 'list') {
+                // Liste: jedem Spieler eine Reihe zuweisen, danach Reihenfolge mit ▲▼
+                const team = val('in-tf-team');
+                const names = [...new Set([...stammdaten.players.filter(p => !team || p.team === team).map(p => p.name), ...tfAssigned()])];
+                const zoneOf = n => active.find(([z]) => tfBoard[z].includes(n))?.[0] || '';
+                const opts = n => `<option value="pool">–</option>` + active.map(([z, l]) => `<option value="${z}" ${zoneOf(n) === z ? 'selected' : ''}>${l}</option>`).join('');
+                body = `<div class="tf-list">${names.map(n => `<div class="tf-lrow"><span class="${staff(n) ? 'staff' : ''}">${esc(n)}</span><select data-tf-player="${esc(n)}">${opts(n)}</select></div>`).join('')}</div>`
+                    + `<div class="tf-order"><b>Reihenfolge (von links)</b>${active.filter(([z]) => tfBoard[z].length).map(([z, l]) => `<div class="tf-ozone"><div class="tf-zone-head">${l}<span>${tfBoard[z].length}</span></div>`
+                        + tfBoard[z].map((n, i) => `<div class="tf-oitem"><span>${i + 1}. ${esc(n)}</span><button type="button" data-tf-up="${z}" data-i="${i}" ${i ? '' : 'disabled'}>▲</button><button type="button" data-tf-down="${z}" data-i="${i}" ${i < tfBoard[z].length - 1 ? '' : 'disabled'}>▼</button></div>`).join('') + '</div>').join('') || '<span class="tf-empty">Noch niemand zugeordnet</span>'}</div>`;
+            } else {
+                const zones = [['pool', 'Verfügbar', tfPool()], ...active.map(([z, l]) => [z, l, tfBoard[z]])];
+                body = zones.map(([z, label, list]) => {
+                    const folded = tfBoard.folded.includes(z);
+                    return `<div class="tf-zone${folded ? ' folded' : ''}" data-zone="${z}"><div class="tf-zone-head"><button type="button" class="tf-fold" data-tf-fold="${z}" title="${folded ? 'Aufklappen' : 'Zuklappen'}">${folded ? '▸' : '▾'}</button>${label}<span>${list.length}</span></div>`
+                        + (folded ? '' : `<div class="tf-chips">${z === 'pool' && !list.length ? '<span class="tf-empty">Alle Spieler sind verteilt</span>' : chips(list)}</div>`) + '</div>';
+                }).join('');
+            }
+            host.innerHTML = tools + body;
+        }
+        /* Reihe ein-/ausblenden: Spieler einer ausgeblendeten Reihe gehen zurück zu „Verfügbar“ */
+        function tfToggleRow(z, on) {
+            if (!on && tfBoard[z].length && !confirm('Die Spieler dieser Reihe kommen zurück zu „Verfügbar“. Reihe ausblenden?')) { renderTfBoard(); return; }
+            tfBoard.off = tfBoard.off.filter(x => x !== z);
+            if (!on) { tfBoard.off.push(z); tfBoard[z] = []; }
+            tfBoardChanged();
+        }
+        function tfReorder(z, i, dir) {
+            const list = tfBoard[z], j = i + dir;
+            if (!list || j < 0 || j >= list.length) return;
+            [list[i], list[j]] = [list[j], list[i]];
+            tfBoardChanged();
         }
         function tfMove(name, zone, index) {
             TF_ZONES.forEach(([z]) => { tfBoard[z] = tfBoard[z].filter(n => n !== name); });
@@ -5260,7 +5318,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const fmt = val('in-tf-namefmt') || 'full';
             const txt = list => list.map(n => findPlayer(n) ? playerDisplayName(n, fmt) : n).join(', ');
             [['back', 'in-tf-row1'], ['middle', 'in-tf-row2'], ['front', 'in-tf-row3'], ['coaches', 'in-tf-coaches'], ['missing', 'in-tf-missing']]
-                .forEach(([z, id]) => setVal(id, txt(tfBoard[z])));
+                .forEach(([z, id]) => setVal(id, tfBoard.off.includes(z) ? '' : txt(tfBoard[z])));
             updateTeamfoto();
         }
         function tfAutoFill() {
@@ -5268,10 +5326,13 @@ Alle sind herzlich eingeladen!</textarea></div>
             const players = pool.filter(n => (findPlayer(n)?.group || 'Spieler') === 'Spieler');
             const staff = pool.filter(n => !players.includes(n));
             if (!pool.length) { toast('Keine freien Spieler – mit „Alle zurück“ neu beginnen'); return; }
-            const rows = players.length > 8 ? ['back', 'middle', 'front'] : ['back', 'front'];
+            const on = z => !tfBoard.off.includes(z);
+            let rows = ['back', 'middle', 'front'].filter(on);
+            if (rows.length === 3 && players.length <= 8) rows = ['back', 'front'];
+            if (!rows.length) { toast('Bitte mindestens eine Reihe einblenden'); return; }
             const per = Math.ceil(players.length / rows.length);
             rows.forEach((z, i) => tfBoard[z].push(...players.slice(i * per, (i + 1) * per)));
-            tfBoard.coaches.push(...staff);
+            if (on('coaches')) tfBoard.coaches.push(...staff);
             const team = val('in-tf-team');
             if (team && ['', '1. MANNSCHAFT'].includes(normName(val('in-tf-title')))) setVal('in-tf-title', team.toLocaleUpperCase('de-DE'));
             tfSelected = null;
@@ -5280,7 +5341,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         function fillTeamfotoNames() { tfAutoFill(); }
         function tfClearBoard() {
             if (tfAssigned().size && !confirm('Alle Spieler zurück in „Verfügbar“ legen?')) return;
-            tfBoard = normTfBoard(null);
+            tfBoard = normTfBoard({ off: tfBoard.off, folded: tfBoard.folded, view: tfBoard.view });
             tfSelected = null;
             ['in-tf-row1', 'in-tf-row2', 'in-tf-row3', 'in-tf-coaches', 'in-tf-missing'].forEach(id => setVal(id, ''));
             tfBoardChanged();
@@ -5357,9 +5418,23 @@ Alle sind herzlich eingeladen!</textarea></div>
             document.addEventListener('pointercancel', end);
             // Antippen einer Reihe: ausgewählten Spieler dorthin legen
             host.addEventListener('click', e => {
+                const b = e.target.closest('button');
+                if (b?.dataset.tfView) { tfBoard.view = b.dataset.tfView; tfSelected = null; renderTfBoard(); scheduleSave(); return; }
+                if (b?.dataset.tfFold) {
+                    const z = b.dataset.tfFold;
+                    tfBoard.folded = tfBoard.folded.includes(z) ? tfBoard.folded.filter(x => x !== z) : [...tfBoard.folded, z];
+                    renderTfBoard(); scheduleSave(); return;
+                }
+                if (b?.dataset.tfUp) { tfReorder(b.dataset.tfUp, +b.dataset.i, -1); return; }
+                if (b?.dataset.tfDown) { tfReorder(b.dataset.tfDown, +b.dataset.i, 1); return; }
                 if (!tfSelected || e.target.closest('.tf-chip')) return;
                 const zone = e.target.closest('.tf-zone');
                 if (zone) tfMove(tfSelected, zone.dataset.zone, null);
+            });
+            host.addEventListener('change', e => {
+                const t = e.target;
+                if (t.dataset.tfRow) tfToggleRow(t.dataset.tfRow, t.checked);
+                else if (t.dataset.tfPlayer) tfMove(t.dataset.tfPlayer, t.value, null);
             });
         }
         function updateTeamfoto() {
