@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 21.3</title>
+    <title>Match-Shot – Grafiken für Vereine 21.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1337,8 +1337,14 @@
                             <input type="file" id="bulk-photo-upload" accept="image/*" multiple onchange="handleBulkPhotoUpload(event)">
                             <span class="hint">Dateiname = Spielername, z.B. <b>Max_Mustermann.jpg</b>. Torjubel-Foto: <b>Max_Mustermann_TOR.jpg</b>, Spezial-Foto: <b>Max_Mustermann_SPEZIAL.jpg</b>. Fehlende Spieler werden automatisch angelegt.</span>
                         </div>
+                        <label style="margin-top:6px;">Alle freistellen – welche Fotos?</label>
+                        <div class="ct-checks" style="margin-bottom:4px;">
+                            <label><input type="checkbox" id="cut-all-img" checked> Normale Fotos</label>
+                            <label><input type="checkbox" id="cut-all-torImg" checked> Torjubel-Fotos</label>
+                            <label><input type="checkbox" id="cut-all-specialImg" checked> Spezial-Fotos</label>
+                        </div>
                         <button type="button" class="copy-action-btn" style="background:#2a9d8f;" onclick="cutOutAllPlayers()">✂️ Hintergrund bei allen Spielern entfernen</button>
-                        <span class="hint" style="margin-bottom:8px;">Die KI läuft direkt auf dem Gerät – es werden keine Fotos übertragen. Einzelne Spieler stellst du mit ✂️ in der Liste frei. Tipp: Auf dem iPhone kannst du Personen auch in der Fotos-App freistellen (Motiv lange drücken → „Kopieren“ bzw. „Sticker hinzufügen“) und das Ergebnis als PNG hochladen.</span>
+                        <span class="hint" style="margin-bottom:8px;">Die KI läuft direkt auf dem Gerät – es werden keine Fotos übertragen. Einzelne Fotos stellst du beim Spieler über ✂️ frei – je Foto wählbar und jederzeit rückgängig, falls zu viel abgeschnitten wurde. Tipp: Auf dem iPhone kannst du Personen auch in der Fotos-App freistellen (Motiv lange drücken → „Kopieren“ bzw. „Sticker hinzufügen“) und das Ergebnis als PNG hochladen.</span>
                         <div id="list-players" class="scrollable-controls-box"></div>
                     </div>
                 </details>
@@ -2393,7 +2399,8 @@ Alle sind herzlich eingeladen!</textarea></div>
     <div id="photo-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closePhotoDialog()">
         <div class="modal-card">
             <h2 id="photo-title">📷 Fotos</h2>
-            <p>Normales Foto für alle Grafiken. Torjubel- und Spezial-Foto sind optional und lassen sich je Reiter unter „Spielerfotos“ auswählen – fehlen sie, wird das normale Foto genommen.</p>
+            <p>Normales Foto für alle Grafiken. Torjubel- und Spezial-Foto sind optional und lassen sich je Reiter unter „Spielerfotos“ auswählen – fehlen sie, wird das normale Foto genommen.
+                Mit ✂️ stellst du jedes Foto einzeln frei. Wurde zu viel abgeschnitten, nochmal ✂️ tippen – dann wird wieder das Originalfoto verwendet.</p>
             <div id="photo-rows"></div>
             <button type="button" class="copy-action-btn" style="margin-top:10px;" onclick="closePhotoDialog()">Fertig</button>
         </div>
@@ -2548,7 +2555,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "21.3";
+        const APP_VERSION = "21.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3427,7 +3434,9 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         async function cutOutAllPlayers() {
-            const todo = stammdaten.players.filter(p => (p.img && !p.cutImg) || (p.torImg && !p.torCutImg) || (p.specialImg && !p.specialCutImg));
+            const fields = Object.keys(PHOTO_CUT_FIELD).filter(f => $('cut-all-' + f)?.checked ?? true);
+            if (!fields.length) { toast('Bitte mindestens eine Foto-Art auswählen'); return; }
+            const todo = stammdaten.players.filter(p => fields.some(f => p[f] && !p[PHOTO_CUT_FIELD[f]]));
             if (!todo.length) { toast('Alle Spieler sind bereits freigestellt'); return; }
             if (!confirm(`${todo.length} Spieler freistellen? Das dauert ca. 1–3 Sekunden pro Spieler. Beim ersten Mal wird zusätzlich die KI geladen (ca. 30 MB, danach offline verfügbar).`)) return;
             showBusy('KI wird geladen …');
@@ -3437,9 +3446,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 for (const p of todo) {
                     setText('busy-text', `Stelle frei: ${p.name} (${++done}/${todo.length})`);
                     await new Promise(r => setTimeout(r, 30));   // Anzeige aktualisieren lassen
-                    if (p.img && !p.cutImg) p.cutImg = await cutOutPerson(p.img);
-                    if (p.torImg && !p.torCutImg) p.torCutImg = await cutOutPerson(p.torImg);
-                    if (p.specialImg && !p.specialCutImg) p.specialCutImg = await cutOutPerson(p.specialImg);
+                    for (const f of fields) if (p[f] && !p[PHOTO_CUT_FIELD[f]]) p[PHOTO_CUT_FIELD[f]] = await cutOutPerson(p[f]);
                 }
             } catch (e) {
                 console.warn(e);
@@ -3496,8 +3503,33 @@ Alle sind herzlich eingeladen!</textarea></div>
                 return `<div class="photo-row"><img src="${src}" class="${cut ? 'cut' : ''}" alt="">
                     <div><b>${label}</b><small>${p[f] ? (cut ? 'vorhanden · freigestellt ✓' : 'vorhanden') : hint}</small></div>
                     <div class="pr-btns"><button type="button" class="sd-btn" title="${p[f] ? 'Ändern' : 'Hochladen'}" onclick="changeEntryImage('players', ${photoDialogIdx}, '${f}')">${p[f] ? '🔄' : '➕'}</button>
+                    ${p[f] ? `<button type="button" class="sd-btn ${cut ? 'active' : ''}" title="${cut ? 'Freistellung entfernen (Originalfoto verwenden)' : 'Hintergrund entfernen (freistellen)'}" onclick="togglePhotoCutout('${f}')">✂️</button>` : ''}
                     ${p[f] && f !== 'img' ? `<button type="button" class="sd-btn danger" title="Löschen" onclick="deletePlayerPhoto('${f}')">🗑️</button>` : ''}</div></div>`;
             }).join('');
+        }
+        /* Einzelnes Foto freistellen bzw. Freistellung wieder entfernen */
+        async function togglePhotoCutout(field) {
+            const p = stammdaten.players[photoDialogIdx];
+            const cutField = PHOTO_CUT_FIELD[field];
+            if (!p || !p[field]) return;
+            if (p[cutField]) {
+                delete p[cutField];
+                await onStammdatenChanged('players');
+                renderPhotoDialog();
+                toast('↩️ Freistellung entfernt – es wird wieder das Originalfoto verwendet');
+                return;
+            }
+            showBusy(segmenterPromise ? `Stelle ${p.name} frei …` : 'KI wird geladen (nur beim ersten Mal, ca. 30 MB) …');
+            try {
+                await getSegmenter();
+                setText('busy-text', `Stelle ${p.name} frei …`);
+                p[cutField] = await cutOutPerson(p[field]);
+            } catch (e) {
+                console.warn(e);
+                alert('Freistellen hat nicht geklappt: ' + (e.message || e));
+            } finally { hideBusy(); }
+            await onStammdatenChanged('players');
+            renderPhotoDialog();
         }
         async function deletePlayerPhoto(field) {
             const p = stammdaten.players[photoDialogIdx];
@@ -3570,7 +3602,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                         </div>`;
                         const anyCut = e.cutImg || e.torCutImg || e.specialCutImg;
                         btns = btn('✏️', 'Namen ändern', `renameEntry('players', ${i})`) + btn('📷', 'Fotos (Normal, Torjubel, Spezial)', `openPhotoDialog(${i})`)
-                            + (e.img || e.torImg || e.specialImg ? btn('✂️', anyCut ? 'Freistellung entfernen' : 'Hintergrund entfernen', `togglePlayerCutout(${i})`, anyCut ? 'active' : '') : '');
+                            + (e.img || e.torImg || e.specialImg ? btn('✂️', 'Freistellen – je Foto wählbar', `openPhotoDialog(${i})`, anyCut ? 'active' : '') : '');
                     } else if (type === 'templates') {
                         thumb = e.thumb; thumbCls = e.format === 'story' ? 'story' : '';
                         sub = e.format === 'story' ? 'Story (9:16)' : 'Feed (1:1)';
