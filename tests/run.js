@@ -168,6 +168,9 @@ async function makePhotos(browser) {
         check('Spezial-Foto: Upload, Auswahl und Ersatz durch normales Foto', sp.has && sp.shown && sp.fallback, JSON.stringify(sp));
         check('Foto-Fenster mit drei Fotos', await page.evaluate(() => { openPhotoDialog(stammdaten.players.findIndex(x => x.name === 'Max Muster'));
             const n = document.querySelectorAll('#photo-rows .photo-row').length; const ok = !$('photo-overlay').hidden; closePhotoDialog(); return n === 3 && ok; }));
+        check('Freistellung je Foto entfernbar (andere bleiben)', await page.evaluate(async () => { const i = stammdaten.players.findIndex(x => x.name === 'Max Muster'), p = stammdaten.players[i];
+            p.cutImg = p.img; p.torCutImg = p.torImg; openPhotoDialog(i); const btns = document.querySelectorAll('#photo-rows .sd-btn.active').length;
+            await togglePhotoCutout('img'); const r = !p.cutImg && !!p.torCutImg && btns === 2; delete p.torCutImg; closePhotoDialog(); return r; }));
         // Zusatzspieler
         await page.click('.tab-btn[data-tab="post"]');
         await page.evaluate(() => { setVal('in-xp1-post', 'Tim Test'); updateTabDesign('post'); });
