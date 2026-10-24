@@ -112,6 +112,13 @@ async function makePhotos(browser) {
         const counts = await page.evaluate(() => [stammdaten.players.length, stammdaten.opponents.length, stammdaten.sponsors.length]);
         check('Demo füllt Beispieldaten', counts[0] >= 18 && counts[1] >= 6 && counts[2] >= 3, counts.join('/'));
         check('Export Beitrag 4:5 = 1200x1500', (await exportSize(page, 'capture-post-feed')) === '1200x1500');
+        // Ein Bild, das nie fertig lädt, darf die Erstellung nicht dauerhaft blockieren
+        await page.route('**/haengt.png', () => {});
+        const stuck = await page.evaluate(async () => { const img = document.createElement('img'); img.src = 'haengt.png?' + Date.now(); img.className = 'test-stuck';
+            $('capture-post-story').appendChild(img); const t0 = performance.now();
+            try { const c = await renderElementToCanvas($('capture-post-story')); return { ok: c.width === 1200, s: Math.round((performance.now() - t0) / 1000) }; }
+            finally { img.remove(); } });
+        check('Hängendes Bild blockiert die Erstellung nicht', stuck.ok && stuck.s < 15, JSON.stringify(stuck));
         check('Export Story = 1200x2133', (await exportSize(page, 'capture-post-story')) === '1200x2133');
         check('Keine Verbindungen zu fremden Servern', page.external.length === 0, page.external.join(', '));
         check('Keine JavaScript-Fehler', page.errors.length === 0, page.errors.join(' | '));
