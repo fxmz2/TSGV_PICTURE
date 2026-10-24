@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 21.6</title>
+    <title>Match-Shot – Grafiken für Vereine 21.7</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2574,7 +2574,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "21.6";
+        const APP_VERSION = "21.7";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -8153,9 +8153,17 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            EXPORT ALS BILD
            ========================================================= */
+        /* Wartet höchstens ms Millisekunden – danach geht es trotzdem weiter (fallback) */
+        function withTimeout(promise, ms, fallback) {
+            let t;
+            return Promise.race([promise, new Promise(res => { t = setTimeout(() => res(fallback), ms); })]).finally(() => clearTimeout(t));
+        }
+        /* Zeichenfläche sofort freigeben (iPhone/Safari hat nur begrenzt Speicher für Zeichenflächen) */
+        function freeCanvas(c) { if (c && c.width) { c.width = 0; c.height = 0; } }
         function waitForImages(root) {
+            // Jedes Bild höchstens 6 s abwarten – ein hängendes Bild blockiert sonst die ganze Erstellung
             return Promise.all(Array.from(root.querySelectorAll('img')).map(img =>
-                img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; })
+                img.complete ? Promise.resolve() : withTimeout(new Promise(res => { img.onload = img.onerror = res; }), 6000)
             ));
         }
 
@@ -8201,7 +8209,10 @@ Alle sind herzlich eingeladen!</textarea></div>
             ctx.rect(x0, y0, cw, ch);
             ctx.clip();
             ctx.drawImage(img, x0 + (cw - dw) / 2, y0 + (ch - dh) / 2, dw, dh);
-            try { return canvas.toDataURL('image/png'); } catch (e) { return null; }
+            let out = null;
+            try { out = canvas.toDataURL('image/png'); } catch (e) {}
+            freeCanvas(canvas);
+            return out;
         }
 
         /* html2canvas kennt keinen CSS-Filter → Bild mit Schatten vorab zeichnen (Layout bleibt gleich) */
@@ -8240,7 +8251,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             ctx.drawImage(img, pad + x0 + (cw - dw) / 2, pad + y0 + (ch - dh) / 2, dw, dh);
             if (cs.objectFit === 'cover') ctx.restore();
             let data;
-            try { data = canvas.toDataURL('image/png'); } catch (e) { return false; }
+            try { data = canvas.toDataURL('image/png'); } catch (e) { freeCanvas(canvas); return false; }
+            freeCanvas(canvas);
 
             // Platzhalter mit gleicher Größe/Position, darin das Schattenbild (ragt über den Rand hinaus)
             const holder = document.createElement('div');
@@ -8330,7 +8342,10 @@ Alle sind herzlich eingeladen!</textarea></div>
             const [ox, oy] = objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
             ctx.scale(scale, scale);
             ctx.drawImage(img, ox, oy, dw, dh);
-            try { return canvas.toDataURL('image/png'); } catch (e) { return null; }
+            let out = null;
+            try { out = canvas.toDataURL('image/png'); } catch (e) {}
+            freeCanvas(canvas);
+            return out;
         }
 
         /* Hintergrundbilder (z.B. eigene Vorlagen) als scharfe Bild-Ebene statt CSS-Hintergrund rendern */
@@ -8344,7 +8359,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (size !== 'cover' && size !== 'contain') continue;
                 const src = new Image();
                 src.src = m[1];
-                try { await src.decode(); } catch (e) { continue; }
+                try { if (await withTimeout(src.decode().then(() => true), 6000, false) !== true) continue; } catch (e) { continue; }
                 const w = el.clientWidth, h = el.clientHeight;
                 let scale = Math.min(exportScaleFor(el), 3000 / Math.max(w, h));
                 const canvas = document.createElement('canvas');
@@ -8358,7 +8373,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 ctx.scale(scale, scale);
                 ctx.drawImage(src, ox, oy, dw, dh);
                 let data;
-                try { data = canvas.toDataURL('image/jpeg', 0.95); } catch (e) { continue; }
+                try { data = canvas.toDataURL('image/jpeg', 0.95); } catch (e) { freeCanvas(canvas); continue; }
+                freeCanvas(canvas);
                 const layer = document.createElement('img');
                 layer.src = data;
                 layer.style.cssText = 'position:absolute; left:0; top:0; width:100%; height:100%; z-index:-1; pointer-events:none; object-fit:fill;';
@@ -8410,7 +8426,8 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function renderElementToCanvas(element) {
             const { holder, clone } = await prepareExportClone(element);
             try {
-                const canvas = await html2canvas(clone, { scale: EXPORT_SCALE, useCORS: true, logging: false, backgroundColor: null });
+                const canvas = await withTimeout(html2canvas(clone, { scale: EXPORT_SCALE, useCORS: true, logging: false, backgroundColor: null }), 60000, null);
+                if (!canvas) throw new Error('Die Erstellung hat zu lange gedauert. Bitte die App einmal neu öffnen und nochmal versuchen.');
                 if (club && club.demo) drawDemoWatermark(canvas);
                 return canvas;
             } finally {
@@ -8420,7 +8437,7 @@ Alle sind herzlich eingeladen!</textarea></div>
 
         /* Unskalierte Kopie außerhalb des sichtbaren Bereichs vorbereiten (Bilder in Export-Auflösung) */
         async function prepareExportClone(element) {
-            if (document.fonts?.ready) await document.fonts.ready;
+            if (document.fonts?.ready) await withTimeout(document.fonts.ready, 3000);
             const view = element.closest('.template-container');
             // Unskalierte Kopie außerhalb des sichtbaren Bereichs rendern (Handy-Vorschau ist verkleinert)
             const holder = document.createElement('div');
@@ -8482,7 +8499,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                     clone.style.display = 'none';
                     try {
                         prep(c);
-                        return await html2canvas(c, { scale: VIDEO_SCALE, useCORS: true, logging: false, backgroundColor: null });
+                        const cv = await withTimeout(html2canvas(c, { scale: VIDEO_SCALE, useCORS: true, logging: false, backgroundColor: null }), 60000, null);
+                        if (!cv) throw new Error('Die Erstellung hat zu lange gedauert. Bitte die App einmal neu öffnen und nochmal versuchen.');
+                        return cv;
                     } finally { c.remove(); clone.style.display = ''; }
                 };
                 const total = units.length + 1;
@@ -8604,7 +8623,9 @@ Alle sind herzlich eingeladen!</textarea></div>
             try {
                 selectElement(null);
                 const { base, layers } = await renderVideoLayers(element, (i, n) => setBtn(`⏳ Video wird vorbereitet (${i}/${n})`));
-                const blob = await recordVideo(base, layers, pct => setBtn(`🎬 Aufnahme … ${pct} %`), videoOptions(tabOfEl));
+                let blob;
+                try { blob = await recordVideo(base, layers, pct => setBtn(`🎬 Aufnahme … ${pct} %`), videoOptions(tabOfEl)); }
+                finally { freeCanvas(base); layers.forEach(l => freeCanvas(l.canvas)); }
                 if (!blob.size) throw new Error('Das Video ist leer.');
                 const ext = blob.type.includes('mp4') ? 'mp4' : 'webm';
                 const file = new File([blob], `${baseName}.${ext}`, { type: blob.type });
@@ -8659,8 +8680,9 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (btn) { btn.innerText = '⏳ Generiere HQ...'; btn.disabled = true; }
             try {
                 const canvas = await renderElementToCanvas(element);
-                const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 1.0));
-                if (!blob) throw new Error('Grafik konnte nicht erstellt werden.');
+                const blob = await withTimeout(new Promise(res => canvas.toBlob(res, 'image/png', 1.0)), 20000, null);
+                freeCanvas(canvas);
+                if (!blob) throw new Error('Grafik konnte nicht erstellt werden. Bitte die App einmal neu öffnen und nochmal versuchen.');
                 const file = new File([blob], filename, { type: 'image/png' });
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
@@ -8671,7 +8693,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                         // z.B. NotAllowedError → Vorschau anzeigen
                     }
                 }
-                showMobileImagePreview(canvas.toDataURL('image/png', 1.0), filename);
+                const dataUrl = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(blob); });
+                showMobileImagePreview(dataUrl, filename);
             } catch (err) {
                 alert("Teilen fehlgeschlagen: " + err.message);
             } finally {
@@ -9511,7 +9534,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                         if (f.endsWith('video')) {
                             setText('bulk-progress', `⏳ ${done}/${total}: Video für ${name} …`);
                             const { base: b, layers } = await renderVideoLayers(el);
-                            const blob = await recordVideo(b, layers, pct => setText('bulk-progress', `🎬 ${done}/${total}: Video für ${name} … ${pct} %`), videoOptions('neuzugang'));
+                            let blob;
+                            try { blob = await recordVideo(b, layers, pct => setText('bulk-progress', `🎬 ${done}/${total}: Video für ${name} … ${pct} %`), videoOptions('neuzugang')); }
+                            finally { freeCanvas(b); layers.forEach(l => freeCanvas(l.canvas)); }
                             packFiles.push(new File([blob], `${base}.${blob.type.includes('mp4') ? 'mp4' : 'webm'}`, { type: blob.type }));
                         } else {
                             setText('bulk-progress', `⏳ ${done}/${total}: Bild für ${name} …`);
