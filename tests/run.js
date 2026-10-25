@@ -118,6 +118,10 @@ async function makePhotos(browser) {
             $('capture-post-story').appendChild(img); const t0 = performance.now();
             try { const c = await renderElementToCanvas($('capture-post-story')); return { ok: c.width === 1200, s: Math.round((performance.now() - t0) / 1000) }; }
             finally { img.remove(); } });
+        const cloned = await page.evaluate(async () => { const tpl = $('capture-post-feed'); const { holder, clone } = await prepareExportClone(tpl);
+            try { let n = -1; await html2canvas(clone, { ...captureOptions(clone, 1), onclone: d => { n = d.images.length; } });
+                return { kopiert: n, vorlage: clone.querySelectorAll('img').length, app: document.images.length }; } finally { holder.remove(); } });
+        check('Erstellung kopiert nur die Vorlage (nicht die ganze App)', cloned.kopiert <= cloned.vorlage && cloned.app > cloned.vorlage * 2, JSON.stringify(cloned));
         check('Hängendes Bild blockiert die Erstellung nicht', stuck.ok && stuck.s < 15, JSON.stringify(stuck));
         check('Export Story = 1200x2133', (await exportSize(page, 'capture-post-story')) === '1200x2133');
         check('Keine Verbindungen zu fremden Servern', page.external.length === 0, page.external.join(', '));

@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 21.7</title>
+    <title>Match-Shot – Grafiken für Vereine 21.8</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2574,7 +2574,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "21.7";
+        const APP_VERSION = "21.8";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -8423,10 +8423,18 @@ Alle sind herzlich eingeladen!</textarea></div>
             ctx.restore();
         }
 
+        /* html2canvas kopiert sonst die komplette App (alle Fotos aller Vorlagen, Spielerliste, Startseite)
+           und wartet, bis jedes Bild geladen ist – mit vielen echten Fotos hängt das am iPhone.
+           Deshalb nur die Vorlage selbst, ihre umgebenden Elemente sowie Stile und Schriften kopieren. */
+        function captureOptions(target, scale) {
+            const keep = el => el === target || el.contains(target) || target.contains(el)
+                || el.tagName === 'STYLE' || el.tagName === 'LINK' || el.tagName === 'HEAD' || document.head.contains(el);
+            return { scale, useCORS: true, logging: false, backgroundColor: null, ignoreElements: el => !keep(el) };
+        }
         async function renderElementToCanvas(element) {
             const { holder, clone } = await prepareExportClone(element);
             try {
-                const canvas = await withTimeout(html2canvas(clone, { scale: EXPORT_SCALE, useCORS: true, logging: false, backgroundColor: null }), 60000, null);
+                const canvas = await withTimeout(html2canvas(clone, captureOptions(clone, EXPORT_SCALE)), 60000, null);
                 if (!canvas) throw new Error('Die Erstellung hat zu lange gedauert. Bitte die App einmal neu öffnen und nochmal versuchen.');
                 if (club && club.demo) drawDemoWatermark(canvas);
                 return canvas;
@@ -8499,7 +8507,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     clone.style.display = 'none';
                     try {
                         prep(c);
-                        const cv = await withTimeout(html2canvas(c, { scale: VIDEO_SCALE, useCORS: true, logging: false, backgroundColor: null }), 60000, null);
+                        const cv = await withTimeout(html2canvas(c, captureOptions(c, VIDEO_SCALE)), 60000, null);
                         if (!cv) throw new Error('Die Erstellung hat zu lange gedauert. Bitte die App einmal neu öffnen und nochmal versuchen.');
                         return cv;
                     } finally { c.remove(); clone.style.display = ''; }
