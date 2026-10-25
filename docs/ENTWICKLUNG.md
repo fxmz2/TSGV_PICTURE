@@ -39,6 +39,7 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 | Design-Stile | `STYLE_PRESETS`, `STYLE_BASE`/`STYLE_EXTRA`, eigene Stile in `stammdaten.designStyles` (`saveCurrentStyle()`, `applyStyle()`) |
 | Video (Reel) | `renderVideoLayers()` (Grundbild + je Element eine Ebene über html2canvas), `recordVideo()` (Canvas + MediaRecorder, MP4 bevorzugt), `addVideoButtons()`; CSP erlaubt dafür `media-src blob:` |
 | Video-Tempo | Je Reiter `vidSpeed` (fast/normal/slow/xslow), `vidGap` (short/normal/long/xlong), `vidDist` (short/mid/far) in EXTRA_DESIGN; `videoOptions(tab)` → `recordVideo(..., opts)`, Länge max. 25 s |
+| Export-Tempo | `captureOptions(target, scale)`: html2canvas kopiert per `ignoreElements` nur die Vorlage (+ Vorfahren, Stile, Schriften) statt der ganzen App; Zeitlimits über `withTimeout()`, Zeichenflächen mit `freeCanvas()` freigeben |
 | Textausrichtung | Je Reiter `textAlign` (Klassen `talign-left/right` am Reiter), je Element `data-align` über den Knopf ⇔ in der Werkzeugleiste (`cycleAlignSelected()`, gespeichert in `positions[id].align`) |
 | Eigene Schriften | `stammdaten.fonts` (Daten-URL), `registerCustomFonts()` als `@font-face` im `<style>` (damit auch der Export sie kennt; CSP `font-src data:`), `refreshFontSelects()` |
 | Mehrere Spieler | `openBulkDialog()`, `runBulkExport()` (Neuzugang/Vorstellung je Spieler als Bild und/oder Video; nutzt `packFiles`) |
