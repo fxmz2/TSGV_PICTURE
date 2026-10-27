@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 22.0</title>
+    <title>Match-Shot – Grafiken für Vereine 22.1</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -391,34 +391,80 @@
         .kal-edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .kal-clear-btn { background: none; border: none; color: #e63946; font-size: 12px; cursor: pointer; padding: 2px 4px; }
 
-        .eckball-container-scaler {
-            width: 800px; height: 560px; position: relative; margin: 0 auto; flex-shrink: 0;
-        }
-        .eckball-board {
-            width: 800px; height: 560px; background: #ffffff; border: 3px solid #111;
-            position: absolute; top: 0; left: 0; box-sizing: border-box; overflow: hidden;
-            color: #111; font-family: Arial, sans-serif; transform-origin: top left;
-        }
-        .eckball-svg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-        .eckball-info-banner { position: absolute; top: 12px; left: 12px; background: rgba(255, 255, 255, 0.95); border: 1.5px solid #000; padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #000; z-index: 4; }
-        .eckball-legend-container { position: absolute; top: 15px; left: 575px; width: 210px; z-index: 5; display: flex; flex-direction: column; gap: 6px; text-transform: uppercase; font-size: 10px; }
+        /* Eckball-Taktik: 16:9-Board (800×450 → Export 2400×1350, passt auf TV und PowerPoint) */
+        .eck-stage { width: 100%; max-width: 800px; margin: 0 auto; }
+        .eck-toolbar { display: flex; gap: 6px; justify-content: center; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+        .eck-toolbar button { border: 1px solid #ccc; background: #fff; color: #222; border-radius: 6px; padding: 6px 10px; font-size: 14px; cursor: pointer; min-width: 40px; }
+        .eck-toolbar span { min-width: 54px; text-align: center; font-size: 13px; font-weight: bold; }
+        .eck-toolbar .eck-full-hint { display: none; color: #bbb; font-size: 11px; font-weight: normal; min-width: 0; }
+        .eckball-container-scaler { width: 800px; height: 450px; max-width: 100%; position: relative; margin: 0 auto; overflow: hidden; -webkit-overflow-scrolling: touch; }
+        .eck-sizer { position: relative; width: 800px; height: 450px; }
+        .eck-stage.eck-full { position: fixed; inset: 0; z-index: 5000; max-width: none; background: #111; padding: 8px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
+        .eck-stage.eck-full .eck-toolbar button { background: #222; color: #fff; border-color: #444; }
+        .eck-stage.eck-full .eck-toolbar span { color: #fff; }
+        .eck-stage.eck-full .eck-toolbar .eck-full-hint { display: inline; }
+        body.eck-full-open { overflow: hidden; }
+        .eckball-board { width: 800px; height: 450px; position: absolute; top: 0; left: 0; box-sizing: border-box; overflow: hidden;
+            color: #111; font-family: Arial, sans-serif; transform-origin: top left; background: #25672a; }
+        .eckball-svg-overlay { position: absolute; top: 0; left: 0; width: 800px; height: 450px; pointer-events: none; }
+        #eck-field-svg { z-index: 1; }
+        #eck-arrow-svg { z-index: 4; }
+        .eckball-info-banner { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.95); border: 1.5px solid #000; padding: 6px 12px; border-radius: 6px;
+            font-size: 16px; font-weight: 900; color: #000; z-index: 8; text-transform: uppercase; line-height: 1.2; }
+        .eckball-info-banner small { display: block; font-size: 11px; font-weight: bold; color: #444; text-transform: none; }
+        .eckball-info-banner small:empty { display: none; }
+        .eck-legend { position: absolute; z-index: 7; box-sizing: border-box; font-size: 12px; line-height: 1.3; padding: 9px 14px; display: flex; gap: 5px 18px; }
+        .eck-legend.bottom { left: 0; right: 0; bottom: 0; height: 104px; flex-direction: column; flex-wrap: wrap; align-content: flex-start; }
+        .eck-legend.right { top: 0; right: 0; bottom: 0; width: 225px; flex-direction: column; gap: 7px; }
+        .eck-legend.off { display: none; }
+        .eck-lg-item { display: flex; gap: 6px; align-items: flex-start; max-width: 245px; }
+        .eck-legend.right .eck-lg-item { max-width: none; }
+        .eck-lg-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; border: 1.5px solid #fff; box-sizing: border-box; }
+        .eck-lg-item b { text-transform: uppercase; }
+        .eck-zone { position: absolute; z-index: 2; box-sizing: border-box; border: 2px dashed; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-align: center;
+            font-size: 11px; font-weight: bold; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.8); cursor: grab; touch-action: none; user-select: none; text-transform: uppercase; padding: 2px; line-height: 1.1; }
+        .eck-zone.on-light { color: #111; text-shadow: none; }
+        .eck-zone-rs { position: absolute; right: -8px; bottom: -8px; width: 16px; height: 16px; background: #fff; border: 2px solid #333; border-radius: 4px; cursor: nwse-resize; touch-action: none; box-sizing: border-box; }
+        .eck-tok, .eck-opp { position: absolute; z-index: 6; transform: translate(-50%, calc(var(--ts) / -2)); cursor: grab; user-select: none; touch-action: none; display: flex; flex-direction: column; align-items: center; }
+        .eck-tok.eck-tok-cut { transform: translate(-50%, calc(var(--ts) * -1.25)); }
+        .eck-opp { z-index: 5; }
+        .eck-tok:active, .eck-opp:active { cursor: grabbing; }
+        .eck-ph { width: var(--ts); height: var(--ts); object-fit: cover; border: 3px solid var(--rc); border-radius: 50%; background: #ddd; box-sizing: border-box; display: block; box-shadow: 0 2px 5px rgba(0,0,0,.35); pointer-events: none; }
+        .eck-tok-square .eck-ph { border-radius: 7px; }
+        .eck-cut { width: calc(var(--ts) * 1.15); height: calc(var(--ts) * 1.4); object-fit: contain; object-position: center bottom; display: block; pointer-events: none; position: relative; z-index: 1; }
+        .eck-cut-base { width: calc(var(--ts) * 0.95); height: calc(var(--ts) * 0.3); border-radius: 50%; background: var(--rc); margin-top: calc(var(--ts) * -0.2); box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+        .eck-dot, .eck-opp-dot { width: var(--ts); height: var(--ts); border-radius: 50%; background: var(--rc); border: 2px solid #fff; box-sizing: border-box; color: #fff; font-weight: 900;
+            font-size: calc(var(--ts) * 0.4); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,.35); text-shadow: 0 1px 1px rgba(0,0,0,.4); pointer-events: none; }
+        .eck-opp-dot { background: #1b1b1b; font-size: calc(var(--ts) * 0.45); }
+        .eck-opp-dot.on-light { background: #fff; color: #1b1b1b; border-color: #1b1b1b; text-shadow: none; }
+        .eck-jersey { width: calc(var(--ts) * 1.1); height: calc(var(--ts) * 1.1); display: block; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+        .eck-tok-name { margin-top: 2px; background: rgba(0,0,0,.75); color: #fff; font-size: 11px; font-weight: bold; padding: 1px 5px; border-radius: 3px; white-space: nowrap; text-transform: uppercase; pointer-events: none; }
 
-        .eckball-player-node { position: absolute; z-index: 6; transform: translate(-50%, -50%); cursor: grab; user-select: none; touch-action: none; display: flex; flex-direction: column; align-items: center; }
-        .eckball-player-node:active { z-index: 100 !important; cursor: grabbing; }
-        .eckball-player-circle {
-            width: 40px; height: 40px; border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 2px solid #111);
-            object-fit: cover; background: var(--avatar-bg, #ddd); pointer-events: none;
-        }
-
-        .tactics-arrow-handle { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #0099ff; border: 2px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); transform: translate(-50%, -50%); cursor: grab; z-index: 20; touch-action: none; }
+        .tactics-arrow-handle { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #1e88e5; border: 2px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); transform: translate(-50%, -50%); cursor: grab; z-index: 20; touch-action: none; }
         .tactics-arrow-handle:active { transform: translate(-50%, -50%) scale(1.3); cursor: grabbing; }
-        .tactics-arrow-handle.red-handle { background: #cc0000; }
-        .tactics-arrow-handle.start-handle { background: #ffffff; border-color: #0099ff; }
-        .tactics-arrow-handle.start-handle.red-handle { border-color: #cc0000; }
+        .tactics-arrow-handle.red-handle { background: #e63946; }
+        .tactics-arrow-handle.yellow-handle { background: #ffd60a; }
+        .tactics-arrow-handle.start-handle { background: #ffffff; border-color: #1e88e5; }
+        .tactics-arrow-handle.start-handle.red-handle { border-color: #e63946; }
+        .tactics-arrow-handle.start-handle.yellow-handle { border-color: #c9a400; }
+
+        /* Eckball-Editor */
+        .eck-var-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+        .eck-var-chip { border: 2px solid #005f73; background: #fff; color: #005f73; border-radius: 16px; padding: 5px 12px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .eck-var-chip.active { background: #005f73; color: #fff; }
+        .eck-btn-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+        .eck-btn-row.two { grid-template-columns: repeat(2, 1fr); }
+        .eck-btn-row .copy-action-btn { margin: 0; }
+        .eck-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .eck-prow { display: grid; grid-template-columns: 14px 1fr 1.25fr 34px; gap: 4px; align-items: center; margin-bottom: 4px; }
+        .eck-zrow { display: grid; grid-template-columns: 14px 1fr 34px 34px; gap: 4px; align-items: center; margin-bottom: 4px; }
+        .eck-sw { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,.25); box-sizing: border-box; }
+        .eck-prow select, .eck-zrow input { font-size: 12px; padding: 5px; width: 100%; box-sizing: border-box; margin: 0; }
         .eck-arrow-list { display: grid; gap: 4px; margin-top: 6px; }
         .eck-arrow-row { display: grid; grid-template-columns: 26px 1fr repeat(4, 34px); gap: 4px; align-items: center; font-size: 13px; }
-        .eck-arrow-swatch { height: 0; border-top: 4px solid #0099ff; }
-        .eck-arrow-swatch.red { border-top-color: #cc0000; }
+        .eck-arrow-swatch { height: 0; border-top: 4px solid #1e88e5; }
+        .eck-arrow-swatch.red { border-top-color: #e63946; }
+        .eck-arrow-swatch.yellow { border-top-color: #e0b800; }
         .eck-arrow-swatch.dash { border-top-style: dashed; }
         .role-select-inline { font-size: 11px; padding: 4px; margin-top: 3px; border-radius: 4px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; }
 
@@ -903,15 +949,11 @@
             .post-template, .story-template { transform: scale(0.85); transform-origin: top center; margin-bottom: -80px; }
             .post-template.fmt-45 { margin-bottom: -95px; }
 
-            .eckball-container-scaler { width: 336px; height: 235px; }
-            .eckball-board { transform: scale(0.42); }
         }
 
         @media (max-width: 380px) {
             .post-template, .story-template { transform: scale(0.75); transform-origin: top center; margin-bottom: -110px; }
             .post-template.fmt-45 { margin-bottom: -135px; }
-            .eckball-container-scaler { width: 288px; height: 201px; }
-            .eckball-board { transform: scale(0.36); }
             .tab-btn { min-width: 68px; padding: 6px 8px; }
         }
     </style>
@@ -1612,35 +1654,83 @@
                     <button type="button" id="eck-redo-btn" class="copy-action-btn" onclick="redoEckball()" style="margin-bottom:0; background:#2a9d8f;">↪️ Wiederholen</button>
                 </div>
 
-                <button type="button" class="copy-action-btn" style="background:#005f73; font-size:13px; padding:10px;" onclick="copyS11ToEckball()">🔄 Startelf von Aufstellung übernehmen</button>
-                <hr style="margin:10px 0; border:none; border-top:1px solid #ccc;">
-
-                <div class="control-group"><label>Namen anzeigen als</label><select id="in-eck-namefmt" class="namefmt-select" onchange="updateEckball(); scheduleSave();"><option value="last">Nur Nachname</option><option value="full">Vor- und Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
                 <div class="control-group">
-                    <label>Akteure an der Ecke</label>
-                    <div class="player-input-row"><select id="eck-player-1" class="player-select eck-select"></select> <span style="font-size:10px; width:60px;">(Schütze)</span></div>
-                    <div class="player-input-row"><select id="eck-player-2" class="player-select eck-select"></select> <span style="font-size:10px; width:60px;">(Doppelp.)</span></div>
+                    <label>📚 Varianten</label>
+                    <div id="eck-var-bar" class="eck-var-bar"></div>
+                    <div class="eck-btn-row">
+                        <button type="button" class="copy-action-btn" style="background:#2a9d8f;" onclick="addEckVariant()">➕ Neue</button>
+                        <button type="button" class="copy-action-btn" onclick="renameEckVariant()">✏️ Umbenennen</button>
+                        <button type="button" class="copy-action-btn" style="background:#6c757d;" onclick="deleteEckVariant()">🗑️ Löschen</button>
+                    </div>
+                    <span class="hint">Jede Variante (z.B. „Kurz“, „1. Pfosten“, „Rückraum“) hat eigene Spieler, Gegner, Zonen und Pfeile. „➕ Neue“ kopiert die aktuelle Variante.</span>
                 </div>
+
                 <div class="control-group">
-                    <label>Zentraler Spieler</label>
-                    <div class="player-input-row"><select id="eck-player-3" class="player-select eck-select"></select> <span style="font-size:10px; width:60px;">(Zentrum)</span></div>
+                    <label>🔍 Ausschnitt & Seite</label>
+                    <div class="eck-grid2">
+                        <select id="in-eck-view" onchange="setEckOpt('view', this.value)">
+                            <option value="box">🔍 Strafraum (nah)</option>
+                            <option value="half">🏟️ Halbes Spielfeld</option>
+                        </select>
+                        <button type="button" class="copy-action-btn" style="margin:0;" onclick="mirrorEck()">↔️ Seite spiegeln</button>
+                    </div>
+                    <span class="hint" id="eck-side-label">Ecke von links</span>
                 </div>
 
-                <label>Einläufer im Strafraum (4)</label>
-                <div class="scrollable-controls-box" id="eck-runner-controls"></div>
-
-                <label>Absicherung & Torwart</label>
-                <div class="scrollable-controls-box">
-                    <div class="player-input-row"><select id="eck-player-8" class="player-select eck-select"></select> <span style="font-size:10px; width:60px;">(Spitze)</span></div>
-                    <div class="player-input-row"><select id="eck-player-9" class="player-select eck-select"></select> <span style="font-size:10px; width:60px;">(Links)</span></div>
-                    <div class="player-input-row"><select id="eck-player-10" class="player-select eck-select"></select> <span style="font-size:10px; width:60px;">(Rechts)</span></div>
-                    <div class="player-input-row"><select id="eck-player-11" class="player-select eck-select"></select> <span style="font-size:10px; width:60px;">(Torwart)</span></div>
+                <div class="control-group">
+                    <label>👥 Eigene Spieler</label>
+                    <div id="eck-player-list"></div>
+                    <div class="eck-grid2" style="margin-top:4px;">
+                        <select id="eck-add-role" class="role-select-inline" style="margin:0;"></select>
+                        <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin:0;" onclick="addEckPlayer()">➕ Spieler</button>
+                    </div>
+                    <button type="button" class="copy-action-btn" style="margin-top:6px;" onclick="fillEckFromLineup()">🔄 Namen aus der Aufstellung übernehmen</button>
+                    <span class="hint">Beliebig viele Spieler je Rolle (z.B. 3× Absicherung). Ohne Namen erscheint ein farbiger Punkt. Auf dem Board einfach verschieben.</span>
                 </div>
 
-                <div class="control-group" style="margin-top:10px;">
+                <div class="control-group">
+                    <label>⚫ Gegenspieler</label>
+                    <div class="eck-btn-row">
+                        <button type="button" class="copy-action-btn" style="background:#2a9d8f;" onclick="addEckOpp()">➕ Gegner</button>
+                        <button type="button" class="copy-action-btn" onclick="eckOppTemplate('zone')">Raumdeckung</button>
+                        <button type="button" class="copy-action-btn" onclick="eckOppTemplate('man')">Manndeckung</button>
+                    </div>
+                    <div class="eck-btn-row two">
+                        <button type="button" class="copy-action-btn" style="background:#6c757d;" onclick="removeLastEckOpp()">➖ Letzten entfernen</button>
+                        <button type="button" class="copy-action-btn" style="background:#6c757d;" onclick="clearEckOpps()">🗑️ Alle Gegner</button>
+                    </div>
+                    <span class="hint" id="eck-opp-count">Keine Gegenspieler</span>
+                </div>
+
+                <div class="control-group">
+                    <label>🟨 Zonen im Strafraum</label>
+                    <div class="eck-grid2">
+                        <select id="eck-zone-tpl">
+                            <option value="near">1. Pfosten</option>
+                            <option value="spot">Elfmeterpunkt</option>
+                            <option value="far">2. Pfosten</option>
+                            <option value="six">Torraum</option>
+                            <option value="edge">Rückraum</option>
+                            <option value="short">Kurz an der Ecke</option>
+                            <option value="free">Freie Zone</option>
+                        </select>
+                        <select id="eck-zone-color">
+                            <option value="yellow">🟡 Gelb</option>
+                            <option value="blue">🔵 Blau</option>
+                            <option value="red">🔴 Rot</option>
+                            <option value="green">🟢 Grün</option>
+                            <option value="white">⚪ Weiß</option>
+                        </select>
+                    </div>
+                    <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin-top:6px;" onclick="addEckZone()">➕ Zone hinzufügen</button>
+                    <div id="eck-zone-list"></div>
+                    <span class="hint">Zonen auf dem Board verschieben, am weißen Eck größer/kleiner ziehen. Text hier ändern.</span>
+                </div>
+
+                <div class="control-group">
                     <label>🏹 Laufwege / Pfeile</label>
                     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px;">
-                        <select id="eck-new-color" title="Farbe"><option value="blue">🔵 Blau</option><option value="red">🔴 Rot</option></select>
+                        <select id="eck-new-color" title="Farbe"><option value="blue">🔵 Blau</option><option value="red">🔴 Rot</option><option value="yellow">🟡 Gelb (Ball)</option></select>
                         <select id="eck-new-line" title="Linie"><option value="dash">┄ Gestrichelt</option><option value="solid">━ Durchgezogen</option></select>
                         <select id="eck-new-shape" title="Form"><option value="0">➝ Gerade</option><option value="1">⤴ Bogen links</option><option value="-1">⤵ Bogen rechts</option></select>
                     </div>
@@ -1651,7 +1741,39 @@
                     <div id="eck-arrow-list" class="eck-arrow-list"></div>
                     <span class="hint">Pfeile auf dem Board am Start- und Endpunkt ziehen. In der Liste: 🎨 Farbe, ┄/━ Linie, ➝/⤴/⤵ gerade oder Bogen.</span>
                 </div>
-                <button type="button" class="copy-action-btn" onclick="resetEckballPositions()">🔄 Spieler auf Standard setzen, Pfeile entfernen</button>
+
+                <div class="control-group">
+                    <label>🎨 Darstellung</label>
+                    <div class="eck-grid2">
+                        <select id="in-eck-token" onchange="setEckOpt('token', this.value)" title="Spieler als">
+                            <option value="circle">⚪ Rundes Foto</option>
+                            <option value="square">⬜ Eckiges Foto</option>
+                            <option value="cut">🧍 Freigestellt</option>
+                            <option value="jersey">👕 Trikot mit Nummer</option>
+                            <option value="dot">🔵 Taktik-Punkt</option>
+                        </select>
+                        <select id="in-eck-theme" onchange="setEckOpt('theme', this.value)" title="Untergrund">
+                            <option value="grass">🟩 Rasen</option>
+                            <option value="white">⬜ Weiß (Taktiktafel)</option>
+                            <option value="dark">⬛ Dunkel</option>
+                        </select>
+                        <select id="in-eck-legend" onchange="setEckOpt('legend', this.value)" title="Legende">
+                            <option value="bottom">Legende unten</option>
+                            <option value="right">Legende rechts</option>
+                            <option value="off">Ohne Legende</option>
+                        </select>
+                        <select id="in-eck-namefmt" class="namefmt-select" onchange="updateEckball(); scheduleSave();" title="Namen anzeigen als"><option value="last">Nur Nachname</option><option value="full">Vor- und Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select>
+                    </div>
+                    <label style="margin-top:8px;">Größe der Spieler</label>
+                    <input type="range" id="in-eck-size" min="24" max="70" step="2" value="40" oninput="setEckOpt('size', this.value, true)" onchange="commitEckHistory()">
+                    <div class="ct-checks" style="margin-top:6px;">
+                        <label><input type="checkbox" id="in-eck-names" checked onchange="setEckOpt('showNames', this.checked)"> Namen auf dem Feld</label>
+                        <label><input type="checkbox" id="in-eck-banner" checked onchange="setEckOpt('banner', this.checked)"> Titel-Kasten</label>
+                    </div>
+                    <span class="hint">„Freigestellt“ nutzt freigestellte Fotos (unter 🗃️ Daten). Fehlt eins, wird das runde Foto gezeigt. „Trikot“ und „Punkt“ zeigen die Rückennummer.</span>
+                </div>
+
+                <button type="button" class="copy-action-btn" onclick="resetEckballPositions()">🔄 Diese Variante auf Grundaufstellung setzen</button>
                 <div id="tabcopy-host-eckball"></div>
             </div>
 
@@ -2102,50 +2224,35 @@ Alle sind herzlich eingeladen!</textarea></div>
             <!-- ECKBALL -->
             <div id="view-eckball" class="template-container">
                 <div class="preview-wrapper">
-                    <div class="preview-label-tag">📐 Eckball Taktik (800x560)</div>
-                    <div class="eckball-container-scaler">
-                        <div id="capture-eckball" class="eckball-board">
-                            <svg class="eckball-svg-overlay" viewBox="0 0 800 560">
-                                <rect x="560" y="0" width="240" height="560" fill="#f8f9fa" />
-                                <line x1="560" y1="0" x2="560" y2="560" stroke="#111111" stroke-width="2.5" />
-
-                                <rect x="0" y="0" width="560" height="560" fill="none" stroke="#000" stroke-width="2.5" />
-                                <rect x="225" y="0" width="110" height="18" fill="none" stroke="#000" stroke-width="2" />
-                                <rect x="80" y="0" width="400" height="220" fill="none" stroke="#000" stroke-width="2.5" />
-                                <rect x="180" y="0" width="200" height="70" fill="none" stroke="#000" stroke-width="2" />
-                                <circle cx="280" cy="160" r="3.5" fill="#000" />
-                                <path d="M 215 220 A 75 75 0 0 0 345 220" fill="none" stroke="#000" stroke-width="2" />
-                                <line x1="0" y1="560" x2="560" y2="560" stroke="#000" stroke-width="2.5" />
-                                <path d="M 205 560 A 75 75 0 0 1 355 560" fill="none" stroke="#000" stroke-width="2" />
-
-                                <defs>
-                                    <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#cc0000" /></marker>
-                                    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0099ff" /></marker>
-                                </defs>
-                                <g id="svg-tactics-group"></g>
-                            </svg>
-
-                            <div class="eckball-info-banner movable">
-                                <b data-label="eckball:banner">Eckball Taktik</b><br>
-                                <span style="font-size:10px; font-weight:normal; color:#444;" data-label="eckball:bannerSub">• Freier Taktikablauf</span>
+                    <div class="preview-label-tag">📐 Eckball-Taktik (16:9 für TV / PowerPoint)</div>
+                    <div id="eck-stage" class="eck-stage">
+                        <div class="eck-toolbar">
+                            <button type="button" onclick="eckZoomBy(-1)" title="Verkleinern">➖</button>
+                            <span id="eck-zoom-val">100 %</span>
+                            <button type="button" onclick="eckZoomBy(1)" title="Vergrößern">➕</button>
+                            <button type="button" id="eck-full-btn" onclick="toggleEckFull()">⛶ Vollbild</button>
+                            <span class="eck-full-hint">Tipp: Handy quer halten</span>
+                        </div>
+                        <div id="eck-scaler" class="eckball-container-scaler">
+                            <div id="eck-sizer" class="eck-sizer">
+                                <div id="capture-eckball" class="eckball-board">
+                                    <svg id="eck-field-svg" class="eckball-svg-overlay" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg"></svg>
+                                    <div id="eck-zones"></div>
+                                    <svg id="eck-arrow-svg" class="eckball-svg-overlay" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg"></svg>
+                                    <div id="eck-opps"></div>
+                                    <div id="eckball-players-container"></div>
+                                    <div id="eck-banner" class="eckball-info-banner movable">
+                                        <b data-label="eckball:banner">Eckball</b><small id="eck-banner-sub"></small>
+                                    </div>
+                                    <div id="eck-legend" class="eck-legend bottom"></div>
+                                    <div id="eckball-handles-container" class="eck-edit-only"></div>
+                                </div>
                             </div>
-
-                            <div class="eckball-legend-container movable">
-                                <div style="font-size: 26px; font-weight: 900; border-bottom: 2px solid #111; padding-bottom: 4px; width: 100%; color:#111;" data-label="eckball:legend">ECKBÄLLE</div>
-                                <div style="margin-top:4px;"><b data-label="eckball:taker">SCHÜTZE:</b> <span id="out-legend-schuetze">-</span></div>
-                                <div><b data-label="eckball:onetwo">DOPPELPASS:</b> <span id="out-legend-doppelpass">-</span></div>
-                                <div><b data-label="eckball:target">ZIELSPIELER:</b> <span id="out-legend-zielspieler">-</span></div>
-                                <div><b data-label="eckball:guard">BODYGUARD:</b> <span id="out-legend-bodyguard">-</span></div>
-                                <div style="margin-top:4px;"><b data-label="eckball:runners">EINLÄUFER:</b> <br><span id="out-legend-einlaeufer">-</span></div>
-                                <div style="margin-top:4px;"><b data-label="eckball:cover">ABSICHERUNG:</b> <br><span id="out-legend-absicherung">-</span></div>
-                            </div>
-
-                            <div id="eckball-players-container"></div>
-                            <div id="eckball-handles-container"></div>
                         </div>
                     </div>
                     <div class="btn-action-group">
                         <button class="download-btn" onclick="shareImage('capture-eckball', 'eckball.png', this)">📲 In Fotos / Teilen</button>
+                        <button type="button" class="download-btn" style="background:#264653;" onclick="exportAllEckVariants()">📚 Alle Varianten</button>
                     </div>
                 </div>
             </div>
@@ -2593,7 +2700,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "22.0";
+        const APP_VERSION = "22.1";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2697,8 +2804,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             tor:        { title: 'TOOOOR!', scorer: 'TORSCHÜTZE:', assist: 'Vorlage von:' },
             ergebnis:   { vs: 'VS', scorers: 'TORSCHÜTZEN', ownGoal: 'Eigentor' },
             kader:      { title: 'KADER', date: 'Datum:', meeting: 'Treffpunkt:', jersey: 'Trikots:', duty: 'Dienst:' },
-            eckball:    { banner: 'Eckball Taktik', bannerSub: '• Freier Taktikablauf', legend: 'ECKBÄLLE', taker: 'SCHÜTZE:', onetwo: 'DOPPELPASS:',
-                          target: 'ZIELSPIELER:', guard: 'BODYGUARD:', runners: 'EINLÄUFER:', cover: 'ABSICHERUNG:' },
+            eckball:    { banner: 'ECKBALL', taker: 'SCHÜTZE', onetwo: 'KURZ / DOPPELPASS', target: 'ZIELSPIELER', guard: 'BLOCKER', screen: 'TORWART STÖREN',
+                          runners: 'EINLÄUFER', edge: 'RÜCKRAUM', cover: 'ABSICHERUNG', keeper: 'TORWART', opp: 'GEGNER' },
             potm:       { title: 'PLAYER OF THE MATCH' },
             kalender:   { home: 'HEIM', away: 'AUSWÄRTS', vs: 'vs', time: 'UHR', empty: 'Keine kommenden Termine eingetragen' },
             neuzugang:  { from: 'Kommt von' },
@@ -2766,8 +2873,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             { id: 'a8', type: 'blue', x1: 260, y1: 500, x2: 260, y2: 450 },
             { id: 'a9', type: 'red', x1: 290, y1: 500, x2: 290, y2: 450 }
         ];
-        const defaultArrows = [];   // Pfeile kommen nur per „➕ Pfeil hinzufügen“
 
+        // Bis v22.0: Standardplätze der 11 Eckball-Spieler (Pixel auf 800×560) – nur noch zum Übernehmen alter Stände
         const defaultEckNodes = [
             { id: 'n1', top: '20px', left: '540px' },
             { id: 'n2', top: '80px', left: '480px' },
@@ -2781,6 +2888,49 @@ Alle sind herzlich eingeladen!</textarea></div>
             { id: 'n10', top: '500px', left: '380px' },
             { id: 'n11', top: '500px', left: '460px' },
         ];
+
+        /* Eckball 2.0: Koordinaten in Metern. Torlinie y = 0, linke Eckfahne x = 0, rechte x = 68 */
+        const ECK_ROLES = [
+            { key: 'taker',  label: 'taker',   color: '#f77f00', short: 'S' },
+            { key: 'onetwo', label: 'onetwo',  color: '#fcbf49', short: 'K' },
+            { key: 'target', label: 'target',  color: '#e63946', short: 'Z' },
+            { key: 'guard',  label: 'guard',   color: '#9d4edd', short: 'B' },
+            { key: 'screen', label: 'screen',  color: '#ff4d9d', short: 'T' },
+            { key: 'runner', label: 'runners', color: '#1e88e5', short: 'E' },
+            { key: 'edge',   label: 'edge',    color: '#2ec4b6', short: 'R' },
+            { key: 'cover',  label: 'cover',   color: '#8d99ae', short: 'A' },
+            { key: 'keeper', label: 'keeper',  color: '#343a40', short: 'TW' }
+        ];
+        const ECK_ROLE = Object.fromEntries(ECK_ROLES.map(r => [r.key, r]));
+        const ECK_ROLE_NAMES = { taker: 'Schütze', onetwo: 'Kurz / Doppelpass', target: 'Zielspieler', guard: 'Blocker', screen: 'Torwart stören',
+            runner: 'Einläufer', edge: 'Rückraum', cover: 'Absicherung', keeper: 'Torwart' };
+        const ECK_DEFAULT_PLAYERS = [
+            ['taker', 0.9, 0.9], ['onetwo', 7, 6], ['screen', 35.5, 2.2], ['guard', 29, 9], ['target', 33, 11.5],
+            ['runner', 27.5, 13.5], ['runner', 38.5, 13.5], ['edge', 34, 20.5], ['cover', 22, 26], ['cover', 46, 26]
+        ];
+        const ECK_VIEWS = { box: { x0: -2, x1: 70, y0: -2.5, y1: 27 }, half: { x0: -2, x1: 70, y0: -2.5, y1: 55 } };
+        const ECK_LEG_H = 104, ECK_LEG_W = 225, ECK_MAX_VARIANTS = 8;
+        const ECK_THEMES = {
+            grass: { bg: '#25672a', field: '#2e7d32', stripes: '#348a39', line: '#ffffff', goal: 'rgba(255,255,255,0.35)', legend: '#173f1a', text: '#ffffff', light: false },
+            white: { bg: '#eef0f2', field: '#ffffff', stripes: '', line: '#111111', goal: '#e9ecef', legend: '#f1f3f5', text: '#111111', light: true },
+            dark:  { bg: '#0d121b', field: '#161e2c', stripes: '#1a2333', line: 'rgba(255,255,255,0.85)', goal: 'rgba(255,255,255,0.18)', legend: '#0a0e15', text: '#ffffff', light: false }
+        };
+        const ECK_ARROW_COLORS = { blue: '#1e88e5', red: '#e63946', yellow: '#ffd60a' };
+        const ECK_ZONE_COLORS = { yellow: '#ffd60a', blue: '#4cc9f0', red: '#ff4d6d', green: '#80ed99', white: '#ffffff' };
+        // Zonen-Vorlagen für eine Ecke von links (rechts = gespiegelt)
+        const ECK_ZONE_TPL = {
+            near:  { label: '1. Pfosten', x: 26.5, y: 0.5, w: 6.5, h: 6 },
+            spot:  { label: 'Elfmeterpunkt', x: 30, y: 8, w: 8, h: 6 },
+            far:   { label: '2. Pfosten', x: 35, y: 0.5, w: 7, h: 6 },
+            six:   { label: 'Torraum', x: 24.84, y: 0, w: 18.32, h: 5.5 },
+            edge:  { label: 'Rückraum', x: 26, y: 16.5, w: 16, h: 6 },
+            short: { label: 'Kurz', x: 3, y: 2, w: 9, h: 9 },
+            free:  { label: 'Zone', x: 29, y: 18, w: 10, h: 6 }
+        };
+        // Gegner-Vorlage Raumdeckung (Ecke von links): Torwart, 1. Pfosten, Fünfmeterlinie, Elfmeterpunkt, kurz
+        const ECK_OPP_ZONE = [[34.5, 1], [30.8, 0.8], [27, 5], [31, 5], [35, 5], [39, 5], [31, 10.5], [37, 10.5], [8, 7]];
+        let eck2 = normEck2(null);
+        let eckZoom = 1;
 
         /* =========================================================
            ZUSTAND
@@ -2799,9 +2949,6 @@ Alle sind herzlich eingeladen!</textarea></div>
         let activeTab = 'start';
         let appReady = false;
         let saveTimer = null;
-
-        let eckArrows = JSON.parse(JSON.stringify(defaultArrows));
-        let eckNodes = JSON.parse(JSON.stringify(defaultEckNodes));
 
         const templateUrlCache = new Map();
         let pendingImageTarget = null;
@@ -3826,23 +3973,6 @@ Alle sind herzlich eingeladen!</textarea></div>
             }
             $('kader-controls').innerHTML = kaderHtml;
 
-            let runnerHtml = '';
-            for (let i = 4; i <= 7; i++) {
-                runnerHtml += `
-                    <div class="control-group">
-                        <select id="eck-player-${i}" class="player-select eck-select"></select>
-                        <select id="eck-role-${i}" class="role-select-inline eck-select">
-                            <option value="normal">Normaler Einläufer</option>
-                            <option value="zielspieler">🎯 Zielspieler</option>
-                            <option value="bodyguard">🛡️ Bodyguard</option>
-                        </select>
-                    </div>`;
-            }
-            $('eck-runner-controls').innerHTML = runnerHtml;
-            document.querySelectorAll('.eck-select').forEach(sel => {
-                sel.addEventListener('change', () => { updateEckball(); commitEckHistory(); });
-            });
-
             let kalHtml = '';
             for (let i = 1; i <= KAL_MAX; i++) {
                 kalHtml += `
@@ -3995,8 +4125,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             noStarters: 'Hinweis ohne Startelf', noBench: 'Hinweis ohne Ersatzbank', noCoaches: 'Hinweis ohne Trainer',
             title: 'Überschrift', scorer: 'Torschütze', assist: 'Vorlage', scorers: 'Überschrift Torschützen', ownGoal: 'Eigentor',
             date: 'Datum', meeting: 'Treffpunkt', jersey: 'Trikots', duty: 'Dienst',
-            banner: 'Banner', bannerSub: 'Banner-Untertitel', legend: 'Legende', taker: 'Schütze', onetwo: 'Doppelpass', target: 'Zielspieler',
-            guard: 'Bodyguard', runners: 'Einläufer', cover: 'Absicherung',
+            banner: 'Titel-Kasten', taker: 'Schütze', onetwo: 'Kurz / Doppelpass', target: 'Zielspieler',
+            guard: 'Blocker', screen: 'Torwart stören', runners: 'Einläufer', edge: 'Rückraum', cover: 'Absicherung', keeper: 'Torwart', opp: 'Gegenspieler',
             home: 'Heim', away: 'Auswärts', time: 'Uhrzeit-Zusatz', empty: 'Hinweis ohne Einträge', from: 'Wechsel „Kommt von“',
             back: 'Hintere Reihe', middle: 'Mittlere Reihe', front: 'Vordere Reihe', missing: 'Es fehlen'
         };
@@ -4706,7 +4836,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             wochenende: { keys: [], inputs: [/^in-wk-/, /^wk-/] },
             teamfoto:   { keys: ['tfBoard'], inputs: [/^in-tf-/] },
             frei:       { keys: [], inputs: [/^in-frei-/] },
-            eckball:    { keys: ['eckArrows', 'eckNodes', 'eckNameFmt'], inputs: [/^eck-/] }
+            eckball:    { keys: ['eck2', 'eckNameFmt'], inputs: [] }
         };
         const TAB_DESIGN_EXTRA = {
             story:    { keys: ['pitchMode', 'showNumbers2'], inputs: [] },
@@ -4752,6 +4882,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             await saveSlotNow();
             const src = migrateNameFmt(await localforage.getItem(STORE.slot(from)));
             if (!src) { alert(`In „${versionLabel(from)}“ ist noch nichts gespeichert.`); return; }
+            if (tab === 'eckball' && !src.eck2) src.eck2 = normEck2(migrateOldEck(src));
             const copy = o => JSON.parse(JSON.stringify(o ?? null));
             const data = collectSlotData();
             const takeKeys = spec => {
@@ -7100,36 +7231,449 @@ Alle sind herzlich eingeladen!</textarea></div>
         function commitEckHistory() { scheduleSave(); }
         function resetEckHistory() { resetHistory(); }
 
-        function resetEckballPositions() {
-            eckArrows = JSON.parse(JSON.stringify(defaultArrows));
-            eckNodes = JSON.parse(JSON.stringify(defaultEckNodes));
-            updateEckball();
-            commitEckHistory();
+        /* ---------- Eckball: Datenmodell ---------- */
+        function eckId(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+        function eckNum(x, def, lo, hi) { x = Number(x); return Number.isFinite(x) ? Math.max(lo, Math.min(hi, x)) : def; }
+        const eckR = x => Math.round(x * 100) / 100;
+        function eckMirrorX(x) { return eckR(68 - x); }
+        function defaultEckVariant(n, side = 'left') {
+            const v = { id: eckId('v'), name: `Variante ${n}`, side: 'left', opps: [], zones: [], arrows: [],
+                players: ECK_DEFAULT_PLAYERS.map(([role, x, y], i) => ({ id: 'p' + (i + 1), name: 'Keiner', role, x, y })) };
+            if (side === 'right') mirrorEckVariant(v);
+            return v;
         }
-
-        function copyS11ToEckball() {
-            const size = lineupSize();
+        function normEckVariant(v, i) {
+            v = v && typeof v === 'object' ? v : {};
+            const list = a => (Array.isArray(a) ? a : []).filter(o => o && typeof o === 'object');
+            const X = (x, d) => eckR(eckNum(x, d, -4, 72)), Y = (y, d) => eckR(eckNum(y, d, -4, 106));
+            return {
+                id: String(v.id || eckId('v')),
+                name: String(v.name || `Variante ${i + 1}`).slice(0, 40),
+                side: v.side === 'right' ? 'right' : 'left',
+                players: list(v.players).slice(0, 30).map((p, k) => ({ id: String(p.id || 'p' + k), name: typeof p.name === 'string' && p.name ? p.name : 'Keiner',
+                    role: ECK_ROLE[p.role] ? p.role : 'runner', x: X(p.x, 34), y: Y(p.y, 12) })),
+                opps: list(v.opps).slice(0, 30).map((o, k) => ({ id: String(o.id || 'o' + k), x: X(o.x, 34), y: Y(o.y, 6) })),
+                zones: list(v.zones).slice(0, 20).map((z, k) => ({ id: String(z.id || 'z' + k), label: String(z.label ?? 'Zone').slice(0, 30),
+                    color: ECK_ZONE_COLORS[z.color] ? z.color : 'yellow', x: X(z.x, 29), y: Y(z.y, 8), w: eckR(eckNum(z.w, 6, 1, 76)), h: eckR(eckNum(z.h, 6, 1, 60)) })),
+                arrows: list(v.arrows).slice(0, 40).map((a, k) => ({ id: String(a.id || 'a' + k), type: ECK_ARROW_COLORS[a.type] ? a.type : 'blue', dash: !!a.dash,
+                    curve: [1, -1].includes(a.curve) ? a.curve : 0, x1: X(a.x1, 20), y1: Y(a.y1, 15), x2: X(a.x2, 30), y2: Y(a.y2, 10) }))
+            };
+        }
+        function normEck2(d) {
+            const o = d && typeof d === 'object' ? d : {};
+            const pick = (x, list, def) => list.includes(x) ? x : def;
+            const variants = (Array.isArray(o.variants) ? o.variants : []).slice(0, ECK_MAX_VARIANTS).map(normEckVariant);
+            if (!variants.length) variants.push(defaultEckVariant(1));
+            return {
+                variants,
+                active: Math.max(0, Math.min(variants.length - 1, parseInt(o.active, 10) || 0)),
+                view: pick(o.view, Object.keys(ECK_VIEWS), 'box'),
+                token: pick(o.token, ['circle', 'square', 'cut', 'jersey', 'dot'], 'circle'),
+                size: eckNum(o.size, 40, 24, 70),
+                showNames: o.showNames !== false,
+                theme: pick(o.theme, Object.keys(ECK_THEMES), 'grass'),
+                legend: pick(o.legend, ['bottom', 'right', 'off'], 'bottom'),
+                banner: o.banner !== false
+            };
+        }
+        /* Stände bis v22.0: 11 feste Plätze (eck-player-1…11), Positionen und Pfeile in Pixeln auf 800×560 */
+        function migrateOldEck(data) {
+            const inp = data?.inputs || {};
+            const named = Object.keys(inp).some(k => /^eck-player-\d+$/.test(k) && inp[k] && inp[k] !== 'Keiner');
+            const nodesMoved = Array.isArray(data?.eckNodes) && JSON.stringify(data.eckNodes) !== JSON.stringify(defaultEckNodes);
+            const oldArrows = normEckArrows(data?.eckArrows);
+            if (!named && !nodesMoved && !oldArrows.length) return null;
+            const toM = (x, y) => ({ x: eckR(34 + (x - 280) / 9.92), y: eckR(y / 13.33) });
+            const roleOf = i => i === 1 ? 'taker' : i === 2 ? 'onetwo' : i === 3 ? 'runner'
+                : i <= 7 ? ({ zielspieler: 'target', bodyguard: 'guard' }[inp[`eck-role-${i}`]] || 'runner') : i <= 10 ? 'cover' : 'keeper';
+            // Unveränderte Plätze → neue Grundaufstellung (Reihenfolge der alten Plätze)
+            const slot = [0, 1, 4, 3, 5, 6, 2, 8, 9, 7];
+            const players = [];
             for (let i = 1; i <= 11; i++) {
-                const p = $(`player-${size + 1 - i}`);
-                const e = $(`eck-player-${i}`);
-                if (e) e.value = p && i <= size ? p.value : 'Keiner';
+                const name = inp[`eck-player-${i}`] || 'Keiner';
+                if (i === 11 && name === 'Keiner') continue;
+                let pos;
+                if (nodesMoved) {
+                    const n = data.eckNodes.find(n => n.id === `n${i}`) || defaultEckNodes[i - 1];
+                    pos = toM(parseFloat(n.left) || 0, parseFloat(n.top) || 0);
+                } else pos = i <= 10 ? { x: ECK_DEFAULT_PLAYERS[slot[i - 1]][1], y: ECK_DEFAULT_PLAYERS[slot[i - 1]][2] } : { x: 34, y: 26 };
+                players.push({ id: 'p' + i, name, role: roleOf(i), ...pos });
             }
-            updateEckball();
-            commitEckHistory();
+            const arrows = oldArrows.map(a => { const s = toM(a.x1, a.y1), e = toM(a.x2, a.y2); return { ...a, x1: s.x, y1: s.y, x2: e.x, y2: e.y }; });
+            return { variants: [{ id: 'v1', name: 'Variante 1', side: nodesMoved ? 'right' : 'left', players, opps: [], zones: [], arrows }] };
+        }
+        function curEck() { return eck2.variants[eck2.active] || eck2.variants[0]; }
+
+        /* ---------- Eckball: Ansicht (Meter → Bildpunkte) ---------- */
+        function eckView() {
+            const fa = eck2.legend === 'bottom' ? { x: 0, y: 0, w: 800, h: 450 - ECK_LEG_H }
+                : eck2.legend === 'right' ? { x: 0, y: 0, w: 800 - ECK_LEG_W, h: 450 } : { x: 0, y: 0, w: 800, h: 450 };
+            const r = ECK_VIEWS[eck2.view] || ECK_VIEWS.box;
+            const s = Math.min(fa.w / (r.x1 - r.x0), fa.h / (r.y1 - r.y0));
+            const ox = (r.x0 + r.x1) / 2 - fa.w / (2 * s), oy = r.y0;
+            return { fa, s, px: x => fa.x + (x - ox) * s, py: y => fa.y + (y - oy) * s, mx: p => ox + (p - fa.x) / s, my: p => oy + (p - fa.y) / s };
+        }
+        // Punkt innerhalb der Spielfläche halten (Bildpunkte)
+        function eckClampPx(v, x, y, pad = 6) {
+            return [Math.max(v.fa.x + pad, Math.min(v.fa.x + v.fa.w - pad, x)), Math.max(v.fa.y + pad, Math.min(v.fa.y + v.fa.h - pad, y))];
+        }
+        function eckFieldSVG(v, th) {
+            const X = x => v.px(x).toFixed(1), Y = y => v.py(y).toFixed(1), S = m => (m * v.s).toFixed(1);
+            const lw = Math.max(2, 0.12 * v.s).toFixed(1);
+            let h = `<rect x="${X(0)}" y="${Y(0)}" width="${S(68)}" height="${S(105)}" fill="${th.field}"/>`;
+            if (th.stripes) for (let i = 1, y = 5.5; y < 105; i++, y += 5.5) if (i % 2) h += `<rect x="${X(0)}" y="${Y(y)}" width="${S(68)}" height="${S(5.5)}" fill="${th.stripes}"/>`;
+            const ar = (r, x1, y1, x2, y2, sweep) => `M ${X(x1)} ${Y(y1)} A ${S(r)} ${S(r)} 0 0 ${sweep} ${X(x2)} ${Y(y2)}`;
+            const d = [
+                `M ${X(0)} ${Y(105)} L ${X(0)} ${Y(0)} L ${X(68)} ${Y(0)} L ${X(68)} ${Y(105)}`,
+                `M ${X(13.84)} ${Y(0)} V ${Y(16.5)} H ${X(54.16)} V ${Y(0)}`,
+                `M ${X(24.84)} ${Y(0)} V ${Y(5.5)} H ${X(43.16)} V ${Y(0)}`,
+                ar(9.15, 26.69, 16.5, 41.31, 16.5, 0),
+                ar(1, 1, 0, 0, 1, 1), ar(1, 67, 0, 68, 1, 0),
+                `M ${X(0)} ${Y(52.5)} H ${X(68)}`, ar(9.15, 24.85, 52.5, 43.15, 52.5, 1)
+            ].join(' ');
+            h += `<rect x="${X(30.34)}" y="${Y(-2)}" width="${S(7.32)}" height="${S(2)}" fill="${th.goal}" stroke="${th.line}" stroke-width="${lw}"/>`;
+            h += `<path d="${d}" fill="none" stroke="${th.line}" stroke-width="${lw}" stroke-linejoin="miter"/>`;
+            h += `<circle cx="${X(34)}" cy="${Y(11)}" r="${Math.max(2.5, 0.22 * v.s).toFixed(1)}" fill="${th.line}"/>`;
+            h += `<circle cx="${X(34)}" cy="${Y(52.5)}" r="${Math.max(2.5, 0.22 * v.s).toFixed(1)}" fill="${th.line}"/>`;
+            // Eckfahnen
+            const fl = Math.max(8, 1.2 * v.s);
+            [0, 68].forEach(x => { h += `<path d="M ${X(x)} ${Y(0)} l 0 ${(-fl).toFixed(1)} l ${(fl * 0.7).toFixed(1)} ${(fl * 0.3).toFixed(1)} l ${(-fl * 0.7).toFixed(1)} ${(fl * 0.3).toFixed(1)}" fill="#ffd60a" stroke="${th.light ? '#111' : '#fff'}" stroke-width="1"/>`; });
+            return h;
+        }
+        function eckArrowPath(a, v) {
+            return arrowPathD({ x1: +v.px(a.x1).toFixed(1), y1: +v.py(a.y1).toFixed(1), x2: +v.px(a.x2).toFixed(1), y2: +v.py(a.y2).toFixed(1), curve: a.curve });
+        }
+        function eckRgba(hex, a) {
+            const n = parseInt(hex.slice(1), 16);
+            return `rgba(${n >> 16 & 255}, ${n >> 8 & 255}, ${n & 255}, ${a})`;
+        }
+        function eckJerseySVG(color, txt) {
+            return `<svg class="eck-jersey" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M13 3 L8 5 L1 12 L6 18 L9 15.5 V37 H31 V15.5 L34 18 L39 12 L32 5 L27 3 Q20 8 13 3 Z" fill="${color}" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>`
+                + `<text x="20" y="${txt.length > 2 ? 27 : 28.5}" font-family="Arial, sans-serif" font-size="${txt.length > 2 ? 10 : 14}" font-weight="bold" fill="#ffffff" text-anchor="middle">${esc(txt)}</text></svg>`;
+        }
+        function eckInitials(name) {
+            return String(name || '').trim().split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        }
+        function eckHasName(n) { return !!n && n !== 'Keiner'; }
+        function eckTokenHTML(pl, v) {
+            const role = ECK_ROLE[pl.role] || ECK_ROLE.runner;
+            const has = eckHasName(pl.name), p = has ? findPlayer(pl.name) : null;
+            let style = eck2.token;
+            const label = String(p?.number || '') || (has ? eckInitials(pl.name) : role.short);
+            let inner;
+            if (!has || style === 'dot') { style = 'dot'; inner = `<div class="eck-dot">${esc(label)}</div>`; }
+            else if (style === 'jersey') inner = eckJerseySVG(role.color, label);
+            else if (style === 'cut' && p?.cutImg) inner = `<img class="eck-cut" src="${p.cutImg}" alt=""><div class="eck-cut-base"></div>`;
+            else { if (style === 'cut') style = 'circle'; inner = `<img class="eck-ph" src="${getPlayerImageSrc(pl.name)}" alt="">`; }
+            const name = has && eck2.showNames ? `<div class="eck-tok-name">${esc(formatEckName(pl.name))}</div>` : '';
+            const [x, y] = eckClampPx(v, v.px(pl.x), v.py(pl.y));
+            return `<div class="eck-tok eck-tok-${style}" data-pid="${esc(pl.id)}" style="left:${x.toFixed(1)}px; top:${y.toFixed(1)}px; --rc:${role.color}; --ts:${eck2.size}px;">${inner}${name}</div>`;
         }
 
         function formatEckName(name) {
-            if (!name || name === "Keiner") return "-";
+            if (!eckHasName(name)) return "-";
             return playerDisplayName(name, val('in-eck-namefmt') || 'last').toLocaleUpperCase('de-DE');
         }
 
-        function getRoleIcon(role) {
-            if(role === 'zielspieler') return ' 🎯';
-            if(role === 'bodyguard') return ' 🛡️';
-            return '';
+        /* Ziehen auf dem Board: liefert die Verschiebung in Bildpunkten der unskalierten Vorlage */
+        function eckDrag(el, { start, move, end }) {
+            let on = false, moved = false, sx = 0, sy = 0, sc = 1;
+            el.onpointerdown = e => {
+                if (e.button > 0) return;
+                on = true; moved = false; e.stopPropagation();
+                try { el.setPointerCapture(e.pointerId); } catch (err) {}
+                sx = e.clientX; sy = e.clientY;
+                sc = getElementScale($('capture-eckball'));
+                start?.();
+            };
+            el.onpointermove = e => {
+                if (!on) return;
+                e.stopPropagation();
+                const dx = (e.clientX - sx) / sc, dy = (e.clientY - sy) / sc;
+                if (Math.abs(dx) + Math.abs(dy) > 1) moved = true;
+                move(dx, dy);
+            };
+            el.onpointerup = el.onpointercancel = e => {
+                if (!on) return;
+                on = false; e.stopPropagation();
+                try { el.releasePointerCapture(e.pointerId); } catch (err) {}
+                if (moved) { end?.(); commitEckHistory(); }
+            };
         }
 
-        /* Pfeile: Farbe blau/rot, durchgezogen oder gestrichelt, gerade oder als Bogen (curve: 0 / 1 / -1) */
+        /* ---------- Eckball: Board zeichnen ---------- */
+        function updateEckBoard() {
+            const board = $('capture-eckball');
+            if (!board) return;
+            const v = eckView(), th = ECK_THEMES[eck2.theme] || ECK_THEMES.grass, cur = curEck();
+            board.style.background = th.bg;
+            $('eck-field-svg').innerHTML = eckFieldSVG(v, th);
+
+            // Zonen
+            $('eck-zones').innerHTML = cur.zones.map(z => {
+                const c = ECK_ZONE_COLORS[z.color];
+                return `<div class="eck-zone ${th.light ? 'on-light' : ''}" data-zid="${esc(z.id)}" style="left:${v.px(z.x).toFixed(1)}px; top:${v.py(z.y).toFixed(1)}px; width:${(z.w * v.s).toFixed(1)}px; height:${(z.h * v.s).toFixed(1)}px; border-color:${c}; background:${eckRgba(c, 0.28)};">${esc(z.label)}<div class="eck-zone-rs eck-edit-only"></div></div>`;
+            }).join('');
+            $('eck-zones').querySelectorAll('.eck-zone').forEach(el => {
+                const z = cur.zones.find(q => q.id === el.dataset.zid);
+                if (!z) return;
+                let L0, T0, W0, H0;
+                eckDrag(el, {
+                    start: () => { L0 = parseFloat(el.style.left); T0 = parseFloat(el.style.top); },
+                    move: (dx, dy) => { el.style.left = (L0 + dx) + 'px'; el.style.top = (T0 + dy) + 'px'; },
+                    end: () => { z.x = eckR(v.mx(parseFloat(el.style.left))); z.y = eckR(v.my(parseFloat(el.style.top))); }
+                });
+                const rs = el.querySelector('.eck-zone-rs');
+                eckDrag(rs, {
+                    start: () => { W0 = el.offsetWidth; H0 = el.offsetHeight; },
+                    move: (dx, dy) => { el.style.width = Math.max(v.s, W0 + dx) + 'px'; el.style.height = Math.max(v.s, H0 + dy) + 'px'; },
+                    end: () => { z.w = eckR(Math.max(1, el.offsetWidth / v.s)); z.h = eckR(Math.max(1, el.offsetHeight / v.s)); }
+                });
+            });
+
+            // Pfeile
+            const markers = Object.entries(ECK_ARROW_COLORS).map(([k, c]) =>
+                `<marker id="eck-arrow-${k}" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="${c}"/></marker>`).join('');
+            $('eck-arrow-svg').innerHTML = `<defs>${markers}</defs>` + cur.arrows.map(a =>
+                `<path id="svg_line_${esc(a.id)}" d="${eckArrowPath(a, v)}" fill="none" stroke="${ECK_ARROW_COLORS[a.type]}" stroke-width="3.5" stroke-linecap="round" ${a.dash ? 'stroke-dasharray="9,7"' : ''} marker-end="url(#eck-arrow-${a.type})"/>`).join('');
+
+            // Gegner
+            $('eck-opps').innerHTML = cur.opps.map(o => {
+                const [x, y] = eckClampPx(v, v.px(o.x), v.py(o.y));
+                return `<div class="eck-opp" data-oid="${esc(o.id)}" style="left:${x.toFixed(1)}px; top:${y.toFixed(1)}px; --ts:${Math.round(eck2.size * 0.75)}px;"><div class="eck-opp-dot ${th.light ? 'on-light' : ''}">✕</div></div>`;
+            }).join('');
+            // Eigene Spieler
+            $('eckball-players-container').innerHTML = cur.players.map(p => eckTokenHTML(p, v)).join('');
+            const dragToken = (el, obj) => {
+                let L0, T0;
+                eckDrag(el, {
+                    start: () => { L0 = parseFloat(el.style.left); T0 = parseFloat(el.style.top); el.style.zIndex = 50; },
+                    move: (dx, dy) => { const [x, y] = eckClampPx(v, L0 + dx, T0 + dy); el.style.left = x + 'px'; el.style.top = y + 'px'; },
+                    end: () => { obj.x = eckR(v.mx(parseFloat(el.style.left))); obj.y = eckR(v.my(parseFloat(el.style.top))); }
+                });
+            };
+            $('eck-opps').querySelectorAll('.eck-opp').forEach(el => { const o = cur.opps.find(q => q.id === el.dataset.oid); if (o) dragToken(el, o); });
+            $('eckball-players-container').querySelectorAll('.eck-tok').forEach(el => { const p = cur.players.find(q => q.id === el.dataset.pid); if (p) dragToken(el, p); });
+
+            // Pfeil-Anfasser (nur zum Bearbeiten, nicht im Bild)
+            const hc = $('eckball-handles-container');
+            hc.innerHTML = '';
+            cur.arrows.forEach(a => {
+                ['1', '2'].forEach(k => {
+                    const h = document.createElement('div');
+                    h.className = `tactics-arrow-handle ${k === '1' ? 'start-handle' : 'end-handle'} ${a.type}-handle`;
+                    const [x, y] = eckClampPx(v, v.px(a['x' + k]), v.py(a['y' + k]), 2);
+                    h.style.left = x + 'px'; h.style.top = y + 'px';
+                    hc.appendChild(h);
+                    let L0, T0;
+                    eckDrag(h, {
+                        start: () => { L0 = parseFloat(h.style.left); T0 = parseFloat(h.style.top); },
+                        move: (dx, dy) => {
+                            const [x, y] = eckClampPx(v, L0 + dx, T0 + dy, 2);
+                            h.style.left = x + 'px'; h.style.top = y + 'px';
+                            a['x' + k] = eckR(v.mx(x)); a['y' + k] = eckR(v.my(y));
+                            $(`svg_line_${a.id}`)?.setAttribute('d', eckArrowPath(a, v));
+                        }
+                    });
+                });
+            });
+
+            // Titel-Kasten & Legende
+            // Titel-Kasten auf der Seite gegenüber der Ecke, damit er den Schützen nicht verdeckt
+            const bn = $('eck-banner');
+            bn.style.display = eck2.banner ? '' : 'none';
+            bn.style.left = cur.side === 'right' ? '10px' : 'auto';
+            bn.style.right = cur.side === 'right' ? 'auto' : (eck2.legend === 'right' ? ECK_LEG_W + 10 : 10) + 'px';
+            setText('eck-banner-sub', cur.name);
+            const lg = $('eck-legend');
+            lg.className = 'eck-legend ' + eck2.legend;
+            lg.style.background = th.legend;
+            lg.style.color = th.text;
+            lg.style.borderTop = eck2.legend === 'bottom' && th.light ? '2px solid #111' : '';
+            lg.style.borderLeft = eck2.legend === 'right' && th.light ? '2px solid #111' : '';
+            const items = ECK_ROLES.map(r => ({ r, list: cur.players.filter(p => p.role === r.key) })).filter(g => g.list.length).map(g => {
+                const names = g.list.filter(p => eckHasName(p.name)).map(p => { const n = findPlayer(p.name)?.number; return (n ? n + ' ' : '') + formatEckName(p.name); });
+                const label = L('eckball', g.r.label).replace(/\s*:\s*$/, '');
+                const text = (label ? `<b>${esc(label)}</b>` : '') + (names.length ? (label ? ': ' : '') + esc(names.join(', ')) : (g.list.length > 1 ? ` ×${g.list.length}` : ''));
+                return `<div class="eck-lg-item"><span class="eck-lg-dot" style="background:${g.r.color}"></span><span>${text}</span></div>`;
+            });
+            const oppLabel = L('eckball', 'opp');
+            if (cur.opps.length && oppLabel) items.push(`<div class="eck-lg-item"><span class="eck-lg-dot" style="background:#1b1b1b"></span><span><b>${esc(oppLabel)}</b></span></div>`);
+            lg.innerHTML = items.join('');
+            layoutEckStage();
+        }
+
+        /* ---------- Eckball: Bearbeiten-Bereich ---------- */
+        function renderEckEditor() {
+            const cur = curEck();
+            const bar = $('eck-var-bar');
+            if (!bar) return;
+            bar.innerHTML = eck2.variants.map((x, i) => `<button type="button" class="eck-var-chip ${i === eck2.active ? 'active' : ''}" onclick="selectEckVariant(${i})">${esc(x.name)}</button>`).join('');
+            setText('eck-side-label', cur.side === 'right' ? '➡️ Ecke von rechts – „Seite spiegeln“ dreht alles auf links.' : '⬅️ Ecke von links – „Seite spiegeln“ dreht alles auf rechts.');
+            setVal('in-eck-view', eck2.view); setVal('in-eck-token', eck2.token); setVal('in-eck-theme', eck2.theme); setVal('in-eck-legend', eck2.legend);
+            setVal('in-eck-size', eck2.size);
+            $('in-eck-names').checked = eck2.showNames;
+            $('in-eck-banner').checked = eck2.banner;
+            const roleOpts = sel => ECK_ROLES.map(r => `<option value="${r.key}" ${r.key === sel ? 'selected' : ''}>${ECK_ROLE_NAMES[r.key]}</option>`).join('');
+            if (!$('eck-add-role').options.length) { $('eck-add-role').innerHTML = roleOpts('runner'); }
+            const opts = getPlayersOptionsHTML();
+            const pl = $('eck-player-list');
+            pl.innerHTML = cur.players.map(p => `<div class="eck-prow"><span class="eck-sw" style="background:${ECK_ROLE[p.role].color}"></span>
+                <select class="role-select-inline" style="margin:0;" title="Rolle" onchange="setEckPlayer('${esc(p.id)}', 'role', this.value)">${roleOpts(p.role)}</select>
+                <select class="player-select eck-psel" data-pid="${esc(p.id)}" onchange="setEckPlayer('${esc(p.id)}', 'name', this.value)">${opts}</select>
+                <button type="button" class="sd-btn danger" title="Entfernen" onclick="deleteEckPlayer('${esc(p.id)}')">🗑️</button></div>`).join('')
+                || '<span class="hint">Noch keine Spieler – unten Rolle wählen und „➕ Spieler“ tippen.</span>';
+            pl.querySelectorAll('select.eck-psel').forEach(s => { const p = cur.players.find(x => x.id === s.dataset.pid); s.value = p.name; if (s.value !== p.name) s.value = 'Keiner'; });
+            setText('eck-opp-count', cur.opps.length ? `${cur.opps.length} Gegenspieler auf dem Board – einzeln verschiebbar.` : 'Keine Gegenspieler. „Raumdeckung“ stellt eine typische Zonenverteidigung auf, „Manndeckung“ je einen Gegner zu deinen Spielern im Strafraum.');
+            $('eck-zone-list').innerHTML = cur.zones.map(z => `<div class="eck-zrow"><span class="eck-sw" style="background:${ECK_ZONE_COLORS[z.color]}"></span>
+                <input type="text" value="${esc(z.label)}" maxlength="30" oninput="setEckZoneLabel('${esc(z.id)}', this.value)">
+                <button type="button" class="sd-btn" title="Farbe wechseln" onclick="cycleEckZoneColor('${esc(z.id)}')">🎨</button>
+                <button type="button" class="sd-btn danger" title="Löschen" onclick="deleteEckZone('${esc(z.id)}')">🗑️</button></div>`).join('');
+            renderArrowList();
+        }
+        function updateEckball() {
+            renderEckEditor();
+            updateEckBoard();
+        }
+        function eckChanged() { updateEckball(); commitEckHistory(); }
+
+        function setEckOpt(key, value, live) {
+            if (key === 'size') value = eckNum(value, 40, 24, 70);
+            eck2[key] = value;
+            if (live) { updateEckBoard(); return; }
+            eckChanged();
+        }
+
+        /* Varianten */
+        function selectEckVariant(i) { eck2.active = Math.max(0, Math.min(eck2.variants.length - 1, i)); eckChanged(); }
+        function addEckVariant() {
+            if (eck2.variants.length >= ECK_MAX_VARIANTS) { alert(`Höchstens ${ECK_MAX_VARIANTS} Varianten.`); return; }
+            const name = prompt('Name der neuen Variante (z.B. „Kurz“, „1. Pfosten“):', `Variante ${eck2.variants.length + 1}`);
+            if (name === null) return;
+            const copy = JSON.parse(JSON.stringify(curEck()));
+            copy.id = eckId('v');
+            copy.name = normName(name).slice(0, 40) || `Variante ${eck2.variants.length + 1}`;
+            eck2.variants.push(copy);
+            eck2.active = eck2.variants.length - 1;
+            eckChanged();
+        }
+        function renameEckVariant() {
+            const cur = curEck();
+            const name = prompt('Neuer Name der Variante:', cur.name);
+            if (name === null || !normName(name)) return;
+            cur.name = normName(name).slice(0, 40);
+            eckChanged();
+        }
+        function deleteEckVariant() {
+            if (eck2.variants.length <= 1) { alert('Die letzte Variante kann nicht gelöscht werden. Mit „🔄 Grundaufstellung“ setzt du sie zurück.'); return; }
+            if (!confirm(`Variante „${curEck().name}“ löschen?`)) return;
+            eck2.variants.splice(eck2.active, 1);
+            eck2.active = Math.max(0, eck2.active - 1);
+            eckChanged();
+        }
+        function mirrorEckVariant(v) {
+            v.players.forEach(p => { p.x = eckMirrorX(p.x); });
+            v.opps.forEach(o => { o.x = eckMirrorX(o.x); });
+            v.zones.forEach(z => { z.x = eckR(68 - z.x - z.w); });
+            v.arrows.forEach(a => { a.x1 = eckMirrorX(a.x1); a.x2 = eckMirrorX(a.x2); a.curve = -a.curve || 0; });
+            v.side = v.side === 'right' ? 'left' : 'right';
+        }
+        function mirrorEck() { mirrorEckVariant(curEck()); eckChanged(); }
+        function resetEckballPositions() {
+            const cur = curEck();
+            const fresh = defaultEckVariant(eck2.active + 1, cur.side);
+            Object.assign(cur, { players: fresh.players, opps: [], zones: [], arrows: [] });
+            eckChanged();
+        }
+
+        /* Spieler */
+        function eckSideX(x) { return curEck().side === 'right' ? eckMirrorX(x) : x; }
+        function addEckPlayer() {
+            const cur = curEck();
+            const role = ECK_ROLE[val('eck-add-role')] ? val('eck-add-role') : 'runner';
+            const base = ECK_DEFAULT_PLAYERS.find(d => d[0] === role) || ['runner', 34, 14];
+            const n = cur.players.filter(p => p.role === role).length;
+            cur.players.push({ id: eckId('p'), name: 'Keiner', role, x: eckR(eckSideX(Math.min(66, base[1] + n * 3))), y: eckR(base[2] + (n % 2) * 1.5) });
+            eckChanged();
+        }
+        function setEckPlayer(id, field, value) {
+            const p = curEck().players.find(x => x.id === id);
+            if (!p) return;
+            if (field === 'role' && ECK_ROLE[value]) p.role = value;
+            if (field === 'name') p.name = value || 'Keiner';
+            eckChanged();
+        }
+        function deleteEckPlayer(id) {
+            const cur = curEck();
+            cur.players = cur.players.filter(x => x.id !== id);
+            eckChanged();
+        }
+        function fillEckFromLineup() {
+            const size = lineupSize(), names = [];
+            for (let i = size; i >= 2; i--) { const n = val(`player-${i}`); if (eckHasName(n) && !names.includes(n)) names.push(n); }
+            if (!names.length) { alert('In der Aufstellung sind noch keine Spieler eingetragen.'); return; }
+            const cur = curEck();
+            const slots = cur.players.filter(p => p.role !== 'keeper');
+            slots.forEach((p, i) => { p.name = names[i] || 'Keiner'; });
+            const keeper = cur.players.find(p => p.role === 'keeper');
+            if (keeper && eckHasName(val('player-1'))) keeper.name = val('player-1');
+            eckChanged();
+            toast(`✅ ${Math.min(names.length, slots.length)} Namen übernommen – Rollen bei Bedarf anpassen`);
+        }
+
+        /* Gegenspieler */
+        function addEckOpp() {
+            const cur = curEck(), n = cur.opps.length;
+            cur.opps.push({ id: eckId('o'), x: eckR(eckSideX(28 + (n % 6) * 2.5)), y: eckR(4 + Math.floor(n / 6) * 3) });
+            eckChanged();
+        }
+        function eckOppTemplate(kind) {
+            const cur = curEck();
+            if (cur.opps.length && !confirm('Vorhandene Gegenspieler ersetzen?')) return;
+            if (kind === 'man') {
+                const marked = cur.players.filter(p => ['target', 'guard', 'screen', 'runner', 'edge'].includes(p.role) && p.y < 24);
+                cur.opps = [{ x: 34.5, y: 1 }, ...marked.map(p => ({ x: eckR(p.x + (p.x < 34 ? 1.2 : -1.2)), y: eckR(Math.max(0.5, p.y - 1.6)) }))];
+            } else cur.opps = ECK_OPP_ZONE.map(([x, y]) => ({ x: eckSideX(x), y }));
+            cur.opps = cur.opps.map(o => ({ id: eckId('o'), ...o }));
+            eckChanged();
+        }
+        function removeLastEckOpp() { curEck().opps.pop(); eckChanged(); }
+        function clearEckOpps() {
+            const cur = curEck();
+            if (cur.opps.length && !confirm('Alle Gegenspieler entfernen?')) return;
+            cur.opps = [];
+            eckChanged();
+        }
+
+        /* Zonen */
+        function addEckZone() {
+            const cur = curEck();
+            const t = ECK_ZONE_TPL[val('eck-zone-tpl')] || ECK_ZONE_TPL.free;
+            const x = cur.side === 'right' ? eckR(68 - t.x - t.w) : t.x;
+            cur.zones.push({ id: eckId('z'), label: t.label, color: ECK_ZONE_COLORS[val('eck-zone-color')] ? val('eck-zone-color') : 'yellow', x, y: t.y, w: t.w, h: t.h });
+            eckChanged();
+        }
+        function setEckZoneLabel(id, text) {
+            const z = curEck().zones.find(x => x.id === id);
+            if (!z) return;
+            z.label = String(text).slice(0, 30);
+            updateEckBoard();
+            commitEckHistory();
+        }
+        function cycleEckZoneColor(id) {
+            const z = curEck().zones.find(x => x.id === id);
+            if (!z) return;
+            const keys = Object.keys(ECK_ZONE_COLORS);
+            z.color = keys[(keys.indexOf(z.color) + 1) % keys.length];
+            eckChanged();
+        }
+        function deleteEckZone(id) {
+            const cur = curEck();
+            cur.zones = cur.zones.filter(x => x.id !== id);
+            eckChanged();
+        }
+
+        /* Pfeile: Farbe blau/rot/gelb, durchgezogen oder gestrichelt, gerade oder als Bogen (curve: 0 / 1 / -1) */
         function normEckArrows(list) {
             if (!Array.isArray(list)) return [];
             const legacy = JSON.stringify(LEGACY_DEFAULT_ARROWS);
@@ -7142,24 +7686,12 @@ Alle sind herzlich eingeladen!</textarea></div>
             const mx = (a.x1 + a.x2) / 2, my = (a.y1 + a.y2) / 2, dx = a.x2 - a.x1, dy = a.y2 - a.y1, k = 0.35 * a.curve;
             return `M ${a.x1} ${a.y1} Q ${(mx - dy * k).toFixed(1)} ${(my + dx * k).toFixed(1)} ${a.x2} ${a.y2}`;
         }
-        function renderEckArrows() {
-            let svgHtml = '';
-            eckArrows.forEach(arr => {
-                const color = arr.type === 'red' ? '#cc0000' : '#0099ff';
-                const marker = arr.type === 'red' ? 'url(#arrow-red)' : 'url(#arrow-blue)';
-                const dash = arr.dash ? 'stroke-dasharray="6,5"' : '';
-                svgHtml += `<path id="svg_line_${arr.id}" d="${arrowPathD(arr)}" fill="none" stroke="${color}" stroke-width="2.5" ${dash} marker-end="${marker}" style="pointer-events:none;" />`;
-            });
-            const grp = $('svg-tactics-group');
-            if (grp) grp.innerHTML = svgHtml;
-            renderArrowHandles();
-            renderArrowList();
-        }
         function renderArrowList() {
             const host = $('eck-arrow-list');
             if (!host) return;
-            host.innerHTML = eckArrows.length ? eckArrows.map((a, i) => `<div class="eck-arrow-row">
-                    <span class="eck-arrow-swatch ${a.type === 'red' ? 'red' : 'blue'} ${a.dash ? 'dash' : ''}"></span><b>Pfeil ${i + 1}</b>
+            const arrows = curEck().arrows;
+            host.innerHTML = arrows.length ? arrows.map((a, i) => `<div class="eck-arrow-row">
+                    <span class="eck-arrow-swatch ${a.type} ${a.dash ? 'dash' : ''}"></span><b>Pfeil ${i + 1}</b>
                     <button type="button" class="sd-btn" title="Farbe wechseln" onclick="editEckArrow('${a.id}', 'type')">🎨</button>
                     <button type="button" class="sd-btn" title="${a.dash ? 'Durchgezogen' : 'Gestrichelt'}" onclick="editEckArrow('${a.id}', 'dash')">${a.dash ? '┄' : '━'}</button>
                     <button type="button" class="sd-btn" title="Gerade / Bogen" onclick="editEckArrow('${a.id}', 'curve')">${a.curve === 1 ? '⤴' : a.curve === -1 ? '⤵' : '➝'}</button>
@@ -7167,164 +7699,107 @@ Alle sind herzlich eingeladen!</textarea></div>
                 : '<span class="hint">Noch keine Pfeile – mit „➕ Pfeil hinzufügen“ einfügen und dann auf dem Board an den Punkten ziehen.</span>';
         }
         function addEckArrow() {
-            const n = eckArrows.length, off = (n % 6) * 18;
-            eckArrows.push({ id: 'a' + Date.now().toString(36), type: val('eck-new-color') === 'red' ? 'red' : 'blue', dash: val('eck-new-line') === 'dash',
-                curve: parseInt(val('eck-new-shape'), 10) || 0, x1: 330 + off, y1: 330 + off, x2: 420 + off, y2: 250 + off });
-            renderEckArrows();
-            commitEckHistory();
+            const cur = curEck(), off = (cur.arrows.length % 6) * 1.6;
+            const type = ECK_ARROW_COLORS[val('eck-new-color')] ? val('eck-new-color') : 'blue';
+            cur.arrows.push({ id: eckId('a'), type, dash: val('eck-new-line') === 'dash', curve: parseInt(val('eck-new-shape'), 10) || 0,
+                x1: eckR(eckSideX(26 + off)), y1: eckR(19 + off / 2), x2: eckR(eckSideX(31 + off)), y2: eckR(9 + off / 2) });
+            eckChanged();
         }
         function editEckArrow(id, field) {
-            const a = eckArrows.find(x => x.id === id);
+            const a = curEck().arrows.find(x => x.id === id);
             if (!a) return;
-            if (field === 'type') a.type = a.type === 'red' ? 'blue' : 'red';
+            const types = Object.keys(ECK_ARROW_COLORS);
+            if (field === 'type') a.type = types[(types.indexOf(a.type) + 1) % types.length];
             if (field === 'dash') a.dash = !a.dash;
             if (field === 'curve') a.curve = a.curve === 0 ? 1 : a.curve === 1 ? -1 : 0;
-            renderEckArrows();
-            commitEckHistory();
+            eckChanged();
         }
         function deleteEckArrow(id) {
-            eckArrows = eckArrows.filter(x => x.id !== id);
-            renderEckArrows();
-            commitEckHistory();
+            const cur = curEck();
+            cur.arrows = cur.arrows.filter(x => x.id !== id);
+            eckChanged();
         }
         function clearEckArrows() {
-            if (eckArrows.length && !confirm('Alle Pfeile löschen?')) return;
-            eckArrows = [];
-            renderEckArrows();
-            commitEckHistory();
+            const cur = curEck();
+            if (cur.arrows.length && !confirm('Alle Pfeile löschen?')) return;
+            cur.arrows = [];
+            eckChanged();
         }
 
-        function renderArrowHandles() {
-            const container = $('eckball-handles-container');
-            if (!container) return;
-            container.innerHTML = '';
-
-            eckArrows.forEach((arr) => {
-                const startNode = document.createElement('div');
-                startNode.className = `tactics-arrow-handle start-handle ${arr.type==='red'?'red-handle':''}`;
-                startNode.style.left = arr.x1 + 'px';
-                startNode.style.top = arr.y1 + 'px';
-                container.appendChild(startNode);
-
-                const endNode = document.createElement('div');
-                endNode.className = `tactics-arrow-handle end-handle ${arr.type==='red'?'red-handle':''}`;
-                endNode.style.left = arr.x2 + 'px';
-                endNode.style.top = arr.y2 + 'px';
-                container.appendChild(endNode);
-
-                setupHandleDrag(startNode, (nx, ny) => {
-                    arr.x1 = nx; arr.y1 = ny;
-                    $(`svg_line_${arr.id}`)?.setAttribute('d', arrowPathD(arr));
-                });
-
-                setupHandleDrag(endNode, (nx, ny) => {
-                    arr.x2 = nx; arr.y2 = ny;
-                    $(`svg_line_${arr.id}`)?.setAttribute('d', arrowPathD(arr));
-                });
-            });
+        /* ---------- Eckball: Zoom & Vollbild (nur Anzeige, das Bild bleibt 16:9) ---------- */
+        const ECK_ZOOMS = [1, 1.5, 2, 3];
+        let eckResizeObs = null;
+        function layoutEckStage() {
+            const st = $('eck-stage'), sc = $('eck-scaler'), sz = $('eck-sizer'), b = $('capture-eckball');
+            if (!st || !sc) return;
+            if (!eckResizeObs && window.ResizeObserver) {
+                eckResizeObs = new ResizeObserver(() => layoutEckStage());
+                eckResizeObs.observe(st);
+                window.addEventListener('resize', () => layoutEckStage());
+            }
+            const full = st.classList.contains('eck-full');
+            const availW = full ? window.innerWidth - 16 : st.clientWidth;
+            if (!availW) return;
+            const fit = full ? Math.min(availW / 800, (window.innerHeight - 70) / 450) : Math.min(1, availW / 800);
+            const s = fit * eckZoom;
+            const cx = sc.scrollWidth > sc.clientWidth ? (sc.scrollLeft + sc.clientWidth / 2) / sc.scrollWidth : 0.5;
+            const cy = sc.scrollHeight > sc.clientHeight ? (sc.scrollTop + sc.clientHeight / 2) / sc.scrollHeight : 0.5;
+            sc.style.width = Math.floor(800 * fit) + 'px';
+            sc.style.height = Math.floor(450 * fit) + 'px';
+            sc.style.overflow = eckZoom > 1 ? 'auto' : 'hidden';
+            sz.style.width = (800 * s) + 'px';
+            sz.style.height = (450 * s) + 'px';
+            b.style.transform = `scale(${s})`;
+            if (eckZoom > 1) {
+                sc.scrollLeft = cx * 800 * s - sc.clientWidth / 2;
+                sc.scrollTop = cy * 450 * s - sc.clientHeight / 2;
+            }
+            setText('eck-zoom-val', Math.round(eckZoom * 100) + ' %');
+        }
+        function eckZoomBy(d) {
+            const i = Math.max(0, ECK_ZOOMS.indexOf(eckZoom));
+            eckZoom = ECK_ZOOMS[Math.max(0, Math.min(ECK_ZOOMS.length - 1, i + d))];
+            layoutEckStage();
+        }
+        function toggleEckFull(force) {
+            const st = $('eck-stage');
+            const on = force ?? !st.classList.contains('eck-full');
+            st.classList.toggle('eck-full', on);
+            document.body.classList.toggle('eck-full-open', on);
+            $('eck-full-btn').textContent = on ? '✕ Schließen' : '⛶ Vollbild';
+            eckZoom = 1;
+            layoutEckStage();
         }
 
-        function setupHandleDrag(node, onMoveCallback) {
-            let isDrag = false, sx, sy, iL, iT, scale = 1;
-            node.onpointerdown = (e) => {
-                isDrag = true; e.stopPropagation();
-                try { node.setPointerCapture(e.pointerId); } catch(err){}
-                sx = e.clientX; sy = e.clientY;
-                iL = parseFloat(node.style.left); iT = parseFloat(node.style.top);
-                scale = getElementScale(node.parentElement || node);
-            };
-            node.onpointermove = (e) => {
-                if (!isDrag) return; e.stopPropagation();
-                let dx = (e.clientX - sx) / scale;
-                let dy = (e.clientY - sy) / scale;
-                let nx = Math.max(5, Math.min(795, Math.round(iL + dx)));
-                let ny = Math.max(5, Math.min(555, Math.round(iT + dy)));
-                node.style.left = nx + 'px'; node.style.top = ny + 'px';
-                onMoveCallback(nx, ny);
-            };
-            node.onpointerup = (e) => {
-                if (!isDrag) return; isDrag = false; e.stopPropagation();
-                try { node.releasePointerCapture(e.pointerId); } catch(err){}
-                commitEckHistory();
-            };
-        }
-
-        function makeEckNodesDraggable() {
-            document.querySelectorAll('.eckball-player-node').forEach(node => {
-                let isDrag = false, sx, sy, iL, iT, scale = 1;
-                const nid = node.getAttribute('data-nid');
-                node.onpointerdown = (e) => {
-                    isDrag = true; e.stopPropagation();
-                    try { node.setPointerCapture(e.pointerId); } catch(err){}
-                    sx = e.clientX; sy = e.clientY;
-                    iL = parseFloat(node.style.left); iT = parseFloat(node.style.top);
-                    scale = getElementScale(node.parentElement || node);
-                };
-                node.onpointermove = (e) => {
-                    if (!isDrag) return; e.stopPropagation();
-                    let dx = (e.clientX - sx) / scale;
-                    let dy = (e.clientY - sy) / scale;
-                    let nx = Math.max(15, Math.min(785, Math.round(iL + dx)));
-                    let ny = Math.max(15, Math.min(545, Math.round(iT + dy)));
-                    node.style.left = nx + 'px'; node.style.top = ny + 'px';
-                };
-                node.onpointerup = (e) => {
-                    if (!isDrag) return; isDrag = false; e.stopPropagation();
-                    try { node.releasePointerCapture(e.pointerId); } catch(err){}
-                    const targetNode = eckNodes.find(n => n.id === nid);
-                    if (targetNode) {
-                        targetNode.left = node.style.left;
-                        targetNode.top = node.style.top;
-                    }
-                    commitEckHistory();
-                };
-            });
-        }
-
-        function updateEckball() {
-            setText('out-legend-schuetze', formatEckName(val('eck-player-1')));
-            setText('out-legend-doppelpass', formatEckName(val('eck-player-2')));
-
-            let zielspieler = "-", bodyguard = "-", einlaeufer = [];
-            const p3 = val('eck-player-3');
-            if (p3 && p3 !== "Keiner") einlaeufer.push("- " + esc(formatEckName(p3)));
-
-            for (let i = 4; i <= 7; i++) {
-                const p = val(`eck-player-${i}`);
-                const r = val(`eck-role-${i}`);
-                if (p && p !== "Keiner") {
-                    if (r === 'zielspieler') zielspieler = formatEckName(p);
-                    else if (r === 'bodyguard') bodyguard = formatEckName(p);
-                    einlaeufer.push("- " + esc(formatEckName(p)) + getRoleIcon(r));
+        /* Alle Varianten nacheinander als Bild (z.B. für PowerPoint) */
+        async function exportAllEckVariants() {
+            if (!confirmConsent(['eckball'])) return;
+            clearPackFiles();
+            selectElement(null);
+            ['pack-select', 'pack-result', 'pack-run', 'pack-share', 'pack-download'].forEach(id => { $(id).hidden = true; });
+            $('pack-results').innerHTML = '';
+            $('pack-overlay').hidden = false;
+            const keep = eck2.active;
+            const slugOf = n => normName(n).toLowerCase().replace(/[^a-z0-9äöüß]+/g, '_').replace(/^_|_$/g, '') || 'variante';
+            try {
+                for (let i = 0; i < eck2.variants.length; i++) {
+                    setText('pack-progress', `⏳ Erstelle Variante ${i + 1} von ${eck2.variants.length} …`);
+                    eck2.active = i;
+                    updateEckBoard();
+                    const canvas = await renderElementToCanvas($('capture-eckball'));
+                    const blob = await withTimeout(new Promise(res => canvas.toBlob(res, 'image/png', 1.0)), 20000, null);
+                    freeCanvas(canvas);
+                    if (!blob) throw new Error('Grafik konnte nicht erstellt werden.');
+                    packFiles.push(new File([blob], `${String(i + 1).padStart(2, '0')}_eckball_${slugOf(eck2.variants[i].name)}.png`, { type: 'image/png' }));
                 }
+            } catch (err) {
+                setText('pack-progress', '❌ Fehler: ' + err.message);
+                return;
+            } finally {
+                eck2.active = keep;
+                updateEckball();
             }
-            setText('out-legend-zielspieler', zielspieler);
-            setText('out-legend-bodyguard', bodyguard);
-            if ($('out-legend-einlaeufer')) $('out-legend-einlaeufer').innerHTML = einlaeufer.length > 0 ? einlaeufer.join('<br>') : "-";
-
-            const absicherung = [];
-            for (let i = 8; i <= 10; i++) {
-                const p = val(`eck-player-${i}`);
-                if (p && p !== "Keiner") absicherung.push("- " + esc(formatEckName(p)));
-            }
-            if ($('out-legend-absicherung')) $('out-legend-absicherung').innerHTML = absicherung.length > 0 ? absicherung.join('<br>') : "-";
-
-            const container = $('eckball-players-container');
-            if (container) {
-                let html = '';
-                for (let i = 1; i <= 11; i++) {
-                    const name = val(`eck-player-${i}`) || "Keiner";
-                    const nData = eckNodes.find(n => n.id === `n${i}`);
-                    if (!nData) continue;
-                    html += `
-                        <div class="eckball-player-node" data-nid="n${i}" style="top:${nData.top}; left:${nData.left};">
-                            <img class="eckball-player-circle" src="${getPlayerImageSrc(name)}" alt="">
-                        </div>`;
-                }
-                container.innerHTML = html;
-                makeEckNodesDraggable();
-            }
-            renderEckArrows();
+            showPackResult();
         }
 
         /* =========================================================
@@ -7548,8 +8023,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 inputs: {},
                 positions: {},
                 tabSettings: {},
-                eckArrows: eckArrows,
-                eckNodes: eckNodes,
+                eck2: JSON.parse(JSON.stringify(eck2)),
                 tfBoard: JSON.parse(JSON.stringify(tfBoard))
             };
             NAME_FMT_FIELDS.forEach(([id, k, legacy, def]) => {
@@ -7565,10 +8039,9 @@ Alle sind herzlich eingeladen!</textarea></div>
             for (let i = 1; i <= SCORER_MAX; i++) inputIds.push(`erg-scorer-${i}`, `erg-minute-${i}`);
             inputIds.push('erg-cd-date', 'in-frei-title', 'in-frei-icon-mode', 'in-frei-icon', 'in-frei-sub', 'in-frei-text',
                 'in-tf-photo', 'in-tf-title', 'in-tf-sub', 'in-tf-team', 'in-tf-namefmt', 'in-tf-row1', 'in-tf-row2', 'in-tf-row3', 'in-tf-coaches', 'in-tf-missing');
-            for (let i = 1; i <= 11; i++) inputIds.push(`player-${i}`, `num-player-${i}`, `eck-player-${i}`);
+            for (let i = 1; i <= 11; i++) inputIds.push(`player-${i}`, `num-player-${i}`);
             for (let i = 1; i <= 7; i++) inputIds.push(`bench-player-${i}`);
             for (let i = 1; i <= KADER_MAX; i++) inputIds.push(`kader-player-${i}`);
-            for (let i = 4; i <= 7; i++) inputIds.push(`eck-role-${i}`);
             for (let i = 1; i <= KAL_MAX; i++) inputIds.push(`kal-date-${i}`, `kal-time-${i}`, `kal-opp-${i}`, `kal-venue-${i}`);
             inputIds.forEach(id => { const el = $(id); if (el) data.inputs[id] = el.value; });
 
@@ -7651,8 +8124,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (data.storyTitleText === 'S11') setVal('in-story-title-text', 'Startaufstellung');
             if ($('in-lineup-match')) $('in-lineup-match').checked = !!data.lineupMatch;
 
-            if (data.eckArrows) eckArrows = normEckArrows(data.eckArrows);
-            if (data.eckNodes) eckNodes = data.eckNodes;
+            eck2 = normEck2(data.eck2 || migrateOldEck(data));
 
             // Vor dem Setzen der Werte: volle Spielerliste in der Aufstellung, sonst gehen Namen verloren
             refreshLineupOptions(true);
@@ -8525,7 +8997,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const clone = element.cloneNode(true);
             clone.removeAttribute('id');
             Object.assign(clone.style, { transform: 'none', margin: '0', position: 'relative', top: '0', left: '0' });
-            clone.querySelectorAll('.tactics-arrow-handle, .safe-zone, .snap-guide').forEach(n => n.remove());
+            clone.querySelectorAll('.tactics-arrow-handle, .eck-edit-only, .safe-zone, .snap-guide').forEach(n => n.remove());
             clone.classList.remove('el-selected');
             clone.querySelectorAll('.el-selected').forEach(n => n.classList.remove('el-selected'));
             holder.appendChild(clone);
@@ -9349,7 +9821,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             tor: 'Torschütze, Vorlage, Spielstand und Minute wählen. Standardmäßig wird das Torjubel-Foto genutzt – unter „Spielerfotos“ kannst du auf das normale Foto wechseln.',
             ergebnis: 'Endstand, Zusatztext und Torschützen eintragen. „Letztes Spiel aus Kalender übernehmen“ füllt Gegner und Heim/Auswärts automatisch.',
             kader: 'Bis zu 20 Spieler für den Kader wählen und Treffpunkt, Trikots und Dienste eintragen. „Kader leeren“ entfernt alle Spieler.',
-            eckball: 'Spieler auf die Rollen verteilen und auf dem Taktikbrett Spieler und Pfeile verschieben. Die Legende rechts füllt sich automatisch.',
+            eckball: 'Taktikbrett im 16:9-Format für TV oder PowerPoint. Spieler mit Rollen hinzufügen, Gegner und Zonen einzeichnen, Pfeile setzen und alles auf dem Board verschieben. Mehrere Varianten anlegen; mit ➕/➖ und ⛶ über dem Board zoomen. „📚 Alle Varianten“ erstellt alle Bilder auf einmal.',
             potm: 'Spieler des Spiels wählen und einen kurzen Text (z.B. „2 Tore“) eintragen. Das Foto lässt sich in der Vorschau verschieben und vergrößern.',
             kalender: 'Termine eintragen oder unter „Spielplan einfügen“ die ganze Saison übernehmen. Die nächsten Spiele erscheinen automatisch sortiert.',
             geburtstag: 'Geburtstagskind wählen und Glückwunsch eintragen. Konfetti lässt sich abschalten.',
@@ -9541,6 +10013,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 $('pack-run').disabled = false;
                 return;
             }
+            showPackResult();
+        }
+        function showPackResult() {
             setText('pack-progress', '');
             packUrls = packFiles.map(f => URL.createObjectURL(f));
             $('pack-results').innerHTML = packFiles.map((f, i) => `<a href="${packUrls[i]}" download="${esc(f.name)}"><img src="${packUrls[i]}" alt="">${esc(f.name)}</a>`).join('');
