@@ -474,6 +474,14 @@ async function makePhotos(browser) {
             setEckOpt('view', 'half'); r.half = eckView().s < 9; setEckOpt('view', 'box');
             return r; });
         check('Eckball: mehrere Varianten (gespeichert), Zoom, Vollbild, Ausschnitt', vars.n === 2 && vars.name === 'Kurz' && vars.active === 1 && vars.sep && vars.saved === 2 && vars.zoom && vars.full && vars.half, JSON.stringify(vars));
+        const pad = await page.evaluate(() => { const p = curEck().players[0], x0 = p.x, y0 = p.y; eckSelect('p:' + p.id);
+            const r = { mark: !!document.querySelector('#eckball-players-container .eck-tok.eck-sel') };
+            eckNudge(1, 0); eckNudge(1, 0); eckNudge(0, 1); r.fine = [eckR(p.x - x0), eckR(p.y - y0)].join();
+            toggleEckStep(); eckNudge(0, 1); toggleEckStep(); r.big = eckR(p.y - y0);
+            addEckArrow(); const a = curEck().arrows.at(-1), ax = [a.x1, a.x2]; eckSelect('a:' + a.id); eckNudge(-1, 0); r.arrow = eckR(ax[0] - a.x1) === 0.5 && eckR(ax[1] - a.x2) === 0.5;
+            r.mid = !!document.querySelector('.tactics-arrow-handle.mid-handle'); r.opts = $('eck-sel').options.length > curEck().players.length;
+            eckDeleteSel(); r.del = !curEck().arrows.some(x => x.id === a.id); return r; });
+        check('Eckball: Steuerkreuz verschiebt Auswahl (fein/grob), ganzer Pfeil, Entfernen', pad.mark && pad.fine === '1,0.5' && pad.big === 2.5 && pad.arrow && pad.mid && pad.opts && pad.del, JSON.stringify(pad));
         check('Export Eckball 16:9 = 2400x1350', (await exportSize(page, 'capture-eckball')) === '2400x1350');
         const mig = await page.evaluate(() => { const keep = collectSlotData(), d = JSON.parse(JSON.stringify(keep)); delete d.eck2;
             const [a, b] = stammdaten.players.map(p => p.name);
