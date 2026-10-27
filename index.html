@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 21.9</title>
+    <title>Match-Shot – Grafiken für Vereine 22.0</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -415,6 +415,11 @@
         .tactics-arrow-handle.red-handle { background: #cc0000; }
         .tactics-arrow-handle.start-handle { background: #ffffff; border-color: #0099ff; }
         .tactics-arrow-handle.start-handle.red-handle { border-color: #cc0000; }
+        .eck-arrow-list { display: grid; gap: 4px; margin-top: 6px; }
+        .eck-arrow-row { display: grid; grid-template-columns: 26px 1fr repeat(4, 34px); gap: 4px; align-items: center; font-size: 13px; }
+        .eck-arrow-swatch { height: 0; border-top: 4px solid #0099ff; }
+        .eck-arrow-swatch.red { border-top-color: #cc0000; }
+        .eck-arrow-swatch.dash { border-top-style: dashed; }
         .role-select-inline { font-size: 11px; padding: 4px; margin-top: 3px; border-radius: 4px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; }
 
         .copy-action-btn { background: #005f73; color: white; border: none; padding: 8px 10px; font-size: 11px; font-weight: bold; border-radius: 5px; cursor: pointer; margin-bottom: 8px; width: 100%; }
@@ -1632,7 +1637,21 @@
                     <div class="player-input-row"><select id="eck-player-11" class="player-select eck-select"></select> <span style="font-size:10px; width:60px;">(Torwart)</span></div>
                 </div>
 
-                <button type="button" class="copy-action-btn" onclick="resetEckballPositions()">🔄 Spieler & Pfeile auf Standard setzen</button>
+                <div class="control-group" style="margin-top:10px;">
+                    <label>🏹 Laufwege / Pfeile</label>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px;">
+                        <select id="eck-new-color" title="Farbe"><option value="blue">🔵 Blau</option><option value="red">🔴 Rot</option></select>
+                        <select id="eck-new-line" title="Linie"><option value="dash">┄ Gestrichelt</option><option value="solid">━ Durchgezogen</option></select>
+                        <select id="eck-new-shape" title="Form"><option value="0">➝ Gerade</option><option value="1">⤴ Bogen links</option><option value="-1">⤵ Bogen rechts</option></select>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:6px;">
+                        <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin:6px 0 0;" onclick="addEckArrow()">➕ Pfeil hinzufügen</button>
+                        <button type="button" class="copy-action-btn" style="background:#6c757d; margin:6px 0 0;" onclick="clearEckArrows()">🗑️ Alle</button>
+                    </div>
+                    <div id="eck-arrow-list" class="eck-arrow-list"></div>
+                    <span class="hint">Pfeile auf dem Board am Start- und Endpunkt ziehen. In der Liste: 🎨 Farbe, ┄/━ Linie, ➝/⤴/⤵ gerade oder Bogen.</span>
+                </div>
+                <button type="button" class="copy-action-btn" onclick="resetEckballPositions()">🔄 Spieler auf Standard setzen, Pfeile entfernen</button>
                 <div id="tabcopy-host-eckball"></div>
             </div>
 
@@ -2574,7 +2593,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "21.9";
+        const APP_VERSION = "22.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2735,7 +2754,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             scheduleSave();
         }
 
-        const defaultArrows = [
+        // Bis v21.9: 9 Standardpfeile unten links – unverändert gespeicherte werden beim Laden entfernt
+        const LEGACY_DEFAULT_ARROWS = [
             { id: 'a1', type: 'blue', x1: 50, y1: 500, x2: 50, y2: 450 },
             { id: 'a2', type: 'blue', x1: 80, y1: 500, x2: 80, y2: 450 },
             { id: 'a3', type: 'blue', x1: 110, y1: 500, x2: 110, y2: 450 },
@@ -2746,6 +2766,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             { id: 'a8', type: 'blue', x1: 260, y1: 500, x2: 260, y2: 450 },
             { id: 'a9', type: 'red', x1: 290, y1: 500, x2: 290, y2: 450 }
         ];
+        const defaultArrows = [];   // Pfeile kommen nur per „➕ Pfeil hinzufügen“
 
         const defaultEckNodes = [
             { id: 'n1', top: '20px', left: '540px' },
@@ -7108,17 +7129,69 @@ Alle sind herzlich eingeladen!</textarea></div>
             return '';
         }
 
+        /* Pfeile: Farbe blau/rot, durchgezogen oder gestrichelt, gerade oder als Bogen (curve: 0 / 1 / -1) */
+        function normEckArrows(list) {
+            if (!Array.isArray(list)) return [];
+            const legacy = JSON.stringify(LEGACY_DEFAULT_ARROWS);
+            if (JSON.stringify(list.map(({ id, type, x1, y1, x2, y2 }) => ({ id, type, x1, y1, x2, y2 }))) === legacy) return [];
+            return list.map(a => ({ ...a, type: a.type === 'red' ? 'red' : 'blue', dash: a.dash ?? a.type !== 'red', curve: [1, -1].includes(a.curve) ? a.curve : 0 }));
+        }
+        function arrowPathD(a) {
+            if (!a.curve) return `M ${a.x1} ${a.y1} L ${a.x2} ${a.y2}`;
+            // Kontrollpunkt seitlich der Mitte → gleichmäßiger Bogen
+            const mx = (a.x1 + a.x2) / 2, my = (a.y1 + a.y2) / 2, dx = a.x2 - a.x1, dy = a.y2 - a.y1, k = 0.35 * a.curve;
+            return `M ${a.x1} ${a.y1} Q ${(mx - dy * k).toFixed(1)} ${(my + dx * k).toFixed(1)} ${a.x2} ${a.y2}`;
+        }
         function renderEckArrows() {
             let svgHtml = '';
             eckArrows.forEach(arr => {
-                const color = arr.type === 'blue' ? '#0099ff' : '#cc0000';
-                const marker = arr.type === 'blue' ? 'url(#arrow-blue)' : 'url(#arrow-red)';
-                const dash = arr.type === 'blue' ? 'stroke-dasharray="4,4"' : '';
-                svgHtml += `<line id="svg_line_${arr.id}" x1="${arr.x1}" y1="${arr.y1}" x2="${arr.x2}" y2="${arr.y2}" stroke="${color}" stroke-width="2.5" ${dash} marker-end="${marker}" style="pointer-events:none;" />`;
+                const color = arr.type === 'red' ? '#cc0000' : '#0099ff';
+                const marker = arr.type === 'red' ? 'url(#arrow-red)' : 'url(#arrow-blue)';
+                const dash = arr.dash ? 'stroke-dasharray="6,5"' : '';
+                svgHtml += `<path id="svg_line_${arr.id}" d="${arrowPathD(arr)}" fill="none" stroke="${color}" stroke-width="2.5" ${dash} marker-end="${marker}" style="pointer-events:none;" />`;
             });
             const grp = $('svg-tactics-group');
             if (grp) grp.innerHTML = svgHtml;
             renderArrowHandles();
+            renderArrowList();
+        }
+        function renderArrowList() {
+            const host = $('eck-arrow-list');
+            if (!host) return;
+            host.innerHTML = eckArrows.length ? eckArrows.map((a, i) => `<div class="eck-arrow-row">
+                    <span class="eck-arrow-swatch ${a.type === 'red' ? 'red' : 'blue'} ${a.dash ? 'dash' : ''}"></span><b>Pfeil ${i + 1}</b>
+                    <button type="button" class="sd-btn" title="Farbe wechseln" onclick="editEckArrow('${a.id}', 'type')">🎨</button>
+                    <button type="button" class="sd-btn" title="${a.dash ? 'Durchgezogen' : 'Gestrichelt'}" onclick="editEckArrow('${a.id}', 'dash')">${a.dash ? '┄' : '━'}</button>
+                    <button type="button" class="sd-btn" title="Gerade / Bogen" onclick="editEckArrow('${a.id}', 'curve')">${a.curve === 1 ? '⤴' : a.curve === -1 ? '⤵' : '➝'}</button>
+                    <button type="button" class="sd-btn danger" title="Löschen" onclick="deleteEckArrow('${a.id}')">🗑️</button></div>`).join('')
+                : '<span class="hint">Noch keine Pfeile – mit „➕ Pfeil hinzufügen“ einfügen und dann auf dem Board an den Punkten ziehen.</span>';
+        }
+        function addEckArrow() {
+            const n = eckArrows.length, off = (n % 6) * 18;
+            eckArrows.push({ id: 'a' + Date.now().toString(36), type: val('eck-new-color') === 'red' ? 'red' : 'blue', dash: val('eck-new-line') === 'dash',
+                curve: parseInt(val('eck-new-shape'), 10) || 0, x1: 330 + off, y1: 330 + off, x2: 420 + off, y2: 250 + off });
+            renderEckArrows();
+            commitEckHistory();
+        }
+        function editEckArrow(id, field) {
+            const a = eckArrows.find(x => x.id === id);
+            if (!a) return;
+            if (field === 'type') a.type = a.type === 'red' ? 'blue' : 'red';
+            if (field === 'dash') a.dash = !a.dash;
+            if (field === 'curve') a.curve = a.curve === 0 ? 1 : a.curve === 1 ? -1 : 0;
+            renderEckArrows();
+            commitEckHistory();
+        }
+        function deleteEckArrow(id) {
+            eckArrows = eckArrows.filter(x => x.id !== id);
+            renderEckArrows();
+            commitEckHistory();
+        }
+        function clearEckArrows() {
+            if (eckArrows.length && !confirm('Alle Pfeile löschen?')) return;
+            eckArrows = [];
+            renderEckArrows();
+            commitEckHistory();
         }
 
         function renderArrowHandles() {
@@ -7141,14 +7214,12 @@ Alle sind herzlich eingeladen!</textarea></div>
 
                 setupHandleDrag(startNode, (nx, ny) => {
                     arr.x1 = nx; arr.y1 = ny;
-                    $(`svg_line_${arr.id}`)?.setAttribute('x1', nx);
-                    $(`svg_line_${arr.id}`)?.setAttribute('y1', ny);
+                    $(`svg_line_${arr.id}`)?.setAttribute('d', arrowPathD(arr));
                 });
 
                 setupHandleDrag(endNode, (nx, ny) => {
                     arr.x2 = nx; arr.y2 = ny;
-                    $(`svg_line_${arr.id}`)?.setAttribute('x2', nx);
-                    $(`svg_line_${arr.id}`)?.setAttribute('y2', ny);
+                    $(`svg_line_${arr.id}`)?.setAttribute('d', arrowPathD(arr));
                 });
             });
         }
@@ -7580,7 +7651,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (data.storyTitleText === 'S11') setVal('in-story-title-text', 'Startaufstellung');
             if ($('in-lineup-match')) $('in-lineup-match').checked = !!data.lineupMatch;
 
-            if (data.eckArrows) eckArrows = data.eckArrows;
+            if (data.eckArrows) eckArrows = normEckArrows(data.eckArrows);
             if (data.eckNodes) eckNodes = data.eckNodes;
 
             // Vor dem Setzen der Werte: volle Spielerliste in der Aufstellung, sonst gehen Namen verloren

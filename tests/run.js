@@ -442,6 +442,13 @@ async function makePhotos(browser) {
             const d = await localforage.getItem(STORE.slot(currentVersion));
             return !!stammdaten.sponsors.find(o => o.name === 'Sponsor Neu') && selectedSponsors.post.includes('Sponsor Neu') && d.positions[sponsorLogoId('capture-post-feed', 'Sponsor Neu')]?.x === 15;
         }));
+        // Eckball: standardmäßig keine Pfeile, per Knopf hinzufügen (Farbe, Linie, Bogen)
+        const eck = await page.evaluate(() => { switchTab('eckball'); resetEckballPositions(); const start = document.querySelectorAll('#svg-tactics-group path').length;
+            setVal('eck-new-color', 'red'); setVal('eck-new-line', 'solid'); setVal('eck-new-shape', '1'); addEckArrow();
+            const pth = document.querySelector('#svg-tactics-group path'); const r = { start, curve: / Q /.test(pth.getAttribute('d')), red: pth.getAttribute('stroke') === '#cc0000', solid: !pth.getAttribute('stroke-dasharray'),
+                legacy: normEckArrows(LEGACY_DEFAULT_ARROWS).length };
+            deleteEckArrow(eckArrows[0].id); r.after = eckArrows.length; return r; });
+        check('Eckball: ohne Standardpfeile, Pfeil mit Farbe/Linie/Bogen hinzufügbar', eck.start === 0 && eck.curve && eck.red && eck.solid && eck.legacy === 0 && eck.after === 0, JSON.stringify(eck));
         // Startseite: Kacheln
         await page.evaluate(() => switchTab('start'));
         check('Startseite zeigt Vorlagen-Kacheln', (await page.$$eval('#create-grid .create-tile', l => l.length)) >= 10);
