@@ -442,13 +442,46 @@ async function makePhotos(browser) {
             const d = await localforage.getItem(STORE.slot(currentVersion));
             return !!stammdaten.sponsors.find(o => o.name === 'Sponsor Neu') && selectedSponsors.post.includes('Sponsor Neu') && d.positions[sponsorLogoId('capture-post-feed', 'Sponsor Neu')]?.x === 15;
         }));
-        // Eckball: standardmäßig keine Pfeile, per Knopf hinzufügen (Farbe, Linie, Bogen)
-        const eck = await page.evaluate(() => { switchTab('eckball'); resetEckballPositions(); const start = document.querySelectorAll('#svg-tactics-group path').length;
+        // Eckball 2.0: 16:9, freie Spieler mit Rollen, Darstellungen, Gegner, Zonen, Spiegeln, Varianten, Pfeile
+        const eck = await page.evaluate(() => { switchTab('eckball'); resetEckballPositions(); const r = { start: curEck().arrows.length };
             setVal('eck-new-color', 'red'); setVal('eck-new-line', 'solid'); setVal('eck-new-shape', '1'); addEckArrow();
-            const pth = document.querySelector('#svg-tactics-group path'); const r = { start, curve: / Q /.test(pth.getAttribute('d')), red: pth.getAttribute('stroke') === '#cc0000', solid: !pth.getAttribute('stroke-dasharray'),
-                legacy: normEckArrows(LEGACY_DEFAULT_ARROWS).length };
-            deleteEckArrow(eckArrows[0].id); r.after = eckArrows.length; return r; });
-        check('Eckball: ohne Standardpfeile, Pfeil mit Farbe/Linie/Bogen hinzufügbar', eck.start === 0 && eck.curve && eck.red && eck.solid && eck.legacy === 0 && eck.after === 0, JSON.stringify(eck));
+            const pth = document.querySelector('#eck-arrow-svg > path');
+            r.arrow = / Q /.test(pth.getAttribute('d')) && pth.getAttribute('stroke') === ECK_ARROW_COLORS.red && !pth.getAttribute('stroke-dasharray');
+            r.legacy = normEckArrows(LEGACY_DEFAULT_ARROWS).length;
+            deleteEckArrow(curEck().arrows[0].id); r.after = curEck().arrows.length;
+            setVal('eck-add-role', 'cover'); addEckPlayer();
+            r.cover = curEck().players.filter(p => p.role === 'cover').length;
+            const name = stammdaten.players[0].name;
+            setEckPlayer(curEck().players[0].id, 'name', name);
+            r.tokens = document.querySelectorAll('#eckball-players-container .eck-tok').length === curEck().players.length;
+            r.legend = $('eck-legend').textContent.includes(formatEckName(name)) && /ABSICHERUNG/.test($('eck-legend').textContent);
+            r.styles = ['circle', 'square', 'jersey', 'dot'].map(t => { setEckOpt('token', t); return document.querySelector('#eckball-players-container .eck-tok').classList.contains('eck-tok-' + t); }).every(Boolean);
+            setEckOpt('token', 'circle'); setEckOpt('showNames', false); r.noNames = !document.querySelector('.eck-tok-name'); setEckOpt('showNames', true);
+            eckOppTemplate('zone'); r.opps = document.querySelectorAll('#eck-opps .eck-opp').length;
+            setVal('eck-zone-tpl', 'near'); addEckZone(); r.zone = document.querySelectorAll('#eck-zones .eck-zone').length === 1;
+            const z0 = { ...curEck().zones[0] }, x0 = curEck().players[0].x;
+            mirrorEck(); r.mirror = curEck().players[0].x === eckR(68 - x0) && curEck().side === 'right' && curEck().zones[0].x === eckR(68 - z0.x - z0.w);
+            return r; });
+        check('Eckball: ohne Standardpfeile, Pfeil mit Farbe/Linie/Bogen', eck.start === 0 && eck.arrow && eck.legacy === 0 && eck.after === 0, JSON.stringify(eck));
+        check('Eckball: freie Spieler mit Rollen (3× Absicherung), Legende, Darstellungen, Namen optional', eck.cover === 3 && eck.tokens && eck.legend && eck.styles && eck.noNames, JSON.stringify(eck));
+        check('Eckball: Gegenspieler, Zonen, Seite spiegeln', eck.opps === 9 && eck.zone && eck.mirror, JSON.stringify(eck));
+        page.answers.push('Kurz');
+        const vars = await page.evaluate(async () => { addEckVariant(); const r = { n: eck2.variants.length, name: curEck().name, active: eck2.active };
+            curEck().players.pop(); updateEckball(); selectEckVariant(0); r.sep = eck2.variants[0].players.length === eck2.variants[1].players.length + 1;
+            await saveSlotNow(); r.saved = (await localforage.getItem(STORE.slot(currentVersion))).eck2.variants.length;
+            eckZoomBy(1); r.zoom = $('capture-eckball').style.transform !== `scale(${Math.min(1, $('eck-stage').clientWidth / 800)})` && $('eck-scaler').style.overflow === 'auto';
+            eckZoomBy(-5); toggleEckFull(true); r.full = $('eck-stage').classList.contains('eck-full'); toggleEckFull(false);
+            setEckOpt('view', 'half'); r.half = eckView().s < 9; setEckOpt('view', 'box');
+            return r; });
+        check('Eckball: mehrere Varianten (gespeichert), Zoom, Vollbild, Ausschnitt', vars.n === 2 && vars.name === 'Kurz' && vars.active === 1 && vars.sep && vars.saved === 2 && vars.zoom && vars.full && vars.half, JSON.stringify(vars));
+        check('Export Eckball 16:9 = 2400x1350', (await exportSize(page, 'capture-eckball')) === '2400x1350');
+        const mig = await page.evaluate(() => { const keep = collectSlotData(), d = JSON.parse(JSON.stringify(keep)); delete d.eck2;
+            const [a, b] = stammdaten.players.map(p => p.name);
+            Object.assign(d.inputs, { 'eck-player-1': a, 'eck-player-4': b, 'eck-role-4': 'zielspieler' }); d.eckNodes = JSON.parse(JSON.stringify(defaultEckNodes));
+            applySlotData(d); updateEckball();
+            const r = { n: eck2.variants.length, taker: curEck().players.find(p => p.role === 'taker')?.name === a, target: curEck().players.some(p => p.role === 'target' && p.name === b) };
+            applySlotData(keep); updateEckball(); r.back = eck2.variants.length; return r; });
+        check('Eckball: alte Stände (feste 11 Plätze) werden übernommen', mig.n === 1 && mig.taker && mig.target && mig.back === 2, JSON.stringify(mig));
         // Startseite: Kacheln
         await page.evaluate(() => switchTab('start'));
         check('Startseite zeigt Vorlagen-Kacheln', (await page.$$eval('#create-grid .create-tile', l => l.length)) >= 10);
