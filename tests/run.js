@@ -336,6 +336,18 @@ async function makePhotos(browser) {
         // Video: Ebenen für die Animation
         const layers = await page.evaluate(async () => { const r = await renderVideoLayers($('capture-ergebnis')); return { n: r.layers.length, w: r.base.width }; });
         check('Video: Ebenen werden erzeugt', layers.n >= 4 && layers.w === 1080, JSON.stringify(layers));
+        // Verschobene Spieler: Name darf im Video nicht abgeschnitten werden (letztes Bild = Foto)
+        const vcut = await page.evaluate(async () => {
+            switchTab('story'); buildFormation(); const cards = [...document.querySelectorAll('#pitch .player-card')];
+            setElOffset(cards[0], 0, 75); setElOffset(cards[cards.length - 1], 10, 70);
+            const tpl = $('capture-story'); const { base, layers } = await renderVideoLayers(tpl);
+            const comp = document.createElement('canvas'); comp.width = base.width; comp.height = base.height; const g = comp.getContext('2d');
+            g.drawImage(base, 0, 0); layers.forEach(L => g.drawImage(L.canvas, L.x, L.y));
+            const { holder, clone } = await prepareExportClone(tpl); let full; try { full = await html2canvas(clone, captureOptions(clone, VIDEO_SCALE)); } finally { holder.remove(); }
+            const a = g.getImageData(0, 0, comp.width, comp.height).data, f = full.getContext('2d').getImageData(0, 0, full.width, full.height).data;
+            let bad = 0; for (let i = 0; i < a.length; i += 4) if (Math.abs(a[i] - f[i]) + Math.abs(a[i + 1] - f[i + 1]) + Math.abs(a[i + 2] - f[i + 2]) > 60) bad++;
+            resetPlayerPositions(); return bad; });
+        check('Video: verschobene Spieler werden nicht abgeschnitten', vcut === 0, vcut + ' abweichende Bildpunkte');
         const vo = await page.evaluate(() => { const def = videoOptions('ergebnis'); setVal('in-vid-speed-ergebnis', 'xslow'); setVal('in-vid-gap-ergebnis', 'long'); setVal('in-vid-dist-ergebnis', 'far');
             const slow = videoOptions('ergebnis'); const saved = collectSlotData().tabSettings.ergebnis;
             ['speed', 'gap', 'dist'].forEach(k => setVal(`in-vid-${k}-ergebnis`, k === 'dist' ? 'short' : 'normal'));
