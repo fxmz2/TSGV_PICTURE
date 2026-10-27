@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 21.8</title>
+    <title>Match-Shot – Grafiken für Vereine 21.9</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2574,7 +2574,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "21.8";
+        const APP_VERSION = "21.9";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -8500,7 +8500,17 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const units = findAnimUnits(clone);
                 units.forEach((u, i) => u.el.setAttribute('data-au', i));
                 const cr = clone.getBoundingClientRect();
-                const rects = units.map(u => { const r = u.el.getBoundingClientRect(); return { x: r.left - cr.left, y: r.top - cr.top, w: r.width, h: r.height }; });
+                // Ausschnitt = Fläche des Elements inkl. aller Inhalte – verschobene Spieler oder Namen ragen oft über die Reihe hinaus
+                const rects = units.map(u => {
+                    let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+                    [u.el, ...u.el.querySelectorAll('*')].forEach(n => {
+                        const q = n.getBoundingClientRect();
+                        if (!q.width || !q.height) return;
+                        l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); b = Math.max(b, q.bottom);
+                    });
+                    if (l === Infinity) { const q = u.el.getBoundingClientRect(); l = q.left; t = q.top; r = q.right; b = q.bottom; }
+                    return { x: l - cr.left, y: t - cr.top, w: r - l, h: b - t };
+                });
                 const pass = async prep => {
                     const c = clone.cloneNode(true);
                     holder.appendChild(c);
