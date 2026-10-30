@@ -423,6 +423,38 @@ async function makePhotos(browser) {
         check('Spieler umbenannt', await page.evaluate(n => !findPlayer(n) && !!findPlayer('Umbenannt Neu'), oldName));
         check('Umbenannt auch in der Aufstellung', await page.evaluate(() => val('player-1') === 'Umbenannt Neu'));
         check('Umbenannt auch im gespeicherten Stand', await page.evaluate(async () => (await localforage.getItem(STORE.slot(currentVersion))).inputs['player-1'] === 'Umbenannt Neu'));
+        // Mehrere Spieler auf einmal bearbeiten: Namen (auch vertauscht), Nummer, Mannschaft, Löschen
+        const mass = await page.evaluate(async () => {
+            stammdaten.players.push({ name: 'Weg Damit' }, { name: 'tausch_a' }, { name: 'tausch_b' });
+            await onStammdatenChanged('players');
+            const lineupName = val('player-1');
+            openMassEdit('players');
+            const row = n => massRows().find(r => r.querySelector('.mass-name').value === n) || (() => { throw new Error('Zeile fehlt: ' + n + ' / ' + massRows().map(r => r.querySelector('.mass-name').value).join('|')); })();
+            const r = { rows: massRows().length === stammdaten.players.length };
+            const lr = row(lineupName);
+            lr.querySelector('.mass-name').value = 'Massen Neu';
+            lr.querySelector('.mass-nr').value = '77';
+            row('tausch_a').querySelector('.mass-name').value = 'tausch_b';
+            row('tausch_b').querySelector('.mass-name').value = 'tausch_a';
+            massTidyNames();
+            r.tidy = !!row('Tausch A') && !!row('Tausch B');
+            row('Weg Damit').querySelector('.mass-check').checked = true; massDeleteSelected();
+            if (stammdaten.teams?.length) { row('Massen Neu').querySelector('.mass-check').checked = true; setVal('mass-team', stammdaten.teams[0]); massApplyToSelected(); }
+            await saveMassEdit();
+            const p = findPlayer('Massen Neu');
+            r.saved = !!p && p.number === '77' && (!stammdaten.teams?.length || p.team === stammdaten.teams[0]);
+            r.lineup = val('player-1') === 'Massen Neu';
+            r.deleted = !findPlayer('Weg Damit');
+            r.closed = $('mass-overlay').hidden;
+            r.stored = (await localforage.getItem(STORE.slot(currentVersion))).inputs['player-1'] === 'Massen Neu';
+            openMassEdit('players'); const a = massRows()[0].querySelector('.mass-name'), b = massRows()[1].querySelector('.mass-name');
+            a.value = b.value; await saveMassEdit(); r.dupBlocked = !$('mass-overlay').hidden && a.classList.contains('bad'); closeMassEdit();
+            stammdaten.players = stammdaten.players.filter(x => !/^Tausch /.test(x.name)); await onStammdatenChanged('players');
+            return r; });
+        check('Mehrere Spieler auf einmal bearbeiten (Namen, Nummer, Mannschaft, Löschen, Doppelte verhindert)', Object.values(mass).every(Boolean), JSON.stringify(mass));
+        check('Gegner: mehrere auf einmal umbenennen', await page.evaluate(async () => { const o = stammdaten.opponents[0]?.name; if (!o) return true;
+            openMassEdit('opponents'); massRows()[0].querySelector('.mass-name').value = 'Gegner Massen'; await saveMassEdit();
+            const ok = !!stammdaten.opponents.find(x => x.name === 'Gegner Massen'); await applyRenames('opponents', new Map([['Gegner Massen', o]])); return ok && !!stammdaten.opponents.find(x => x.name === o); }));
         // Gegner & Sponsoren umbenennen (inkl. einzeln verschobenem Sponsor-Logo)
         const prep = await page.evaluate(async () => {
             const opp = stammdaten.opponents[0].name; setVal('in-post-opponent-select', opp);

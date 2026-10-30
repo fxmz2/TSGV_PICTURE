@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 22.2</title>
+    <title>Match-Shot – Grafiken für Vereine 22.3</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -893,6 +893,30 @@
         .pack-results a { display: block; text-align: center; font-size: 10px; color: #333; text-decoration: none; word-break: break-all; }
         .pack-results img { width: 100%; border-radius: 6px; border: 1px solid #ddd; display: block; margin-bottom: 3px; }
         .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        /* Mehrere Spieler / Gegner / Sponsoren auf einmal bearbeiten */
+        .mass-card { max-width: 560px; }
+        .mass-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; font-size: 13px; }
+        .mass-tools button, .mass-bulk button { border: 1px solid #ccc; background: #f8f9fa; color: #222; border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; }
+        .mass-bulk { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 12px; background: #f1f5f9; padding: 6px; border-radius: 8px; margin-bottom: 8px; }
+        .mass-bulk select { font-size: 12px; padding: 4px; flex: 1 1 30%; min-width: 0; }
+        .mass-row { display: grid; grid-template-columns: 22px 52px 1fr; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid #eee; }
+        .mass-row input[type="checkbox"] { width: 18px; height: 18px; margin: 0; }
+        .mass-row img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: #e5e7eb; }
+        .mass-row img.logo { object-fit: contain; background: #fff; border: 1px solid #ddd; box-sizing: border-box; }
+        .mass-name { width: 100%; box-sizing: border-box; font-size: 16px; padding: 7px 8px; border: 1px solid #ccc; border-radius: 6px; }
+        .mass-name.bad { border-color: #e63946; background: #fff0f0; }
+        .mass-sub { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+        .mass-sub select, .mass-sub input { font-size: 12px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; min-width: 0; background: #fff; }
+        .mass-sub .mass-nr { width: 46px; text-align: center; }
+        .mass-sub select, .mass-sub .mass-nick { flex: 1 1 28%; }
+        .mass-row.del { opacity: 0.45; }
+        .mass-row.del .mass-name { text-decoration: line-through; }
+        .mass-undel { display: none; margin-top: 4px; border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+        .mass-row.del .mass-undel { display: inline-block; }
+        .mass-open-btn { background: #264653; }
+        .mass-card .modal-actions { position: sticky; bottom: -18px; margin: 10px 0 -18px; padding: 8px 0 18px; background: #fff; border-top: 1px solid #eee;
+            display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 6px; }
+        .mass-card .modal-actions button { padding: 11px 6px; font-size: 13px; }
         .modal-actions button { border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; }
         .modal-actions .primary { background: #2a9d8f; color: white; }
         .modal-actions .secondary { background: #e9ecef; color: #333; }
@@ -1433,6 +1457,7 @@
                         </div>
                         <button type="button" class="copy-action-btn" style="background:#2a9d8f;" onclick="cutOutAllPlayers()">✂️ Hintergrund bei allen Spielern entfernen</button>
                         <span class="hint" style="margin-bottom:8px;">Die KI läuft direkt auf dem Gerät – es werden keine Fotos übertragen. Einzelne Fotos stellst du beim Spieler über ✂️ frei – je Foto wählbar und jederzeit rückgängig, falls zu viel abgeschnitten wurde. Tipp: Auf dem iPhone kannst du Personen auch in der Fotos-App freistellen (Motiv lange drücken → „Kopieren“ bzw. „Sticker hinzufügen“) und das Ergebnis als PNG hochladen.</span>
+                        <button type="button" class="copy-action-btn mass-open-btn" onclick="openMassEdit('players')">✏️ Alle Spieler auf einmal bearbeiten (Namen, Nummern, Mannschaft …)</button>
                         <div id="list-players" class="scrollable-controls-box"></div>
                     </div>
                 </details>
@@ -1443,6 +1468,7 @@
                         <div class="control-group"><label>Name</label><input type="text" id="new-opponent-name" placeholder="Name des Gegners"></div>
                         <div class="control-group"><label>Wappen</label><input type="file" id="new-opponent-img" accept="image/*"></div>
                         <button type="button" class="copy-action-btn" onclick="addSimpleEntry('opponents')">➕ Gegner speichern</button>
+                        <button type="button" class="copy-action-btn mass-open-btn" onclick="openMassEdit('opponents')">✏️ Mehrere Gegner auf einmal bearbeiten</button>
                         <div id="list-opponents" class="scrollable-controls-box"></div>
                     </div>
                 </details>
@@ -1453,6 +1479,7 @@
                         <div class="control-group"><label>Name</label><input type="text" id="new-sponsor-name" placeholder="Name des Sponsors"></div>
                         <div class="control-group"><label>Logo</label><input type="file" id="new-sponsor-img" accept="image/*"></div>
                         <button type="button" class="copy-action-btn" onclick="addSimpleEntry('sponsors')">➕ Sponsor speichern</button>
+                        <button type="button" class="copy-action-btn mass-open-btn" onclick="openMassEdit('sponsors')">✏️ Mehrere Sponsoren auf einmal bearbeiten</button>
                         <div id="list-sponsors" class="scrollable-controls-box"></div>
                     </div>
                 </details>
@@ -2581,6 +2608,29 @@ Alle sind herzlich eingeladen!</textarea></div>
     </div>
 
     <!-- GRAFIK-PAKET -->
+    <div id="mass-overlay" class="modal-overlay" hidden>
+        <div class="modal-card mass-card">
+            <h2 id="mass-title">✏️ Mehrere bearbeiten</h2>
+            <p>Namen direkt in der Liste ändern – mit „Weiter“ auf der Tastatur springst du zum nächsten. Erst „💾 Alles speichern“ übernimmt alles (auch in Aufstellung, Kalender, Ergebnissen …).</p>
+            <div class="mass-tools">
+                <button type="button" onclick="massTidyNames()" title="z.B. „max_mustermann-2“ → „Max Mustermann 2“">✨ Dateinamen aufräumen</button>
+                <label><input type="checkbox" id="mass-all" onchange="massSelectAll(this.checked)"> Alle auswählen</label>
+            </div>
+            <div class="mass-bulk" id="mass-bulk">
+                <span>Für Ausgewählte:</span>
+                <select id="mass-team"></select>
+                <select id="mass-pos"></select>
+                <button type="button" onclick="massApplyToSelected()">Übernehmen</button>
+            </div>
+            <div id="mass-rows"></div>
+            <div class="modal-actions">
+                <button type="button" class="primary" onclick="saveMassEdit()">💾 Alles speichern</button>
+                <button type="button" class="secondary" style="color:#c1121f;" onclick="massDeleteSelected()" title="Angekreuzte löschen">🗑️ Löschen</button>
+                <button type="button" class="secondary" onclick="closeMassEdit()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
     <div id="photo-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closePhotoDialog()">
         <div class="modal-card">
             <h2 id="photo-title">📷 Fotos</h2>
@@ -2740,7 +2790,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "22.2";
+        const APP_VERSION = "22.3";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3892,21 +3942,30 @@ Alle sind herzlich eingeladen!</textarea></div>
             const newName = normName(input);
             if (!newName || newName === oldName) return;
             if (newName === 'Keiner' || list.some(x => x.name === newName)) { alert(`„${newName}“ gibt es schon – bitte einen anderen Namen wählen.`); return; }
+            await applyRenames(type, new Map([[oldName, newName]]));
+            toast(`✅ „${oldName}“ heißt jetzt „${newName}“`);
+        }
+        /* map: alter Name → neuer Name. Alle auf einmal tauschen, damit auch vertauschte Namen (A↔B) stimmen */
+        async function applyRenames(type, map) {
+            if (!map.size) return;
             await saveSlotNow();
             const swap = o => {
                 if (Array.isArray(o)) return o.map(swap);
                 if (o && typeof o === 'object') { for (const k in o) o[k] = swap(o[k]); return o; }
-                return o === oldName ? newName : o;
+                return typeof o === 'string' && map.has(o) ? map.get(o) : o;
             };
             // Einzeln verschobene Sponsor-Logos hängen am Namen (spl-<Vorlage>-<Name>) → Position mitnehmen
-            const oldEnd = type === 'sponsors' ? sponsorLogoId('', oldName).slice(4) : null, newEnd = oldEnd && sponsorLogoId('', newName).slice(4);
+            const ends = type === 'sponsors' ? [...map].map(([o, n]) => [sponsorLogoId('', o).slice(4), sponsorLogoId('', n).slice(4)]).filter(([a, b]) => a !== b) : [];
             const movePositions = pos => {
-                if (!pos || !oldEnd || oldEnd === newEnd) return;
+                if (!pos || !ends.length) return;
+                const moved = {};
                 Object.keys(pos).forEach(k => {
-                    if (!k.startsWith('spl-') || !k.endsWith(oldEnd)) return;
-                    pos[k.slice(0, -oldEnd.length) + newEnd] = pos[k];
+                    const hit = k.startsWith('spl-') && ends.find(([a]) => k.endsWith(a));
+                    if (!hit) return;
+                    moved[k.slice(0, -hit[0].length) + hit[1]] = pos[k];
                     delete pos[k];
                 });
+                Object.assign(pos, moved);
             };
             for (const v of ['v1', 'v2', 'v3']) {
                 const d = await localforage.getItem(STORE.slot(v));
@@ -3916,7 +3975,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 await localforage.setItem(STORE.slot(v), d);
             }
             movePositions(pendingPositions);
-            e.name = newName;
+            stammdaten[type].forEach(e => { if (map.has(e.name)) e.name = map.get(e.name); });
             const cur = await localforage.getItem(STORE.slot(currentVersion));
             sortStammdaten();
             await saveStammdaten();
@@ -3928,7 +3987,125 @@ Alle sind herzlich eingeladen!</textarea></div>
             renderStammdatenLists();
             renderAll();
             resetHistory();
-            toast(`✅ „${oldName}“ heißt jetzt „${newName}“`);
+        }
+
+        /* ---------- Mehrere Einträge auf einmal bearbeiten ---------- */
+        let massState = null;
+        const MASS_TITLES = { players: '✏️ Spieler bearbeiten', opponents: '✏️ Gegner bearbeiten', sponsors: '✏️ Sponsoren bearbeiten' };
+        function openMassEdit(type) {
+            const entries = (stammdaten[type] || []).slice();
+            if (!entries.length) { alert('Noch keine Einträge angelegt.'); return; }
+            massState = { type, entries };
+            const players = type === 'players';
+            setText('mass-title', `${MASS_TITLES[type]} (${entries.length})`);
+            $('mass-bulk').hidden = !players;
+            if (players) {
+                $('mass-team').innerHTML = '<option value="*">Mannschaft nicht ändern</option>' + teamOptionsHTML('', '– keine Mannschaft –');
+                $('mass-pos').innerHTML = '<option value="*">Position nicht ändern</option>' + positionOptionsHTML('', '– keine Position –');
+            }
+            $('mass-all').checked = false;
+            $('mass-rows').innerHTML = entries.map((e, i) => {
+                const img = players ? (e.cutImg || e.img || PLAYER_FALLBACK) : (e.img || makeBadgeSvg(e.name));
+                const isPlayer = players && (e.group || 'Spieler') === 'Spieler';
+                const sub = players ? `<div class="mass-sub">
+                        ${isPlayer ? `<input type="text" class="mass-nr" placeholder="Nr." maxlength="3" value="${esc(e.number || '')}" title="Rückennummer">` : ''}
+                        <select class="mass-team" title="Mannschaft">${teamOptionsHTML(e.team, '– Mannschaft –')}</select>
+                        ${isPlayer ? `<select class="mass-pos" title="Position">${positionOptionsHTML(e.position, '– Position –')}</select>` : ''}
+                        <input type="text" class="mass-nick" placeholder="Spitzname" maxlength="30" value="${esc(e.nick || '')}" title="Spitzname (optional)">
+                    </div>` : '';
+                return `<div class="mass-row" data-i="${i}">
+                    <input type="checkbox" class="mass-check" title="Auswählen">
+                    <img src="${img}" class="${players ? '' : 'logo'}" alt="">
+                    <div><input type="text" class="mass-name" value="${esc(e.name)}" maxlength="60" enterkeyhint="next" autocomplete="off">${sub}
+                        <button type="button" class="mass-undel" onclick="this.closest('.mass-row').classList.remove('del')">↩️ doch behalten</button></div>
+                </div>`;
+            }).join('');
+            $('mass-rows').querySelectorAll('.mass-name').forEach((inp, i, all) => {
+                inp.addEventListener('keydown', ev => {
+                    if (ev.key !== 'Enter') return;
+                    ev.preventDefault();
+                    if (all[i + 1]) { all[i + 1].focus(); all[i + 1].select(); } else inp.blur();
+                });
+                inp.addEventListener('input', () => inp.classList.remove('bad'));
+            });
+            $('mass-overlay').hidden = false;
+        }
+        function closeMassEdit() {
+            $('mass-overlay').hidden = true;
+            $('mass-rows').innerHTML = '';
+            massState = null;
+        }
+        function massRows() { return Array.from($('mass-rows').querySelectorAll('.mass-row')); }
+        function massSelectAll(on) { massRows().forEach(r => { r.querySelector('.mass-check').checked = on; }); }
+        function massSelected() { return massRows().filter(r => r.querySelector('.mass-check').checked); }
+        /* „max_mustermann-2.jpg“ → „Max Mustermann 2“ */
+        function tidyFileName(n) {
+            const t = normName(String(n).replace(/\.(jpe?g|png|webp|heic|heif|gif|bmp)$/i, '').replace(/[_\-.]+/g, ' '));
+            return t.split(' ').map(w => (w === w.toLowerCase() || (w === w.toUpperCase() && w.length > 2)) && /^\p{L}/u.test(w)
+                ? w.charAt(0).toLocaleUpperCase('de-DE') + w.slice(1).toLocaleLowerCase('de-DE') : w).join(' ');
+        }
+        function massTidyNames() {
+            let n = 0;
+            massRows().forEach(r => {
+                const inp = r.querySelector('.mass-name'), t = tidyFileName(inp.value);
+                if (t && t !== inp.value) { inp.value = t; n++; }
+            });
+            toast(n ? `✨ ${n} Namen aufgeräumt – bitte kurz prüfen` : 'Nichts aufzuräumen');
+        }
+        function massApplyToSelected() {
+            const rows = massSelected();
+            if (!rows.length) { alert('Bitte zuerst links die Spieler ankreuzen.'); return; }
+            const team = val('mass-team'), pos = val('mass-pos');
+            rows.forEach(r => {
+                if (team !== '*') r.querySelector('.mass-team').value = team;
+                if (pos !== '*' && r.querySelector('.mass-pos')) r.querySelector('.mass-pos').value = pos;
+            });
+            toast(`✅ Bei ${rows.length} Spieler${rows.length === 1 ? '' : 'n'} eingetragen – noch speichern`);
+        }
+        function massDeleteSelected() {
+            const rows = massSelected();
+            if (!rows.length) { alert('Bitte zuerst links die Einträge ankreuzen, die gelöscht werden sollen.'); return; }
+            rows.forEach(r => { r.classList.add('del'); r.querySelector('.mass-check').checked = false; });
+            $('mass-all').checked = false;
+            toast(`🗑️ ${rows.length} zum Löschen markiert – erst mit „Alles speichern“ endgültig`);
+        }
+        async function saveMassEdit() {
+            if (!massState) return;
+            const { type, entries } = massState;
+            const keep = [], del = new Set(), seen = new Map(), bad = [];
+            massRows().forEach(r => {
+                const e = entries[+r.dataset.i];
+                if (!e) return;
+                if (r.classList.contains('del')) { del.add(e); return; }
+                const inp = r.querySelector('.mass-name');
+                const name = normName(inp.value) || e.name;
+                if (name === 'Keiner' || seen.has(name)) { bad.push(name); inp.classList.add('bad'); seen.get(name)?.classList.add('bad'); }
+                seen.set(name, inp);
+                keep.push({ e, r, name });
+            });
+            if (bad.length) {
+                alert(`Diese Namen gibt es mehrfach (oder „Keiner“): ${[...new Set(bad)].join(', ')}\nBitte eindeutige Namen vergeben – die Felder sind rot markiert.`);
+                $('mass-rows').querySelector('.mass-name.bad')?.focus();
+                return;
+            }
+            if (del.size && !confirm(`${del.size} Eintr${del.size === 1 ? 'ag' : 'äge'} wirklich löschen?`)) return;
+            const map = new Map();
+            let changed = 0;
+            keep.forEach(({ e, r, name }) => {
+                if (name !== e.name) map.set(e.name, name);
+                if (type !== 'players') return;
+                const set = (field, v) => { v = normName(v); if ((e[field] || '') === v) return; if (v) e[field] = v; else delete e[field]; changed++; };
+                if (r.querySelector('.mass-nr')) set('number', r.querySelector('.mass-nr').value);
+                set('team', r.querySelector('.mass-team').value);
+                if (r.querySelector('.mass-pos')) set('position', r.querySelector('.mass-pos').value);
+                set('nick', r.querySelector('.mass-nick').value);
+            });
+            if (del.size) stammdaten[type] = stammdaten[type].filter(e => !del.has(e));
+            closeMassEdit();
+            if (map.size) await applyRenames(type, map);
+            await onStammdatenChanged(type);
+            const parts = [map.size && `${map.size} umbenannt`, changed && `${changed} Angaben geändert`, del.size && `${del.size} gelöscht`].filter(Boolean);
+            toast(parts.length ? '✅ ' + parts.join(', ') : 'Keine Änderungen');
         }
         function parseLines(text) {
             const out = [];
