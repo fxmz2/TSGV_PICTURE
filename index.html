@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 22.3</title>
+    <title>Match-Shot – Grafiken für Vereine 22.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1502,15 +1502,16 @@
                         <div class="control-group">
                             <label>Format</label>
                             <select id="new-template-format">
-                                <option value="auto">Automatisch erkennen</option>
-                                <option value="feed">Feed (1:1)</option>
-                                <option value="story">Story (9:16)</option>
+                                <option value="both">Story & Beitrag (beides)</option>
+                                <option value="auto">Automatisch erkennen (nur eins)</option>
+                                <option value="feed">Nur Beitrag</option>
+                                <option value="story">Nur Story</option>
                             </select>
                         </div>
                         <div class="control-group">
                             <label>Bild(er) hochladen</label>
                             <input type="file" id="new-template-img" accept="image/*" multiple onchange="handleTemplateUpload(event)">
-                            <span class="hint">Ideal: 1080×1350 px bzw. 1080×1080 px (Beitrag) und 1080×1920 px (Story). Die Hintergründe erscheinen danach in jedem Reiter unter „🖼️ Hintergrund & Formen“.</span>
+                            <span class="hint">Ideal: 1080×1350 px bzw. 1080×1080 px (Beitrag) und 1080×1920 px (Story). Die Hintergründe erscheinen danach in jedem Reiter unter „🖼️ Hintergrund & Formen“. Mit „Story & Beitrag“ reicht ein Bild für beide Formate – es wird mittig passend zugeschnitten. Das Format lässt sich in der Liste unten jederzeit ändern.</span>
                         </div>
                         <div id="list-templates" class="scrollable-controls-box"></div>
                     </div>
@@ -2790,7 +2791,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "22.3";
+        const APP_VERSION = "22.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3544,7 +3545,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 await redo(p, 'specialImg', IMG_OPTS.photo, false);
                 await redo(p, 'specialCutImg', null, true);
             }
-            for (const t of stammdaten.templates) await redo(t, 'img', IMG_OPTS[t.format === 'story' ? 'story' : 'feed'], false);
+            for (const t of stammdaten.templates) await redo(t, 'img', IMG_OPTS[templateImgOpts(t.format)], false);
             await saveStammdaten();
             renderStammdatenLists();
             updateAllViews();
@@ -3657,7 +3658,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function handleTemplateUpload(event) {
             const files = Array.from(event.target.files || []);
             if (!files.length) return;
-            const wanted = val('new-template-format') || 'auto';
+            const wanted = val('new-template-format') || 'both';
             let count = 0;
             for (const file of files) {
                 try {
@@ -3669,7 +3670,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                             id: 'tpl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
                             name: normName(file.name.replace(/\.[^.]+$/, '').replace(/_/g, ' ')) || 'Hintergrund',
                             format,
-                            img: imageToDataURL(img, IMG_OPTS[format]),
+                            img: imageToDataURL(img, IMG_OPTS[templateImgOpts(format)]),
                             thumb: imageToDataURL(img, IMG_OPTS.thumb)
                         });
                         count++;
@@ -3834,6 +3835,15 @@ Alle sind herzlich eingeladen!</textarea></div>
             toast('✅ Bild aktualisiert');
         }
 
+        async function setTemplateFormat(idx, format) {
+            const t = stammdaten.templates[idx];
+            if (!t || !['feed', 'story', 'both'].includes(format)) return;
+            t.format = format;
+            await onStammdatenChanged('templates');
+            editorTabs.forEach(tab => updateTabDesign(tab));
+            toast(format === 'both' ? '✅ Hintergrund jetzt für Story & Beitrag' : format === 'story' ? '✅ Hintergrund nur für Story' : '✅ Hintergrund nur für Beitrag');
+        }
+
         async function deleteEntry(type, idx) {
             const entry = stammdaten[type][idx];
             if (!entry) return;
@@ -3882,7 +3892,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                             + (e.img || e.torImg || e.specialImg ? btn('✂️', 'Freistellen – je Foto wählbar', `openPhotoDialog(${i})`, anyCut ? 'active' : '') : '');
                     } else if (type === 'templates') {
                         thumb = e.thumb; thumbCls = e.format === 'story' ? 'story' : '';
-                        sub = e.format === 'story' ? 'Story (9:16)' : 'Feed (1:1)';
+                        meta = `<div class="sd-meta"><select title="Verwenden für" onchange="setTemplateFormat(${i}, this.value)">
+                            ${[['both', 'Story & Beitrag'], ['feed', 'Nur Beitrag'], ['story', 'Nur Story']].map(([v, l]) => `<option value="${v}" ${(e.format || 'feed') === v ? 'selected' : ''}>${l}</option>`).join('')}
+                        </select></div>`;
                     } else {
                         thumb = e.img || makeBadgeSvg(e.name); thumbCls = 'logo-thumb cut-thumb';
                         sub = e.img ? (e.imgOrig ? 'Hintergrund entfernt ✓' : '') : 'kein Logo';
@@ -5317,12 +5329,16 @@ Alle sind herzlich eingeladen!</textarea></div>
             editorTabs.forEach(tab => { renderCustomTextEditors(tab); renderCustomTextElements(tab); });
         }
 
-        function isValidBg(id) {
-            return BUILTIN_BGS.some(b => b.id === id) || !!findTemplate(id);
+        /* Eigene Hintergründe: format 'feed', 'story' oder 'both' (für Beitrag und Story) */
+        function templateFits(t, fmt) { return !!t && (t.format === fmt || t.format === 'both'); }
+        function templateImgOpts(format) { return format === 'feed' ? 'feed' : 'story'; }
+        function isValidBg(id, fmt) {
+            const t = findTemplate(id);
+            return BUILTIN_BGS.some(b => b.id === id) || (fmt ? templateFits(t, fmt) : !!t);
         }
         function getBgValue(tab, fmt) {
             const v = val(`in-bg-${tab}-${fmt}`);
-            return isValidBg(v) ? v : DEFAULT_BG;
+            return isValidBg(v, fmt) ? v : DEFAULT_BG;
         }
 
         function applyBg(card, bgId) {
@@ -5346,7 +5362,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 let html = BUILTIN_BGS.map(b =>
                     `<button type="button" class="bg-thumb ${cls} ${cur === b.id ? 'active' : ''}" data-bg="${b.id}" title="${b.name}" style="background-image:${b.css}" onclick="selectBg('${tab}', '${fmt}', '${b.id}')"></button>`
                 ).join('');
-                html += stammdaten.templates.filter(t => t.format === fmt).map(t =>
+                html += stammdaten.templates.filter(t => templateFits(t, fmt)).map(t =>
                     `<button type="button" class="bg-thumb ${cls} ${cur === t.id ? 'active' : ''}" data-bg="${t.id}" title="${esc(t.name)}" style="background-image:url('${t.thumb}')" onclick="selectBg('${tab}', '${fmt}', '${t.id}')"></button>`
                 ).join('');
                 html += `<button type="button" class="bg-thumb add ${cls}" title="Eigenen Hintergrund hochladen (Daten)" onclick="openTemplateUpload('${fmt}')">＋</button>`;
@@ -5357,7 +5373,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         function openTemplateUpload(fmt) {
             switchTab('stammdaten');
             const sel = $('new-template-format');
-            if (sel) sel.value = fmt;
+            if (sel) sel.value = 'both';
             const input = $('new-template-img');
             const section = input?.closest('details');
             if (section) section.open = true;

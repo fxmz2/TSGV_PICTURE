@@ -166,6 +166,20 @@ async function makePhotos(browser) {
         await page.waitForTimeout(2000);
         const p = await page.evaluate(() => { const x = findPlayer('Max Muster'); return x && !!x.img && !!x.torImg; });
         check('Mehrfach-Upload mit Torjubel-Foto', p);
+        // Eigener Hintergrund: standardmäßig für Story & Beitrag, Format nachträglich änderbar
+        await page.evaluate(() => { $('new-template-img').closest('details').open = true; });
+        await page.setInputFiles('#new-template-img', photos[0]);
+        await page.waitForFunction(() => stammdaten.templates.length > 0, null, { timeout: 8000 });
+        const bg = await page.evaluate(async () => { const t = stammdaten.templates[0], r = { format: t.format };
+            renderBgThumbs('post');
+            r.grids = ['feed', 'story'].every(f => !!document.querySelector(`#thumb-grid-post-${f} [data-bg="${t.id}"]`));
+            selectBg('post', 'feed', t.id); selectBg('post', 'story', t.id);
+            r.used = getBgValue('post', 'feed') === t.id && getBgValue('post', 'story') === t.id && $('capture-post-story').style.backgroundImage.includes('blob:');
+            await setTemplateFormat(0, 'feed');
+            r.feedOnly = getBgValue('post', 'story') === DEFAULT_BG && !document.querySelector(`#thumb-grid-post-story [data-bg="${t.id}"]`) && getBgValue('post', 'feed') === t.id;
+            stammdaten.templates = []; await onStammdatenChanged('templates'); selectBg('post', 'feed', DEFAULT_BG); selectBg('post', 'story', DEFAULT_BG);
+            return r; });
+        check('Hintergrund einmal hochladen → für Story & Beitrag (Format änderbar)', bg.format === 'both' && bg.grids && bg.used && bg.feedOnly, JSON.stringify(bg));
         // Foto-Umschalter
         await page.click('.tab-btn[data-tab="potm"]');
         await page.selectOption('#in-potm-player', 'Max Muster');
