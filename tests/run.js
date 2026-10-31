@@ -387,6 +387,13 @@ async function makePhotos(browser) {
         const vlast = await page.evaluate(() => voState.items[voState.items.length - 1].key);
         await page.mouse.move(va.x + va.width / 2, va.y + va.height / 2); await page.mouse.down(); await page.mouse.move(vb.x + vb.width / 2, vb.y + 2, { steps: 8 }); await page.mouse.up();
         check('Video-Reihenfolge per Ziehen', await page.evaluate(k => { const ok = voState.items[0].key === k && vidOrder['capture-post-feed'][0] === k; delete vidOrder['capture-post-feed']; closeVidOrder(); return ok; }, vlast));
+        const vsp = await page.evaluate(() => { switchTab('post'); const c = $('team-logos-post-container'), r = {};
+            r.def = val('in-vs-pos-post'); const dir = val('in-logo-dir-post'); setVal('in-logo-dir-post', 'row');
+            ['top', 'center', 'bottom'].forEach(p => { setVal('in-vs-pos-post', p); updateTabDesign('post'); const a = c.querySelector('.logos-vs').getBoundingClientRect(), b = c.querySelector('.logo').getBoundingClientRect();
+                r[p] = Math.round((a.top + a.height / 2 - b.top) / b.height * 100); });
+            setVal('in-vs-size-post', '200'); updateTabDesign('post'); r.big = parseFloat(getComputedStyle(c.querySelector('.logos-vs')).fontSize) > parseFloat(getComputedStyle(c).fontSize) * 1.8;
+            setVal('in-vs-size-post', '100'); setVal('in-vs-pos-post', 'center'); setVal('in-logo-dir-post', dir); updateTabDesign('post'); return r; });
+        check('„VS“ bei der Ankündigung: Position oben/mittig/unten und Größe', vsp.def === 'center' && vsp.top < 25 && Math.abs(vsp.center - 50) <= 8 && vsp.bottom > 75 && vsp.big, JSON.stringify(vsp));
         // Uhrzeit als Stunde/Minute + „Uhr“ statt Freitext
         const tp = await page.evaluate(() => { switchTab('post'); const src = $('in-post-time'), box = src.nextElementSibling, r = {};
             const h = box.querySelector('.tp-h'), m = box.querySelector('.tp-m'), u = box.querySelector('.tp-u');
