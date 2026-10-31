@@ -32,7 +32,7 @@ CODE-HASH = Vereinsname = Wappen-Datei = gültig bis = Paket
 ```
 
 - **CODE-HASH**: mit `code-generator.html` erzeugen (lokal im Browser öffnen). So steht der Code nicht lesbar in der Datei.
-- **Wappen-Datei**: z.B. `Wappen/SC_Lilaheim.jpg` (Groß-/Kleinschreibung beachten, keine Umlaute).
+- **Wappen-Datei**: z.B. `Wappen/SC_Lilaheim.png` (Groß-/Kleinschreibung beachten, keine Umlaute).
 - **gültig bis**: Ende der Saisonlizenz, z.B. `2050-12-31`. Zum Verlängern nur das Datum ändern.
 - **Paket**: `basis` oder `advanced` (ohne Angabe: advanced).
   - Basis: Ankündigung, Aufstellung (auch 7er/9er), Tor, Ergebnis (inkl. Halbzeit, Absage, Countdown),
