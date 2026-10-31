@@ -394,6 +394,26 @@ async function makePhotos(browser) {
             setVal('in-vs-size-post', '200'); updateTabDesign('post'); r.big = parseFloat(getComputedStyle(c.querySelector('.logos-vs')).fontSize) > parseFloat(getComputedStyle(c).fontSize) * 1.8;
             setVal('in-vs-size-post', '100'); setVal('in-vs-pos-post', 'center'); setVal('in-logo-dir-post', dir); updateTabDesign('post'); return r; });
         check('„VS“ bei der Ankündigung: Position oben/mittig/unten und Größe', vsp.def === 'center' && vsp.top < 25 && Math.abs(vsp.center - 50) <= 8 && vsp.bottom > 75 && vsp.big, JSON.stringify(vsp));
+        // Ankündigung: Titel automatisch nach Spielort, Datum per Kalender, Spielstand als Zahlen
+        const pk = await page.evaluate(() => { switchTab('post'); const r = {};
+            setVal('in-post-title-mode', 'auto'); setVal('in-post-venue', 'auswaerts'); updatePostFields(); r.away = $('out-post-title').textContent === 'AUSWÄRTSSPIEL' && $('in-post-title').disabled;
+            setVal('in-post-venue', 'heim'); updatePostFields(); r.home = $('out-post-title').textContent === 'HEIMSPIEL';
+            setVal('in-post-title-mode', 'custom'); setVal('in-post-title', 'DERBY'); updatePostFields(); r.custom = $('out-post-title').textContent === 'DERBY';
+            const d = collectSlotData(); delete d.postTitleMode; applySlotData(d); r.migr = val('in-post-title-mode') === 'custom';
+            setVal('in-post-title-mode', 'auto'); updatePostFields();
+            const db = $('in-post-date').previousElementSibling; db.querySelector('.dp-d').value = '2026-11-07'; db.querySelector('.dp-f').value = 'short';
+            db.querySelector('.dp-f').dispatchEvent(new Event('change', { bubbles: true })); r.date = val('in-post-date');
+            setVal('in-post-date', 'Samstag, 14.11.'); r.parsed = new Date(db.querySelector('.dp-d').value).getDay() === 6 && db.querySelector('.dp-f').value === 'long';
+            const tb = $('in-tor-score').nextElementSibling; tb.querySelector('.sp-a').value = '2'; tb.querySelector('.sp-a').dispatchEvent(new Event('input', { bubbles: true }));
+            tb.querySelector('.sp-b').value = '1'; tb.querySelector('.sp-b').dispatchEvent(new Event('input', { bubbles: true })); r.score = val('in-tor-score');
+            setVal('wk-score-1', 'abgesagt'); r.free = $('wk-score-1').nextElementSibling.hidden && $('wk-score-1').style.display !== 'none'; setVal('wk-score-1', '');
+            setErgMode('absage'); r.forced = $('in-ergebnis-score').nextElementSibling.hidden; setErgMode('ergebnis'); r.back = !$('in-ergebnis-score').nextElementSibling.hidden;
+            return r; });
+        check('Ankündigung: Titel automatisch/eigener, Datum aus Kalender, Spielstand als Zahlen', pk.away && pk.home && pk.custom && pk.migr && pk.date === 'Sa, 07.11.' && pk.parsed && pk.score === '2 : 1' && pk.free && pk.forced && pk.back, JSON.stringify(pk));
+        check('Wochenende: lange Vereinsnamen werden verkleinert statt abgeschnitten', await page.evaluate(() => { switchTab('wochenende');
+            stammdaten.opponents.push({ name: 'SpVgg Vorlagendorfhausen-Musterberg' }); refreshOpponentDropdown(); setVal('wk-team-1', 'A-Jugend'); setVal('wk-opp-1', 'SpVgg Vorlagendorfhausen-Musterberg'); setVal('wk-score-1', '0:1'); updateWochenende();
+            const els = [...document.querySelectorAll('#view-wochenende .fit-text')].filter(e => e.clientWidth); const ok = els.length > 0 && els.every(e => e.scrollWidth <= e.clientWidth + 1);
+            stammdaten.opponents.pop(); refreshOpponentDropdown(); setVal('wk-team-1', ''); setVal('wk-opp-1', ''); setVal('wk-score-1', ''); updateWochenende(); return ok; }));
         // Uhrzeit als Stunde/Minute + „Uhr“ statt Freitext
         const tp = await page.evaluate(() => { switchTab('post'); const src = $('in-post-time'), box = src.nextElementSibling, r = {};
             const h = box.querySelector('.tp-h'), m = box.querySelector('.tp-m'), u = box.querySelector('.tp-u');
