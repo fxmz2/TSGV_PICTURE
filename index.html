@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 22.9</title>
+    <title>Match-Shot – Grafiken für Vereine 23.0</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -771,6 +771,7 @@
         .wk-match { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; text-transform: uppercase; line-height: 1.2; }
         .wk-match img, .wk-own { width: 28px; height: 28px; object-fit: contain; background: #fff; border-radius: 50%; padding: 2px; box-sizing: border-box; flex-shrink: 0; }
         .wk-row .wk-own { margin-right: -4px; }
+        .wk-match > div { min-width: 0; }
         .wk-venue { display: block; font-size: 9px; color: rgba(255,255,255,0.75); letter-spacing: 0.5px; }
         .wk-score { min-width: 54px; flex-shrink: 0; text-align: center; font-size: 18px; font-weight: 900; border-radius: 8px; padding: 4px 6px; background: #6c757d; box-sizing: border-box; }
         .wk-score.win { background: #1b8a3c; }
@@ -782,9 +783,9 @@
         .wk-compact .wk-match img, .wk-compact .wk-own { width: 22px; height: 22px; }
         .wk-story { top: 150px; gap: 12px; }
         .wk-story .wk-row { padding: 10px 12px; }
-        .wk-story .wk-team { width: 100px; font-size: 11px; }
-        .wk-story .wk-match { font-size: 13px; }
-        .wk-story .wk-match img, .wk-story .wk-own { width: 36px; height: 36px; }
+        .wk-story .wk-team { width: 86px; font-size: 10px; }
+        .wk-story .wk-match { font-size: 12px; gap: 6px; }
+        .wk-story .wk-match img, .wk-story .wk-own { width: 32px; height: 32px; }
         .wk-story .wk-score { font-size: 22px; min-width: 64px; }
 
         .caption-text { width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px; line-height: 1.45; padding: 8px; border: 1px solid #ccc; border-radius: 6px; resize: vertical; }
@@ -893,6 +894,16 @@
         .time-pick label.tp-uhr { display: inline-flex; align-items: center; gap: 4px; font-weight: normal; margin: 0 0 0 4px; cursor: pointer; }
         .time-pick label.tp-uhr input { width: auto; margin: 0; }
         .time-pick input.tp-x { flex: 1 1 100%; }
+        /* Spielstand: zwei Zahlen statt Freitext; Datum: Kalender + Format */
+        .score-pick { display: flex; align-items: center; gap: 6px; }
+        .score-pick input.sp-a, .score-pick input.sp-b { width: 56px; flex: 0 0 56px; text-align: center; font-size: 16px; padding: 8px 4px; }
+        .score-pick .sp-colon { font-weight: bold; font-size: 18px; }
+        .score-pick button, .score-free-btn { border: 1px solid #ccc; background: #f8f9fa; color: #333; border-radius: 6px; padding: 6px 8px; font-size: 12px; cursor: pointer; margin-left: auto; }
+        .kal-edit-grid .score-pick input.sp-a, .kal-edit-grid .score-pick input.sp-b { width: 44px; flex-basis: 44px; padding: 7px 2px; }
+        .date-pick { display: grid; grid-template-columns: 1.2fr 1fr; gap: 6px; }
+        .date-pick input.dp-d { min-width: 0; }
+        .title-pick { display: grid; grid-template-columns: 1fr 1.2fr; gap: 6px; }
+        .title-pick input:disabled { background: #f1f3f5; color: #555; }
         /* Video: Reihenfolge der Elemente */
         .vo-fmt { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
         .vo-fmt button { border: 2px solid #005f73; background: #fff; color: #005f73; border-radius: 16px; padding: 5px 12px; font-size: 13px; font-weight: bold; cursor: pointer; }
@@ -1596,14 +1607,23 @@
 
                 <div class="control-group">
                     <label>Spielort</label>
-                    <select id="in-post-venue" onchange="updateMatchup();">
+                    <select id="in-post-venue" onchange="updateMatchup(); updatePostFields();">
                         <option value="heim">Heimspiel</option>
                         <option value="auswaerts">Auswärtsspiel</option>
                     </select>
                 </div>
                 <div class="control-group"><label>Gegner</label><select id="in-post-opponent-select" class="opp-select" onchange="updateMatchup();"></select></div>
-                <div class="control-group"><label>Titel</label><input type="text" id="in-post-title" value="HEIMSPIEL" oninput="updatePostFields();"></div>
-                <div class="control-group"><label>Datum</label><input type="text" id="in-post-date" placeholder="Sonntag, 07.06." oninput="updateAllDates();"></div>
+                <div class="control-group"><label>Titel</label>
+                    <div class="title-pick">
+                        <select id="in-post-title-mode" onchange="updatePostFields(); scheduleSave();" title="Titel">
+                            <option value="auto">Automatisch</option>
+                            <option value="custom">Eigener Titel</option>
+                        </select>
+                        <input type="text" id="in-post-title" value="HEIMSPIEL" oninput="updatePostFields();">
+                    </div>
+                    <span class="hint" id="post-title-hint">Heimspiel → „HEIMSPIEL“, Auswärtsspiel → „AUSWÄRTSSPIEL“. Die beiden Wörter änderst du unter „🔤 Feste Texte ändern“.</span>
+                </div>
+                <div class="control-group"><label>Datum</label><input type="text" id="in-post-date" class="date-src" placeholder="z.B. Pfingstmontag, 09.06." oninput="updateAllDates();"></div>
                 <div class="control-group"><label>Uhrzeit</label><input type="hidden" id="in-post-time" class="time-src" value=""></div>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('post')">🔄 Zurücksetzen (Positionen & Design) …</button>
@@ -1701,7 +1721,7 @@
                 <div class="control-group"><label>Torschütze</label><select id="in-tor-player" class="player-select" onchange="updateTor();"></select></div>
                 <div class="control-group"><label>Vorlagengeber (Optional)</label><select id="in-tor-assist" class="player-select" onchange="updateTor();"></select></div>
                 <div class="control-group"><label>Name anzeigen als</label><select id="in-tor-namefmt" class="namefmt-select" onchange="updateTor(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
-                <div class="control-group"><label>Spielstand</label><input type="text" id="in-tor-score" value="1 : 0" oninput="updateTor();"></div>
+                <div class="control-group"><label>Spielstand</label><input type="text" id="in-tor-score" class="score-src" value="1 : 0" oninput="updateTor();"></div>
                 <div class="control-group"><label>Minute</label><select id="in-tor-minute" class="keep-unknown" onchange="updateTor();"></select></div>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('tor')">🔄 Zurücksetzen (Positionen & Design) …</button>
@@ -1724,7 +1744,7 @@
                 </div>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-ergebnis-title" value="ENDERGEBNIS" oninput="updateErgebnis();"></div>
                 <div class="control-group erg-cd-only"><label>Spieltag (zählt die Tage automatisch herunter)</label><input type="date" id="erg-cd-date" onchange="updateErgebnis(); scheduleSave();"></div>
-                <div class="control-group"><label id="erg-score-label">Spielstand</label><input type="text" id="in-ergebnis-score" value="3 : 1" oninput="updateErgebnis();"></div>
+                <div class="control-group"><label id="erg-score-label">Spielstand</label><input type="text" id="in-ergebnis-score" class="score-src" value="3 : 1" oninput="updateErgebnis();"></div>
                 <div class="control-group"><label id="erg-text-label">Zusatztext</label><input type="text" id="in-ergebnis-text" value="Auswärtssieg!" oninput="updateErgebnis();"></div>
                 <button type="button" class="copy-action-btn" style="background:#2a9d8f; font-size:13px; padding:10px;" onclick="applyLastKalenderToErgebnis()">📅 Letztes Spiel aus Kalender übernehmen</button>
                 <span class="hint" style="margin-bottom:10px;">Gegner und Heim/Auswärts werden aus „Ankündigung“ übernommen (und dort mit geändert).</span>
@@ -2869,7 +2889,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "22.9";
+        const APP_VERSION = "23.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -2967,7 +2987,7 @@ Alle sind herzlich eingeladen!</textarea></div>
 
         /* Feste Beschriftungen in den Vorlagen – je Reiter überschreibbar (leer = Standard, „-“ = ausblenden) */
         const LABEL_DEFS = {
-            post:       { vs: 'VS' },
+            post:       { vs: 'VS', titleHome: 'HEIMSPIEL', titleAway: 'AUSWÄRTSSPIEL' },
             story:      { listTitle: 'AUFSTELLUNG', starters: 'STARTELF', bench: 'ERSATZBANK', coaches: 'TRAINER',
                           noStarters: 'Keine Spieler gewählt', noBench: 'Keine Ersatzspieler', noCoaches: 'Keine Trainer angegeben' },
             tor:        { title: 'TOOOOR!', scorer: 'TORSCHÜTZE:', assist: 'Vorlage von:' },
@@ -3141,6 +3161,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (el.tagName === 'SELECT' && el.classList.contains('keep-unknown') && v !== '' && ![...el.options].some(o => o.value === String(v))) el.add(new Option(String(v), String(v)));
             el.value = v;
             if (el.classList.contains('time-src')) syncTimePick(el);
+            if (el.classList.contains('score-src')) syncScorePick(el);
+            if (el.classList.contains('date-src')) syncDatePick(el);
         }
         /* Uhrzeit-Felder: zwei Kästchen (Stunde, Minute) + „Uhr“ an/aus statt Freitext.
            Der fertige Text („15:00 Uhr“) steht weiter im versteckten Original-Feld – gespeicherte Stände bleiben gültig. */
@@ -3192,7 +3214,109 @@ Alle sind herzlich eingeladen!</textarea></div>
             box.querySelector('.tp-x').value = t.extra;
             box.querySelector('.tp-x').hidden = !src.dataset.extra && !t.extra;
         }
-        function syncAllTimePicks() { document.querySelectorAll('input.time-src').forEach(syncTimePick); }
+        function syncAllTimePicks() {
+            document.querySelectorAll('input.time-src').forEach(syncTimePick);
+            document.querySelectorAll('input.score-src').forEach(syncScorePick);
+            document.querySelectorAll('input.date-src').forEach(syncDatePick);
+        }
+
+        /* Spielstand: zwei Zahlenfelder; Freitext (z.B. „abgesagt“) über den Knopf „Text“ */
+        const SCORE_RE = /^\s*(\d{1,2})\s*[:\-–]\s*(\d{1,2})\s*$/;
+        function setupScorePicks() {
+            document.querySelectorAll('input.score-src').forEach(src => {
+                if (src.nextElementSibling?.classList.contains('score-pick')) return;
+                const box = document.createElement('div');
+                box.className = 'score-pick';
+                box.innerHTML = `<input type="text" class="sp-a" inputmode="numeric" maxlength="2" placeholder="0" aria-label="Tore Heim">`
+                    + `<span class="sp-colon">:</span><input type="text" class="sp-b" inputmode="numeric" maxlength="2" placeholder="0" aria-label="Tore Gast">`
+                    + `<button type="button" class="sp-text" title="Freitext, z.B. abgesagt">${src.closest('.kal-edit-grid') ? '✎' : '✎ Text'}</button>`;
+                src.after(box);
+                const back = document.createElement('button');
+                back.type = 'button'; back.className = 'score-free-btn'; back.textContent = '🔢 Zahlen'; back.title = 'Wieder als Zahlen eingeben';
+                box.after(back);
+                const [a, b] = [box.querySelector('.sp-a'), box.querySelector('.sp-b')];
+                const write = () => {
+                    const x = a.value.replace(/\D/g, ''), y = b.value.replace(/\D/g, '');
+                    a.value = x; b.value = y;
+                    const sep = src.dataset.sep || ' : ';
+                    src.value = x || y ? `${x || 0}${sep}${y || 0}` : '';
+                };
+                a.addEventListener('input', () => { write(); if (a.value.length === 2) { b.focus(); b.select(); } });
+                b.addEventListener('input', write);
+                box.querySelector('.sp-text').addEventListener('click', () => { src.dataset.mode = 'free'; syncScorePick(src); src.focus(); });
+                back.addEventListener('click', () => {
+                    src.dataset.mode = '';
+                    if (!SCORE_RE.test(src.value)) { src.value = ''; src.dispatchEvent(new Event('input', { bubbles: true })); }
+                    syncScorePick(src); a.focus();
+                });
+                syncScorePick(src);
+            });
+        }
+        function syncScorePick(src) {
+            const box = src.nextElementSibling;
+            if (!box?.classList.contains('score-pick')) return;
+            const back = box.nextElementSibling, m = SCORE_RE.exec(src.value || '');
+            const forced = src.dataset.forceFree === '1';
+            const free = forced || src.dataset.mode === 'free' || (!m && normName(src.value) !== '');
+            box.hidden = free;
+            src.style.display = free ? '' : 'none';
+            if (back) back.hidden = !free || forced;
+            box.querySelector('.sp-a').value = m ? m[1] : '';
+            box.querySelector('.sp-b').value = m ? m[2] : '';
+        }
+
+        /* Datum: Kalender-Auswahl, Wochentag automatisch; Format wählbar oder eigener Text */
+        const DATE_FORMATS = [['long', 'Samstag, 07.11.'], ['short', 'Sa, 07.11.'], ['full', 'Samstag, 07.11.2026'], ['date', '07.11.2026'], ['custom', 'Eigener Text']];
+        function formatDateText(iso, fmt) {
+            const d = parseISODate(iso);
+            if (!d) return '';
+            const wd = WEEKDAYS_LONG[d.getDay()], dm = `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.`;
+            return { long: `${wd}, ${dm}`, short: `${wd.slice(0, 2)}, ${dm}`, full: `${wd}, ${dm}${d.getFullYear()}`, date: `${dm}${d.getFullYear()}` }[fmt] || `${wd}, ${dm}`;
+        }
+        function parseDateText(v) {
+            const t = normName(v);
+            if (!t) return { iso: '', fmt: 'long' };
+            const m = /^(?:([A-Za-zÄÖÜäöüß]+)\.?,?\s+)?(\d{1,2})\.(\d{1,2})\.(\d{4})?$/.exec(t);
+            if (!m) return { iso: '', fmt: 'custom' };
+            const wd = (m[1] || '').toLowerCase(), dd = +m[2], mm = +m[3];
+            const wdIdx = WEEKDAYS_LONG.findIndex(w => wd && w.toLowerCase().startsWith(wd.slice(0, 2)));
+            let year = m[4] ? +m[4] : null;
+            if (!year) {
+                // Jahr ohne Angabe: passend zum Wochentag, sonst das nächstgelegene ab heute
+                const now = new Date(), cands = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
+                const ok = cands.filter(y => wdIdx < 0 || new Date(y, mm - 1, dd).getDay() === wdIdx);
+                const list = ok.length ? ok : cands;
+                year = list.reduce((best, y) => Math.abs(new Date(y, mm - 1, dd) - now) < Math.abs(new Date(best, mm - 1, dd) - now) ? y : best, list[0]);
+            }
+            const fmt = m[4] ? (m[1] ? 'full' : 'date') : (m[1] && m[1].length <= 3 ? 'short' : 'long');
+            return { iso: `${year}-${pad(mm)}-${pad(dd)}`, fmt };
+        }
+        function setupDatePicks() {
+            document.querySelectorAll('input.date-src').forEach(src => {
+                if (src.previousElementSibling?.classList.contains('date-pick')) return;
+                const box = document.createElement('div');
+                box.className = 'date-pick';
+                box.innerHTML = `<input type="date" class="dp-d" aria-label="Datum"><select class="dp-f" title="Format">${DATE_FORMATS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>`;
+                src.before(box);
+                const [d, f] = [box.querySelector('.dp-d'), box.querySelector('.dp-f')];
+                const write = () => {
+                    if (f.value === 'custom') { src.hidden = false; return; }
+                    src.value = formatDateText(d.value, f.value);
+                    src.hidden = true;
+                };
+                d.addEventListener('change', write);
+                f.addEventListener('change', () => { write(); if (f.value === 'custom') src.focus(); });
+                syncDatePick(src);
+            });
+        }
+        function syncDatePick(src) {
+            const box = src.previousElementSibling;
+            if (!box?.classList.contains('date-pick')) return;
+            const p = parseDateText(src.value), f = box.querySelector('.dp-f');
+            if (p.iso) box.querySelector('.dp-d').value = p.iso;
+            if (!(f.value === 'custom' && !p.iso)) f.value = p.fmt;
+            src.hidden = f.value !== 'custom';
+        }
         /* Spielminuten 0–120 mit Nachspielzeit (45+1 …, 90+1 …, 120+1 …) */
         function minuteOptionsHTML(valueOf, labelOf, emptyLabel) {
             const list = [];
@@ -4387,7 +4511,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                         <div class="kal-edit-head">Spiel ${i} <button type="button" class="kal-clear-btn" onclick="clearWeekendRow(${i})">✕ leeren</button></div>
                         <div class="kal-edit-grid">
                             <input type="text" id="wk-team-${i}" placeholder="Mannschaft" oninput="updateWochenende();">
-                            <input type="text" id="wk-score-${i}" placeholder="Ergebnis, z.B. 3:1" oninput="updateWochenende();">
+                            <input type="text" id="wk-score-${i}" class="score-src" data-sep=":" placeholder="Ergebnis, z.B. abgesagt" oninput="updateWochenende();">
                             <select id="wk-opp-${i}" class="opp-select" onchange="updateWochenende();"></select>
                             <select id="wk-venue-${i}" onchange="updateWochenende();">
                                 <option value="heim">🏠 Heimspiel</option>
@@ -4499,7 +4623,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             });
         }
         const LABEL_NAMES = {
-            vs: '„VS“ zwischen den Logos', listTitle: 'Überschrift Liste', starters: 'Startelf', bench: 'Ersatzbank', coaches: 'Trainer',
+            vs: '„VS“ zwischen den Logos', titleHome: 'Titel Heimspiel (automatisch)', titleAway: 'Titel Auswärtsspiel (automatisch)', listTitle: 'Überschrift Liste', starters: 'Startelf', bench: 'Ersatzbank', coaches: 'Trainer',
             noStarters: 'Hinweis ohne Startelf', noBench: 'Hinweis ohne Ersatzbank', noCoaches: 'Hinweis ohne Trainer',
             title: 'Überschrift', scorer: 'Torschütze', assist: 'Vorlage', scorers: 'Überschrift Torschützen', ownGoal: 'Eigentor',
             date: 'Datum', meeting: 'Treffpunkt', jersey: 'Trikots', duty: 'Dienst',
@@ -5211,7 +5335,7 @@ Alle sind herzlich eingeladen!</textarea></div>
            EINEN REITER AUS EINER ANDEREN VERSION ÜBERNEHMEN
            ========================================================= */
         const TAB_CONTENT = {
-            post:       { keys: ['venue', 'opponentSelect', 'postTitle', 'postDate', 'postTime'], inputs: [] },
+            post:       { keys: ['venue', 'opponentSelect', 'postTitle', 'postTitleMode', 'postDate', 'postTime'], inputs: [] },
             story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly', 'captain', 'pitchHideNames', 'lineupMatch', 'lineupSub'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
             tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute', 'torNameFmt'], inputs: [] },
             ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers', 'ergNameFmt', 'ergMode'], inputs: [/^erg-/] },
@@ -7062,6 +7186,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (ed) Object.keys(ERG_MODES).forEach(m => ed.classList.toggle('erg-mode-' + m, m === mode));
             document.querySelectorAll('#erg-mode-btns button').forEach(b => b.classList.toggle('active', b.dataset.ergMode === mode));
             setText('erg-score-label', M.scoreLabel);
+            const es = $('in-ergebnis-score');
+            if (es) { es.dataset.forceFree = ['absage', 'countdown'].includes(mode) ? '1' : ''; syncScorePick(es); }
             setText('erg-text-label', M.textLabel);
 
             let scoreHtml = esc(score);
@@ -7219,7 +7345,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     <div class="wk-team">${esc(r.team || getTeamName())}</div>
                     <div class="wk-match">
                         <img src="${getOpponentLogoSrc(r.opp || 'Gegner')}" alt="">
-                        <div>${esc(L('wochenende', 'vs'))} ${esc(r.opp || 'Gegner')}${(v => v ? `<span class="wk-venue">${esc(v)}</span>` : '')(L('wochenende', r.venue === 'auswaerts' ? 'away' : 'home'))}</div>
+                        <div class="fit-text">${esc(L('wochenende', 'vs'))} ${esc(r.opp || 'Gegner')}${(v => v ? `<span class="wk-venue">${esc(v)}</span>` : '')(L('wochenende', r.venue === 'auswaerts' ? 'away' : 'home'))}</div>
                     </div>
                     <div class="wk-score ${weekendResult(r.score)}">${esc(r.score || '–')}</div>
                 </div>`).join('') : `<div class="kal-empty">${esc(L('wochenende', 'empty'))}</div>`;
@@ -7227,6 +7353,16 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (feed) { feed.innerHTML = html; feed.classList.toggle('wk-compact', rows.length > 4); }
             const story = $('out-wk-list');
             if (story) story.innerHTML = html;
+            fitTexts($('view-wochenende'));
+        }
+        /* Texte mit „fit-text“ werden verkleinert, bis lange Wörter (z.B. Vereinsnamen) in ihre Spalte passen */
+        function fitTexts(root) {
+            root?.querySelectorAll('.fit-text').forEach(el => {
+                el.style.fontSize = '';
+                if (!el.clientWidth) return;   // gerade nicht sichtbar – wird beim Erstellen des Bilds nachgeholt
+                let fs = parseFloat(getComputedStyle(el).fontSize) || 12;
+                while (el.scrollWidth > el.clientWidth + 1 && fs > 7) { fs -= 0.5; el.style.fontSize = fs + 'px'; }
+            });
         }
 
         function clearWeekendRow(i) {
@@ -7406,7 +7542,11 @@ Alle sind herzlich eingeladen!</textarea></div>
             if ($('team-logos-ergebnis-container-feed')) $('team-logos-ergebnis-container-feed').innerHTML = ergHtml;
         }
 
+        function postTitleAuto() { return val('in-post-title-mode') !== 'custom'; }
         function updatePostFields() {
+            if (postTitleAuto()) setVal('in-post-title', L('post', val('in-post-venue') === 'auswaerts' ? 'titleAway' : 'titleHome'));
+            if ($('in-post-title')) $('in-post-title').disabled = postTitleAuto();
+            if ($('post-title-hint')) $('post-title-hint').hidden = !postTitleAuto();
             const title = val('in-post-title');
             const time = val('in-post-time');
             setText('out-post-title', title);
@@ -7547,7 +7687,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             setVal('in-post-date', `${WEEKDAYS_LONG[d.getDay()]}, ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.`);
             setVal('in-post-time', next.time ? `${next.time} Uhr` : '');
             const title = normName(val('in-post-title')).toUpperCase();
-            if (!title || title === 'HEIMSPIEL' || title === 'AUSWÄRTSSPIEL') setVal('in-post-title', home ? 'HEIMSPIEL' : 'AUSWÄRTSSPIEL');
+            if (!postTitleAuto() && (!title || title === 'HEIMSPIEL' || title === 'AUSWÄRTSSPIEL')) setVal('in-post-title', home ? 'HEIMSPIEL' : 'AUSWÄRTSSPIEL');
             updatePostFields();
             updateAllDates();
             updateMatchup();
@@ -8517,6 +8657,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 venue: val('in-post-venue') || 'heim',
                 opponentSelect: val('in-post-opponent-select'),
                 postTitle: val('in-post-title'),
+                postTitleMode: val('in-post-title-mode') || 'auto',
                 postDate: val('in-post-date'),
                 postTime: val('in-post-time'),
 
@@ -8632,7 +8773,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (!data) return;
             const map = {
                 teamName: 'cfg-team-name', primary: 'cfg-color-primary', jerseyColor: 'cfg-color-jersey', frameColor: 'cfg-color-frame',
-                venue: 'in-post-venue', opponentSelect: 'in-post-opponent-select', postTitle: 'in-post-title', postDate: 'in-post-date', postTime: 'in-post-time',
+                venue: 'in-post-venue', opponentSelect: 'in-post-opponent-select', postTitle: 'in-post-title', postTitleMode: 'in-post-title-mode', postDate: 'in-post-date', postTime: 'in-post-time',
                 storyTitleText: 'in-story-title-text', coach1: 'in-coach-1', coach2: 'in-coach-2', formation: 'formation-select', pitchMode: 'in-pitch-mode', captain: 'in-captain', lineupSub: 'in-lineup-sub',
                 torImgSize: 'in-size-tor-img', torPlayer: 'in-tor-player', torAssist: 'in-tor-assist', torScore: 'in-tor-score', torMinute: 'in-tor-minute',
                 ergTitle: 'in-ergebnis-title', ergScore: 'in-ergebnis-score', ergText: 'in-ergebnis-text',
@@ -8656,6 +8797,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
             setVal('in-erg-mode', ERG_MODES[data.ergMode] ? data.ergMode : 'ergebnis');
             tfBoard = normTfBoard(data.tfBoard);
+            if (data.postTitleMode === undefined && data.postTitle !== undefined)
+                setVal('in-post-title-mode', ['', 'HEIMSPIEL', 'AUSWÄRTSSPIEL'].includes(normName(data.postTitle).toUpperCase()) ? 'auto' : 'custom');
             vidOrder = data.vidOrder && typeof data.vidOrder === 'object' && !Array.isArray(data.vidOrder) ? data.vidOrder : {};
             if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
             if ($('in-kal-own-logo')) $('in-kal-own-logo').checked = data.kalOwnLogo ?? true;
@@ -9545,6 +9688,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             clone.querySelectorAll('.el-selected').forEach(n => n.classList.remove('el-selected'));
             holder.appendChild(clone);
             document.body.appendChild(holder);
+            fitTexts(clone);
             try {
                 await waitForImages(clone);
                 replaceObjectFitImages(clone);
@@ -11147,6 +11291,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 editorTabs.forEach(t => applyExtraDesign(t, null));   // Standardwerte (z.B. Tor-Reiter: Torjubel-Foto)
                 buildPlayerSelectControls();
                 setupTimePicks();
+                setupScorePicks();
+                setupDatePicks();
                 fillFormationOptions(11, '4-4-2');
                 createPresentedBy();
                 refreshPlayerOptions();
