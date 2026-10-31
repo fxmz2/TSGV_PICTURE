@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 22.4</title>
+    <title>Match-Shot – Grafiken für Vereine 22.5</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -968,7 +968,7 @@
         .scorer-box.scorer-cols { column-count: 2; column-gap: 14px; max-width: 94%; }
         .scorer-box.scorer-cols .scorer-head { column-span: all; }
         .scorer-box.scorer-cols .scorer-line { break-inside: avoid; }
-        .scorer-row { display: grid; grid-template-columns: 1fr 70px; gap: 6px; margin-bottom: 6px; }
+        .scorer-row { display: grid; grid-template-columns: 1fr 84px; gap: 6px; margin-bottom: 6px; }
 
         /* Geburtstag */
         .confetti-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
@@ -1637,7 +1637,7 @@
                 <div class="control-group"><label>Vorlagengeber (Optional)</label><select id="in-tor-assist" class="player-select" onchange="updateTor();"></select></div>
                 <div class="control-group"><label>Name anzeigen als</label><select id="in-tor-namefmt" class="namefmt-select" onchange="updateTor(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
                 <div class="control-group"><label>Spielstand</label><input type="text" id="in-tor-score" value="1 : 0" oninput="updateTor();"></div>
-                <div class="control-group"><label>Minute</label><input type="text" id="in-tor-minute" value="12. Min" oninput="updateTor();"></div>
+                <div class="control-group"><label>Minute</label><select id="in-tor-minute" class="keep-unknown" onchange="updateTor();"></select></div>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('tor')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
@@ -2791,7 +2791,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "22.4";
+        const APP_VERSION = "22.5";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3056,7 +3056,23 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
         function $(id) { return document.getElementById(id); }
         function val(id) { return $(id)?.value ?? ''; }
-        function setVal(id, v) { const el = $(id); if (el && v !== undefined && v !== null) el.value = v; }
+        function setVal(id, v) {
+            const el = $(id);
+            if (!el || v === undefined || v === null) return;
+            // Auswahlfelder mit „keep-unknown“ (z.B. Minuten) behalten ältere, frei eingetippte Werte als eigenen Eintrag
+            if (el.tagName === 'SELECT' && el.classList.contains('keep-unknown') && v !== '' && ![...el.options].some(o => o.value === String(v))) el.add(new Option(String(v), String(v)));
+            el.value = v;
+        }
+        /* Spielminuten 0–120 mit Nachspielzeit (45+1 …, 90+1 …, 120+1 …) */
+        function minuteOptionsHTML(valueOf, labelOf, emptyLabel) {
+            const list = [];
+            for (let m = 0; m <= 120; m++) {
+                list.push(String(m));
+                const extra = { 45: 5, 90: 8, 120: 3 }[m] || 0;
+                for (let x = 1; x <= extra; x++) list.push(`${m}+${x}`);
+            }
+            return `<option value="">${esc(emptyLabel)}</option>` + list.map(m => `<option value="${esc(valueOf(m))}">${esc(labelOf(m))}</option>`).join('');
+        }
         function setText(id, v) { const el = $(id); if (el) el.innerText = v; }
         function pad(n) { return String(n).padStart(2, '0'); }
         function normName(s) { return String(s || '').replace(/\s+/g, ' ').trim(); }
@@ -4220,12 +4236,15 @@ Alle sind herzlich eingeladen!</textarea></div>
             }
             $('kal-controls').innerHTML = kalHtml;
 
+            const ergMinuteOpts = minuteOptionsHTML(m => m, m => `${m}'`, 'Min.');
+            $('in-tor-minute').innerHTML = minuteOptionsHTML(m => `${m}. Min`, m => `${m}. Minute`, '– ohne Minute –');
+            $('in-tor-minute').value = '12. Min';
             let scorerHtml = '';
             for (let i = 1; i <= SCORER_MAX; i++) {
                 scorerHtml += `
                     <div class="scorer-row">
                         <select id="erg-scorer-${i}" class="player-select scorer-select" onchange="updateErgebnis();"></select>
-                        <input type="text" id="erg-minute-${i}" placeholder="Min." oninput="updateErgebnis();">
+                        <select id="erg-minute-${i}" class="keep-unknown" title="Minute" onchange="updateErgebnis();">${ergMinuteOpts}</select>
                     </div>`;
             }
             scorerHtml += `<button type="button" id="erg-more-scorers" class="copy-action-btn" style="background:#2a9d8f; margin-top:4px;" onclick="showMoreScorers()">➕ Weitere Torschützen</button>`;

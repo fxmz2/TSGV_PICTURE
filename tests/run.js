@@ -404,6 +404,13 @@ async function makePhotos(browser) {
             const saved = Object.keys(collectSlotData().inputs).filter(k => /^erg-scorer-/.test(k)).length;
             const r = { start, more, filled: visible(), saved, lines: document.querySelectorAll('#out-erg-scorers .scorer-line').length };
             for (let i = 1; i <= SCORER_MAX; i++) { setVal('erg-scorer-' + i, 'Keiner'); setVal('erg-minute-' + i, ''); } updateErgebnis(); return r; });
+        const mins = await page.evaluate(() => { const t = $('in-tor-minute'), e = $('erg-minute-1'), r = {};
+            r.select = t.tagName === 'SELECT' && e.tagName === 'SELECT';
+            r.range = [...t.options].some(o => o.value === '0. Min') && [...t.options].some(o => o.value === '120. Min') && [...e.options].some(o => o.value === '90+3');
+            setVal('in-tor-minute', '88. Min'); updateTor(); r.shown = $('out-tor-minute').textContent === '88. Min';
+            setVal('erg-minute-1', "17'"); r.old = val('erg-minute-1') === "17'";   // ältere, frei eingetippte Werte bleiben erhalten
+            setVal('erg-minute-1', ''); return r; });
+        check('Minute als Auswahl 0–120 (Tor & Torschützen), alte Werte bleiben', Object.values(mins).every(Boolean), JSON.stringify(mins));
         check('Bis zu 25 Torschützen (zuerst 10, mehr per Knopf)', many.start === 10 && many.more === 15 && many.filled >= 20 && many.saved === 25 && many.lines > 0, JSON.stringify(many));
         // Freie Vorlage & Mannschaftsfoto
         check('Freie Vorlage', await page.evaluate(() => { switchTab('frei'); setVal('in-frei-title', 'SOMMERFEST'); setVal('in-frei-icon-mode', 'emoji'); updateFrei(); return $('out-frei-title').textContent === 'SOMMERFEST' && $('out-frei-icon-feed').textContent.length > 0; }));
