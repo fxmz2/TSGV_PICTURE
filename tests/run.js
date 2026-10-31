@@ -414,6 +414,18 @@ async function makePhotos(browser) {
             stammdaten.opponents.push({ name: 'SpVgg Vorlagendorfhausen-Musterberg' }); refreshOpponentDropdown(); setVal('wk-team-1', 'A-Jugend'); setVal('wk-opp-1', 'SpVgg Vorlagendorfhausen-Musterberg'); setVal('wk-score-1', '0:1'); updateWochenende();
             const els = [...document.querySelectorAll('#view-wochenende .fit-text')].filter(e => e.clientWidth); const ok = els.length > 0 && els.every(e => e.scrollWidth <= e.clientWidth + 1);
             stammdaten.opponents.pop(); refreshOpponentDropdown(); setVal('wk-team-1', ''); setVal('wk-opp-1', ''); setVal('wk-score-1', ''); updateWochenende(); return ok; }));
+        // Farben & Schrift: Hinweise „wirkt auf“, Zeigen, und umgekehrt vom Element zur Einstellung
+        const roles = await page.evaluate(async () => { switchTab('post'); const host = $('design-controls-post'), r = {};
+            host.querySelector('details[data-section="colors"]').open = true; renderRoleHints('post');
+            r.title = /HEIMSPIEL|AUSWÄRTS|DERBY/i.test(host.querySelector('.role-hint[data-role="title"]').textContent);
+            r.unusedBox = host.querySelector('[data-role-ctl="boxbg"]').classList.contains('role-unused');
+            r.frame = /Wappen/.test(host.querySelector('.role-hint[data-role="frame"]').textContent);
+            r.targets = roleTargets('post', DESIGN_ROLES.find(x => x.key === 'title')).some(el => el.id === 'out-post-title');
+            r.restored = getComputedStyle($('out-post-title')).color !== 'rgb(255, 0, 255)';
+            selectElement($('txt-post-title')); showElementRoles(); r.pop = !$('role-pop').hidden && /Überschriften|Schriftfarbe/.test($('role-pop').textContent);
+            jumpToRole('post', 'text'); r.jump = $('role-pop').hidden && !selectedEl && host.querySelector('details[data-section="colors"]').open;
+            return r; });
+        check('Farben & Schrift: „wirkt auf“, nicht genutzte ausgegraut, vom Element zur Einstellung', Object.values(roles).every(Boolean), JSON.stringify(roles));
         // Uhrzeit als Stunde/Minute + „Uhr“ statt Freitext
         const tp = await page.evaluate(() => { switchTab('post'); const src = $('in-post-time'), box = src.nextElementSibling, r = {};
             const h = box.querySelector('.tp-h'), m = box.querySelector('.tp-m'), u = box.querySelector('.tp-u');
