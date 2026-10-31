@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 23.0</title>
+    <title>Match-Shot – Grafiken für Vereine 23.1</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -875,6 +875,21 @@
         .el-toolbar { position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 9000;
             display: flex; align-items: center; gap: 6px; background: rgba(20,24,30,0.94); color: white; padding: 6px 8px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); font-size: 12px; font-weight: bold; }
         .el-toolbar[hidden] { display: none; }
+        /* Farben & Schrift: was steuert was? */
+        .role-intro { font-size: 12px; color: #444; background: #eef6f8; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; line-height: 1.4; }
+        .role-hint { font-size: 11px; color: #5c6670; margin-top: 3px; line-height: 1.35; display: flex; gap: 6px; align-items: flex-start; }
+        .role-hint .rh-ex { flex: 1; min-width: 0; }
+        .role-hint .rh-show { flex-shrink: 0; border: 1px solid #c9d3da; background: #fff; color: #005f73; border-radius: 12px; padding: 2px 10px; font-size: 14px; cursor: pointer; }
+        .control-group.role-unused > label, .control-group.role-unused > input, .control-group.role-unused > select { opacity: 0.5; }
+        .design-flash { outline: 3px dashed #e07a2f !important; outline-offset: 3px; animation: designFlash 0.5s ease-in-out 5 alternate; }
+        @keyframes designFlash { from { outline-color: #e07a2f; } to { outline-color: #ffd60a; } }
+        .ctl-flash { box-shadow: 0 0 0 3px #e07a2f; border-radius: 8px; transition: box-shadow 0.3s; }
+        .role-pop { position: fixed; left: 50%; top: calc(58px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 9001; background: #1f2933; color: #fff; border-radius: 12px;
+            padding: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); width: min(92vw, 360px); box-sizing: border-box; font-size: 13px; }
+        .role-pop[hidden] { display: none; }
+        .role-pop b { display: block; margin-bottom: 6px; }
+        .role-pop button { display: block; width: 100%; text-align: left; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 8px; padding: 8px 10px; margin-top: 5px; font-size: 13px; cursor: pointer; }
+        .role-pop button small { color: #b8c4cc; }
         .el-toolbar button { background: rgba(255,255,255,0.14); color: white; border: none; border-radius: 8px; min-width: 34px; height: 34px; font-size: 15px; font-weight: bold; cursor: pointer; padding: 0 8px; }
         .el-toolbar button { white-space: nowrap; }
         .el-toolbar button.danger { background: #c1121f; }
@@ -990,7 +1005,7 @@
         .storage-status.warn { color: #a35a00; }
         .el-toolbar .el-scale-label { min-width: 44px; text-align: center; }
         @media (max-width: 480px) {
-            .el-toolbar { gap: 4px; padding: 5px 6px; max-width: calc(100vw - 12px); box-sizing: border-box; }
+            .el-toolbar { gap: 4px; padding: 5px 6px; width: max-content; max-width: calc(100vw - 12px); box-sizing: border-box; flex-wrap: wrap; justify-content: center; }
             .el-toolbar .tb-title { display: none; }
             .el-toolbar button { min-width: 30px; padding: 0 5px; }
             .el-toolbar .el-scale-label { min-width: 38px; }
@@ -2856,9 +2871,12 @@ Alle sind herzlich eingeladen!</textarea></div>
         <button type="button" id="el-sync-btn" onclick="toggleSyncFormats()" title="Beitrag & Story gemeinsam anpassen">🔗</button>
         <button type="button" id="el-name-btn" onclick="togglePitchName()" title="Namen dieses Spielers ein-/ausblenden" hidden>🏷️</button>
         <button type="button" id="el-align-btn" onclick="cycleAlignSelected()" title="Text: mittig / links / rechts" hidden>⇔</button>
+        <button type="button" id="el-style-btn" onclick="showElementRoles()" title="Welche Farbe/Schrift steuert das?">🎨</button>
         <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
         <button type="button" onclick="selectElement(null)" title="Fertig">✓</button>
     </div>
+
+    <div id="role-pop" class="role-pop" hidden></div>
 
     <!-- BOTTOM NAVBAR -->
     <div class="bottom-bar">
@@ -2889,7 +2907,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "23.0";
+        const APP_VERSION = "23.1";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4914,25 +4932,26 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const host = $(`design-controls-${tab}`);
                 if (!host) return;
                 host.innerHTML = styleDesignHTML(tab) + (cfg.pitch ? pitchDesignHTML(tab) : '') + `
-                    <details class="design-details" data-section="colors">
+                    <details class="design-details" data-section="colors" ontoggle="if (this.open) renderRoleHints('${tab}')">
                         <summary>🎨 Farben & Schrift</summary>
                         <div class="details-body">
+                            <div class="role-intro">Unter jeder Einstellung steht, was sie in dieser Vorlage verändert. <b>👁</b> markiert die Stellen in der Vorschau. Umgekehrt geht's auch: ein Element in der Vorschau antippen und oben auf <b>🎨</b> tippen.</div>
                             <div class="design-sub">Vereinsfarben <small>– gelten für alle Reiter</small></div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Hauptfarbe</label><input type="color" class="club-color-mirror" data-target="cfg-color-primary" value="#005f73" oninput="mirrorClubColor(this)"></div>
-                                <div class="control-group"><label>Akzent- / Trikotfarbe</label><input type="color" class="club-color-mirror" data-target="cfg-color-jersey" value="#bb3e03" oninput="mirrorClubColor(this)"></div>
+                                <div class="control-group" data-role-ctl="primary"><label>Hauptfarbe</label><input type="color" class="club-color-mirror" data-target="cfg-color-primary" value="#005f73" oninput="mirrorClubColor(this)"><div class="role-hint" data-role="primary"></div></div>
+                                <div class="control-group" data-role-ctl="jersey"><label>Akzent- / Trikotfarbe</label><input type="color" class="club-color-mirror" data-target="cfg-color-jersey" value="#bb3e03" oninput="mirrorClubColor(this)"><div class="role-hint" data-role="jersey"></div></div>
                             </div>
                             <div class="design-sub">Texte <small>– Titel, Datum, Namen ohne Kasten</small></div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Schriftfarbe</label><input type="color" id="in-color-text-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
-                                <div class="control-group adv-only"><label>Farbe Überschriften</label>
+                                <div class="control-group" data-role-ctl="text"><label>Schriftfarbe</label><input type="color" id="in-color-text-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"><div class="role-hint" data-role="text"></div></div>
+                                <div class="control-group adv-only" data-role-ctl="title"><label>Farbe Überschriften</label>
                                     <select id="in-title-color-mode-${tab}" onchange="updateTabDesign('${tab}')">
                                         <option value="text">Wie Schriftfarbe</option>
                                         <option value="jersey">Akzent-/Trikotfarbe</option>
                                         <option value="primary">Hauptfarbe</option>
                                         <option value="custom">Eigene Farbe ↓</option>
                                     </select>
-                                    <input type="color" id="in-color-title-${tab}" value="#f1c40f" style="margin-top:4px;" onchange="setVal('in-title-color-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
+                                    <input type="color" id="in-color-title-${tab}" value="#f1c40f" style="margin-top:4px;" onchange="setVal('in-title-color-mode-${tab}', 'custom'); updateTabDesign('${tab}')"><div class="role-hint" data-role="title"></div></div>
                             </div>
                             <div class="control-group"><label>Ausrichtung der Texte</label>
                                 <select id="in-text-align-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
@@ -4942,8 +4961,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 </select>
                                 <span class="hint">Einzelne Texte: in der Vorschau antippen und in der Leiste oben mit ⇔ umstellen.</span></div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Schriftart Texte</label><select id="in-font-${tab}" onchange="updateTabDesign('${tab}')">${fontOptions}</select></div>
-                                <div class="control-group adv-only"><label>Schriftart Überschriften</label><select id="in-font-title-${tab}" onchange="updateTabDesign('${tab}')"><option value="">Wie Texte</option>${fontOptions}</select></div>
+                                <div class="control-group" data-role-ctl="font"><label>Schriftart Texte</label><select id="in-font-${tab}" onchange="updateTabDesign('${tab}')">${fontOptions}</select><div class="role-hint" data-role="font"></div></div>
+                                <div class="control-group adv-only" data-role-ctl="tfont"><label>Schriftart Überschriften</label><select id="in-font-title-${tab}" onchange="updateTabDesign('${tab}')"><option value="">Wie Texte</option>${fontOptions}</select><div class="role-hint" data-role="tfont"></div></div>
                             </div>
                             ${cfg.sizes ? `
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -4951,7 +4970,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <div class="control-group"><label>Größe Texte</label><input type="range" id="in-size-info-${tab}" min="0.6" max="4" step="0.1" value="1.1" oninput="updateTabDesign('${tab}')"></div>
                             </div>` : ''}
                             <div class="adv-only" style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Text-Effekt</label>
+                                <div class="control-group"><label>Text-Effekt <small>(alle Texte)</small></label>
                                     <select id="in-text-effect-${tab}" onchange="updateTabDesign('${tab}')">
                                         <option value="soft">Schatten (Standard)</option>
                                         <option value="strong">Starker Schatten</option>
@@ -4960,11 +4979,12 @@ Alle sind herzlich eingeladen!</textarea></div>
                                         <option value="3d">3D-Versatz</option>
                                         <option value="none">Ohne</option>
                                     </select></div>
-                                <div class="control-group"><label>Buchstabenabstand</label><input type="range" id="in-letter-spacing-${tab}" min="-2" max="12" step="0.5" value="0" oninput="updateTabDesign('${tab}')"></div>
+                                <div class="control-group"><label>Buchstabenabstand <small>(Überschriften)</small></label><input type="range" id="in-letter-spacing-${tab}" min="-2" max="12" step="0.5" value="0" oninput="updateTabDesign('${tab}')"></div>
                             </div>
                             <div class="ct-checks adv-only">
                                 <label><input type="checkbox" id="in-title-upper-${tab}" checked onchange="updateTabDesign('${tab}')"> GROSSBUCHSTABEN</label>
                                 <label><input type="checkbox" id="in-title-italic-${tab}" onchange="updateTabDesign('${tab}')"> <i>Kursiv</i></label>
+                                <small style="color:#5c6670;">– gilt für die Überschriften</small>
                             </div>
                             <div class="design-sub">Kästen <small>– Namensschilder, Listen, Ersatzbank, Termine</small></div>
                             <div class="control-group">
@@ -4974,13 +4994,13 @@ Alle sind herzlich eingeladen!</textarea></div>
                                     <option value="custom">Eigene Farben ↓</option>
                                 </select></div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Kasten-Farbe</label><input type="color" id="in-box-color-${tab}" value="#000000" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
-                                <div class="control-group"><label>Schrift im Kasten</label><input type="color" id="in-box-text-${tab}" value="#ffffff" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
+                                <div class="control-group" data-role-ctl="boxbg"><label>Kasten-Farbe</label><input type="color" id="in-box-color-${tab}" value="#000000" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"><div class="role-hint" data-role="boxbg"></div></div>
+                                <div class="control-group" data-role-ctl="boxfg"><label>Schrift im Kasten</label><input type="color" id="in-box-text-${tab}" value="#ffffff" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"><div class="role-hint" data-role="boxfg"></div></div>
                             </div>
                             <div class="control-group"><label><input type="checkbox" id="in-accent-line-${tab}" checked onchange="updateTabDesign('${tab}'); scheduleSave();"> Akzent-Linie unter Namen (in Akzent-/Trikotfarbe)</label></div>
                             <div class="control-group"><label>Deckkraft der Kästen</label><input type="range" id="in-box-opacity-${tab}" min="0" max="100" step="5" value="60" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
                             <div class="design-sub">Rahmen <small>– um Fotos und Wappen</small></div>
-                            <div class="control-group"><label>Rahmenfarbe</label><input type="color" id="in-color-frame-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"></div>
+                            <div class="control-group" data-role-ctl="frame"><label>Rahmenfarbe</label><input type="color" id="in-color-frame-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"><div class="role-hint" data-role="frame"></div></div>
                             <span class="hint">Einzelne Texte und Bilder kannst du zusätzlich in der Vorschau antippen und größer/kleiner ziehen. Eigene Texte haben ihre Farbe unter „✍️ Eigene Texte“.</span>
                         </div>
                     </details>
@@ -6405,6 +6425,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         function selectElement(el) {
+            if ($('role-pop')) $('role-pop').hidden = true;
             if (selectedEl && selectedEl !== el) selectedEl.classList.remove('el-selected');
             selectedEl = el;
             if (el) el.classList.add('el-selected');
@@ -6433,6 +6454,119 @@ Alle sind herzlich eingeladen!</textarea></div>
                 syncBtn.title = syncOn() ? 'Beitrag & Story gemeinsam anpassen: AN' : 'Beitrag & Story gemeinsam anpassen: AUS';
             }
             markPartners();
+        }
+        /* ---------- Farben & Schrift: welche Einstellung wirkt wo? ----------
+           Die App setzt kurz eine Testfarbe/-schrift auf die Vorlage und vergleicht – so stimmt die Antwort für jede Vorlage. */
+        const DESIGN_ROLES = [
+            { key: 'title', name: 'Farbe Überschriften', probe: { '--title-color': '#ff00ff' }, props: ['color'], text: true },
+            { key: 'text', name: 'Schriftfarbe', probe: { color: '#ff00ff' }, props: ['color'], text: true },
+            { key: 'boxbg', name: 'Kasten-Farbe', probe: { '--box-bg': '#ff00ff' }, props: ['backgroundColor'] },
+            { key: 'boxfg', name: 'Schrift im Kasten', probe: { '--box-fg': '#ff00ff' }, props: ['color'], text: true },
+            { key: 'frame', name: 'Rahmenfarbe', probe: { '--avatar-border': '3px solid #ff00ff', '--avatar-bg': '#ff00ff' }, props: ['borderTopColor', 'backgroundColor'] },
+            { key: 'primary', name: 'Hauptfarbe', probe: { '--primary': '#ff00ff' }, props: ['color', 'backgroundColor', 'backgroundImage', 'borderTopColor', 'borderBottomColor'] },
+            { key: 'jersey', name: 'Akzent-/Trikotfarbe', probe: { '--jersey-color': '#ff00ff' }, props: ['color', 'backgroundColor', 'backgroundImage', 'borderTopColor', 'borderBottomColor', 'boxShadow'] },
+            { key: 'font', name: 'Schriftart Texte', probe: { 'font-family': '"Courier New", monospace' }, props: ['fontFamily'], text: true },
+            { key: 'tfont', name: 'Schriftart Überschriften', probe: { '--title-font': '"Courier New", monospace' }, props: ['fontFamily'], text: true }
+        ];
+        const ownText = el => Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim());
+        /* Elemente der Vorlagen eines Reiters, die sich durch eine Einstellung ändern (nur sichtbare, nur die obersten) */
+        function roleTargets(tab, role, within) {
+            const view = $(`view-${tab}`);
+            if (!view) return [];
+            const tpls = Array.from(view.querySelectorAll('.post-template, .story-template'));
+            const els = tpls.flatMap(t => [t, ...t.querySelectorAll('*')]).filter(el => !within || within === el || within.contains(el));
+            const hidden = new Map();
+            const isHidden = el => {
+                if (!el || el === view) return false;
+                if (hidden.has(el)) return hidden.get(el);
+                const cs = getComputedStyle(el);
+                const h = cs.display === 'none' || cs.visibility === 'hidden' || el.classList.contains('logo-hidden') || isHidden(el.parentElement);
+                hidden.set(el, h); return h;
+            };
+            const vis = els.filter(el => !isHidden(el) && !el.closest('.safe-zone, .snap-guide'));
+            const snap = () => vis.map(el => { const cs = getComputedStyle(el); return role.props.map(k => cs[k]).join('|'); });
+            const before = snap();
+            const saved = Object.keys(role.probe).map(k => [k, view.style.getPropertyValue(k), view.style.getPropertyPriority(k)]);
+            Object.entries(role.probe).forEach(([k, v]) => view.style.setProperty(k, v));
+            const after = snap();
+            saved.forEach(([k, v, pr]) => v ? view.style.setProperty(k, v, pr) : view.style.removeProperty(k));
+            let changed = vis.filter((el, i) => before[i] !== after[i]);
+            if (role.text) changed = changed.filter(el => ownText(el) && !el.matches('img'));
+            const set = new Set(changed);
+            return changed.filter(el => { for (let n = el.parentElement; n && n !== view; n = n.parentElement) if (set.has(n)) return false; return true; });
+        }
+        function roleExamples(tab, role, targets) {
+            const out = [];
+            const add = t => { t = normName(t); if (t && !out.includes(t) && out.length < 3) out.push(t.length > 26 ? t.slice(0, 26) + '…' : t); };
+            targets.forEach(el => {
+                if (el.matches('.post-template, .story-template')) add('Hintergrund');
+                else if (el.matches('img') || (role.key === 'frame' && el.querySelector('img'))) add(el.closest('.corner-logo') || el.matches('.corner-logo') ? 'Vereinslogo in der Ecke' : el.closest('.team-logos, .lm-teams, .kal-row, .wk-row') ? 'Wappen' : 'Spielerfotos');
+                else if (role.text) add(`„${el.textContent}“`);
+                else add(normName(el.textContent) ? `„${el.textContent}“` : 'Fläche / Linie');
+            });
+            return out;
+        }
+        function renderRoleHints(tab) {
+            const host = $(`design-controls-${tab}`);
+            if (!host) return;
+            DESIGN_ROLES.forEach(role => {
+                const hint = host.querySelector(`.role-hint[data-role="${role.key}"]`);
+                if (!hint) return;
+                const targets = roleTargets(tab, role);
+                const ex = roleExamples(tab, role, targets);
+                hint.closest('.control-group')?.classList.toggle('role-unused', !targets.length);
+                hint.innerHTML = targets.length
+                    ? `<span class="rh-ex">wirkt auf: ${esc(ex.join(', '))}${targets.length > ex.length ? ' …' : ''}</span><button type="button" class="rh-show" title="In der Vorschau zeigen" onclick="showDesignRole('${tab}', '${role.key}')">👁</button>`
+                    : `<span class="rh-ex">wird in dieser Vorlage gerade nicht verwendet</span>`;
+            });
+        }
+        function flashTargets(targets) {
+            targets.forEach(el => el.classList.add('design-flash'));
+            setTimeout(() => targets.forEach(el => el.classList.remove('design-flash')), 2600);
+        }
+        function showDesignRole(tab, key) {
+            const role = DESIGN_ROLES.find(r => r.key === key);
+            const targets = role ? roleTargets(tab, role) : [];
+            if (!targets.length) { toast('In dieser Vorlage gerade nicht verwendet'); return; }
+            if (window.matchMedia('(max-width: 850px)').matches && !document.body.classList.contains('show-preview')) toggleMobileView();
+            setTimeout(() => {
+                targets[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
+                flashTargets(targets);
+                toast(`🟧 Markiert: ${role.name}${window.matchMedia('(max-width: 850px)').matches ? ' – unten „✏️ Bearbeiten“ führt zurück' : ''}`);
+            }, 120);
+        }
+        /* Element in der Vorschau angetippt → welche Einstellungen steuern es? */
+        function showElementRoles() {
+            const el = selectedEl, pop = $('role-pop');
+            if (!el || !pop) return;
+            const tab = (el.closest('.template-container')?.id || '').replace(/^view-/, '');
+            if (!editorTabs.includes(tab)) return;
+            const adv = isAdvanced();
+            const hits = DESIGN_ROLES.filter(r => (adv || !['title', 'tfont'].includes(r.key)) && roleTargets(tab, r, el).length);
+            pop.innerHTML = `<b>🎨 Das wird gesteuert über:</b>` + (hits.length
+                ? hits.map(r => `<button type="button" onclick="jumpToRole('${tab}', '${r.key}')">${esc(r.name)} <small>› ändern</small></button>`).join('')
+                : '<div style="color:#b8c4cc;">Keine der Farb- oder Schrifteinstellungen – z.B. ein Foto oder ein Wappen. Eigene Texte haben ihre Farbe unter „✍️ Eigene Texte“.</div>')
+                + `<button type="button" onclick="this.parentElement.hidden = true" style="text-align:center; margin-top:8px;">Schließen</button>`;
+            pop.hidden = false;
+            pop.style.top = (($('el-toolbar')?.getBoundingClientRect().bottom) || 50) + 8 + 'px';
+        }
+        function jumpToRole(tab, key) {
+            $('role-pop').hidden = true;
+            selectElement(null);
+            if (document.body.classList.contains('show-preview')) toggleMobileView();
+            const host = $(`design-controls-${tab}`);
+            host?.closest('details')?.setAttribute('open', '');
+            host?.querySelector('.sect-design')?.setAttribute('open', '');
+            const colors = host?.querySelector('details[data-section="colors"]');
+            if (colors) { colors.hidden = false; colors.open = true; }
+            renderRoleHints(tab);
+            const grp = host?.querySelector(`[data-role-ctl="${key}"]`);
+            if (!grp) return;
+            setTimeout(() => {
+                grp.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                grp.classList.add('ctl-flash');
+                setTimeout(() => grp.classList.remove('ctl-flash'), 2200);
+            }, 150);
         }
         function nudgeSelectedScale(d) {
             if (!selectedEl) return;
@@ -8511,7 +8645,9 @@ Alle sind herzlich eingeladen!</textarea></div>
             updateEckball();
         }
 
+        const scheduleRoleHints = debounce(tab => renderRoleHints(tab), 600);
         function updateAllViews() {
+            if ($(`design-controls-${activeTab}`)?.querySelector('details[data-section="colors"][open]')) scheduleRoleHints(activeTab);
             applyLabels();
             updateDesignSettings();
             if (editorTabs.includes(activeTab)) {
