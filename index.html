@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 22.8</title>
+    <title>Match-Shot – Grafiken für Vereine 22.9</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -227,6 +227,11 @@
         .team-logos { display: flex; align-items: flex-start; justify-content: center; gap: var(--logos-gap, 20px); margin: 15px 0; width: 100%; position: absolute; top: 130px; }
         .logo-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .logos-stacked .team-logos { flex-direction: column; align-items: center; }
+        /* „VS“ zwischen den Wappen: Position zur Wappenhöhe (oben / mittig / unten) und Größe */
+        .team-logos > .logos-vs { line-height: 1.3; font-size: calc(1em * var(--vs-scale, 1)); align-self: flex-start; white-space: nowrap; }
+        .vs-center .team-logos > .logos-vs { margin-top: calc(var(--logo-size, 75px) / 2 - 0.65em); }
+        .vs-bottom .team-logos > .logos-vs { margin-top: calc(var(--logo-size, 75px) - 1.3em); }
+        .logos-stacked .team-logos > .logos-vs { margin-top: 0; align-self: center; }
         .logo {
             width: var(--logo-size, 75px); height: var(--logo-size, 75px); background-color: var(--avatar-bg, white);
             border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 3px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
@@ -2864,7 +2869,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "22.8";
+        const APP_VERSION = "22.9";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4563,6 +4568,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             { key: 'sponsorFree', id: 'in-sponsor-free', def: () => false, check: true },
             { key: 'logoGap', id: 'in-logo-gap', def: () => '20' },
             { key: 'logoDir', id: 'in-logo-dir', def: () => 'row' },
+            { key: 'vsPos', id: 'in-vs-pos', def: () => 'center' },
+            { key: 'vsSize', id: 'in-vs-size', def: () => '100' },
             { key: 'fieldStyle', id: 'in-field-style', def: () => 'none' },
             { key: 'fieldView', id: 'in-field-view', def: () => 'flat' },
             { key: 'fieldShape', id: 'in-field-shape', def: () => 'half' },
@@ -4626,7 +4633,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         const STYLE_BASE = [['frameShape', 'in-frame-shape'], ['colorFrame', 'in-color-frame'], ['colorText', 'in-color-text'], ['font', 'in-font'],
             ['titleSize', 'in-size-title'], ['infoSize', 'in-size-info'], ['logoSize', 'in-logo-size']];
         const STYLE_EXTRA = ['titleFont', 'titleColorMode', 'titleColor', 'textEffect', 'letterSpacing', 'titleUpper', 'titleItalic',
-            'boxMode', 'boxColor', 'boxText', 'boxOpacity', 'accentLine', 'textAlign', 'logoGap', 'logoDir',
+            'boxMode', 'boxColor', 'boxText', 'boxOpacity', 'accentLine', 'textAlign', 'logoGap', 'logoDir', 'vsPos', 'vsSize',
             'fieldStyle', 'fieldView', 'fieldShape', 'fieldOpacity', 'fieldSize', 'playerStyle', 'playerSize', 'pitchNameMode', 'pitchShadow', 'pitchBigNum',
             'lmLayout', 'lmLogoSize', 'lmTextSize', 'lmVs'];
         const F = n => FONT_LIST.find(f => f[0].includes(n))?.[0] || 'Arial, sans-serif';
@@ -4886,6 +4893,13 @@ Alle sind herzlich eingeladen!</textarea></div>
                                         <option value="column">↕️ Übereinander</option>
                                     </select></div>
                                 <div class="control-group"><label>Abstand der Wappen</label><input type="range" id="in-logo-gap-${tab}" min="0" max="140" step="5" value="20" oninput="updateTabDesign('${tab}')"></div>
+                                <div class="control-group"><label>Position „VS“</label>
+                                    <select id="in-vs-pos-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="center">Mittig zu den Wappen</option>
+                                        <option value="top">Oben</option>
+                                        <option value="bottom">Unten</option>
+                                    </select></div>
+                                <div class="control-group"><label>Größe „VS“</label><input type="range" id="in-vs-size-${tab}" min="50" max="250" step="10" value="100" oninput="updateTabDesign('${tab}')"></div>
                             </div>` : ''}
                             <button type="button" class="copy-action-btn" style="background:#5a4fcf;" onclick="applyDesignToAllTabs('${tab}')">🎨 Dieses Design auf alle Reiter übertragen</button>
                             <span class="hint">Überträgt Farben, Schriften, Kästen, Rahmen, Logo- und Sponsoren-Einstellungen – auf Wunsch auch die Hintergründe.</span>
@@ -5586,6 +5600,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (logoSize) viewContainer.style.setProperty('--logo-size', logoSize + 'px');
                 if ($(`in-logo-gap-${tab}`)) viewContainer.style.setProperty('--logos-gap', (parseFloat(val(`in-logo-gap-${tab}`)) || 0) + 'px');
                 viewContainer.classList.toggle('logos-stacked', val(`in-logo-dir-${tab}`) === 'column');
+                const vsPos = $(`in-vs-pos-${tab}`) ? (val(`in-vs-pos-${tab}`) || 'center') : 'center';
+                ['top', 'center', 'bottom'].forEach(k => viewContainer.classList.toggle('vs-' + k, k === vsPos));
+                viewContainer.style.setProperty('--vs-scale', ((parseFloat(val(`in-vs-size-${tab}`)) || 100) / 100).toString());
 
                 viewContainer.style.setProperty('--avatar-radius', radius);
                 viewContainer.style.setProperty('--avatar-border', border);
@@ -7375,7 +7392,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const oppLogo = `<img src="${getOpponentLogoSrc(opp || 'Gegner')}" class="logo" alt="">`;
 
             function buildLogosHtml(showNames, tab) {
-                const vsSpan = L(tab, 'vs') ? `<span>${esc(L(tab, 'vs'))}</span>` : '';
+                const vsSpan = L(tab, 'vs') ? `<span class="logos-vs">${esc(L(tab, 'vs'))}</span>` : '';
                 const ourItem = showNames ? `<div class="logo-wrapper">${ourLogo}<div class="logo-sub-name">${ownTeamName}</div></div>` : ourLogo;
                 const oppItem = showNames ? `<div class="logo-wrapper">${oppLogo}<div class="logo-sub-name">${oppName}</div></div>` : oppLogo;
                 return isHome ? `${ourItem} ${vsSpan} ${oppItem}` : `${oppItem} ${vsSpan} ${ourItem}`;
