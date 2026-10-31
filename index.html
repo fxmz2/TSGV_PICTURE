@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 22.5</title>
+    <title>Match-Shot – Grafiken für Vereine 22.6</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -659,6 +659,16 @@
         .lp-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 20px 18px; text-align: center; max-width: 560px; margin: 0 auto; }
         .lp-box p { font-size: 14px; line-height: 1.55; color: #bcd3da; margin: 0 0 14px; font-family: Arial, sans-serif; }
         .lp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .lp-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 720px; margin: 0 auto; }
+        .lp-price { position: relative; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 22px 18px 18px; text-align: center; }
+        .lp-price.best { border-color: #e07a2f; box-shadow: 0 6px 22px rgba(224,122,47,0.25); }
+        .lp-price h3 { margin: 0; color: #fff; font-size: 18px; }
+        .lp-amount { font-size: 34px; font-weight: 900; color: #fff; margin: 6px 0 0; }
+        .lp-price small { color: #9fbcc5; font-family: Arial, sans-serif; font-size: 12px; }
+        .lp-price ul { text-align: left; margin: 14px 0 0; padding: 0; list-style: none; font-family: Arial, sans-serif; font-size: 13px; color: #bcd3da; line-height: 1.45; }
+        .lp-price li { padding-left: 20px; position: relative; margin-bottom: 5px; }
+        .lp-price li::before { content: '✓'; position: absolute; left: 0; color: #2ec4b6; font-weight: bold; }
+        .lp-badge { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: #e07a2f; color: #fff; font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 10px; white-space: nowrap; font-family: Arial, sans-serif; }
         .lp-code { padding-top: 30px; padding-bottom: 10px; }
                 .lp-bar { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 2; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: rgba(5,12,16,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top: 1px solid rgba(255,255,255,0.1); }
         .lp-bar .lp-btn { flex: 1; padding: 12px 8px; font-size: 14px; }
@@ -670,7 +680,8 @@
         @media (min-width: 761px) { .license-overlay .lp-bar { display: none !important; } .landing-mode, html.lp-boot #license-overlay { padding-bottom: 30px; } }
         @media (max-width: 760px) {
             .lp-arrows { display: none; }
-            .lp-steps, .lp-two { grid-template-columns: 1fr; }
+            .lp-steps, .lp-two, .lp-prices { grid-template-columns: 1fr; }
+            .lp-prices { gap: 20px; }
             .lp-feats { grid-template-columns: 1fr 1fr; }
             .lp-gallery img { height: 300px; }
         }
@@ -1049,7 +1060,7 @@
                 <h2>Alles, was euer Verein braucht</h2>
                 <p class="lp-sub">Gemacht für Ehrenamtliche, die wenig Zeit haben</p>
                 <div class="lp-feats">
-                    <div class="lp-feat"><span>📋</span><b>12 Vorlagen</b><p>Von der Spieltag-Ankündigung bis zum Geburtstagsgruß und Sponsoren-Dank.</p></div>
+                    <div class="lp-feat"><span>📋</span><b>14 Vorlagen</b><p>Von der Spieltag-Ankündigung bis zum Geburtstagsgruß und Sponsoren-Dank.</p></div>
                     <div class="lp-feat"><span>📱</span><b>Beitrag &amp; Story</b><p>Beide Instagram-Formate auf einmal – Änderungen laufen auf Wunsch synchron mit.</p></div>
                     <div class="lp-feat"><span>✂️</span><b>Hintergrund weg per KI</b><p>Spielerfotos mit einem Tipp freistellen – direkt auf dem Gerät.</p></div>
                     <div class="lp-feat"><span>🎬</span><b>Reels &amp; Videos</b><p>Jede Grafik auch als kurzes animiertes Video.</p></div>
@@ -1060,13 +1071,44 @@
                 </div>
             </section>
 
+            <section class="lp-section lp-wrap" id="lp-prices">
+                <h2>Preise</h2>
+                <p class="lp-sub">Einführungspreise · je 12 Monate für den ganzen Verein · der erste Monat ist kostenlos</p>
+                <div class="lp-prices">
+                    <div class="lp-price">
+                        <h3>Basis</h3>
+                        <div class="lp-amount">24,99 €</div>
+                        <small>für 12 Monate · ca. 2,08 € im Monat</small>
+                        <ul>
+                            <li>10 Vorlagen: Ankündigung, Aufstellung (auch 7er/9er), Tor, Ergebnis, Kader, Player of the Match, Kalender, Geburtstag, Mannschaftsfoto, freie Vorlage</li>
+                            <li>Beitrag &amp; Story, eure Farben, Wappen &amp; Schriften</li>
+                            <li>Beliebig viele Geräte im Verein</li>
+                        </ul>
+                    </div>
+                    <div class="lp-price best">
+                        <span class="lp-badge">Alle 14 Vorlagen</span>
+                        <h3>Advanced</h3>
+                        <div class="lp-amount">39,99 €</div>
+                        <small>für 12 Monate · ca. 3,33 € im Monat</small>
+                        <ul>
+                            <li>Alles aus Basis</li>
+                            <li>Eckball-Taktik (16:9 für TV &amp; PowerPoint), Neuzugang &amp; Spielervorstellung, Sponsoren-Dank, Wochenend-Ergebnisse</li>
+                            <li>Sponsorenleisten &amp; „Präsentiert von“</li>
+                            <li>Reels &amp; Videos, Hintergrund weg per KI</li>
+                            <li>Spielplan-Import &amp; viele Grafiken auf einmal</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="lp-note" style="text-align:center;">Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Im Testmonat jederzeit per E-Mail kündbar, danach bis 4 Wochen vor Ablauf. <a href="agb.html" target="_blank" rel="noopener" style="color:inherit;">AGB</a></div>
+            </section>
+
             <section class="lp-section lp-wrap">
                 <div class="lp-two">
                     <div class="lp-box">
                         <h2>Match-Shot für deinen Verein</h2>
                         <p id="lp-buy-text">Testet Match-Shot einen Monat kostenlos mit euren eigenen Spielern und Fotos – ohne Wasserzeichen und unverbindlich. Einfach per E-Mail anfragen und das Vereinswappen anhängen: Freischaltung innerhalb von 48 Stunden.</p>
-                        <a id="lp-buy-btn" class="lp-btn primary" href="mailto:clubshotinfo@gmail.com">✉️ Testmonat anfragen</a>
-                        <div class="lp-note">oder direkt an <a href="mailto:clubshotinfo@gmail.com" style="color:inherit;">clubshotinfo@gmail.com</a></div>
+                        <a id="lp-buy-btn" class="lp-btn primary" href="mailto:info@match-shot.de">✉️ Testmonat anfragen</a>
+                        <div class="lp-note">oder direkt an <a href="mailto:info@match-shot.de" style="color:inherit;">info@match-shot.de</a></div>
                     </div>
                     <div class="lp-box">
                         <h2>Match-Shot auf Instagram</h2>
@@ -1088,7 +1130,7 @@
             <button type="button" id="license-cancel" class="license-cancel" onclick="hideLicenseOverlay()" hidden>Abbrechen</button>
             <button type="button" id="license-backup" class="license-cancel" onclick="exportConfigJSON()" hidden>💾 Trotzdem Backup meiner Daten sichern</button>
             <button type="button" id="license-demo" class="license-cancel" onclick="setVal('license-input', DEMO_CODE); submitLicenseCode();">🧪 Erst einmal testen (Demo-Modus)</button>
-            <p class="license-contact">Noch keinen Code oder Fragen? ✉️ <a href="mailto:clubshotinfo@gmail.com">clubshotinfo@gmail.com</a></p>
+            <p class="license-contact">Noch keinen Code oder Fragen? ✉️ <a href="mailto:info@match-shot.de">info@match-shot.de</a></p>
             <div class="app-footer" style="margin-top:14px;">
                 <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a>
             </div>
@@ -1343,7 +1385,7 @@
                     <b>📦 Basis-Paket</b>
                     Im Advanced-Paket zusätzlich enthalten: Eckbälle, Neuzugang/Spielervorstellung, Danke-Sponsor, Wochenend-Ergebnisse,
                     Sponsorenleisten, „Präsentiert von“, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte, Spielplan-Import und Grafik-Paket.
-                    Für ein Upgrade schreib uns: <a href="mailto:clubshotinfo@gmail.com?subject=Match-Shot%20Upgrade%20auf%20Advanced">clubshotinfo@gmail.com</a>
+                    Für ein Upgrade schreib uns: <a href="mailto:info@match-shot.de?subject=Match-Shot%20Upgrade%20auf%20Advanced">info@match-shot.de</a>
                 </div>
 
                 <details class="sect" id="ui-settings">
@@ -1381,7 +1423,7 @@
                 <div class="app-footer">
                     Match-Shot <span id="app-version-label"></span> · © [Anbieter]<br>
                     <a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="agb.html" target="_blank" rel="noopener">AGB</a><br>
-                    Hilfe & Kontakt: <a href="mailto:clubshotinfo@gmail.com">clubshotinfo@gmail.com</a><br>
+                    Hilfe & Kontakt: <a href="mailto:info@match-shot.de">info@match-shot.de</a><br>
                     Tipps & Beispiele auf Instagram: <a href="https://www.instagram.com/match_shot_de/" target="_blank" rel="noopener">@match_shot_de</a>
                 </div>
             </div>
@@ -1391,7 +1433,7 @@
                 <div class="notice-card info" style="margin-top:20px;">
                     <b>🔒 Advanced-Funktion</b>
                     <span id="locked-text">Dieser Reiter ist im Advanced-Paket enthalten.</span>
-                    Für ein Upgrade schreib uns an <a href="mailto:clubshotinfo@gmail.com?subject=Match-Shot%20Upgrade%20auf%20Advanced">clubshotinfo@gmail.com</a> – deine Daten bleiben erhalten.
+                    Für ein Upgrade schreib uns an <a href="mailto:info@match-shot.de?subject=Match-Shot%20Upgrade%20auf%20Advanced">info@match-shot.de</a> – deine Daten bleiben erhalten.
                 </div>
             </div>
 
@@ -2791,7 +2833,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "22.5";
+        const APP_VERSION = "22.6";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -8910,7 +8952,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (warn) warn.hidden = true;
             if (!club || club.demo || !club.validUntil) return;
             if (isLicenseExpired(club)) {
-                showLicenseOverlay(false, `Die Saisonlizenz für ${club.name} ist am ${formatIsoDate(club.validUntil)} abgelaufen. Zum Verlängern schreib uns an ${CONTACT_EMAIL}. Deine Daten bleiben auf diesem Gerät erhalten.`, { expired: true });
+                showLicenseOverlay(false, `Die Lizenz für ${club.name} ist am ${formatIsoDate(club.validUntil)} abgelaufen. Zum Verlängern schreib uns an ${CONTACT_EMAIL}. Deine Daten bleiben auf diesem Gerät erhalten.`, { expired: true });
                 return;
             }
             const days = daysUntil(club.validUntil);
@@ -8920,14 +8962,14 @@ Alle sind herzlich eingeladen!</textarea></div>
             }
         }
 
-        const CONTACT_EMAIL = 'clubshotinfo@gmail.com';
+        const CONTACT_EMAIL = 'info@match-shot.de';
         /* Landingpage: Links für Bestellung und Instagram – sobald vorhanden hier eintragen.
            Ohne Bestell-Link öffnet „Testmonat anfragen“ eine vorausgefüllte E-Mail. */
         const LANDING_LINKS = { kaufen: '', instagram: 'https://www.instagram.com/match_shot_de/' };
         const ORDER_MAIL = {
             subject: 'Match-Shot – Testmonat für unseren Verein',
             body: 'Hallo Match-Shot-Team,\n\nwir möchten Match-Shot einen Monat kostenlos mit unseren eigenen Daten testen.\n\n'
-                + 'Verein:\nAnsprechpartner:\nRechnungsadresse:\nTelefon (optional):\nPaket (Basis oder Advanced):\n\n'
+                + 'Verein:\nAnsprechpartner:\nRechnungsadresse:\nTelefon (optional):\nPaket (Basis 24,99 € oder Advanced 39,99 € je 12 Monate):\n\n'
                 + 'Unser Vereinswappen hängt an (PNG oder JPG, am besten ohne Hintergrund).\n'
                 + 'Wir bestätigen, dass wir berechtigt sind, das Wappen im Namen des Vereins zu verwenden, und erlauben Match-Shot, es für die Bereitstellung der App zu speichern und anzuzeigen.\n\n'
                 + 'Viele Grüße'
