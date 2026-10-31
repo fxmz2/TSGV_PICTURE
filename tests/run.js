@@ -370,6 +370,32 @@ async function makePhotos(browser) {
             ['speed', 'gap', 'dist'].forEach(k => setVal(`in-vid-${k}-ergebnis`, k === 'dist' ? 'short' : 'normal'));
             return { def: def.dur, slow: slow.dur, gap: slow.gap[0], dist: slow.dist, saved: saved.vidSpeed + '/' + saved.vidGap + '/' + saved.vidDist }; });
         check('Video: Tempo, Abstand und Einflug-Weg einstellbar', vo.def === 0.6 && vo.slow === 1.5 && vo.gap === 0.75 && vo.dist === 6 && vo.saved === 'xslow/long/far', JSON.stringify(vo));
+        // Video: eigene Reihenfolge der Elemente (Liste mit Ziehen / ▲▼, wird gespeichert und beim Video genutzt)
+        const vord = await page.evaluate(async () => { switchTab('post'); delete vidOrder['capture-post-feed'];
+            const nat = await vidUnitsFor('capture-post-feed'); const r = { n: nat.length };
+            await openVidOrder('post'); r.list = document.querySelectorAll('#vo-list .vo-item').length === nat.length && !$('vidorder-overlay').hidden;
+            const last = voState.items[voState.items.length - 1].key;
+            for (let i = voState.items.length - 1; i > 0; i--) moveVidOrder(i, -1);
+            r.first = voState.items[0].key === last;
+            r.used = (await vidUnitsFor('capture-post-feed'))[0].key === last;
+            r.saved = collectSlotData().vidOrder['capture-post-feed'][0] === last;
+            await resetVidOrder(); r.reset = !vidOrder['capture-post-feed'] && voState.items[0].key === nat[0].key;
+            closeVidOrder(); return r; });
+        check('Video: Reihenfolge der Elemente einstellbar', vord.n >= 3 && vord.list && vord.first && vord.used && vord.saved && vord.reset, JSON.stringify(vord));
+        await page.evaluate(() => openVidOrder('post')); await page.waitForFunction(() => document.querySelectorAll('#vo-list .vo-handle').length >= 3);
+        const vh = await page.$$('#vo-list .vo-handle'), va = await vh[vh.length - 1].boundingBox(), vb = await vh[0].boundingBox();
+        const vlast = await page.evaluate(() => voState.items[voState.items.length - 1].key);
+        await page.mouse.move(va.x + va.width / 2, va.y + va.height / 2); await page.mouse.down(); await page.mouse.move(vb.x + vb.width / 2, vb.y + 2, { steps: 8 }); await page.mouse.up();
+        check('Video-Reihenfolge per Ziehen', await page.evaluate(k => { const ok = voState.items[0].key === k && vidOrder['capture-post-feed'][0] === k; delete vidOrder['capture-post-feed']; closeVidOrder(); return ok; }, vlast));
+        // Uhrzeit als Stunde/Minute + „Uhr“ statt Freitext
+        const tp = await page.evaluate(() => { switchTab('post'); const src = $('in-post-time'), box = src.nextElementSibling, r = {};
+            const h = box.querySelector('.tp-h'), m = box.querySelector('.tp-m'), u = box.querySelector('.tp-u');
+            h.value = '9'; h.dispatchEvent(new Event('input', { bubbles: true })); m.value = '5'; m.dispatchEvent(new Event('input', { bubbles: true }));
+            r.a = src.value; u.checked = false; u.dispatchEvent(new Event('change', { bubbles: true })); r.b = src.value;
+            setVal('in-post-time', '18:30 Uhr'); r.c = [h.value, m.value, u.checked].join('/'); updatePostFields(); r.out = $('out-post-time').textContent;
+            setVal('in-kader-meeting', '13:45 Uhr am Sportplatz'); const kb = $('in-kader-meeting').nextElementSibling; r.k = [kb.querySelector('.tp-h').value, kb.querySelector('.tp-x').value].join('/');
+            return r; });
+        check('Uhrzeit mit zwei Kästchen und „Uhr“ an/aus', tp.a === '9:05 Uhr' && tp.b === '9:05' && tp.c === '18/30/true' && tp.out === '18:30 Uhr' && tp.k === '13/am Sportplatz', JSON.stringify(tp));
         check('Video-Knöpfe an den Vorlagen', (await page.$$eval('.video-btn', l => l.length)) >= 20);
         // Import: Auswahl-Dialog und Zusammenführen
         const backup = await page.evaluate(async () => await (await buildBackup()).blob.text());

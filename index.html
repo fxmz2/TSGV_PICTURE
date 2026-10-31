@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 22.7</title>
+    <title>Match-Shot – Grafiken für Vereine 22.8</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -881,6 +881,24 @@
         .snap-guide[hidden] { display: none; }
 
         /* Dialoge: Grafik-Paket */
+        /* Uhrzeit: Stunden + Minuten + „Uhr“ */
+        .time-pick { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .time-pick input.tp-h, .time-pick input.tp-m { width: 56px; flex: 0 0 56px; text-align: center; font-size: 16px; padding: 8px 4px; }
+        .time-pick .tp-colon { font-weight: bold; font-size: 18px; }
+        .time-pick label.tp-uhr { display: inline-flex; align-items: center; gap: 4px; font-weight: normal; margin: 0 0 0 4px; cursor: pointer; }
+        .time-pick label.tp-uhr input { width: auto; margin: 0; }
+        .time-pick input.tp-x { flex: 1 1 100%; }
+        /* Video: Reihenfolge der Elemente */
+        .vo-fmt { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+        .vo-fmt button { border: 2px solid #005f73; background: #fff; color: #005f73; border-radius: 16px; padding: 5px 12px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .vo-fmt button.active { background: #005f73; color: #fff; }
+        .vo-list { display: flex; flex-direction: column; gap: 5px; margin: 6px 0 4px; }
+        .vo-item { display: grid; grid-template-columns: 30px 24px 1fr 34px 34px; gap: 4px; align-items: center; background: #f6f7f9; border: 1px solid #e2e4e8; border-radius: 8px; padding: 5px 6px; font-size: 13px; user-select: none; }
+        .vo-item.dragging { opacity: 0.6; border-color: #e07a2f; background: #fff4ec; }
+        .vo-handle { cursor: grab; touch-action: none; font-size: 18px; text-align: center; color: #666; }
+        .vo-num { font-weight: bold; color: #005f73; text-align: center; }
+        .vo-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+        .vo-flash { outline: 4px solid #e07a2f !important; outline-offset: 3px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9990; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
         .modal-overlay[hidden] { display: none; }
         .modal-card { background: white; color: #222; border-radius: 14px; padding: 18px; width: 100%; max-width: 440px; max-height: 88vh; overflow: auto; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
@@ -1581,7 +1599,7 @@
                 <div class="control-group"><label>Gegner</label><select id="in-post-opponent-select" class="opp-select" onchange="updateMatchup();"></select></div>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-post-title" value="HEIMSPIEL" oninput="updatePostFields();"></div>
                 <div class="control-group"><label>Datum</label><input type="text" id="in-post-date" placeholder="Sonntag, 07.06." oninput="updateAllDates();"></div>
-                <div class="control-group"><label>Uhrzeit</label><input type="text" id="in-post-time" placeholder="15:00 Uhr" oninput="updatePostFields();"></div>
+                <div class="control-group"><label>Uhrzeit</label><input type="hidden" id="in-post-time" class="time-src" value=""></div>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('post')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
@@ -1723,7 +1741,7 @@
                 <h2>Kader Einstellungen</h2>
                 <div id="design-controls-kader"></div>
 
-                <div class="control-group"><label>Treffpunkt</label><input type="text" id="in-kader-meeting" value="13:45 Uhr" oninput="updateKader();"></div>
+                <div class="control-group"><label>Treffpunkt</label><input type="hidden" id="in-kader-meeting" class="time-src" data-extra="z.B. am Sportplatz (optional)" value="13:45 Uhr"></div>
                 <div class="control-group"><label>Trikotfarbe</label><input type="text" id="in-kader-jersey" value="Blau / Schwarz" oninput="updateKader();"></div>
                 <div class="control-group"><label>Spieltagsdienst 1</label><select id="in-kader-duty-1" class="player-select" onchange="updateKader();"></select></div>
                 <div class="control-group"><label>Spieltagsdienst 2</label><select id="in-kader-duty-2" class="player-select" onchange="updateKader();"></select></div>
@@ -2651,6 +2669,19 @@ Alle sind herzlich eingeladen!</textarea></div>
     </div>
 
     <!-- GRAFIK-PAKET -->
+    <div id="vidorder-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closeVidOrder()">
+        <div class="modal-card">
+            <h2>🎬 Reihenfolge im Video</h2>
+            <p>Ziehe die Elemente am ☰ in die gewünschte Reihenfolge – oben fliegt zuerst ein. Antippen eines Eintrags markiert ihn kurz in der Vorschau.</p>
+            <div class="vo-fmt" id="vo-fmt"></div>
+            <div class="vo-list" id="vo-list"></div>
+            <div class="modal-actions">
+                <button type="button" class="primary" onclick="closeVidOrder()">Fertig</button>
+                <button type="button" class="secondary" onclick="resetVidOrder()">↺ Wieder von oben nach unten</button>
+            </div>
+        </div>
+    </div>
+
     <div id="mass-overlay" class="modal-overlay" hidden>
         <div class="modal-card mass-card">
             <h2 id="mass-title">✏️ Mehrere bearbeiten</h2>
@@ -2833,7 +2864,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "22.7";
+        const APP_VERSION = "22.8";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3104,7 +3135,59 @@ Alle sind herzlich eingeladen!</textarea></div>
             // Auswahlfelder mit „keep-unknown“ (z.B. Minuten) behalten ältere, frei eingetippte Werte als eigenen Eintrag
             if (el.tagName === 'SELECT' && el.classList.contains('keep-unknown') && v !== '' && ![...el.options].some(o => o.value === String(v))) el.add(new Option(String(v), String(v)));
             el.value = v;
+            if (el.classList.contains('time-src')) syncTimePick(el);
         }
+        /* Uhrzeit-Felder: zwei Kästchen (Stunde, Minute) + „Uhr“ an/aus statt Freitext.
+           Der fertige Text („15:00 Uhr“) steht weiter im versteckten Original-Feld – gespeicherte Stände bleiben gültig. */
+        function parseTimeText(v) {
+            const t = String(v || '').trim();
+            const m = /^(\d{1,2})(?:\s*[:.]\s*(\d{1,2}))?\s*(uhr)?\s*(.*)$/i.exec(t);
+            if (!m) return { h: '', m: '', uhr: true, extra: t };
+            return { h: m[1], m: m[2] || '', uhr: !!m[3], extra: m[4] || '' };
+        }
+        function composeTime(h, m, uhr, extra) {
+            h = String(h || '').replace(/\D/g, '').slice(0, 2);
+            m = String(m || '').replace(/\D/g, '').slice(0, 2);
+            if (h && +h > 23) h = '23';
+            if (m && +m > 59) m = '59';
+            const time = h ? `${h}:${(m || '0').padStart(2, '0')}${uhr ? ' Uhr' : ''}` : '';
+            return [time, normName(extra)].filter(Boolean).join(' ');
+        }
+        function setupTimePicks() {
+            document.querySelectorAll('input.time-src').forEach(src => {
+                if (src.nextElementSibling?.classList.contains('time-pick')) return;
+                const box = document.createElement('div');
+                box.className = 'time-pick';
+                box.innerHTML = `<input type="text" class="tp-h" inputmode="numeric" maxlength="2" placeholder="15" aria-label="Stunde"><span class="tp-colon">:</span>`
+                    + `<input type="text" class="tp-m" inputmode="numeric" maxlength="2" placeholder="00" aria-label="Minute">`
+                    + `<label class="tp-uhr"><input type="checkbox" class="tp-u" checked> Uhr</label>`
+                    + `<input type="text" class="tp-x" maxlength="60" placeholder="${esc(src.dataset.extra || 'Zusatz (optional)')}">`;
+                src.after(box);
+                const [h, m, u, x] = ['.tp-h', '.tp-m', '.tp-u', '.tp-x'].map(q => box.querySelector(q));
+                const write = () => { src.value = composeTime(h.value, m.value, u.checked, x.value); };
+                h.addEventListener('input', () => {
+                    h.value = h.value.replace(/\D/g, '');
+                    if (h.value.length === 2 || +h.value > 2) { m.focus(); m.select(); }
+                    write();
+                });
+                m.addEventListener('input', () => { m.value = m.value.replace(/\D/g, ''); write(); });
+                m.addEventListener('blur', () => { if (m.value.length === 1) { m.value = m.value.padStart(2, '0'); write(); } });
+                u.addEventListener('change', write);
+                x.addEventListener('input', write);
+                syncTimePick(src);
+            });
+        }
+        function syncTimePick(src) {
+            const box = src.nextElementSibling;
+            if (!box?.classList.contains('time-pick')) return;
+            const t = parseTimeText(src.value);
+            box.querySelector('.tp-h').value = t.h;
+            box.querySelector('.tp-m').value = t.h ? (t.m || '00').padStart(2, '0') : t.m;
+            box.querySelector('.tp-u').checked = t.uhr || !src.value;
+            box.querySelector('.tp-x').value = t.extra;
+            box.querySelector('.tp-x').hidden = !src.dataset.extra && !t.extra;
+        }
+        function syncAllTimePicks() { document.querySelectorAll('input.time-src').forEach(syncTimePick); }
         /* Spielminuten 0–120 mit Nachspielzeit (45+1 …, 90+1 …, 120+1 …) */
         function minuteOptionsHTML(valueOf, labelOf, emptyLabel) {
             const list = [];
@@ -4898,7 +4981,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <select id="in-vid-dist-${tab}" onchange="scheduleSave();">
                                     <option value="short">Kurz (sanft)</option><option value="mid">Mittel</option><option value="far">Weit (von unten)</option>
                                 </select></div>
-                            <span class="hint">Gilt für „🎬 Als Video (Reel)“ in diesem Reiter. Langsamer und mit mehr Abstand wird das Video länger (max. 25 Sekunden).</span>
+                            <button type="button" class="copy-action-btn" style="margin:4px 0 6px;" onclick="openVidOrder('${tab}')">🔀 Reihenfolge der Elemente festlegen</button>
+                            <span class="hint">Gilt für „🎬 Als Video (Reel)“ in diesem Reiter. Langsamer und mit mehr Abstand wird das Video länger (max. 25 Sekunden). Ohne eigene Reihenfolge fliegen die Elemente von oben nach unten ein.</span>
                         </div>
                     </details>
                     ${labelEditorHTML(tab)}`;
@@ -8245,6 +8329,7 @@ Alle sind herzlich eingeladen!</textarea></div>
            ANSICHTEN / TABS
            ========================================================= */
         function renderAll() {
+            syncAllTimePicks();
             renderStyleList();
             applyFeedFormatClasses();
             applyLabels();
@@ -8463,7 +8548,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 positions: {},
                 tabSettings: {},
                 eck2: JSON.parse(JSON.stringify(eck2)),
-                tfBoard: JSON.parse(JSON.stringify(tfBoard))
+                tfBoard: JSON.parse(JSON.stringify(tfBoard)),
+                vidOrder: JSON.parse(JSON.stringify(vidOrder))
             };
             NAME_FMT_FIELDS.forEach(([id, k, legacy, def]) => {
                 data[k] = val(id) || def;
@@ -8553,6 +8639,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
             setVal('in-erg-mode', ERG_MODES[data.ergMode] ? data.ergMode : 'ergebnis');
             tfBoard = normTfBoard(data.tfBoard);
+            vidOrder = data.vidOrder && typeof data.vidOrder === 'object' && !Array.isArray(data.vidOrder) ? data.vidOrder : {};
             if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
             if ($('in-kal-own-logo')) $('in-kal-own-logo').checked = data.kalOwnLogo ?? true;
             if ($('in-wk-own-logo')) $('in-wk-own-logo').checked = data.wkOwnLogo ?? true;
@@ -9471,15 +9558,126 @@ Alle sind herzlich eingeladen!</textarea></div>
             top.filter(visible).forEach(el => {
                 if (el.classList.contains('pitch')) {
                     // Reihen von hinten (Torwart) nach vorne
-                    Array.from(el.querySelectorAll(':scope > .row')).forEach((r, i) => units.push({ el: r, order: el.getBoundingClientRect().top - tr.top + 0.01 * i, row: true }));
-                } else units.push({ el, order: el.getBoundingClientRect().top - tr.top });
+                    Array.from(el.querySelectorAll(':scope > .row')).forEach((r, i) => units.push({ el: r, order: el.getBoundingClientRect().top - tr.top + 0.01 * i, row: true, key: 'row:' + i }));
+                } else units.push({ el, order: el.getBoundingClientRect().top - tr.top, key: el.id || '' });
             });
             return units.sort((a, b) => a.order - b.order);
         }
+        /* Eigene Reihenfolge je Vorlage (vidOrder[Vorlagen-ID] = Schlüssel); neue Elemente kommen ans Ende */
+        let vidOrder = {};
+        function sortAnimUnits(units, tplId) {
+            const order = vidOrder[tplId];
+            if (!Array.isArray(order) || !order.length) return units;
+            const rank = (u, i) => { const k = order.indexOf(u.key); return k < 0 ? order.length + i : k; };
+            return units.map((u, i) => ({ u, r: rank(u, i) })).sort((a, b) => a.r - b.r).map(x => x.u);
+        }
+        function vidUnitLabel(u) {
+            const el = u.el, text = normName((el.innerText || el.textContent || '').replace(/\s+/g, ' '));
+            const short = t => t.length > 38 ? t.slice(0, 38) + '…' : t;
+            if (u.row) return '⚽ ' + (text ? short(text) : 'Spielfeld-Reihe');
+            const id = (el.id || '').toLowerCase();
+            const img = el.tagName === 'IMG' || !!el.querySelector('img, svg');
+            if (/sponsor|^spl-|^pb-/.test(id) || el.classList.contains('sponsor-banner')) return '🤝 Sponsoren' + (text ? ': ' + short(text) : '');
+            if (text) return (img ? '🖼️ ' : '🔤 ') + short(text);
+            if (/logo|crest|wappen|team/.test(id)) return '🛡️ Wappen / Logos';
+            if (/player|photo|img|foto/.test(id) || img) return '🖼️ Bild';
+            return '▫️ Element';
+        }
+        let voState = null;
+        async function openVidOrder(tab) {
+            const tpls = Array.from($(`view-${tab}`)?.querySelectorAll('.post-template, .story-template') || []);
+            if (!tpls.length) return;
+            voState = { tab, tpls, tplId: (voState?.tab === tab && tpls.some(t => t.id === voState.tplId)) ? voState.tplId : tpls[0].id, items: [] };
+            $('vo-fmt').innerHTML = tpls.length > 1 ? tpls.map(t => `<button type="button" data-tpl="${t.id}" onclick="selectVidOrderTpl('${t.id}')">${esc(t.closest('.preview-wrapper')?.querySelector('.preview-label-tag')?.textContent.trim() || (t.classList.contains('story-template') ? 'Story' : 'Beitrag'))}</button>`).join('') : '';
+            $('vidorder-overlay').hidden = false;
+            await selectVidOrderTpl(voState.tplId);
+        }
+        async function selectVidOrderTpl(tplId) {
+            if (!voState) return;
+            voState.tplId = tplId;
+            $('vo-fmt').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.tpl === tplId));
+            $('vo-list').innerHTML = '<span class="hint">⏳ Elemente werden gelesen …</span>';
+            voState.items = await vidUnitsFor(tplId);
+            renderVidOrder();
+        }
+        /* Einheiten einer Vorlage in Video-Reihenfolge (liest eine unsichtbare Kopie – klappt auch, wenn die Vorschau gerade ausgeblendet ist) */
+        async function vidUnitsFor(tplId) {
+            const tpl = $(tplId);
+            if (!tpl) return [];
+            const { holder, clone } = await prepareExportClone(tpl);
+            try {
+                return sortAnimUnits(findAnimUnits(clone), tplId).map(u => ({ key: u.key, label: vidUnitLabel(u) }));
+            } finally { holder.remove(); }
+        }
+        function renderVidOrder() {
+            const items = voState?.items || [];
+            $('vo-list').innerHTML = items.length ? items.map((it, i) => `<div class="vo-item" data-i="${i}">
+                    <span class="vo-handle" title="Ziehen zum Verschieben">☰</span><span class="vo-num">${i + 1}</span>
+                    <span class="vo-label" title="In der Vorschau zeigen" onclick="flashVidUnit(${i})">${esc(it.label)}</span>
+                    <button type="button" class="sd-btn" title="Früher" onclick="moveVidOrder(${i}, -1)" ${i ? '' : 'disabled'}>▲</button>
+                    <button type="button" class="sd-btn" title="Später" onclick="moveVidOrder(${i}, 1)" ${i < items.length - 1 ? '' : 'disabled'}>▼</button>
+                </div>`).join('') : '<span class="hint">In dieser Vorlage gibt es keine Elemente, die einfliegen.</span>';
+            $('vo-list').querySelectorAll('.vo-handle').forEach(h => setupVidOrderDrag(h));
+        }
+        function saveVidOrder() {
+            vidOrder[voState.tplId] = voState.items.map(it => it.key);
+            scheduleSave();
+        }
+        function moveVidOrder(i, d) {
+            const items = voState.items, j = i + d;
+            if (j < 0 || j >= items.length) return;
+            [items[i], items[j]] = [items[j], items[i]];
+            saveVidOrder();
+            renderVidOrder();
+        }
+        function setupVidOrderDrag(handle) {
+            handle.onpointerdown = e => {
+                const row = handle.closest('.vo-item'), list = $('vo-list');
+                e.preventDefault();
+                row.classList.add('dragging');
+                // Auf window lauschen: beim Umsortieren wandert die Zeile im DOM, ein Pointer-Capture ginge dabei verloren
+                const move = ev => {
+                    ev.preventDefault();
+                    const over = Array.from(list.children).find(r => { const b = r.getBoundingClientRect(); return r !== row && ev.clientY >= b.top && ev.clientY <= b.bottom; });
+                    if (!over) return;
+                    const b = over.getBoundingClientRect();
+                    list.insertBefore(row, ev.clientY < b.top + b.height / 2 ? over : over.nextSibling);
+                };
+                const up = () => {
+                    window.removeEventListener('pointermove', move);
+                    window.removeEventListener('pointerup', up);
+                    window.removeEventListener('pointercancel', up);
+                    row.classList.remove('dragging');
+                    const old = voState.items;
+                    voState.items = Array.from(list.children).map(r => old[+r.dataset.i]);
+                    saveVidOrder();
+                    renderVidOrder();
+                };
+                window.addEventListener('pointermove', move, { passive: false });
+                window.addEventListener('pointerup', up);
+                window.addEventListener('pointercancel', up);
+            };
+        }
+        function flashVidUnit(i) {
+            const it = voState?.items[i], tpl = $(voState?.tplId);
+            if (!it || !tpl) return;
+            const el = it.key.startsWith('row:') ? tpl.querySelectorAll('.pitch > .row')[+it.key.slice(4)] : (it.key && $(it.key));
+            if (!el) return;
+            el.classList.add('vo-flash');
+            setTimeout(() => el.classList.remove('vo-flash'), 1400);
+        }
+        async function resetVidOrder() {
+            if (!voState) return;
+            delete vidOrder[voState.tplId];
+            scheduleSave();
+            await selectVidOrderTpl(voState.tplId);
+            toast('↺ Wieder von oben nach unten');
+        }
+        function closeVidOrder() { $('vidorder-overlay').hidden = true; }
         async function renderVideoLayers(element, onProgress) {
             const { holder, clone } = await prepareExportClone(element);
             try {
-                const units = findAnimUnits(clone);
+                const units = sortAnimUnits(findAnimUnits(clone), element.id);
                 units.forEach((u, i) => u.el.setAttribute('data-au', i));
                 const cr = clone.getBoundingClientRect();
                 // Ausschnitt = Fläche des Elements inkl. aller Inhalte – verschobene Spieler oder Namen ragen oft über die Reihe hinaus
@@ -10931,6 +11129,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 document.addEventListener('toggle', e => { if (e.target.matches?.('.sidebar details')) rememberSection(e.target); }, true);
                 editorTabs.forEach(t => applyExtraDesign(t, null));   // Standardwerte (z.B. Tor-Reiter: Torjubel-Foto)
                 buildPlayerSelectControls();
+                setupTimePicks();
                 fillFormationOptions(11, '4-4-2');
                 createPresentedBy();
                 refreshPlayerOptions();
