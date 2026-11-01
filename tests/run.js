@@ -480,6 +480,32 @@ async function makePhotos(browser) {
             setVal('erg-minute-1', ''); return r; });
         check('Minute als Auswahl 0–120 (Tor & Torschützen), alte Werte bleiben', Object.values(mins).every(Boolean), JSON.stringify(mins));
         check('Bis zu 25 Torschützen (zuerst 10, mehr per Knopf)', many.start === 10 && many.more === 15 && many.filled >= 20 && many.saved === 25 && many.lines > 0, JSON.stringify(many));
+        // Tor: Gegner aus der Ankündigung (Anzeigetafel Heim links), Spielart, Vorlage als Foto oder Zeile, ins Ergebnis übernehmen
+        const tor = await page.evaluate(() => { const r = {}, P = stammdaten.players.filter(x => (x.group || 'Spieler') === 'Spieler').map(x => x.name);
+            const opp = stammdaten.opponents[0].name; switchTab('tor');
+            setVal('in-post-opponent-select', opp); setVal('in-post-venue', 'auswaerts'); updateMatchup();
+            setVal('in-tor-player', P[0]); setVal('in-tor-assist', P[1]); setVal('in-tor-score', '0 : 1'); setVal('in-tor-minute', '67. Min'); setVal('in-tor-kind', 'Kopfball');
+            setVal('in-tor-opp-mode', 'names'); setVal('in-tor-assist-mode', 'photo'); updateTor();
+            const names = [...document.querySelectorAll('#capture-tor .tb-team span')].map(e => e.textContent);
+            r.board = names.length === 2 && names[0] === opp && names[1] === getTeamName() && $('out-tor-score').textContent === '0 : 1';
+            r.sub = $('out-tor-minute').textContent === '67. Min · Kopfball';
+            r.photo = $('out-tor-assist-wrap').style.display === 'flex' && !document.querySelector('#out-tor-player-name .tor-assist-line');
+            r.info = $('tor-match-info').textContent.includes(opp) && /Auswärtsspiel/.test($('tor-match-info').textContent);
+            setVal('in-post-venue', 'heim'); updateMatchup(); r.home = document.querySelector('#capture-tor .tb-team span').textContent === getTeamName();
+            setVal('in-tor-assist-mode', 'line'); updateTor();
+            r.line = $('out-tor-assist-wrap').style.display === 'none' && /Vorlage/.test(document.querySelector('#out-tor-player-name-feed .tor-assist-line')?.textContent || '');
+            setVal('in-tor-opp-mode', 'off'); updateTor(); r.off = !$('out-tor-score').closest('.tor-details').classList.contains('tor-board') && !document.querySelector('#capture-tor .tb-team');
+            const d = collectSlotData(); r.saved = d.torOppMode === 'off' && d.torAssistMode === 'line' && d.torKind === 'Kopfball';
+            const old = JSON.parse(JSON.stringify(d)); delete old.torOppMode; delete old.torAssistMode; delete old.torKind;
+            setVal('in-tor-opp-mode', 'logos'); applySlotData(old); r.migrated = val('in-tor-opp-mode') === 'off' && val('in-tor-assist-mode') === 'line';
+            setVal('in-tor-score', '1 : 0'); addTorToErgebnis(); addTorToErgebnis();
+            r.erg = val('erg-scorer-1') === P[0] && val('erg-minute-1') === '67' && val('in-ergebnis-score') === '1 : 0' && val('erg-scorer-2') !== P[0];
+            setVal('erg-scorer-1', 'Keiner'); setVal('erg-minute-1', ''); setVal('in-tor-assist', 'Keiner'); setVal('in-tor-kind', ''); setVal('in-tor-opp-mode', 'logos'); setVal('in-tor-assist-mode', 'photo'); updateErgebnis(); updateTor();
+            return r; });
+        check('Tor: Gegner als Anzeigetafel (Heim links) aus der Ankündigung, Spielart, Vorlage als Foto oder Zeile', tor.board && tor.sub && tor.photo && tor.info && tor.home && tor.line && tor.off, JSON.stringify(tor));
+        check('Tor: neue Einstellungen gespeichert, alte Stände ohne Gegner-Anzeige', tor.saved && tor.migrated, JSON.stringify(tor));
+        check('Tor: „Auch beim Ergebnis eintragen“ (ohne doppelten Eintrag)', tor.erg, JSON.stringify(tor));
+        check('Export Tor Story mit Anzeigetafel', (await exportSize(page, 'capture-tor')) === '1200x2133');
         // Freie Vorlage & Mannschaftsfoto
         check('Freie Vorlage', await page.evaluate(() => { switchTab('frei'); setVal('in-frei-title', 'SOMMERFEST'); setVal('in-frei-icon-mode', 'emoji'); updateFrei(); return $('out-frei-title').textContent === 'SOMMERFEST' && $('out-frei-icon-feed').textContent.length > 0; }));
         check('Export freie Vorlage', (await exportSize(page, 'capture-frei')) === '1200x2133');
