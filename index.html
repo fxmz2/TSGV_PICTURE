@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 23.1</title>
+    <title>Match-Shot – Grafiken für Vereine 23.2</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -323,8 +323,26 @@
 
         .assist-wrapper {
             display: flex; flex-direction: column; align-items: center;
-            background: rgba(0,0,0,0.65); padding: 6px 10px; border-radius: 8px;
+            background: var(--box-bg, rgba(0,0,0,0.65)); color: var(--box-fg, white); padding: 6px 10px; border-radius: 8px;
         }
+        .assist-wrapper > div { color: inherit !important; }
+        /* Tor: Anzeigetafel mit Wappen (Heim links, Gast rechts) */
+        .tor-details.tor-board { flex-direction: column; align-items: center; gap: 4px; padding: 8px 14px; }
+        .tor-board .tb-row { display: flex; align-items: center; gap: 12px; }
+        .tor-board .tb-team { display: flex; flex-direction: column; align-items: center; gap: 3px; max-width: 90px; }
+        .tor-board .tb-team img { width: 38px; height: 38px; object-fit: contain; background: #fff; border-radius: 50%; padding: 3px; box-sizing: border-box; }
+        .tor-board .tb-team span { font-size: 9px; line-height: 1.15; text-align: center; text-transform: uppercase; }
+        .tor-board .tb-mid { display: flex; flex-direction: column; align-items: center; }
+        .tor-board .tb-score { font-size: 1.7rem; font-weight: 900; white-space: nowrap; line-height: 1.1; }
+        .tor-board .tb-sub { font-size: 0.75rem; opacity: 0.9; white-space: nowrap; }
+        .post-template .tor-board { padding: 6px 12px; }
+        .post-template .tor-board .tb-team img { width: 32px; height: 32px; }
+        .post-template .tor-board .tb-team span { font-size: 8px; }
+        .story-template .tor-board .tb-team img { width: 46px; height: 46px; }
+        .tor-assist-line { display: block; font-size: 0.75em; font-weight: normal; margin-top: 4px; opacity: 0.95; }
+        .match-info { background: #eef6f8; border-radius: 8px; padding: 8px 10px; font-size: 13px; margin-bottom: 10px; display: flex; gap: 8px; align-items: center; }
+        .match-info span { flex: 1; }
+        .match-info button { border: 1px solid #c9d3da; background: #fff; color: #005f73; border-radius: 8px; padding: 5px 9px; font-size: 12px; cursor: pointer; white-space: nowrap; }
 
         .kader-layout { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 12px; box-sizing: border-box; z-index: 2; margin-top: 50px; }
         .kader-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; margin-bottom: 6px; }
@@ -1728,16 +1746,51 @@
                 <h2>Tor-Update Einstellungen</h2>
                 <div id="design-controls-tor"></div>
 
+                <div class="match-info" id="tor-match-info"></div>
+
+                <div class="design-sub">1 · Das Tor</div>
+                <div class="control-group"><label>Torschütze</label><select id="in-tor-player" class="player-select" onchange="updateTor();"></select></div>
+                <div class="control-group"><label>Spielstand nach dem Tor</label><input type="text" id="in-tor-score" class="score-src" value="1 : 0" oninput="updateTor();">
+                    <span class="hint" id="tor-score-teams"></span></div>
+                <div class="eck-grid2">
+                    <div class="control-group"><label>Minute</label><select id="in-tor-minute" class="keep-unknown" onchange="updateTor();"></select></div>
+                    <div class="control-group"><label>Art des Tores</label>
+                        <select id="in-tor-kind" onchange="updateTor(); scheduleSave();">
+                            <option value="">– keine Angabe –</option>
+                            <option value="Elfmeter">Elfmeter</option>
+                            <option value="Freistoß">Freistoß</option>
+                            <option value="Kopfball">Kopfball</option>
+                            <option value="Fernschuss">Fernschuss</option>
+                            <option value="Konter">Konter</option>
+                        </select></div>
+                </div>
+
+                <div class="design-sub">2 · Gegner im Bild</div>
                 <div class="control-group">
-                    <label>Tor-Bild Größe</label>
+                    <select id="in-tor-opp-mode" onchange="updateTor(); scheduleSave();">
+                        <option value="logos">Anzeigetafel mit beiden Wappen</option>
+                        <option value="names">Anzeigetafel mit Wappen & Vereinsnamen</option>
+                        <option value="off">Nicht anzeigen (nur Spielstand)</option>
+                    </select>
+                    <span class="hint">Heim steht links, Gast rechts – wie in der Ankündigung eingestellt.</span></div>
+
+                <div class="design-sub">3 · Vorlage</div>
+                <div class="control-group"><label>Vorlagengeber (optional)</label><select id="in-tor-assist" class="player-select" onchange="updateTor();"></select></div>
+                <div class="control-group" id="tor-assist-mode-group"><label>Vorlage anzeigen als</label>
+                    <select id="in-tor-assist-mode" onchange="updateTor(); scheduleSave();">
+                        <option value="photo">Foto mit Name (frei verschiebbar)</option>
+                        <option value="line">Textzeile unter dem Torschützen</option>
+                    </select></div>
+
+                <div class="design-sub">4 · Darstellung</div>
+                <div class="control-group"><label>Namen anzeigen als</label><select id="in-tor-namefmt" class="namefmt-select" onchange="updateTor(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
+                <div class="control-group">
+                    <label>Größe Torschützen-Foto</label>
                     <input type="range" id="in-size-tor-img" min="80" max="350" step="5" value="170" oninput="updateTorImageSize()">
                 </div>
 
-                <div class="control-group"><label>Torschütze</label><select id="in-tor-player" class="player-select" onchange="updateTor();"></select></div>
-                <div class="control-group"><label>Vorlagengeber (Optional)</label><select id="in-tor-assist" class="player-select" onchange="updateTor();"></select></div>
-                <div class="control-group"><label>Name anzeigen als</label><select id="in-tor-namefmt" class="namefmt-select" onchange="updateTor(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
-                <div class="control-group"><label>Spielstand</label><input type="text" id="in-tor-score" class="score-src" value="1 : 0" oninput="updateTor();"></div>
-                <div class="control-group"><label>Minute</label><select id="in-tor-minute" class="keep-unknown" onchange="updateTor();"></select></div>
+                <button type="button" class="copy-action-btn" style="background:#2a9d8f; font-size:13px; padding:10px;" onclick="addTorToErgebnis()">📋 Tor beim Ergebnis eintragen (Torschützen & Spielstand)</button>
+                <span class="hint" style="margin-bottom:10px;">So füllt sich das Endergebnis während des Spiels von selbst.</span>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('tor')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
@@ -2258,7 +2311,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <div id="out-tor-minute-feed">12. Min</div>
                             </div>
                         </div>
-                        <img id="img-tor-player-feed" class="tor-player-img-feed draggable-img" data-default-top="180px" data-default-left="140px" style="top:180px; left:140px;" alt="">
+                        <img id="img-tor-player-feed" class="tor-player-img-feed draggable-img" data-default-top="200px" data-default-left="140px" style="top:200px; left:140px;" alt="">
                         <div id="out-tor-assist-wrap-feed" class="draggable-img" data-default-top="270px" data-default-left="15px" style="top:270px; left:15px; display:none; flex-direction:column; align-items:center; width:auto;">
                             <div class="assist-wrapper">
                                 <div style="font-size:9px; margin-bottom:2px; color:white;" data-label="tor:assist">Vorlage von:</div>
@@ -2907,7 +2960,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "23.1";
+        const APP_VERSION = "23.2";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -5229,7 +5282,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 case 'tor': {
                     const p = playerLabel(val('in-tor-player')), a = playerLabel(val('in-tor-assist'));
                     const minute = normName(val('in-tor-minute')), score = normName(val('in-tor-score'));
-                    lines.push(`⚽ TOOOOR! ${p ? `${p} trifft` : 'Wir treffen'}${minute ? ` in der ${minute}` : ''}${score ? ` zum ${score}` : ''}!`);
+                    const kind = val('in-tor-kind'), opp = val('in-post-opponent-select');
+                    lines.push(`⚽ TOOOOR! ${p ? `${p} trifft` : 'Wir treffen'}${kind ? ` per ${kind}` : ''}${minute ? ` in der ${minute}` : ''}${score ? ` zum ${score}` : ''}${opp ? ` gegen ${opp}` : ''}!`);
                     if (a) lines.push(`🅰️ Vorlage: ${a}`);
                     break;
                 }
@@ -5357,7 +5411,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         const TAB_CONTENT = {
             post:       { keys: ['venue', 'opponentSelect', 'postTitle', 'postTitleMode', 'postDate', 'postTime'], inputs: [] },
             story:      { keys: ['storyTitleText', 'coach1', 'coach2', 'formation', 'lineupKaderOnly', 'captain', 'pitchHideNames', 'lineupMatch', 'lineupSub'], inputs: [/^player-\d+$/, /^num-player-/, /^bench-player-/] },
-            tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute', 'torNameFmt'], inputs: [] },
+            tor:        { keys: ['torPlayer', 'torAssist', 'torScore', 'torMinute', 'torKind', 'torOppMode', 'torAssistMode', 'torNameFmt'], inputs: [] },
             ergebnis:   { keys: ['ergTitle', 'ergScore', 'ergText', 'ergShowScorers', 'ergNameFmt', 'ergMode'], inputs: [/^erg-/] },
             kader:      { keys: ['kaderMeeting', 'kaderJersey', 'kaderDuty1', 'kaderDuty2', 'kaderFreetext', 'kaderNameFmt'], inputs: [/^kader-player-/] },
             potm:       { keys: ['potmPlayer', 'potmText', 'potmNameFmt'], inputs: [] },
@@ -7247,21 +7301,43 @@ Alle sind herzlich eingeladen!</textarea></div>
             if ($('out-list-coaches')) $('out-list-coaches').innerHTML = coachHTML || esc(L('story', 'noCoaches'));
         }
 
+        /* Das aktuelle Spiel (Gegner, Heim/Auswärts) kommt aus der Ankündigung – Tor und Ergebnis bauen darauf auf */
+        function currentMatch() {
+            const home = val('in-post-venue') !== 'auswaerts', opp = val('in-post-opponent-select') || '';
+            const own = { name: getTeamName(), logo: getClubLogoSrc() }, other = { name: opp || 'Gegner', logo: getOpponentLogoSrc(opp || 'Gegner') };
+            return { home, opp, homeTeam: home ? own : other, awayTeam: home ? other : own };
+        }
         function updateTor() {
             const name = val('in-tor-player') || "Keiner";
             const assistName = val('in-tor-assist') || "Keiner";
             const score = val('in-tor-score');
             const minute = val('in-tor-minute');
+            const kind = val('in-tor-kind');
+            const oppMode = val('in-tor-opp-mode') || 'logos';
+            const assistMode = val('in-tor-assist-mode') || 'photo';
+            const m = currentMatch();
+            const sub = [minute, kind].filter(Boolean).join(' · ');
 
-            setText('out-tor-score', score);
-            setText('out-tor-score-feed', score);
-            setText('out-tor-minute', minute);
-            setText('out-tor-minute-feed', minute);
+            // Spielstand / Anzeigetafel (Heim links, Gast rechts)
+            [['out-tor-score', 'out-tor-minute'], ['out-tor-score-feed', 'out-tor-minute-feed']].forEach(([sid, mid]) => {
+                const box = $(sid)?.closest('.tor-details');
+                if (!box) return;
+                const board = oppMode !== 'off';
+                box.classList.toggle('tor-board', board);
+                const team = t => `<div class="tb-team"><img src="${t.logo}" alt="">${oppMode === 'names' ? `<span>${esc(t.name)}</span>` : ''}</div>`;
+                box.innerHTML = board
+                    ? `<div class="tb-row">${team(m.homeTeam)}<div class="tb-mid"><div class="tb-score" id="${sid}">${esc(score)}</div><div class="tb-sub" id="${mid}"${sub ? '' : ' hidden'}>${esc(sub)}</div></div>${team(m.awayTeam)}</div>`
+                    : `<div id="${sid}">${esc(score)}</div>${sub ? '|' : ''}<div id="${mid}">${esc(sub)}</div>`;
+            });
 
             const torFmt = val('in-tor-namefmt') || 'full';
             const shownName = name !== "Keiner" ? playerNameHtml(name, torFmt) : '-';
             const scorerLbl = L('tor', 'scorer');
-            const scorerHtml = (scorerLbl ? esc(scorerLbl) + '<br>' : '') + shownName;
+            const hasAssist = assistName !== "Keiner";
+            // Vorlagengeber: bei „Vor- und Nachname“ kurz als „M. Mustermann“, sonst wie der Torschütze
+            const assistShown = hasAssist ? playerNameHtml(assistName, torFmt === 'full' ? 'short' : torFmt) : '';
+            const assistLine = hasAssist && assistMode === 'line' ? `<span class="tor-assist-line">${esc(L('tor', 'assist'))} ${assistShown}</span>` : '';
+            const scorerHtml = (scorerLbl ? esc(scorerLbl) + '<br>' : '') + shownName + assistLine;
             if ($('out-tor-player-name')) $('out-tor-player-name').innerHTML = scorerHtml;
             if ($('out-tor-player-name-feed')) $('out-tor-player-name-feed').innerHTML = scorerHtml;
 
@@ -7269,18 +7345,43 @@ Alle sind herzlich eingeladen!</textarea></div>
             ['img-tor-player', 'img-tor-player-feed'].forEach(id => { const img = $(id); if (img) img.src = torSrc; });
 
             [['out-tor-assist-wrap', 'img-tor-assist', 'out-tor-assist-name'],
-             ['out-tor-assist-wrap-feed', 'img-tor-assist-feed', 'out-tor-assist-name-feed']].forEach(([wrapId, imgId, nameId]) => {
-                const wrap = $(wrapId), imgEl = $(imgId), nameEl = $(nameId);
-                if (!wrap || !imgEl || !nameEl) return;
-                if (assistName !== "Keiner") {
+             ['out-tor-assist-wrap-feed', 'img-tor-assist-feed', 'out-tor-assist-name-feed']].forEach(([wrapId, imgId, nameEl]) => {
+                const wrap = $(wrapId), imgEl = $(imgId), nm = $(nameEl);
+                if (!wrap || !imgEl || !nm) return;
+                if (hasAssist && assistMode === 'photo') {
                     wrap.style.display = "flex";
-                    // Vorlagengeber: bei „Vor- und Nachname“ kurz als „M. Mustermann“, sonst wie der Torschütze
-                    nameEl.innerHTML = playerNameHtml(assistName, torFmt === 'full' ? 'short' : torFmt);
+                    nm.innerHTML = assistShown;
                     imgEl.src = getPlayerImageSrc(assistName, 'tor');
                 } else {
                     wrap.style.display = "none";
                 }
             });
+            if ($('tor-assist-mode-group')) $('tor-assist-mode-group').hidden = !hasAssist;
+
+            // Hinweise im Bearbeiten-Bereich
+            const info = $('tor-match-info');
+            if (info) info.innerHTML = `<span>⚽ <b>${esc(m.homeTeam.name)}</b> – <b>${esc(m.awayTeam.name)}</b><br><small>${m.home ? 'Heimspiel' : 'Auswärtsspiel'} · aus der Ankündigung</small></span><button type="button" onclick="switchTab('post')">✏️ ändern</button>`;
+            setText('tor-score-teams', `Links ${m.homeTeam.name} (Heim), rechts ${m.awayTeam.name} (Gast).`);
+        }
+        /* Tor auch beim Ergebnis eintragen: nächste freie Torschützen-Zeile + Spielstand */
+        function addTorToErgebnis() {
+            const name = val('in-tor-player');
+            if (!name || name === 'Keiner') { alert('Bitte zuerst den Torschützen auswählen.'); return; }
+            const min = (/^(\d+(?:\+\d+)?)/.exec(val('in-tor-minute') || '') || [])[1] || '';
+            let free = 0;
+            for (let i = 1; i <= SCORER_MAX; i++) {
+                const n = val(`erg-scorer-${i}`), mm = normName(val(`erg-minute-${i}`));
+                if (n === name && mm === min) { toast('Dieses Tor steht schon beim Ergebnis.'); return; }
+                if (!free && (!n || n === 'Keiner') && !mm) free = i;
+            }
+            if (!free) { alert('Beim Ergebnis sind alle Torschützen-Zeilen belegt.'); return; }
+            setVal(`erg-scorer-${free}`, name);
+            setVal(`erg-minute-${free}`, min);
+            if (ergMode() === 'ergebnis' || ergMode() === 'halbzeit') setVal('in-ergebnis-score', val('in-tor-score'));
+            scorersShown = Math.max(scorersShown, free);
+            updateErgebnis();
+            scheduleSave();
+            toast(`✅ ${playerDisplayName(name, 'last')}${min ? ` (${min}')` : ''} beim Ergebnis eingetragen – Spielstand ${val('in-tor-score')}`);
         }
 
         /* Ergebnis-Reiter: Endergebnis, Halbzeit, Spielabsage oder Countdown (gleiche Vorlage, andere Texte) */
@@ -7674,6 +7775,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if ($('team-logos-post-story-container')) $('team-logos-post-story-container').innerHTML = postHtml;
             if ($('team-logos-ergebnis-container')) $('team-logos-ergebnis-container').innerHTML = ergHtml;
             if ($('team-logos-ergebnis-container-feed')) $('team-logos-ergebnis-container-feed').innerHTML = ergHtml;
+            if (typeof updateTor === 'function') updateTor();
         }
 
         function postTitleAuto() { return val('in-post-title-mode') !== 'custom'; }
@@ -8812,6 +8914,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 torAssist: val('in-tor-assist') || 'Keiner',
                 torScore: val('in-tor-score'),
                 torMinute: val('in-tor-minute'),
+                torKind: val('in-tor-kind') || '',
+                torOppMode: val('in-tor-opp-mode') || 'logos',
+                torAssistMode: val('in-tor-assist-mode') || 'photo',
 
                 ergTitle: val('in-ergebnis-title'),
                 ergScore: val('in-ergebnis-score'),
@@ -8911,7 +9016,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 teamName: 'cfg-team-name', primary: 'cfg-color-primary', jerseyColor: 'cfg-color-jersey', frameColor: 'cfg-color-frame',
                 venue: 'in-post-venue', opponentSelect: 'in-post-opponent-select', postTitle: 'in-post-title', postTitleMode: 'in-post-title-mode', postDate: 'in-post-date', postTime: 'in-post-time',
                 storyTitleText: 'in-story-title-text', coach1: 'in-coach-1', coach2: 'in-coach-2', formation: 'formation-select', pitchMode: 'in-pitch-mode', captain: 'in-captain', lineupSub: 'in-lineup-sub',
-                torImgSize: 'in-size-tor-img', torPlayer: 'in-tor-player', torAssist: 'in-tor-assist', torScore: 'in-tor-score', torMinute: 'in-tor-minute',
+                torImgSize: 'in-size-tor-img', torPlayer: 'in-tor-player', torAssist: 'in-tor-assist', torScore: 'in-tor-score', torMinute: 'in-tor-minute', torKind: 'in-tor-kind', torOppMode: 'in-tor-opp-mode', torAssistMode: 'in-tor-assist-mode',
                 ergTitle: 'in-ergebnis-title', ergScore: 'in-ergebnis-score', ergText: 'in-ergebnis-text',
                 kaderMeeting: 'in-kader-meeting', kaderJersey: 'in-kader-jersey', kaderDuty1: 'in-kader-duty-1', kaderDuty2: 'in-kader-duty-2', kaderFreetext: 'in-kader-freetext',
                 potmPlayer: 'in-potm-player', potmText: 'in-potm-text'
@@ -8933,6 +9038,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
             setVal('in-erg-mode', ERG_MODES[data.ergMode] ? data.ergMode : 'ergebnis');
             tfBoard = normTfBoard(data.tfBoard);
+            if (data.torOppMode === undefined && data.torPlayer !== undefined) setVal('in-tor-opp-mode', 'off');
             if (data.postTitleMode === undefined && data.postTitle !== undefined)
                 setVal('in-post-title-mode', ['', 'HEIMSPIEL', 'AUSWÄRTSSPIEL'].includes(normName(data.postTitle).toUpperCase()) ? 'auto' : 'custom');
             vidOrder = data.vidOrder && typeof data.vidOrder === 'object' && !Array.isArray(data.vidOrder) ? data.vidOrder : {};
