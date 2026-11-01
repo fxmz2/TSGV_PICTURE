@@ -414,6 +414,29 @@ async function makePhotos(browser) {
             stammdaten.opponents.push({ name: 'SpVgg Vorlagendorfhausen-Musterberg' }); refreshOpponentDropdown(); setVal('wk-team-1', 'A-Jugend'); setVal('wk-opp-1', 'SpVgg Vorlagendorfhausen-Musterberg'); setVal('wk-score-1', '0:1'); updateWochenende();
             const els = [...document.querySelectorAll('#view-wochenende .fit-text')].filter(e => e.clientWidth); const ok = els.length > 0 && els.every(e => e.scrollWidth <= e.clientWidth + 1);
             stammdaten.opponents.pop(); refreshOpponentDropdown(); setVal('wk-team-1', ''); setVal('wk-opp-1', ''); setVal('wk-score-1', ''); updateWochenende(); return ok; }));
+        // Wochenende als Vorschau: Spiele aller Versionen aus den Ankündigungen übernehmen, danach auf Ergebnisse umschalten
+        const wkp = await page.evaluate(async () => { const r = {}, O = stammdaten.opponents.map(o => o.name); switchTab('wochenende');
+            const keepPost = [val('in-post-opponent-select'), val('in-post-venue'), val('in-post-date'), val('in-post-time')], keepV2 = await localforage.getItem(STORE.slot('v2'));
+            setVal('in-post-opponent-select', O[0]); setVal('in-post-venue', 'heim'); setVal('in-post-date', 'Sonntag, 08.11.'); setVal('in-post-time', '15:00 Uhr');
+            const d2 = collectSlotData(); d2.opponentSelect = O[1]; d2.venue = 'auswaerts'; d2.postDate = 'Samstag, 07.11.'; d2.postTime = '13:30 Uhr';
+            await localforage.setItem(STORE.slot('v2'), d2); setVal('wk-score-1', '9:9');
+            await importWeekendFromVersions();
+            const rows = readWeekendRows();
+            r.import = wkMode() === 'vorschau' && rows.length >= 2 && rows[0].opp === O[0] && rows[0].time === '15:00' && /-11-08$/.test(rows[0].date) && rows[1].venue === 'auswaerts' && rows[1].time === '13:30' && rows[0].score === '';
+            const when = [...document.querySelectorAll('#out-wk-list-feed .wk-when')].map(e => e.textContent);
+            r.view = val('in-wk-title') === 'SPIELTAG' && when[0] === 'So 08.11.15:00' && !document.querySelector('#out-wk-list-feed .wk-score');
+            r.caption = /gegen .* · So 08\.11\. · 15:00 Uhr/.test(buildCaption('wochenende')) && /bei /.test(buildCaption('wochenende'));
+            const d = collectSlotData(); r.saved = d.inputs['in-wk-mode'] === 'vorschau' && d.inputs['wk-time-2'] === '13:30';
+            setWkMode('ergebnis'); setVal('wk-score-1', '2:1'); updateWochenende();
+            r.results = val('in-wk-title') === 'ERGEBNISSE' && readWeekendRows()[0].opp === O[0] && !!document.querySelector('#out-wk-list-feed .wk-score.win') && !document.querySelector('#out-wk-list-feed .wk-when');
+            const old = JSON.parse(JSON.stringify(collectSlotData())); delete old.inputs['in-wk-mode']; for (let i = 1; i <= WK_MAX; i++) { delete old.inputs[`wk-date-${i}`]; delete old.inputs[`wk-time-${i}`]; }
+            setWkMode('vorschau'); applySlotData(old); updateWochenende(); r.old = wkMode() === 'ergebnis' && val('wk-time-1') === '';
+            for (let i = 1; i <= WK_MAX; i++) clearWeekendRow(i);
+            [['in-post-opponent-select', 0], ['in-post-venue', 1], ['in-post-date', 2], ['in-post-time', 3]].forEach(([id, k]) => setVal(id, keepPost[k]));
+            if (keepV2) await localforage.setItem(STORE.slot('v2'), keepV2); else await localforage.removeItem(STORE.slot('v2'));
+            updateAllViews(); return r; });
+        check('Wochenende-Vorschau: Spiele aller Versionen aus den Ankündigungen (Tag, Anstoß, Heim/Auswärts), Bildtext', wkp.import && wkp.view && wkp.caption, JSON.stringify(wkp));
+        check('Wochenende: Vorschau gespeichert, Umschalten auf Ergebnisse behält Spiele, alte Stände = Ergebnisse', wkp.saved && wkp.results && wkp.old, JSON.stringify(wkp));
         // Farben & Schrift: Hinweise „wirkt auf“, Zeigen, und umgekehrt vom Element zur Einstellung
         const roles = await page.evaluate(async () => { switchTab('post'); const host = $('design-controls-post'), r = {};
             host.querySelector('details[data-section="colors"]').open = true; renderRoleHints('post');
