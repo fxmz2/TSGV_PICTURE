@@ -458,6 +458,22 @@ async function makePhotos(browser) {
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
+        // Sponsor: Logo-Kasten in verschiedenen Formen oder ganz ohne Kasten, Name ausblendbar, alte Stände → Standard
+        const spon = await page.evaluate(async () => { const r = {}; switchTab('sponsor'); setVal('in-spon-select', stammdaten.sponsors[0].name); updateSponsorPost();
+            const c = $('out-spon-card'), cs = () => getComputedStyle(c);
+            r.def = c.classList.contains('ss-rounded') && cs().backgroundColor === 'rgb(255, 255, 255)';
+            setVal('in-spon-shape', 'circle'); updateSponsorPost(); r.circle = c.offsetWidth === c.offsetHeight && cs().borderRadius === '50%';
+            setVal('in-spon-shape', 'shield'); setVal('in-spon-border', 'frame'); updateSponsorPost(); r.shield = /svg/.test(c.style.backgroundImage) && cs().backgroundColor === 'rgba(0, 0, 0, 0)';
+            r.shieldExport = (await renderElementToCanvas($('capture-sponsor'))).width === 1200;
+            setVal('in-spon-shape', 'square'); setVal('in-spon-boxcolor', '#112233'); updateSponsorPost(); r.square = cs().backgroundColor === 'rgb(17, 34, 51)' && cs().borderTopWidth === '3px';
+            setVal('in-spon-shape', 'none'); setVal('in-spon-showname', 'no'); updateSponsorPost();
+            r.none = cs().backgroundColor === 'rgba(0, 0, 0, 0)' && cs().boxShadow === 'none' && document.querySelector('#editor-sponsor .spon-box-only').hidden && $('out-spon-name').style.display === 'none';
+            const d = collectSlotData(); r.saved = d.inputs['in-spon-shape'] === 'none' && d.inputs['in-spon-showname'] === 'no';
+            const old = JSON.parse(JSON.stringify(d)); ['in-spon-shape', 'in-spon-boxcolor', 'in-spon-border', 'in-spon-showname'].forEach(k => delete old.inputs[k]);
+            applySlotData(old); updateSponsorPost(); r.old = val('in-spon-shape') === 'rounded' && val('in-spon-showname') === 'yes' && c.classList.contains('ss-rounded') && $('out-spon-name').style.display === '';
+            return r; });
+        check('Sponsor: Logo-Kasten als Kreis, Schild, eckig (Farbe/Rahmen) oder ohne Kasten, Name ausblendbar', spon.def && spon.circle && spon.shield && spon.shieldExport && spon.square && spon.none, JSON.stringify(spon));
+        check('Sponsor: Kasten-Einstellungen gespeichert, alte Stände wie bisher', spon.saved && spon.old, JSON.stringify(spon));
         // Ergebnis: Spielabsage, Countdown
         const modes = await page.evaluate(() => { switchTab('ergebnis'); setErgMode('absage'); const a = [val('in-ergebnis-title'), !!document.querySelector('#out-ergebnis-score .erg-stamp'), $('out-erg-scorers-wrap').style.display];
             setErgMode('countdown'); const d = new Date(); d.setDate(d.getDate() + 4); setVal('erg-cd-date', d.toISOString().slice(0, 10)); updateErgebnis(); const c = $('out-ergebnis-score').textContent;

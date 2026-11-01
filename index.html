@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 23.2</title>
+    <title>Match-Shot – Grafiken für Vereine 23.3</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -778,6 +778,13 @@
         /* Danke an Sponsor */
         .spon-card { display: flex; align-items: center; justify-content: center; background: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.45); box-sizing: border-box; padding: 16px; overflow: hidden; }
         .spon-card img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .spon-card.ss-square { border-radius: 0; }
+        .spon-card.ss-circle { border-radius: 50%; padding: 12%; }
+        .spon-card.ss-shield { border-radius: 0; box-shadow: none; background-repeat: no-repeat; background-position: center; background-size: 100% 100%; padding: 12% 16% 30%; overflow: visible; }
+        .spon-card.ss-none, .spon-card.ss-free { box-shadow: none; padding: 0; border-radius: 0; overflow: visible; }
+        .spon-card.ss-free img { filter: drop-shadow(0 6px 10px rgba(0,0,0,0.55)); }
+        .spon-card:is(.ss-none, .ss-free) .spon-card-text { color: inherit !important; text-shadow: var(--tpl-text-shadow, 0 2px 6px rgba(0,0,0,0.6)); }
+        .spon-card.ss-border { border: 3px solid var(--tab-frame, var(--frame-color)); }
         .spon-card-text { color: #111; font-size: 1.6rem; font-weight: 900; text-align: center; text-shadow: none; text-transform: uppercase; }
         .spon-name { display: inline-block; font-size: 1.3rem; font-weight: bold; background: var(--box-bg, rgba(0,0,0,0.72)); color: var(--box-fg, white); padding: 5px 16px; border-radius: 8px; border-bottom: 3px solid var(--jersey-color); text-shadow: none; }
         .spon-extra { font-size: 0.85rem; font-weight: bold; color: rgba(255,255,255,0.9); margin-top: 2px; }
@@ -2106,6 +2113,30 @@
                 <div class="control-group"><label>Titel</label><input type="text" id="in-spon-title" value="DANKE!" oninput="updateSponsorPost();"></div>
                 <div class="control-group"><label>Text</label><input type="text" id="in-spon-text" value="für die großartige Unterstützung!" oninput="updateSponsorPost();"></div>
                 <div class="control-group"><label>Zusatz (optional)</label><input type="text" id="in-spon-extra" value="" placeholder="z.B. Neue Trikots für die Saison 2026/27" oninput="updateSponsorPost();"></div>
+                <div class="design-sub">Logo-Kasten <small>– wie die Rahmen bei den Spielern</small></div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div class="control-group"><label>Form</label>
+                        <select id="in-spon-shape" onchange="updateSponsorPost(); scheduleSave();">
+                            <option value="rounded">Abgerundet (Standard)</option>
+                            <option value="square">Eckig</option>
+                            <option value="circle">Kreis</option>
+                            <option value="shield">Schild-Form</option>
+                            <option value="none">Ohne Kasten</option>
+                            <option value="free">Ohne Kasten, mit Schatten</option>
+                        </select></div>
+                    <div class="control-group spon-box-only"><label>Kasten-Farbe</label><input type="color" id="in-spon-boxcolor" value="#ffffff" oninput="updateSponsorPost()" onchange="scheduleSave()"></div>
+                    <div class="control-group spon-box-only"><label>Rahmen</label>
+                        <select id="in-spon-border" onchange="updateSponsorPost(); scheduleSave();">
+                            <option value="none">Ohne Rahmen</option>
+                            <option value="frame">In Rahmenfarbe</option>
+                        </select></div>
+                    <div class="control-group"><label>Sponsorname</label>
+                        <select id="in-spon-showname" onchange="updateSponsorPost(); scheduleSave();">
+                            <option value="yes">Anzeigen</option>
+                            <option value="no">Ausblenden</option>
+                        </select></div>
+                </div>
+                <span class="hint" style="margin-bottom:10px;">„Ohne Kasten“ sieht am besten mit Logos ohne Hintergrund aus (PNG mit durchsichtigem Hintergrund). Die Rahmenfarbe stellst du unter „Farben &amp; Schrift“ ein.</span>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('sponsor')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
@@ -2960,7 +2991,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "23.2";
+        const APP_VERSION = "23.3";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -5070,7 +5101,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <input type="hidden" id="in-bg-${tab}-story" value="${DEFAULT_BG}">
                                 <div class="bg-thumb-grid" id="thumb-grid-${tab}-story"></div>
                             </div>
-                            <div class="control-group">
+                            <div class="control-group"${/nicht verwendet/.test(cfg.frameLabel) ? ' hidden' : ''}>
                                 <label>${cfg.frameLabel}</label>
                                 <select id="in-frame-shape-${tab}" onchange="updateTabDesign('${tab}')">
                                     <option value="circle">Kreis (Standard)</option>
@@ -5807,6 +5838,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 viewContainer.style.setProperty('--avatar-clip', clip);
                 viewContainer.style.setProperty('--avatar-bg', bg);
                 viewContainer.style.setProperty('--avatar-shadow', shadow);
+                viewContainer.style.setProperty('--tab-frame', frameColVal);
 
                 // Überschriften: eigene Schrift, Farbe, Abstand, Großbuchstaben, Kursiv; Text-Effekt für alle Texte
                 const adv = isAdvanced();   // Basis-Paket: Überschriften im Standard-Design
@@ -5852,6 +5884,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const logoStory = $(`in-logo-story-${tab}`)?.checked ?? true;
                 viewContainer.querySelectorAll('.post-template .corner-logo').forEach(l => l.classList.toggle('logo-hidden', !logoFeed));
                 viewContainer.querySelectorAll('.story-template .corner-logo').forEach(l => l.classList.toggle('logo-hidden', !logoStory));
+                if (tab === 'sponsor') updateSponsorPost();
             }
 
             ['feed', 'story'].forEach(fmt => {
@@ -7546,7 +7579,39 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (extra) { extra.innerText = val('in-spon-extra'); extra.style.display = val('in-spon-extra') ? '' : 'none'; }
                 const c = $(`out-spon-card${sfx}`);
                 if (c && c.dataset.key !== (name + '|' + !!sp?.img)) { c.innerHTML = card; c.dataset.key = name + '|' + !!sp?.img; }
+                if (c) styleSponsorCard(c);
+                const nm = $(`out-spon-name${sfx}`);
+                if (nm) nm.style.display = val('in-spon-showname') === 'no' ? 'none' : '';
             });
+            document.querySelectorAll('#editor-sponsor .spon-box-only').forEach(e => e.hidden = ['none', 'free'].includes(val('in-spon-shape')));
+        }
+        /* Logo-Kasten: Form (wie die Spieler-Rahmen), Farbe und Rahmen. Schild als SVG-Hintergrund, weil der Bild-Export kein clip-path kennt. */
+        const SPON_DEFAULTS = { 'in-spon-shape': 'rounded', 'in-spon-boxcolor': '#ffffff', 'in-spon-border': 'none', 'in-spon-showname': 'yes' };
+        const SPON_SHAPES = ['rounded', 'square', 'circle', 'shield', 'none', 'free'];
+        function styleSponsorCard(c) {
+            const shape = SPON_SHAPES.includes(val('in-spon-shape')) ? val('in-spon-shape') : 'rounded';
+            const boxCol = /^#[0-9a-f]{6}$/i.test(val('in-spon-boxcolor')) ? val('in-spon-boxcolor') : '#ffffff';
+            const border = val('in-spon-border') === 'frame';
+            const boxless = shape === 'none' || shape === 'free';
+            if (!c.dataset.w) { c.dataset.w = parseFloat(c.style.width) || 230; c.dataset.h = parseFloat(c.style.height) || 150; }
+            const W = +c.dataset.w, H = +c.dataset.h, sq = shape === 'circle' || shape === 'shield';
+            c.style.width = (sq ? H : W) + 'px';
+            c.style.height = H + 'px';
+            c.style.marginLeft = sq ? ((W - H) / 2) + 'px' : '';
+            SPON_SHAPES.forEach(k => c.classList.toggle('ss-' + k, k === shape));
+            c.classList.toggle('ss-border', border && !boxless && shape !== 'shield');
+            c.style.backgroundColor = boxless || shape === 'shield' ? 'transparent' : boxCol;
+            if (shape === 'shield') {
+                const fc = border ? (val('in-color-frame-sponsor') || val('cfg-color-frame') || '#ffffff') : '';
+                // Feste Größe nötig – sonst zeichnet der Bild-Export das Schild zu schmal
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${H}" height="${H}" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M2 2H98V74.5L50 98 2 74.5Z" fill="${boxCol}"${fc ? ` stroke="${fc}" stroke-width="3" vector-effect="non-scaling-stroke"` : ''}/></svg>`;
+                c.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+            } else c.style.backgroundImage = '';
+            // Text-Ersatz (Sponsor ohne Logo): dunkle Schrift auf hellem Kasten, helle auf dunklem
+            const n = parseInt(boxCol.slice(1), 16);
+            const light = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 140;
+            const t = c.querySelector('.spon-card-text');
+            if (t) t.style.color = boxless ? '' : (light ? '#111' : '#fff');
         }
 
         /* ---------- Wochenend-Ergebnisse ---------- */
@@ -8958,7 +9023,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const inputIds = ['in-kal-mode', 'in-kal-title', 'in-kal-color-home', 'in-kal-color-away',
                 'in-bday-player', 'in-bday-title', 'in-bday-text',
                 'in-new-mode', 'in-new-player', 'in-new-title', 'in-new-position', 'in-new-number', 'in-new-from-select', 'in-new-from-text', 'in-new-text',
-                'in-spon-select', 'in-spon-title', 'in-spon-text', 'in-spon-extra', 'in-wk-title', 'in-wk-sub'];
+                'in-spon-select', 'in-spon-title', 'in-spon-text', 'in-spon-extra', 'in-spon-shape', 'in-spon-boxcolor', 'in-spon-border', 'in-spon-showname', 'in-wk-title', 'in-wk-sub'];
             for (let i = 1; i <= WK_MAX; i++) inputIds.push(`wk-team-${i}`, `wk-score-${i}`, `wk-opp-${i}`, `wk-venue-${i}`);
             for (let i = 1; i <= SCORER_MAX; i++) inputIds.push(`erg-scorer-${i}`, `erg-minute-${i}`);
             inputIds.push('erg-cd-date', 'in-frei-title', 'in-frei-icon-mode', 'in-frei-icon', 'in-frei-sub', 'in-frei-text',
@@ -9060,6 +9125,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 // Ältere Stände kannten nur 10 Torschützen-Zeilen → übrige leeren
                 for (let i = 1; i <= SCORER_MAX; i++) if (!(`erg-scorer-${i}` in data.inputs)) { setVal(`erg-scorer-${i}`, 'Keiner'); setVal(`erg-minute-${i}`, ''); }
                 scorersShown = SCORER_START;
+                // Ältere Stände ohne Logo-Kasten-Einstellungen → Standard (sonst bliebe die Einstellung der vorigen Version stehen)
+                Object.entries(SPON_DEFAULTS).forEach(([k, v]) => { if (!(k in data.inputs)) setVal(k, v); });
                 for (const k in data.inputs) setVal(k, data.inputs[k]);
             }
             if (data.lineupKaderOnly !== undefined && $('in-lineup-kader-only')) $('in-lineup-kader-only').checked = data.lineupKaderOnly;
