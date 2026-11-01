@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 23.3</title>
+    <title>Match-Shot – Grafiken für Vereine 23.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1069,7 +1069,7 @@
         .transfer-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
         .transfer-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--box-bg, rgba(0,0,0,0.62)); color: var(--box-fg, white); text-shadow: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: bold; }
         .transfer-chip img { width: 22px; height: 22px; object-fit: contain; background: white; border-radius: 50%; padding: 1px; box-sizing: border-box; }
-        .transfer-number { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 22px; background: var(--jersey-color); border-radius: 4px; padding: 0 4px; }
+        .transfer-number { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 22px; background: var(--jersey-color); color: var(--jersey-fg, #fff); border-radius: 4px; padding: 0 4px; }
 
         @media (max-width: 850px) {
             .sidebar { width: 100%; padding-bottom: 40px; }
@@ -2991,7 +2991,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "23.3";
+        const APP_VERSION = "23.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -5781,6 +5781,13 @@ Alle sind herzlich eingeladen!</textarea></div>
             updateAllViews();
             scheduleSave();
         }
+        /* Gut lesbare Schriftfarbe (weiß oder fast schwarz) für eine Hintergrundfarbe #rrggbb */
+        function contrastText(hex) {
+            const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+            if (!m) return '#ffffff';
+            const n = parseInt(m[1], 16);
+            return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 150 ? '#111111' : '#ffffff';
+        }
         function updateDesignSettings() {
             const primary = val('cfg-color-primary') || '#005f73';
             const jerseyCol = val('cfg-color-jersey') || '#bb3e03';
@@ -5789,6 +5796,8 @@ Alle sind herzlich eingeladen!</textarea></div>
 
             document.documentElement.style.setProperty('--primary', primary);
             document.documentElement.style.setProperty('--jersey-color', jerseyCol);
+            // Schrift auf Flächen in Trikotfarbe (z. B. Rückennummer beim Neuzugang): automatisch weiß oder schwarz – je nachdem, was besser lesbar ist
+            document.documentElement.style.setProperty('--jersey-fg', contrastText(jerseyCol));
             document.documentElement.style.setProperty('--frame-color', frameCol);
             applyClubBranding();
         }
@@ -7608,10 +7617,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 c.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
             } else c.style.backgroundImage = '';
             // Text-Ersatz (Sponsor ohne Logo): dunkle Schrift auf hellem Kasten, helle auf dunklem
-            const n = parseInt(boxCol.slice(1), 16);
-            const light = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 140;
             const t = c.querySelector('.spon-card-text');
-            if (t) t.style.color = boxless ? '' : (light ? '#111' : '#fff');
+            if (t) t.style.color = boxless ? '' : contrastText(boxCol);
         }
 
         /* ---------- Wochenend-Ergebnisse ---------- */
