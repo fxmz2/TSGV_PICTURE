@@ -25,6 +25,12 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 .url{position:absolute;left:64px;bottom:58px;font-size:24px;font-weight:700;color:#b9c8e6}
 .shot{border-radius:22px;box-shadow:0 24px 60px #000a;border:2px solid #ffffff22;display:block}
 .vis{position:absolute;left:0;right:0}
+.roles{display:flex;flex-direction:column;gap:22px;margin-top:34px}
+.role{display:flex;gap:26px;align-items:center;background:#ffffff0b;border:1px solid #ffffff1f;border-radius:24px;padding:22px}
+.role img{width:200px;flex:none;border-radius:14px}
+.role b{display:block;font-size:34px;font-weight:900;margin-bottom:12px}
+.rl{font-size:24px;line-height:1.3;font-weight:600;color:#dbe4f5;padding-left:38px;position:relative;margin-bottom:10px}
+.rl::before{content:"✓";position:absolute;left:0;top:-1px;width:28px;height:28px;border-radius:50%;background:#7fd99a22;color:#7fd99a;font-size:17px;font-weight:900;display:flex;align-items:center;justify-content:center}
 /* Folie 1 */
 .fan{position:absolute;left:0;right:0;bottom:150px;height:600px}
 .fan img{position:absolute;width:360px}
@@ -40,6 +46,7 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 .fr .lg{position:absolute;top:36%;left:0;right:0;display:flex;justify-content:center;gap:18px;align-items:center;z-index:2;font-weight:900;font-size:18px}
 .fr .lg i{width:62px;height:62px;border-radius:50%;background:#fff;color:#2b1550;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:20px}
 .fr .lb{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:17px;font-weight:800;z-index:2;background:#0008;padding:6px}
+.ex{margin:0;text-align:center}.ex figcaption{margin-top:12px;font-size:20px;font-weight:800;color:#b9c8e6}
 /* Folie Datenschutz */
 .lock{position:absolute;right:56px;top:130px;font-size:230px;opacity:.95;filter:drop-shadow(0 20px 40px #000a)}
 .dev{margin-top:46px;display:flex;align-items:center;gap:24px;background:#ffffff0d;border:1px solid #ffffff1f;border-radius:24px;padding:24px 28px}
@@ -78,7 +85,7 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 
 <!-- 1 Titel -->
 <section class="s"><div class="in">
- <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">1 / 9</div></div>
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">1 / 10</div></div>
  <h1 style="margin-top:70px;font-size:88px">Vereinsgrafiken<br>in Minuten –<br><span class="o">nicht in Stunden.</span></h1>
  <div class="lead">Spieltag, Tor, Ergebnis &amp; mehr – mit euren Farben, eurem Wappen und euren Sponsoren.</div>
  <div class="fan">
@@ -91,18 +98,18 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 
 <!-- 2 Eigene Vorlagen -->
 <section class="s"><div class="in">
- <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">2 / 9</div></div>
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">2 / 10</div></div>
  <div class="kick"><span class="em">🖼️</span>Eigene Vorlagen</div>
  <h2>Euer Hintergrund.<br><span class="o">Einmal hochladen.</span></h2>
  <div class="lead">Ladet euer eigenes Design hoch – es steht sofort für <b>Beitrag und Story</b> bereit, in allen Vorlagen.</div>
  <div class="mock-up" style="margin-top:60px">
   <div class="upl"><div class="big">📤</div>Hintergrund<br>hochladen</div>
   <div class="arrow">→</div>
-  <div class="fr" style="width:280px;height:350px"><div class="t">HEIMSPIEL</div><div class="lg"><i>DV</i>VS<i>FM</i></div><div class="lb">Beitrag 4:5</div></div>
-  <div class="fr" style="width:220px;height:391px"><div class="t" style="top:16%">HEIMSPIEL</div><div class="lg" style="top:38%"><i>DV</i>VS<i>FM</i></div><div class="lb">Story 9:16</div></div>
+  <figure class="ex"><img class="shot" src="../../landing/sponsor.webp" style="width:290px"><figcaption>Beitrag 4:5</figcaption></figure>
+  <figure class="ex"><img class="shot" src="../../landing/neuzugang.webp" style="width:215px"><figcaption>Story 9:16</figcaption></figure>
  </div>
  <div class="pts" style="margin-top:44px">
-  <div class="pt"><span>✓</span>Eure Fotos, Muster oder Designs als Vorlage</div>
+  <div class="pt"><span>✓</span>Ein Hintergrund – passt in Beitrag und Story</div>
   <div class="pt"><span>✓</span>Schrift, Farben &amp; Logos passen sich an</div>
  </div>
  <div class="url">match-shot.de</div><div class="swipe">Wischen →</div>
@@ -110,7 +117,7 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 
 <!-- 3 Datenschutz -->
 <section class="s"><div class="in">
- <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">3 / 9</div></div>
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">3 / 10</div></div>
  <div class="lock">🔒</div>
  <div class="kick"><span class="em">🛡️</span>Datenschutz</div>
  <h2 style="max-width:700px">Spielerfotos<br>bleiben, wo sie<br><span class="o">hingehören.</span></h2>
@@ -127,12 +134,12 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 
 <!-- 4 Versionen -->
 <section class="s"><div class="in">
- <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">4 / 9</div></div>
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">4 / 10</div></div>
  <div class="kick"><span class="em">🗂️</span>3 Versionen</div>
  <h2>Eine App für<br><span class="o">alle Mannschaften.</span></h2>
  <div class="lead">Drei getrennte Versionen – z. B. <b>1. Mannschaft, 2. Mannschaft und Jugend</b>. Jede mit eigener Aufstellung, eigenen Texten und eigenem Spiel.</div>
  <div style="display:flex;gap:30px;margin-top:44px;align-items:flex-start">
-  <img class="shot" src="../../landing/app-start.webp" style="width:470px">
+  <img class="shot" src="../../landing/wochenende.webp" style="width:440px">
   <div style="flex:1">
    <div class="pts" style="margin-top:0">
     <div class="pt"><span>✓</span><div>Namen frei wählbar</div></div>
@@ -141,14 +148,27 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
    </div>
   </div>
  </div>
- <img class="shot" src="../../landing/wochenende.webp" style="position:absolute;right:64px;bottom:140px;width:300px;transform:rotate(4deg)">
- <div style="position:absolute;left:64px;bottom:150px;width:560px;font-size:25px;line-height:1.35;color:#c3cfe6"><b style="color:#fff">Am Sonntagabend:</b> alle Ergebnisse des Wochenendes auf einer Grafik.<span class="tag">Advanced</span></div>
+ <div style="position:absolute;left:64px;right:64px;bottom:150px;font-size:25px;line-height:1.35;color:#c3cfe6"><b style="color:#fff">Am Sonntagabend:</b> alle Ergebnisse des Wochenendes auf einer Grafik.<span class="tag">Advanced</span></div>
+ <div class="url">match-shot.de</div><div class="swipe">Wischen →</div>
+</div></section>
+
+<!-- 5 Social Media & Trainer -->
+<section class="s"><div class="in">
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">5 / 10</div></div>
+ <div class="kick"><span class="em">🤝</span>Für alle im Verein</div>
+ <h2>Für Social Media<br><span class="o">&amp; Trainer.</span></h2>
+ <div class="roles">
+  <div class="role"><img class="shot" src="../../landing/tor.webp"><div><b>📱 Social Media</b>
+   <div class="rl">Ankündigung, Tor live, Halbzeit &amp; Ergebnis</div><div class="rl">Beitrag, Story &amp; Reel</div><div class="rl">Sponsoren &amp; Geburtstage</div></div></div>
+  <div class="role"><img class="shot" src="../../landing/kader.webp"><div><b>📋 Trainer</b>
+   <div class="rl">Kader mit Treffpunkt, Trikots &amp; Diensten – ab in die WhatsApp-Gruppe</div><div class="rl">Aufstellung für die Kabine</div><div class="rl">Eckball-Taktik 16:9 für TV &amp; PowerPoint<span class="tag">Advanced</span></div></div></div>
+ </div>
  <div class="url">match-shot.de</div><div class="swipe">Wischen →</div>
 </div></section>
 
 <!-- 5 Sponsoren -->
 <section class="s"><div class="in">
- <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">5 / 9</div></div>
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">6 / 10</div></div>
  <div class="kick"><span class="em">🤝</span>Sponsoren</div>
  <h2>Eure Sponsoren –<br><span class="o">auf jeder Grafik.</span></h2>
  <div class="lead">Sponsoren sichtbar machen ist bares Geld für den Verein. Mit Match-Shot sind sie bei jedem Post dabei.</div>
@@ -158,8 +178,8 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
   <div class="pt"><span>✓</span><div>Eigene Vorlage „Sponsoren-Dank“</div></div>
  </div>
  <div style="position:absolute;left:64px;right:64px;bottom:140px;display:flex;gap:30px;justify-content:center">
-  <img class="shot" src="../../landing/post-feed.webp" style="width:380px;transform:rotate(-3deg)">
-  <img class="shot" src="../../landing/ergebnis.webp" style="width:380px;transform:rotate(3deg)">
+  <img class="shot" src="../../landing/sponsor.webp" style="width:380px;transform:rotate(-3deg)">
+  <img class="shot" src="../../landing/potm.webp" style="width:380px;transform:rotate(3deg)">
  </div>
  <div style="position:absolute;left:64px;bottom:62px"><span class="tag" style="margin:0">im Advanced-Paket</span></div>
  <div class="swipe">Wischen →</div>
@@ -167,14 +187,14 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 
 <!-- 6 14 Vorlagen -->
 <section class="s"><div class="in">
- <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">6 / 9</div></div>
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">7 / 10</div></div>
  <div class="kick"><span class="em">📋</span>14 Vorlagen</div>
  <h2>Für jeden Moment<br><span class="o">der Saison.</span></h2>
  <div class="tg">
-  <img src="../../landing/post-feed.webp"><img src="../../landing/tor.webp"><img src="../../landing/ergebnis.webp"><img src="../../landing/wochenende.webp">
+  <img src="../../landing/post-feed.webp"><img src="../../landing/ergebnis.webp"><img src="../../landing/potm.webp"><img src="../../landing/geburtstag.webp">
  </div>
  <div class="tg" style="grid-template-columns:repeat(3,1fr);margin-top:16px;padding:0 190px">
-  <img src="../../landing/aufstellung.webp"><img src="../../landing/spieltage.webp"><img src="../../landing/neuzugang.webp">
+  <img src="../../landing/aufstellung.webp"><img src="../../landing/tor.webp"><img src="../../landing/kader.webp">
  </div>
  <div class="chips">
   <span>Ankündigung</span><span>Aufstellung (11er, 9er, 7er)</span><span>Tor</span><span>Ergebnis</span><span>Kader</span><span>Player of the Match</span><span>Kalender</span><span>Geburtstag</span><span>Mannschaftsfoto</span><span>Freie Vorlage</span>
@@ -185,11 +205,11 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 
 <!-- 7 Beitrag, Story, Reel, Design -->
 <section class="s"><div class="in">
- <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">7 / 9</div></div>
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">8 / 10</div></div>
  <div class="kick"><span class="em">🎬</span>Beitrag · Story · Reel</div>
  <h2>Einmal ausfüllen,<br><span class="o">überall posten.</span></h2>
  <div style="display:flex;gap:36px;margin-top:30px">
-  <img class="shot" src="../../landing/app-editor.webp" style="width:370px">
+  <img class="shot" src="../../landing/tor.webp" style="width:330px">
   <div style="flex:1">
    <div class="pts" style="margin-top:6px;gap:26px">
     <div class="pt"><span>✓</span><div>Beitrag &amp; Story auf einmal<small>Änderungen laufen auf Wunsch synchron mit</small></div></div>
@@ -205,7 +225,7 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 
 <!-- 8 Was es nicht gibt -->
 <section class="s"><div class="in">
- <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">8 / 9</div></div>
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">9 / 10</div></div>
  <div class="kick" style="color:#ff9b9b"><span class="em">❌</span>Das gibt's bei uns nicht</div>
  <h2>Was ihr bei<br>Match-Shot <span class="o">nicht</span> bekommt:</h2>
  <div class="nogrid">
@@ -221,7 +241,7 @@ h2{font-size:64px;line-height:1.06;font-weight:900;letter-spacing:-1px;margin:14
 
 <!-- 9 Preise -->
 <section class="s"><div class="in">
- <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">9 / 9</div></div>
+ <div class="top"><div class="brand"><img src="../../matchshot.png" alt=""><span>Match-<span class="a">Shot</span></span></div><div class="pg">10 / 10</div></div>
  <div class="kick"><span class="em">💶</span>Einführungspreise</div>
  <h2>Für den ganzen Verein.<br><span class="o">1. Monat kostenlos.</span></h2>
  <div class="prices">
