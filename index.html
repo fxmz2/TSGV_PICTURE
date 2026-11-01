@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 23.4</title>
+    <title>Match-Shot – Grafiken für Vereine 23.5</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -682,6 +682,12 @@
         .lp-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 20px 18px; text-align: center; max-width: 560px; margin: 0 auto; }
         .lp-box p { font-size: 14px; line-height: 1.55; color: #bcd3da; margin: 0 0 14px; font-family: Arial, sans-serif; }
         .lp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .lp-role { display: flex; gap: 14px; align-items: flex-start; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px; }
+        .lp-role img { width: 120px; flex: none; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: zoom-in; }
+        .lp-role b { display: block; color: #fff; font-size: 16px; margin: 2px 0 6px; }
+        .lp-role ul { margin: 0; padding: 0; list-style: none; font-family: Arial, sans-serif; font-size: 13px; line-height: 1.45; color: #bcd3da; }
+        .lp-role li { padding-left: 18px; position: relative; margin-bottom: 5px; }
+        .lp-role li::before { content: '✓'; position: absolute; left: 0; color: #2ec4b6; font-weight: bold; }
         .lp-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 720px; margin: 0 auto; }
         .lp-price { position: relative; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 22px 18px 18px; text-align: center; }
         .lp-price.best { border-color: #e07a2f; box-shadow: 0 6px 22px rgba(224,122,47,0.25); }
@@ -1096,7 +1102,7 @@
             <header class="lp-hero lp-wrap">
                 <div class="lp-brand"><img src="matchshot.png" alt="" onerror="this.hidden = true"><span>Match-<span class="brand-accent">Shot</span></span></div>
                 <h1>Profi-Grafiken für deinen Verein – <span>direkt am Handy</span></h1>
-                <p>Spieltag, Aufstellung, Tor, Ergebnis und mehr: In wenigen Minuten fertige Instagram-Beiträge, Storys und Reels in euren Vereinsfarben – ganz ohne Designkenntnisse.</p>
+                <p>Spieltag, Aufstellung, Tor, Ergebnis und mehr: In wenigen Minuten fertige Instagram-Beiträge, Storys und Reels in euren Vereinsfarben – ganz ohne Designkenntnisse. Für das Social-Media-Team und für die Trainer.</p>
                 <div class="lp-cta">
                     <button type="button" class="lp-btn primary" onclick="lpStartDemo()">🧪 Kostenlos testen</button>
                     <button type="button" class="lp-btn ghost" onclick="lpGoToCode()">🔑 Vereinscode eingeben</button>
@@ -1111,10 +1117,16 @@
                     <figure><img src="landing/post-feed.webp" alt="Beispiel: Spieltag-Ankündigung" loading="lazy" onclick="lpZoom(this)"><figcaption>Spieltag-Ankündigung</figcaption></figure>
                     <figure><img src="landing/aufstellung.webp" alt="Beispiel: Startaufstellung im Profi-Look" loading="lazy" onclick="lpZoom(this)"><figcaption>Startaufstellung im Profi-Look</figcaption></figure>
                     <figure><img src="landing/tor.webp" alt="Beispiel: Tor-Update live" loading="lazy" onclick="lpZoom(this)"><figcaption>Tor-Update live</figcaption></figure>
-                    <figure><img src="landing/ergebnis.webp" alt="Beispiel: Endergebnis mit Torschützen" loading="lazy" onclick="lpZoom(this)"><figcaption>Endergebnis mit Torschützen</figcaption></figure>
-                    <figure><img src="landing/neuzugang.webp" alt="Beispiel: Neuzugang & Spielervorstellung" loading="lazy" onclick="lpZoom(this)"><figcaption>Neuzugang & Spielervorstellung</figcaption></figure>
-                    <figure><img src="landing/spieltage.webp" alt="Beispiel: Die nächsten Spiele" loading="lazy" onclick="lpZoom(this)"><figcaption>Die nächsten Spiele</figcaption></figure>
+                    <figure><img src="landing/ergebnis.webp" alt="Beispiel: Halbzeit &amp; Endergebnis mit Torschützen" loading="lazy" onclick="lpZoom(this)"><figcaption>Halbzeit &amp; Endergebnis mit Torschützen</figcaption></figure>
+                    <figure><img src="landing/potm.webp" alt="Beispiel: Player of the Match" loading="lazy" onclick="lpZoom(this)"><figcaption>Player of the Match</figcaption></figure>
                     <figure><img src="landing/wochenende.webp" alt="Beispiel: Alle Ergebnisse vom Wochenende" loading="lazy" onclick="lpZoom(this)"><figcaption>Alle Ergebnisse vom Wochenende</figcaption></figure>
+                    <figure><img src="landing/spieltage.webp" alt="Beispiel: Die nächsten Spiele" loading="lazy" onclick="lpZoom(this)"><figcaption>Die nächsten Spiele</figcaption></figure>
+                    <figure><img src="landing/kader.webp" alt="Beispiel: Kader mit Treffpunkt &amp; Infos" loading="lazy" onclick="lpZoom(this)"><figcaption>Kader mit Treffpunkt &amp; Infos</figcaption></figure>
+                    <figure><img src="landing/neuzugang.webp" alt="Beispiel: Neuzugang &amp; Spielervorstellung" loading="lazy" onclick="lpZoom(this)"><figcaption>Neuzugang &amp; Spielervorstellung</figcaption></figure>
+                    <figure><img src="landing/sponsor.webp" alt="Beispiel: Danke an Sponsoren" loading="lazy" onclick="lpZoom(this)"><figcaption>Danke an Sponsoren</figcaption></figure>
+                    <figure><img src="landing/teamfoto.webp" alt="Beispiel: Mannschaftsfoto mit Namen" loading="lazy" onclick="lpZoom(this)"><figcaption>Mannschaftsfoto mit Namen</figcaption></figure>
+                    <figure><img src="landing/geburtstag.webp" alt="Beispiel: Geburtstagsgruß" loading="lazy" onclick="lpZoom(this)"><figcaption>Geburtstagsgruß</figcaption></figure>
+                    <figure><img src="landing/vereinsfest.webp" alt="Beispiel: Freie Vorlage, z. B. Vereinsfest" loading="lazy" onclick="lpZoom(this)"><figcaption>Freie Vorlage, z. B. Vereinsfest</figcaption></figure>
                 </div>
                 <div class="lp-hint">← wischen für mehr · antippen zum Vergrößern</div>
                 <div class="lp-arrows"><button type="button" aria-label="Zurück" onclick="lpScroll(-1)">‹</button><button type="button" aria-label="Weiter" onclick="lpScroll(1)">›</button></div>
@@ -1127,6 +1139,23 @@
                     <figure class="lp-step"><img src="landing/app-start.webp" alt="Match-Shot: Vorlage auswählen" loading="lazy" onclick="lpZoom(this)"><b><i>1</i>Vorlage wählen</b><figcaption>Ankündigung, Aufstellung, Tor, Ergebnis … mit einem Tipp starten. Spieler und Gegner sind einmal angelegt und immer parat.</figcaption></figure>
                     <figure class="lp-step"><img src="landing/app-editor.webp" alt="Match-Shot: Grafik bearbeiten" loading="lazy" onclick="lpZoom(this)"><b><i>2</i>Anpassen</b><figcaption>Spieler, Texte und Logos mit dem Finger verschieben und größer oder kleiner ziehen.</figcaption></figure>
                     <figure class="lp-step"><img src="landing/app-design.webp" alt="Match-Shot: Design wählen" loading="lazy" onclick="lpZoom(this)"><b><i>3</i>Design wählen &amp; teilen</b><figcaption>Fertige Stile, Vereinsfarben, eigene Schriften – dann direkt auf Instagram teilen, als Bild oder Reel.</figcaption></figure>
+                </div>
+            </section>
+
+            <section class="lp-section lp-wrap">
+                <h2>Für Social Media &amp; Trainer</h2>
+                <p class="lp-sub">Eine App für alle im Verein – nicht nur fürs Instagram-Team</p>
+                <div class="lp-two lp-roles">
+                    <div class="lp-role">
+                        <img src="landing/tor.webp" alt="Beispiel: Tor-Update für Instagram" loading="lazy" onclick="lpZoom(this)">
+                        <div><b>📱 Social Media</b>
+                        <ul><li>Ankündigung, Tor live, Halbzeit &amp; Ergebnis</li><li>Beitrag, Story &amp; Reel auf einmal</li><li>Sponsoren auf jeder Grafik</li><li>Geburtstage, Neuzugänge, Vereinsfeste</li></ul></div>
+                    </div>
+                    <div class="lp-role">
+                        <img src="landing/eckball.webp" alt="Match-Shot: Eckball-Taktik bearbeiten" loading="lazy" onclick="lpZoom(this)">
+                        <div><b>📋 Trainer</b>
+                        <ul><li>Kader mit Treffpunkt, Trikots &amp; Diensten – fertig für die WhatsApp-Gruppe</li><li>Aufstellung für die Kabine</li><li>Eckball-Taktik im 16:9-Format für TV oder PowerPoint</li><li>Mehrere Mannschaften getrennt in 3 Versionen</li></ul></div>
+                    </div>
                 </div>
             </section>
 
@@ -2991,7 +3020,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "23.4";
+        const APP_VERSION = "23.5";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)

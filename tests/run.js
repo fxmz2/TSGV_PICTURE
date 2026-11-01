@@ -97,10 +97,10 @@ async function makePhotos(browser) {
         await page.goto(BASE);
         await page.waitForTimeout(800);
         check('Freischalt-Fenster erscheint', await page.isVisible('#license-overlay'));
-        check('Landingpage beim ersten Besuch', await page.evaluate(() => $('license-overlay').classList.contains('landing-mode') && document.querySelectorAll('.lp-gallery img').length >= 6));
+        check('Landingpage beim ersten Besuch', await page.evaluate(() => $('license-overlay').classList.contains('landing-mode') && document.querySelectorAll('.lp-gallery img').length >= 13 && document.querySelectorAll('.lp-role').length === 2));
         await page.evaluate(() => document.querySelectorAll('#license-overlay img[loading="lazy"]').forEach(i => i.loading = 'eager'));
         await page.waitForTimeout(800);
-        check('Landingpage: alle Bilder geladen', await page.evaluate(() => [...document.querySelectorAll('.lp-gallery img, .lp-step img')].every(i => i.complete && i.naturalWidth > 0)));
+        check('Landingpage: alle Bilder geladen', await page.evaluate(() => [...document.querySelectorAll('.lp-gallery img, .lp-step img, .lp-role img')].every(i => i.complete && i.naturalWidth > 0)));
         check('Landingpage: Testmonat per E-Mail anfragen', await page.evaluate(() => /^mailto:info@match-shot\.de\?subject=[\s\S]*Testmonat[\s\S]*&body=[\s\S]*Wappen/.test(decodeURIComponent($('lp-buy-btn').href))));
         check('Landingpage: Preise Basis & Advanced', await page.evaluate(() => { const t = $('lp-prices')?.textContent || ''; return document.querySelectorAll('.lp-price').length === 2 && /24,99/.test(t) && /39,99/.test(t) && /14 Vorlagen/.test(document.querySelector('.lp-feats').textContent); }));
         check('Impressum, Datenschutz & AGB ohne Platzhalter, mit neuer Adresse', await page.evaluate(async () => { const pages = await Promise.all(['impressum.html', 'datenschutz.html', 'agb.html'].map(f => fetch(f).then(r => r.text())));
