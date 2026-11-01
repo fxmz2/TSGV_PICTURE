@@ -458,6 +458,13 @@ async function makePhotos(browser) {
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
+        // Neuzugang: Rückennummer auf Trikotfarbe immer lesbar (weiß auf dunkel, schwarz auf hell)
+        const num = await page.evaluate(() => { const keep = val('cfg-color-jersey'), r = {}; switchTab('neuzugang'); const sn = $('in-new-show-number').checked; $('in-new-show-number').checked = true; setVal('in-new-number', '7'); updateNeuzugang();
+            const col = () => getComputedStyle(document.querySelector('#view-neuzugang .transfer-number')).color;
+            setVal('cfg-color-jersey', '#5b2a86'); updateDesignSettings(); r.dark = col() === 'rgb(255, 255, 255)';
+            setVal('cfg-color-jersey', '#f1c40f'); updateDesignSettings(); r.light = col() === 'rgb(17, 17, 17)';
+            setVal('cfg-color-jersey', keep); updateDesignSettings(); $('in-new-show-number').checked = sn; setVal('in-new-number', ''); updateNeuzugang(); return r; });
+        check('Neuzugang: Rückennummer passt sich der Trikotfarbe an (lesbar)', num.dark && num.light, JSON.stringify(num));
         // Sponsor: Logo-Kasten in verschiedenen Formen oder ganz ohne Kasten, Name ausblendbar, alte Stände → Standard
         const spon = await page.evaluate(async () => { const r = {}; switchTab('sponsor'); setVal('in-spon-select', stammdaten.sponsors[0].name); updateSponsorPost();
             const c = $('out-spon-card'), cs = () => getComputedStyle(c);
