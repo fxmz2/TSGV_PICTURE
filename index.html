@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 23.6</title>
+    <title>Match-Shot – Grafiken für Vereine 23.7</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -808,6 +808,17 @@
         .wk-score.win { background: #1b8a3c; }
         .wk-score.loss { background: #c1121f; }
         .wk-score.open { background: rgba(255,255,255,0.2); }
+        .wk-when { min-width: 62px; flex-shrink: 0; text-align: center; border-radius: 8px; padding: 3px 6px; background: var(--jersey-color); color: var(--jersey-fg, #fff); box-sizing: border-box; line-height: 1.1; }
+        .wk-when small { display: block; font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; opacity: 0.9; }
+        .wk-when b { display: block; font-size: 15px; font-weight: 900; }
+        .wk-compact .wk-when b { font-size: 13px; }
+        .wk-story .wk-when { min-width: 70px; }
+        .wk-story .wk-when b { font-size: 18px; }
+        #editor-wochenende.wk-mode-ergebnis .wk-pre-only, #editor-wochenende.wk-mode-vorschau .wk-res-only { display: none !important; }
+        #wk-controls .kal-edit-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+        #editor-wochenende.wk-mode-vorschau #wk-controls [id^="wk-team-"], .wk-when-edit { grid-column: 1 / -1; }
+        .wk-when-edit { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
+        .wk-when-edit input { min-width: 0; width: 100%; box-sizing: border-box; }
         .wk-compact { gap: 5px; }
         .wk-compact .wk-row { padding: 4px 8px; }
         .wk-compact .wk-score { font-size: 15px; min-width: 46px; padding: 3px 4px; }
@@ -1195,7 +1206,7 @@
                         <small>für 12 Monate · ca. 3,33 € im Monat</small>
                         <ul>
                             <li>Alles aus Basis</li>
-                            <li>Eckball-Taktik (16:9 für TV &amp; PowerPoint), Neuzugang &amp; Spielervorstellung, Sponsoren-Dank, Wochenend-Ergebnisse</li>
+                            <li>Eckball-Taktik (16:9 für TV &amp; PowerPoint), Neuzugang &amp; Spielervorstellung, Sponsoren-Dank, Wochenende (Spieltag-Vorschau &amp; Ergebnisse aller Mannschaften)</li>
                             <li>Sponsorenleisten &amp; „Präsentiert von“</li>
                             <li>Reels &amp; Videos, Hintergrund weg per KI</li>
                             <li>Spielplan-Import &amp; viele Grafiken auf einmal</li>
@@ -1486,7 +1497,7 @@
                 <!-- PAKET-HINWEIS (Basis) -->
                 <div id="tier-card" class="notice-card info" hidden>
                     <b>📦 Basis-Paket</b>
-                    Im Advanced-Paket zusätzlich enthalten: Eckbälle, Neuzugang/Spielervorstellung, Danke-Sponsor, Wochenend-Ergebnisse,
+                    Im Advanced-Paket zusätzlich enthalten: Eckbälle, Neuzugang/Spielervorstellung, Danke-Sponsor, Wochenende (Vorschau & Ergebnisse),
                     Sponsorenleisten, „Präsentiert von“, zusätzliche Spieler, Freistellen (KI), Schrift-Effekte, Spielplan-Import und Grafik-Paket.
                     Für ein Upgrade schreib uns: <a href="mailto:info@match-shot.de?subject=Match-Shot%20Upgrade%20auf%20Advanced">info@match-shot.de</a>
                 </div>
@@ -2172,9 +2183,19 @@
 
             <!-- EDITOR: WOCHENEND-ERGEBNISSE -->
             <div id="editor-wochenende" class="editor-section">
-                <h2>📊 Wochenend-Ergebnisse</h2>
+                <h2>📊 Wochenende – alle Mannschaften</h2>
                 <div id="design-controls-wochenende"></div>
 
+                <div class="control-group">
+                    <label>Art der Grafik</label>
+                    <div class="erg-mode-btns" id="wk-mode-btns">
+                        <button type="button" data-wk-mode="vorschau" onclick="setWkMode('vorschau')">📣 Vorschau (Spieltag)</button>
+                        <button type="button" data-wk-mode="ergebnis" onclick="setWkMode('ergebnis')">🏁 Ergebnisse</button>
+                    </div>
+                    <input type="hidden" id="in-wk-mode" value="ergebnis">
+                    <span class="hint" id="wk-mode-hint"></span>
+                </div>
+                <button type="button" class="copy-action-btn" id="wk-import-btn" style="background:#2a9d8f;" onclick="importWeekendFromVersions()">📥 Spiele aus den Ankündigungen aller Versionen übernehmen</button>
                 <div class="control-group"><label>Titel</label><input type="text" id="in-wk-title" value="ERGEBNISSE" oninput="updateWochenende();"></div>
                 <div class="control-group"><label>Untertitel</label><input type="text" id="in-wk-sub" value="VOM WOCHENENDE" placeholder="z.B. 27./28.09." oninput="updateWochenende();"></div>
                 <div class="control-group"><label><input type="checkbox" id="in-wk-own-logo" checked onchange="updateWochenende(); scheduleSave();"> Eigenes Wappen bei jedem Spiel anzeigen</label></div>
@@ -2182,7 +2203,8 @@
 
                 <label>Spiele (max. 6)</label>
                 <div id="wk-controls"></div>
-                <span class="hint" style="margin-bottom:10px;">Ergebnis immer aus eigener Sicht eintragen (eigene Tore zuerst), z.B. 3:1. Sieg, Remis und Niederlage werden automatisch farbig markiert.</span>
+                <span class="hint wk-res-only" style="margin-bottom:10px;">Ergebnis immer aus eigener Sicht eintragen (eigene Tore zuerst), z.B. 3:1. Sieg, Remis und Niederlage werden automatisch farbig markiert.</span>
+                <span class="hint wk-pre-only" style="margin-bottom:10px;">Tipp: Am Freitag die Vorschau posten, am Sonntag auf „Ergebnisse“ umschalten – Mannschaften und Gegner bleiben stehen, nur noch die Ergebnisse eintragen.</span>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('wochenende')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
@@ -3020,7 +3042,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "23.6";
+        const APP_VERSION = "23.7";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3129,7 +3151,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             potm:       { title: 'PLAYER OF THE MATCH' },
             kalender:   { home: 'HEIM', away: 'AUSWÄRTS', vs: 'vs', time: 'UHR', empty: 'Keine kommenden Termine eingetragen' },
             neuzugang:  { from: 'Kommt von' },
-            wochenende: { home: 'HEIM', away: 'AUSWÄRTS', vs: 'vs', empty: 'Noch keine Ergebnisse eingetragen' },
+            wochenende: { home: 'HEIM', away: 'AUSWÄRTS', vs: 'vs', empty: 'Noch keine Ergebnisse eingetragen', emptyPreview: 'Noch keine Spiele eingetragen' },
             teamfoto:   { back: 'HINTEN V. L.:', middle: 'MITTE V. L.:', front: 'VORNE V. L.:', coaches: 'TRAINER:', missing: 'ES FEHLEN:' }
         };
 
@@ -4642,7 +4664,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                         <div class="kal-edit-head">Spiel ${i} <button type="button" class="kal-clear-btn" onclick="clearWeekendRow(${i})">✕ leeren</button></div>
                         <div class="kal-edit-grid">
                             <input type="text" id="wk-team-${i}" placeholder="Mannschaft" oninput="updateWochenende();">
-                            <input type="text" id="wk-score-${i}" class="score-src" data-sep=":" placeholder="Ergebnis, z.B. abgesagt" oninput="updateWochenende();">
+                            <div class="wk-res-only"><input type="text" id="wk-score-${i}" class="score-src" data-sep=":" placeholder="Ergebnis, z.B. abgesagt" oninput="updateWochenende();"></div>
+                            <div class="wk-pre-only wk-when-edit"><input type="date" id="wk-date-${i}" title="Datum" onchange="updateWochenende(); scheduleSave();"><input type="time" id="wk-time-${i}" title="Anstoß" onchange="updateWochenende(); scheduleSave();"></div>
                             <select id="wk-opp-${i}" class="opp-select" onchange="updateWochenende();"></select>
                             <select id="wk-venue-${i}" onchange="updateWochenende();">
                                 <option value="heim">🏠 Heimspiel</option>
@@ -4760,7 +4783,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             date: 'Datum', meeting: 'Treffpunkt', jersey: 'Trikots', duty: 'Dienst',
             banner: 'Titel-Kasten', taker: 'Schütze', onetwo: 'Kurz / Doppelpass', target: 'Zielspieler',
             guard: 'Blocker', screen: 'Torwart stören', runners: 'Einläufer', edge: 'Rückraum', cover: 'Absicherung', keeper: 'Torwart', opp: 'Gegenspieler',
-            home: 'Heim', away: 'Auswärts', time: 'Uhrzeit-Zusatz', empty: 'Hinweis ohne Einträge', from: 'Wechsel „Kommt von“',
+            home: 'Heim', away: 'Auswärts', time: 'Uhrzeit-Zusatz', empty: 'Hinweis ohne Einträge', emptyPreview: 'Hinweis ohne Spiele (Vorschau)', from: 'Wechsel „Kommt von“',
             back: 'Hintere Reihe', middle: 'Mittlere Reihe', front: 'Vordere Reihe', missing: 'Es fehlen'
         };
         function labelEditorHTML(tab) {
@@ -5430,6 +5453,15 @@ Alle sind herzlich eingeladen!</textarea></div>
                 }
                 case 'wochenende': {
                     const emoji = { win: '✅', draw: '🤝', loss: '❌', open: '' };
+                    if (wkMode() === 'vorschau') {
+                        lines.push(`📣 ${niceCase([val('in-wk-title'), val('in-wk-sub')].map(normName).filter(Boolean).join(' – '))}`, '');
+                        readWeekendRows().forEach(r => {
+                            const w = wkWhenParts(r);
+                            lines.push(`• ${r.team || own}: ${r.venue === 'auswaerts' ? 'bei' : 'gegen'} ${r.opp || 'Gegner'}${w.day ? ` · ${w.day}` : ''}${w.time ? ` · ${w.time} Uhr` : ''}`);
+                        });
+                        lines.push('', 'Kommt vorbei und unterstützt uns! 💪');
+                        break;
+                    }
                     lines.push(`📊 ${niceCase([val('in-wk-title'), val('in-wk-sub')].map(normName).filter(Boolean).join(' '))}`, '');
                     readWeekendRows().forEach(r => {
                         const res = weekendResult(r.score);
@@ -7624,7 +7656,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             document.querySelectorAll('#editor-sponsor .spon-box-only').forEach(e => e.hidden = ['none', 'free'].includes(val('in-spon-shape')));
         }
         /* Logo-Kasten: Form (wie die Spieler-Rahmen), Farbe und Rahmen. Schild als SVG-Hintergrund, weil der Bild-Export kein clip-path kennt. */
-        const SPON_DEFAULTS = { 'in-spon-shape': 'rounded', 'in-spon-boxcolor': '#ffffff', 'in-spon-border': 'none', 'in-spon-showname': 'yes' };
+        const SPON_DEFAULTS = { 'in-spon-shape': 'rounded', 'in-spon-boxcolor': '#ffffff', 'in-spon-border': 'none', 'in-spon-showname': 'yes', 'in-wk-mode': 'ergebnis' };
+        for (let i = 1; i <= WK_MAX; i++) { SPON_DEFAULTS[`wk-date-${i}`] = ''; SPON_DEFAULTS[`wk-time-${i}`] = ''; }
         const SPON_SHAPES = ['rounded', 'square', 'circle', 'shield', 'none', 'free'];
         function styleSponsorCard(c) {
             const shape = SPON_SHAPES.includes(val('in-spon-shape')) ? val('in-spon-shape') : 'rounded';
@@ -7655,10 +7688,63 @@ Alle sind herzlich eingeladen!</textarea></div>
             const rows = [];
             for (let i = 1; i <= WK_MAX; i++) {
                 const team = normName(val(`wk-team-${i}`)), score = normName(val(`wk-score-${i}`)), opp = val(`wk-opp-${i}`);
-                if (!team && !score && !opp) continue;
-                rows.push({ team, score, opp, venue: val(`wk-venue-${i}`) || 'heim' });
+                const date = val(`wk-date-${i}`), time = val(`wk-time-${i}`);
+                if (!team && !score && !opp && !date && !time) continue;
+                rows.push({ team, score, opp, date, time, venue: val(`wk-venue-${i}`) || 'heim' });
             }
             return rows;
+        }
+
+        /* Wochenende: „Vorschau“ (alle Spiele des Wochenendes mit Tag & Uhrzeit) oder „Ergebnisse“ – gleiche Zeilen, gleiche Gegner */
+        const WK_MODES = {
+            vorschau: { title: 'SPIELTAG', sub: 'UNSERE SPIELE AM WOCHENENDE', hint: 'Alle Spiele des Wochenendes auf einer Grafik – Tag und Anstoß je Spiel eintragen oder aus den Ankündigungen übernehmen.' },
+            ergebnis: { title: 'ERGEBNISSE', sub: 'VOM WOCHENENDE', hint: 'Ergebnisse aller Mannschaften auf einer Grafik.' }
+        };
+        function wkMode() { return val('in-wk-mode') === 'vorschau' ? 'vorschau' : 'ergebnis'; }
+        function setWkMode(mode) {
+            const old = wkMode();
+            if (!WK_MODES[mode]) mode = 'ergebnis';
+            setVal('in-wk-mode', mode);
+            if (mode !== old) {
+                // Nur Texte tauschen, die noch der Vorgabe entsprechen – Eigenes bleibt stehen
+                [['in-wk-title', 'title'], ['in-wk-sub', 'sub']].forEach(([id, k]) => {
+                    if (Object.values(WK_MODES).map(m => m[k]).concat(['']).includes(normName(val(id)))) setVal(id, WK_MODES[mode][k]);
+                });
+                captionDirty.wochenende = false;
+            }
+            updateWochenende();
+            updateCaption('wochenende');
+            scheduleSave();
+        }
+        function wkWhenParts(r) {
+            const d = parseISODate(r.date);
+            return {
+                day: d ? `${WEEKDAYS_LONG[d.getDay()].slice(0, 2)} ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.` : '',
+                time: r.time ? r.time.slice(0, 5) : ''
+            };
+        }
+        /* Spiele aus den Ankündigungen der 3 Versionen übernehmen (Gegner, Heim/Auswärts, Datum, Anstoß) */
+        async function importWeekendFromVersions() {
+            const found = [];
+            for (const v of ['v1', 'v2', 'v3']) {
+                let d;
+                if (v === currentVersion) d = { opponentSelect: val('in-post-opponent-select'), venue: val('in-post-venue'), postDate: val('in-post-date'), postTime: val('in-post-time') };
+                else d = await localforage.getItem(STORE.slot(v)).catch(() => null);
+                if (!d || !normName(d.opponentSelect)) continue;
+                const t = parseTimeText(d.postTime);
+                found.push({ team: versionLabel(v), opp: d.opponentSelect, venue: d.venue === 'auswaerts' ? 'auswaerts' : 'heim',
+                    date: parseDateText(d.postDate).iso, time: t.h ? `${t.h.padStart(2, '0')}:${(t.m || '0').padStart(2, '0')}` : '' });
+            }
+            if (!found.length) { alert('In den Ankündigungen ist noch kein Gegner eingetragen. Bitte zuerst in jeder Version unter „Ankündigung“ den Gegner wählen.'); return; }
+            found.forEach((f, idx) => {
+                const i = idx + 1;
+                setVal(`wk-team-${i}`, f.team); setVal(`wk-opp-${i}`, f.opp); setVal(`wk-venue-${i}`, f.venue);
+                setVal(`wk-date-${i}`, f.date); setVal(`wk-time-${i}`, f.time);
+                setVal(`wk-score-${i}`, '');   // neuer Spieltag: alte Ergebnisse weg
+            });
+            if (wkMode() !== 'vorschau') setWkMode('vorschau'); else { updateWochenende(); scheduleSave(); }
+            syncAllTimePicks();
+            toast(`✅ ${found.length} Spiel${found.length > 1 ? 'e' : ''} aus den Ankündigungen übernommen`);
         }
 
         function weekendResult(score) {
@@ -7669,7 +7755,11 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         function updateWochenende() {
-            const rows = readWeekendRows();
+            const rows = readWeekendRows(), mode = wkMode(), pre = mode === 'vorschau';
+            const ed = $('editor-wochenende');
+            if (ed) { ed.classList.toggle('wk-mode-vorschau', pre); ed.classList.toggle('wk-mode-ergebnis', !pre); }
+            document.querySelectorAll('#wk-mode-btns button').forEach(b => b.classList.toggle('active', b.dataset.wkMode === mode));
+            setText('wk-mode-hint', WK_MODES[mode].hint);
             const ownWk = ($('in-wk-own-logo')?.checked ?? true) ? `<img class="wk-own" src="${getClubLogoSrc()}" alt="">` : '';
             ['', '-feed'].forEach(sfx => {
                 setText(`out-wk-title${sfx}`, val('in-wk-title'));
@@ -7683,8 +7773,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                         <img src="${getOpponentLogoSrc(r.opp || 'Gegner')}" alt="">
                         <div class="fit-text">${esc(L('wochenende', 'vs'))} ${esc(r.opp || 'Gegner')}${(v => v ? `<span class="wk-venue">${esc(v)}</span>` : '')(L('wochenende', r.venue === 'auswaerts' ? 'away' : 'home'))}</div>
                     </div>
-                    <div class="wk-score ${weekendResult(r.score)}">${esc(r.score || '–')}</div>
-                </div>`).join('') : `<div class="kal-empty">${esc(L('wochenende', 'empty'))}</div>`;
+                    ${pre ? (w => `<div class="wk-when">${w.day ? `<small>${esc(w.day)}</small>` : ''}<b>${esc(w.time || '–')}</b></div>`)(wkWhenParts(r))
+                          : `<div class="wk-score ${weekendResult(r.score)}">${esc(r.score || '–')}</div>`}
+                </div>`).join('') : `<div class="kal-empty">${esc(L('wochenende', pre ? 'emptyPreview' : 'empty'))}</div>`;
             const feed = $('out-wk-list-feed');
             if (feed) { feed.innerHTML = html; feed.classList.toggle('wk-compact', rows.length > 4); }
             const story = $('out-wk-list');
@@ -7702,7 +7793,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         function clearWeekendRow(i) {
-            setVal(`wk-team-${i}`, ''); setVal(`wk-score-${i}`, ''); setVal(`wk-opp-${i}`, ''); setVal(`wk-venue-${i}`, 'heim');
+            setVal(`wk-team-${i}`, ''); setVal(`wk-score-${i}`, ''); setVal(`wk-opp-${i}`, ''); setVal(`wk-venue-${i}`, 'heim'); setVal(`wk-date-${i}`, ''); setVal(`wk-time-${i}`, '');
             updateWochenende();
             scheduleSave();
         }
@@ -9060,7 +9151,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 'in-bday-player', 'in-bday-title', 'in-bday-text',
                 'in-new-mode', 'in-new-player', 'in-new-title', 'in-new-position', 'in-new-number', 'in-new-from-select', 'in-new-from-text', 'in-new-text',
                 'in-spon-select', 'in-spon-title', 'in-spon-text', 'in-spon-extra', 'in-spon-shape', 'in-spon-boxcolor', 'in-spon-border', 'in-spon-showname', 'in-wk-title', 'in-wk-sub'];
-            for (let i = 1; i <= WK_MAX; i++) inputIds.push(`wk-team-${i}`, `wk-score-${i}`, `wk-opp-${i}`, `wk-venue-${i}`);
+            inputIds.push('in-wk-mode');
+            for (let i = 1; i <= WK_MAX; i++) inputIds.push(`wk-team-${i}`, `wk-score-${i}`, `wk-opp-${i}`, `wk-venue-${i}`, `wk-date-${i}`, `wk-time-${i}`);
             for (let i = 1; i <= SCORER_MAX; i++) inputIds.push(`erg-scorer-${i}`, `erg-minute-${i}`);
             inputIds.push('erg-cd-date', 'in-frei-title', 'in-frei-icon-mode', 'in-frei-icon', 'in-frei-sub', 'in-frei-text',
                 'in-tf-photo', 'in-tf-title', 'in-tf-sub', 'in-tf-team', 'in-tf-namefmt', 'in-tf-row1', 'in-tf-row2', 'in-tf-row3', 'in-tf-coaches', 'in-tf-missing');
@@ -9161,7 +9253,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 // Ältere Stände kannten nur 10 Torschützen-Zeilen → übrige leeren
                 for (let i = 1; i <= SCORER_MAX; i++) if (!(`erg-scorer-${i}` in data.inputs)) { setVal(`erg-scorer-${i}`, 'Keiner'); setVal(`erg-minute-${i}`, ''); }
                 scorersShown = SCORER_START;
-                // Ältere Stände ohne Logo-Kasten-Einstellungen → Standard (sonst bliebe die Einstellung der vorigen Version stehen)
+                // Ältere Stände ohne Logo-Kasten- bzw. Wochenend-Vorschau-Einstellungen → Standard (sonst bliebe die Einstellung der vorigen Version stehen)
                 Object.entries(SPON_DEFAULTS).forEach(([k, v]) => { if (!(k in data.inputs)) setVal(k, v); });
                 for (const k in data.inputs) setVal(k, data.inputs[k]);
             }
@@ -10972,7 +11064,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             sponsor: 'Sponsor wählen und Dankestext eintragen – ideal z.B. für neue Trikots oder Bälle.',
             teamfoto: 'Mannschaftsfoto hochladen, Titel eintragen und mit „Namen eintragen“ die Spieler einer Mannschaft übernehmen – dann auf hintere, mittlere und vordere Reihe verteilen.',
             frei: 'Für alles neben dem Spielbetrieb: Titel, Symbol oder Wappen, eine hervorgehobene Zeile und freier Text. Eigene Fotos als Hintergrund unter „Aussehen anpassen“ wählen.',
-            wochenende: 'Ergebnisse aller Mannschaften vom Wochenende eintragen (eigene Tore zuerst). Sieg, Remis und Niederlage werden farbig markiert.'
+            wochenende: 'Alle Mannschaften auf einer Grafik: als „Vorschau“ mit Tag und Anstoß (auch aus den Ankündigungen übernehmen) oder als „Ergebnisse“ (eigene Tore zuerst, Sieg/Remis/Niederlage farbig).'
         };
         function setupHelp() {
             Object.keys(HELP_TEXTS).forEach(tab => {
