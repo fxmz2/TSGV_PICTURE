@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Match-Shot – Handbuch &amp; FAQ</title>
+<style>
+@page { size: A4; margin: 16mm 15mm 18mm 15mm; }
+* { box-sizing: border-box; }
+:root { --navy:#0b1d3a; --blue:#1f5cf0; --blue2:#4f8bff; --orange:#e07a2f; --green:#2a9d8f; --text:#1d2433; --muted:#5b6578; --line:#e3e7ef; --soft:#f4f6fb; }
+body { font-family: Inter, Arial, sans-serif; color: var(--text); font-size: 10.2pt; line-height: 1.5; margin: 0; }
+h1 { font-size: 22pt; color: var(--navy); margin: 0 0 4mm; letter-spacing: -0.3px; }
+h2 { font-size: 15pt; color: var(--navy); margin: 7mm 0 2.5mm; padding-bottom: 1.5mm; border-bottom: 2px solid var(--blue); }
+h3 { font-size: 11.5pt; color: var(--navy); margin: 4mm 0 1.5mm; }
+p { margin: 0 0 2.2mm; }
+ul, ol { margin: 0 0 2.5mm; padding-left: 5.5mm; }
+li { margin-bottom: 1mm; }
+b { color: #101828; }
+.page { page-break-after: always; }
+.nobreak { break-inside: avoid; page-break-inside: avoid; }
+.muted { color: var(--muted); }
+.ui { display:inline-block; background:#eef2fb; border:1px solid #d5ddf0; border-radius:4px; padding:0 4px; font-weight:600; font-size:9.4pt; color:#1b2a4a; white-space:nowrap; }
+.adv { display:inline-block; background:var(--orange); color:#fff; font-size:7.5pt; font-weight:800; border-radius:3px; padding:0 4px; vertical-align:1px; letter-spacing:0.3px; }
+.tip { background:#eaf7f2; border-left:4px solid var(--green); border-radius:6px; padding:2.5mm 3.5mm; margin:3mm 0; font-size:9.6pt; }
+.warn { background:#fff3e8; border-left:4px solid var(--orange); border-radius:6px; padding:2.5mm 3.5mm; margin:3mm 0; font-size:9.6pt; }
+.tip b:first-child, .warn b:first-child { display:block; margin-bottom:0.5mm; }
+.row { display:flex; gap:6mm; align-items:flex-start; }
+.row > .txt { flex:1; min-width:0; }
+.shot { border:1px solid var(--line); border-radius:6px; box-shadow:0 1.5mm 4mm rgba(15,30,60,0.12); display:block; }
+.shot-col { flex:none; width:62mm; }
+.shot-col.s { width:52mm; }
+.cap { font-size:8pt; color:var(--muted); text-align:center; margin-top:1.5mm; }
+.steps { counter-reset: st; list-style:none; padding-left:0; }
+.steps > li { counter-increment: st; position:relative; padding-left:8.5mm; margin-bottom:2.2mm; }
+.steps > li::before { content: counter(st); position:absolute; left:0; top:0.2mm; width:6mm; height:6mm; border-radius:50%; background:var(--blue); color:#fff; font-weight:800; font-size:9pt; text-align:center; line-height:6mm; }
+table { width:100%; border-collapse:collapse; font-size:9.4pt; margin:2mm 0 3mm; }
+th, td { border:1px solid var(--line); padding:1.6mm 2.2mm; text-align:left; vertical-align:top; }
+th { background:var(--soft); color:var(--navy); }
+/* Titelseite */
+.cover { height: 263mm; position:relative; background: linear-gradient(160deg,#0b1d3a 0%,#081428 60%,#050c1a 100%); color:#fff; border-radius: 4mm; padding: 18mm 16mm; overflow:hidden; }
+.cover::before { content:""; position:absolute; inset:0; background: repeating-linear-gradient(135deg, transparent 0 9mm, rgba(255,255,255,0.03) 9mm 10.5mm); }
+.cover > * { position:relative; }
+.brand { display:flex; align-items:center; gap:4mm; font-weight:900; font-size:20pt; }
+.brand img { width:16mm; height:16mm; border-radius:3.5mm; }
+.brand .a { color: var(--blue2); }
+.cover h1 { color:#fff; font-size:34pt; line-height:1.05; margin:20mm 0 5mm; }
+.cover h1 span { color:#f0a35e; }
+.cover .sub { font-size:13pt; color:#c3cfe6; max-width:150mm; }
+.fan { position:absolute; left:0; right:0; bottom:22mm; height:110mm; }
+.fan img { position:absolute; width:62mm; border-radius:3mm; box-shadow:0 4mm 10mm rgba(0,0,0,0.5); border:0.5mm solid rgba(255,255,255,0.18); }
+.cover .foot { position:absolute; left:16mm; right:16mm; bottom:10mm; display:flex; justify-content:space-between; font-size:9.5pt; color:#9fb0d0; }
+/* Inhalt */
+.toc { list-style:none; padding:0; font-size:11pt; }
+.toc li { display:flex; gap:3mm; padding:2.2mm 0; border-bottom:1px dotted #cfd6e4; }
+.toc li span:first-child { width:9mm; font-weight:800; color:var(--blue); }
+/* Vorlagen */
+.tpl { display:flex; gap:5mm; align-items:flex-start; border:1px solid var(--line); border-radius:3mm; padding:4mm; margin-bottom:4mm; break-inside:avoid; page-break-inside:avoid; }
+.tpl .ex { flex:none; width:40mm; }
+.tpl .ex img { width:100%; border-radius:2mm; display:block; box-shadow:0 1mm 3mm rgba(0,0,0,0.25); }
+.tpl h3 { margin-top:0; }
+.tpl .ed { flex:none; width:44mm; }
+.tpl .ed img { width:100%; border:1px solid var(--line); border-radius:1.5mm; display:block; }
+.day { display:grid; grid-template-columns: 26mm 1fr; gap:0; border:1px solid var(--line); border-radius:3mm; overflow:hidden; margin:3mm 0; }
+.day div { padding:2mm 3mm; border-bottom:1px solid var(--line); }
+.day div:nth-child(odd) { background:var(--soft); font-weight:800; color:var(--navy); }
+.day div:nth-last-child(-n+2) { border-bottom:none; }
+.faq h3 { margin:3.5mm 0 1mm; font-size:10.6pt; }
+.faq h3::before { content:"F: "; color:var(--blue); }
+.faq p { margin-left:0; }
+.contact { background:var(--navy); color:#fff; border-radius:3mm; padding:6mm; margin-top:6mm; }
+.contact b { color:#fff; }
+.contact a { color:#9cc0ff; }
+</style></head><body>
+
+<!-- ============ TITEL ============ -->
+<section class="page">
+ <div class="cover">
+  <div class="brand"><img src="img/matchshot.png"><span>Match-<span class="a">Shot</span></span></div>
+  <h1>Handbuch &amp; FAQ<br><span>für deinen Verein</span></h1>
+  <div class="sub">Einrichten, Grafiken erstellen, teilen – alle Funktionen Schritt für Schritt, mit Tipps aus der Praxis und Antworten auf die häufigsten Fragen.</div>
+  <div class="fan">
+   <img src="img/post-feed-g.jpg" style="left:14mm; top:16mm; transform:rotate(-7deg)">
+   <img src="img/ergebnis-g.jpg" style="right:14mm; top:16mm; transform:rotate(7deg)">
+   <img src="img/tor-g.jpg" style="left:50%; margin-left:-31mm; top:0; width:62mm; z-index:2">
+  </div>
+  <div class="foot"><span>match-shot.de · info@match-shot.de</span><span>Stand: November 2026 · App-Version 23.7</span></div>
+ </div>
+</section>
+
+<!-- ============ INHALT ============ -->
+<section class="page">
+ <h1>Inhalt</h1>
+ <ol class="toc">
+  <li><span>1</span><span>Schnellstart in 5 Schritten</span></li>
+  <li><span>2</span><span>Einrichtung – so legst du alles einmal richtig an</span></li>
+  <li><span>3</span><span>Bedienung – Vorschau, Verschieben, Aussehen, Teilen</span></li>
+  <li><span>4</span><span>Die 14 Vorlagen im Überblick</span></li>
+  <li><span>5</span><span>Ein typischer Spieltag mit Match-Shot</span></li>
+  <li><span>6</span><span>Häufige Fragen (FAQ)</span></li>
+  <li><span>7</span><span>Basis oder Advanced – was ist enthalten?</span></li>
+ </ol>
+ <div class="tip"><b>So liest du dieses Handbuch</b>Begriffe in <span class="ui">grauen Kästchen</span> sind Knöpfe oder Bereiche, genau so, wie sie in der App heißen. Funktionen mit <span class="adv">ADVANCED</span> gibt es nur im Advanced-Paket.</div>
+ <div class="tip"><b>Die wichtigste Regel zuerst</b>Spieler, Gegner, Sponsoren und Hintergründe legst du <b>nur einmal</b> an. Danach stehen sie in allen Vorlagen per Tipp zur Auswahl – die meisten Grafiken sind dann in einer Minute fertig.</div>
+ <h2>Wo finde ich was?</h2>
+ <table>
+  <tr><th style="width:36mm">Bereich</th><th>Was du dort machst</th></tr>
+  <tr><td><span class="ui">🏠 Start</span></td><td>Vorlage auswählen, Versionen (Mannschaften) wechseln, <b>Einstellungen</b>: Vereinsname, Wappen, Farben, Hashtags, Backup</td></tr>
+  <tr><td><span class="ui">🗃️ Daten</span></td><td>Spieler &amp; Trainer, Gegner, Sponsoren, eigene Schriften und eigene Hintergründe anlegen</td></tr>
+  <tr><td>Reiter der Vorlagen</td><td><span class="ui">Ankündigung</span> <span class="ui">Aufstellung</span> <span class="ui">Tor</span> <span class="ui">Ergebnis</span> … – unten in der Leiste wischen, um alle zu sehen</td></tr>
+  <tr><td><span class="ui">✏️ Bearbeiten</span> / <span class="ui">👁️ Vorschau ansehen</span></td><td>Am Handy wechselst du mit dem großen Knopf unten zwischen Eingabe und fertiger Grafik</td></tr>
+ </table>
+</section>
+
+<!-- ============ 1 SCHNELLSTART ============ -->
+<section class="page">
+ <h1>1 · Schnellstart in 5 Schritten</h1>
+ <div class="row">
+  <div class="txt">
+   <ol class="steps">
+    <li><b>Vereinscode eingeben.</b> Öffne <b>match-shot.de</b> und tippe auf <span class="ui">🔑 Vereinscode eingeben</span>. Den Code hast du per E-Mail bekommen. Danach sind Vereinsname und Wappen schon eingetragen.</li>
+    <li><b>App auf den Home-Bildschirm legen.</b>
+     <br><b>iPhone:</b> in Safari unten auf <span class="ui">Teilen □↑</span> → <span class="ui">Zum Home-Bildschirm</span>.
+     <br><b>Android:</b> im Chrome-Menü ⋮ → <span class="ui">App installieren</span> (oder in den Einstellungen auf <span class="ui">App installieren</span>).
+     <br>Ab jetzt öffnest du Match-Shot über das Symbol – wie eine normale App, auch ohne Internet.</li>
+    <li><b>Verein einrichten.</b> <span class="ui">🏠 Start</span> → <span class="ui">⚙️ Einstellungen</span> → <span class="ui">🏷️ Vereinsname, Wappen &amp; Farben</span> → <span class="ui">🎨 Farben aus dem Wappen übernehmen</span>. Wer es geführt mag: <span class="ui">🧭 Einrichtungs-Assistent starten</span>.</li>
+    <li><b>Spieler, Gegner und Sponsoren anlegen</b> unter <span class="ui">🗃️ Daten</span> (Kapitel 2). Am schnellsten mit <b>„Mehrere Fotos auf einmal“</b>.</li>
+    <li><b>Erste Grafik erstellen:</b> <span class="ui">🏠 Start</span> → <span class="ui">📣 Ankündigung</span> → <span class="ui">📅 Nächsten Termin aus Kalender übernehmen</span> oder Gegner, Datum und Uhrzeit wählen → <span class="ui">📲 In Fotos / Teilen</span>. Fertig!</li>
+   </ol>
+   <div class="warn"><b>Wichtig für iPhone-Nutzer</b>Wird Match-Shot nur im Safari-Tab benutzt, kann das iPhone gespeicherte Daten nach 7 Tagen ohne Nutzung löschen. Über den Home-Bildschirm passiert das nicht. Mach außerdem regelmäßig ein <b>Backup</b> (Kapitel 2) – die App erinnert dich daran.</div>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/app-start-g.jpg" style="width:100%"><div class="cap">Startseite: Vorlage antippen, oben die Version (Mannschaft) wählen</div></div>
+ </div>
+</section>
+
+<!-- ============ 2 EINRICHTUNG ============ -->
+<section class="page">
+ <h1>2 · Einrichtung</h1>
+ <p class="muted">Einmal sorgfältig einrichten spart dir später jede Woche Zeit. Plane dafür etwa 30–60 Minuten ein.</p>
+
+ <h2>2.1 Einstellungen (Start)</h2>
+ <div class="row">
+  <div class="txt">
+   <h3>🏷️ Vereinsname, Wappen &amp; Farben</h3>
+   <ul>
+    <li><b>Vereinsname auf den Grafiken:</b> leer lassen = Name aus dem Vereinscode. Hier kannst du z. B. „SC Lilaheim“ statt „Sportclub Lilaheim e. V.“ eintragen.</li>
+    <li><b>Hintergrund des Vereinswappens entfernen:</b> entfernt weiße oder schwarze Ecken um das Wappen.</li>
+    <li><b>Hauptfarbe, Trikotfarbe, Kreis-/Rahmenfarbe:</b> am einfachsten mit <span class="ui">🎨 Farben aus dem Wappen übernehmen</span>. Die Trikotfarbe ist die Akzentfarbe (Linien, Rückennummern, Hervorhebungen).</li>
+   </ul>
+   <h3>📱 Beiträge &amp; Instagram</h3>
+   <ul>
+    <li><b>Hashtags:</b> werden automatisch unter jeden Beitragstext gesetzt, z. B. <i>#sclilaheim #kreisliga</i>.</li>
+    <li><b>Format der Beiträge:</b> 4:5 (Hochformat, empfohlen – Instagram zeigt Beiträge im Profil hochkant) oder 1:1.</li>
+    <li><b>Instagram-Hilfslinien in Storys:</b> zeigt, wo Profilbild und Antwortfeld später etwas verdecken. Die Linien sind nicht im fertigen Bild.</li>
+   </ul>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/einst-verein.jpg" style="width:100%"><div class="cap">Vereinsname, Wappen &amp; Farben</div></div>
+ </div>
+ <div class="row">
+  <div class="txt">
+   <h3>📋 Versionen / Mannschaften</h3>
+   <p>Match-Shot hat <b>3 getrennte Versionen</b> – ideal für 1. Mannschaft, 2. Mannschaft und Jugend. Jede Version hat eigene Aufstellung, eigene Texte und eigene Spiele. Gib ihnen hier Namen; diese erscheinen z. B. in der Wochenend-Grafik.</p>
+   <p><b>Zwischen Versionen kopieren:</b> überträgt Inhalte oder das Design von einer Version in eine andere. Spieler, Gegner, Sponsoren und Hintergründe gelten sowieso für alle Versionen.</p>
+   <h3>👁️ Ansicht anpassen</h3>
+   <p>Blende Reiter oder Bereiche aus, die du nie brauchst. Der <span class="ui">Einfach-Modus</span> zeigt nur das Nötigste – gut für Helfer, die nur schnell eine Grafik machen sollen.</p>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/einst-versionen.jpg" style="width:100%"><div class="cap">Die 3 Versionen benennen</div></div>
+ </div>
+</section>
+
+<section class="page">
+ <div class="row">
+  <div class="txt">
+   <h3>💾 Backup &amp; Export</h3>
+   <p>Alle Daten liegen <b>nur auf deinem Gerät</b> – nicht in einer Cloud. Deshalb ist das Backup wichtig:</p>
+   <ul>
+    <li><span class="ui">📥 Alles als JSON sichern (inkl. Bilder)</span> speichert eine Datei mit allem.</li>
+    <li><span class="ui">📤 Backup teilen</span> schickt die Datei per WhatsApp, Mail oder AirDrop – z. B. an dich selbst oder an einen zweiten Admin.</li>
+    <li><b>JSON Datei importieren:</b> auf dem anderen Gerät die Datei einlesen. Mit <b>„Zusammenführen“</b> kommen nur neue Daten dazu, vorhandene bleiben erhalten.</li>
+   </ul>
+   <div class="tip"><b>Empfehlung</b>Mach nach jeder größeren Änderung (neue Spieler, neue Fotos) ein Backup und teile es dir selbst per Mail. Dann ist nichts verloren, wenn das Handy kaputtgeht.</div>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/einst-backup.jpg" style="width:100%"><div class="cap">Backup sichern und teilen</div></div>
+ </div>
+
+ <h2>2.2 Daten anlegen</h2>
+ <div class="row">
+  <div class="txt">
+   <h3>🏷️ Mannschaften &amp; Positionen</h3>
+   <p>Lege fest, welche Mannschaften und Positionen es gibt (<span class="ui">Positionen: einfach</span> oder <span class="ui">detailliert</span>). Die Reihenfolge bestimmt die Sortierung der Spielerliste.</p>
+   <h3>👤 Spieler &amp; Trainer</h3>
+   <ul>
+    <li><b>Name, Spitzname, Rolle</b> (Spieler, Trainer …), <b>Mannschaft, Position, Rückennummer</b>.</li>
+    <li><b>Bis zu 3 Fotos pro Spieler:</b> normales Foto, <b>Torjubel-Foto</b> (wird beim „Tor“ automatisch genommen) und ein <b>Spezial-Foto</b> (z. B. Spieltag-Pose).</li>
+    <li><b>Mehrere Fotos auf einmal:</b> Dateiname = Spielername, z. B. <i>Max_Mustermann.jpg</i>, <i>Max_Mustermann_TOR.jpg</i>, <i>Max_Mustermann_SPEZIAL.jpg</i>. Fehlende Spieler werden automatisch angelegt.</li>
+    <li><span class="adv">ADVANCED</span> <b>Hintergrund entfernen per KI:</b> <span class="ui">✂️ Hintergrund bei allen Spielern entfernen</span> oder einzeln beim Spieler über ✂️. Die KI läuft direkt auf dem Gerät – es werden keine Fotos hochgeladen.</li>
+    <li><span class="ui">✏️ Alle Spieler auf einmal bearbeiten</span>: Namen, Nummern und Mannschaften in einer Liste ändern.</li>
+    <li><b>🛡️ Einwilligungen verwalten (DSGVO):</b> pro Spieler festhalten, ob Foto und Name veröffentlicht werden dürfen. Beim Teilen warnt die App, wenn jemand ohne Einwilligung abgebildet ist.</li>
+   </ul>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/daten-spieler.jpg" style="width:100%"><div class="cap">Spieler mit bis zu 3 Fotos anlegen</div></div>
+ </div>
+</section>
+
+<section class="page">
+ <div class="tip"><b>Tipps für gute Spielerfotos</b>
+  <ul style="margin:1mm 0 0">
+   <li>Hochformat, Spieler von Kopf bis Brust/Hüfte, Gesicht gut beleuchtet.</li>
+   <li>Alle Fotos vor dem gleichen, ruhigen Hintergrund – dann wirkt die Aufstellung einheitlich, und die KI stellt sauberer frei.</li>
+   <li>Für das Torjubel-Foto lohnt sich ein Jubel-Bild (Faust, Arme hoch) – das bringt Emotion in die Tor-Grafik.</li>
+   <li>Unter <span class="ui">🧹 Speicher optimieren</span> lassen sich sehr große Fotos verkleinern, falls das Gerät voll wird.</li>
+  </ul></div>
+ <div class="row">
+  <div class="txt">
+   <h3>🛡️ Gegner</h3>
+   <p>Name und Wappen des Gegners. Das Wappen erscheint dann in Ankündigung, Tor-Anzeigetafel, Ergebnis, Kalender und Wochenende. Mehrere Gegner bearbeitest du mit <span class="ui">✏️ Mehrere Gegner auf einmal bearbeiten</span>.</p>
+   <h3>🤝 Sponsoren</h3>
+   <p>Name und Logo. Am besten Logos als PNG mit durchsichtigem Hintergrund – dann sehen sie auf jedem Hintergrund gut aus.</p>
+   <h3>🔤 Eigene Schriften</h3>
+   <p>Lade eure Vereinsschrift hoch (.ttf, .otf, .woff, .woff2). Bitte nur Schriften verwenden, für die ihr eine Lizenz habt.</p>
+   <h3>🖼️ Eigene Hintergründe</h3>
+   <p>Euer eigenes Design als Hintergrund – z. B. die Kabine, euer Stadion oder ein Vereinsmuster. Ideale Größen: <b>1080 × 1350 px</b> (Beitrag) und <b>1080 × 1920 px</b> (Story). Mit dem Format <b>„Story &amp; Beitrag“</b> reicht ein Bild für beide. Danach erscheinen die Hintergründe in jedem Reiter unter <span class="ui">🖼️ Hintergrund &amp; Formen</span>.</p>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/daten-hintergruende.jpg" style="width:100%"><div class="cap">Eigene Hintergründe hochladen</div></div>
+ </div>
+
+ <h2>2.3 Spielplan einmal einfügen <span class="adv">ADVANCED</span></h2>
+ <div class="row">
+  <div class="txt">
+   <p>Im Reiter <span class="ui">📅 Kalender</span> unter <span class="ui">📋 Spielplan einfügen (ganze Saison)</span> kopierst du den Spielplan einmal hinein (z. B. aus fussball.de). Danach:</p>
+   <ul>
+    <li>Die Ankündigung füllt sich mit <span class="ui">📅 Nächsten Termin aus Kalender übernehmen</span> selbst.</li>
+    <li>Das Ergebnis holt sich mit <span class="ui">📅 Letztes Spiel aus Kalender übernehmen</span> Gegner und Heim/Auswärts.</li>
+    <li>Die Grafik „Nächste Spiele“ zeigt immer die kommenden Termine.</li>
+   </ul>
+   <p>Einzelne Termine kannst du auch von Hand eintragen (Datum, Anstoß, Gegner, Heim/Auswärts).</p>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/kalender.jpg" style="width:100%"><div class="cap">Termine im Kalender</div></div>
+ </div>
+</section>
+
+<!-- ============ 3 BEDIENUNG ============ -->
+<section class="page">
+ <h1>3 · Bedienung</h1>
+ <p>Jede Vorlage funktioniert gleich: <b>oben eintragen, in der Vorschau anpassen, teilen.</b> Jede Grafik entsteht automatisch <b>als Beitrag und als Story</b>.</p>
+
+ <h2>3.1 In der Vorschau verschieben &amp; größer ziehen</h2>
+ <div class="row">
+  <div class="txt">
+   <p>Tippe in der Vorschau auf ein Element (Text, Logo, Spieler). Es wird gestrichelt markiert und oben erscheint die Werkzeugleiste:</p>
+   <table>
+    <tr><th style="width:24mm">Knopf</th><th>Funktion</th></tr>
+    <tr><td><b>− / +</b></td><td>Element kleiner / größer (Prozent-Anzeige dazwischen)</td></tr>
+    <tr><td><b>↺</b></td><td>Größe &amp; Position dieses Elements zurücksetzen</td></tr>
+    <tr><td><b>⬆ / ⬇</b></td><td>Nach vorne holen / nach hinten schieben (wenn Elemente sich überlappen)</td></tr>
+    <tr><td><b>🔗 Story / Beitrag</b></td><td>Beitrag &amp; Story gemeinsam anpassen: das Gegenstück im anderen Format bewegt sich mit</td></tr>
+    <tr><td><b>🏷️</b></td><td>Namen dieses Spielers ein- oder ausblenden</td></tr>
+    <tr><td><b>🎨</b></td><td>„Welche Farbe/Schrift steuert das?“ – springt direkt zur passenden Einstellung</td></tr>
+    <tr><td><b>✓</b></td><td>Fertig</td></tr>
+   </table>
+   <p>Verschieben geht mit dem Finger; zum Größer-/Kleinerziehen auch mit zwei Fingern. Bei der Eckball-Taktik gibt es zusätzlich ein <b>Steuerkreuz</b> für millimetergenaues Verschieben.</p>
+   <div class="tip"><b>Etwas verrutscht oder verschwunden?</b>Unten in jedem Reiter: <span class="ui">🔄 Zurücksetzen (Positionen &amp; Design) …</span> – dort wählst du, was zurückgesetzt werden soll.</div>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/app-editor-g.jpg" style="width:100%"><div class="cap">Element markiert – oben die Werkzeugleiste</div></div>
+ </div>
+</section>
+
+<section class="page">
+ <h2>3.2 Aussehen anpassen</h2>
+ <div class="row">
+  <div class="txt">
+   <p>Unter jeder Vorlage findest du <span class="ui">🎨 Aussehen anpassen</span> (optional – die Vorlagen sehen auch ohne Änderungen gut aus):</p>
+   <ul>
+    <li><b>✨ Design-Stile:</b> fertige Looks (z. B. Klassisch, Modern, Kräftig, Retro, Minimal, Leuchten). Mit „Auf alle Reiter anwenden“ sieht alles einheitlich aus. Eigene Stile kannst du speichern.</li>
+    <li><b>🎨 Farben &amp; Schrift:</b> Schriftfarbe, Schriftart, Größen, Kästen, Text-Effekt. Unter jeder Einstellung steht <b>„wirkt auf: …“</b> – mit 👁 wird die Stelle in der Vorschau markiert.</li>
+    <li><b>🖼️ Hintergrund &amp; Formen:</b> Hintergrund für Beitrag und Story wählen (auch eure eigenen) und die Rahmenform der Fotos und Wappen (Kreis, abgerundet, Schild, freigestellt …).</li>
+    <li><b>👥 Spielerfotos &amp; zusätzliche Spieler:</b> normales, Torjubel- oder Spezial-Foto; freigestellte Fotos; weitere Spieler ins Bild holen.</li>
+    <li><b>🏷️ Vereinslogo &amp; Team-Namen:</b> Wappen ein-/ausblenden, Größe, Anordnung, Position und Größe des „VS“.</li>
+    <li><b>🤝 Sponsoren:</b> Sponsoren-Leiste und <b>„Präsentiert von“</b> mit eurem Hauptsponsor <span class="adv">ADVANCED</span>.</li>
+    <li><b>✍️ Eigene Texte:</b> beliebige zusätzliche Texte ins Bild setzen.</li>
+    <li><b>🎬 Video (Reel):</b> Tempo und Art, wie die Elemente im Video einfliegen <span class="adv">ADVANCED</span>.</li>
+   </ul>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/app-design-g.jpg" style="width:100%"><div class="cap">Die Bereiche unter „Aussehen anpassen“</div></div>
+ </div>
+ <div class="row">
+  <div class="txt">
+   <h3>Farben &amp; Schrift – was steuert was?</h3>
+   <p>Du weißt nicht, welche Einstellung welchen Text färbt? Zwei Wege:</p>
+   <ol>
+    <li>In <span class="ui">🎨 Farben &amp; Schrift</span> steht unter jeder Einstellung, worauf sie wirkt. Tippe auf 👁 – die Stellen blinken in der Vorschau.</li>
+    <li>Umgekehrt: in der Vorschau ein Element antippen und in der Werkzeugleiste 🎨 wählen – die App springt zur passenden Einstellung.</li>
+   </ol>
+   <p><b>Feste Texte ändern:</b> Wörter wie „HEIMSPIEL“, „TORSCHÜTZE:“ oder „vs“ kannst du unter <span class="ui">🔤 Feste Texte ändern</span> anpassen – z. B. auf Schwäbisch oder Englisch.</p>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/farben.jpg" style="width:100%"><div class="cap">„wirkt auf“ unter jeder Einstellung</div></div>
+ </div>
+</section>
+
+<section class="page">
+ <h2>3.3 Teilen, Video &amp; Beitragstext</h2>
+ <div class="row">
+  <div class="txt">
+   <ul>
+    <li><span class="ui">📲 In Fotos / Teilen</span> unter jeder Vorschau: Bild direkt in die Fotos speichern oder an Instagram, WhatsApp &amp; Co. teilen. Exportiert wird in hoher Auflösung (Beitrag 1200 × 1500 px, Story 1200 × 2133 px).</li>
+    <li><span class="ui">🎬 Als Video (Reel)</span> <span class="adv">ADVANCED</span>: macht aus der Grafik ein kurzes Video, in dem die Elemente nacheinander einfliegen. Unter <span class="ui">🎬 Video (Reel)</span> → <span class="ui">🔀 Reihenfolge der Elemente festlegen</span> bestimmst du per Ziehen, was wann erscheint. Das Video hat keinen Ton – Musik fügst du in Instagram hinzu.</li>
+    <li><span class="ui">💬 Text für den Beitrag</span>: Match-Shot schreibt den passenden Instagram-Text samt Hashtags automatisch. <span class="ui">📋 Text kopieren</span>, in Instagram einfügen, fertig. Du kannst ihn frei ändern; <span class="ui">🔄 Neu erzeugen</span> holt den automatischen Text zurück.</li>
+    <li><span class="ui">📦 Mehrere Grafiken auf einmal teilen</span> <span class="adv">ADVANCED</span>: das Spieltags-Paket – z. B. Ankündigung, Aufstellung und Kader in einem Rutsch.</li>
+    <li><span class="ui">📋 Aus anderer Version übernehmen</span>: den Inhalt eines Reiters aus einer anderen Version (Mannschaft) kopieren.</li>
+   </ul>
+   <div class="tip"><b>Musik in Reels</b>Nutze für deinen Vereinsaccount in Instagram am besten Musik aus dem Bereich „Lizenzfrei“ – die ist auch für Vereine und Werbung freigegeben.</div>
+  </div>
+  <div class="shot-col s"><img class="shot" src="img/beitragstext.jpg" style="width:100%"><div class="cap">Automatischer Beitragstext</div><br><img class="shot" src="img/reel.jpg" style="width:100%"><div class="cap">Einstellungen fürs Reel</div></div>
+ </div>
+</section>
+
+<!-- ============ 4 VORLAGEN ============ -->
+<section class="page">
+ <h1>4 · Die 14 Vorlagen</h1>
+ <p class="muted">Bei jeder Vorlage: links ein Beispiel, rechts der Bearbeiten-Bereich. Alle Vorlagen gibt es als Beitrag und als Story.</p>
+
+ <div class="tpl">
+  <div class="ex"><img src="img/post-feed-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>📣 Ankündigung</h3>
+   <ol class="steps">
+    <li><span class="ui">📅 Nächsten Termin aus Kalender übernehmen</span> – oder Spielort, Gegner, Datum und Uhrzeit wählen.</li>
+    <li>Der <b>Titel</b> passt sich automatisch an: „HEIMSPIEL“ oder „AUSWÄRTSSPIEL“ (oder eigener Text).</li>
+    <li>Unter „Aussehen anpassen“ einen Spieler ins Bild holen, Wappen-Anordnung und „VS“ einstellen.</li>
+   </ol>
+   <p class="muted">Tipp: Die Ankündigung ist die Basis – Tor, Ergebnis und Wochenende übernehmen Gegner und Spielort von hier.</p>
+  </div>
+  <div class="ed"><img src="img/ankuendigung.jpg"></div>
+ </div>
+
+ <div class="tpl">
+  <div class="ex"><img src="img/aufstellung-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>📋 Aufstellung</h3>
+   <ol class="steps">
+    <li><b>Spielform</b> (11er, 9er, 7er) und <b>Formation</b> wählen.</li>
+    <li>Startelf antippen, <b>Kapitän</b>, Bank und Trainer eintragen; optional Rückennummern.</li>
+    <li>„<b>Gegner &amp; Datum anzeigen</b>“ für den Profi-Look. Unter <span class="ui">⚽ Spielfeld &amp; Spieler-Look</span>: Feld schräg wie im TV, freigestellte Spieler.</li>
+   </ol>
+   <p class="muted">Tipp: Spieler in der Vorschau antippen und verschieben oder größer ziehen (z. B. den Kapitän). Als Liste gibt es die Aufstellung ebenfalls.</p>
+  </div>
+  <div class="ed"><img src="img/aufstellung.jpg"></div>
+ </div>
+</section>
+
+<section class="page">
+ <div class="tpl">
+  <div class="ex"><img src="img/tor-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>⚽ Tor</h3>
+   <ol class="steps">
+    <li><b>Torschütze</b>, <b>Spielstand</b> und <b>Minute</b> wählen, optional die Art (Elfmeter, Kopfball …).</li>
+    <li><b>Gegner im Bild:</b> Anzeigetafel mit beiden Wappen (Heim links) – kommt automatisch aus der Ankündigung.</li>
+    <li><b>Vorlage:</b> Vorlagengeber als Foto oder als Textzeile.</li>
+    <li><span class="ui">Tor beim Ergebnis eintragen</span> – spart später das Abtippen.</li>
+   </ol>
+   <p class="muted">Tipp: Das Torjubel-Foto wird automatisch genommen. Live während des Spiels in unter einer Minute online.</p>
+  </div>
+  <div class="ed"><img src="img/tor.jpg"></div>
+ </div>
+
+ <div class="tpl">
+  <div class="ex"><img src="img/ergebnis-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>🏁 Ergebnis</h3>
+   <ol class="steps">
+    <li><b>Art der Grafik:</b> Endergebnis, Halbzeit, Spielabsage (mit Stempel) oder Countdown bis zum nächsten Spiel.</li>
+    <li><span class="ui">📅 Letztes Spiel aus Kalender übernehmen</span>, Spielstand und Zusatztext eintragen.</li>
+    <li><b>Torschützen</b> mit Minute auswählen (bis zu 25).</li>
+   </ol>
+   <p class="muted">Tipp: Die Halbzeit-Grafik eignet sich perfekt als Story während des Spiels.</p>
+  </div>
+  <div class="ed"><img src="img/ergebnis.jpg"></div>
+ </div>
+</section>
+
+<section class="page">
+ <div class="tpl">
+  <div class="ex"><img src="img/kader-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>👥 Kader <span class="muted" style="font-weight:400">– ideal für Trainer</span></h3>
+   <ol class="steps">
+    <li><b>Treffpunkt</b> (Uhrzeit und Ort), <b>Trikotfarbe</b>, <b>Spieltagsdienste</b> eintragen.</li>
+    <li><b>Zusatz / Fließtext</b>, z. B. „12 Bälle, Hütchen, Medi-Tasche“.</li>
+    <li>Bis zu 20 Spieler für den Kader auswählen.</li>
+   </ol>
+   <p class="muted">Tipp: Als Story-Bild direkt in die WhatsApp-Gruppe der Mannschaft teilen.</p>
+  </div>
+  <div class="ed"><img src="img/kader.jpg"></div>
+ </div>
+
+ <div class="tpl">
+  <div class="ex"><img src="img/spieltage-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>📅 Kalender – Nächste Spiele</h3>
+   <ol class="steps">
+    <li>Termine eintragen oder den Spielplan einfügen (Kapitel 2.3).</li>
+    <li><b>Anzeige:</b> alle kommenden Termine, nur der Monat des nächsten Termins oder alle Termine.</li>
+    <li>Farben für Heim- und Auswärtsspiele wählen.</li>
+   </ol>
+   <p class="muted">Tipp: Zu Monatsbeginn als Beitrag – so wissen Fans und Eltern immer Bescheid.</p>
+  </div>
+ </div>
+
+ <div class="tpl">
+  <div class="ex"><img src="img/potm-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>⭐ Player of the Match</h3>
+   <p>Spieler wählen, kurze Info (z. B. „2 Tore, 1 Vorlage“) eintragen – Foto in der Vorschau verschieben und vergrößern. Perfekt mit „Präsentiert von“ eures Sponsors.</p>
+  </div>
+ </div>
+</section>
+
+<section class="page">
+ <div class="tpl">
+  <div class="ex"><img src="img/geburtstag-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>🎂 Geburtstag</h3>
+   <p>Geburtstagskind wählen, Glückwunsch eintragen. Das Konfetti lässt sich abschalten.</p>
+  </div>
+ </div>
+ <div class="tpl">
+  <div class="ex"><img src="img/teamfoto-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>📸 Mannschaftsfoto</h3>
+   <ol class="steps">
+    <li>Mannschaftsfoto hochladen (am besten Querformat), Titel und Untertitel eintragen.</li>
+    <li>Spieler auf <b>hintere, mittlere und vordere Reihe</b> verteilen – <span class="ui">🔀 Automatisch verteilen</span> hilft, mit ▲▼ sortieren.</li>
+    <li>Trainer &amp; Betreuer sowie „Es fehlen“ ergänzen.</li>
+   </ol>
+  </div>
+ </div>
+ <div class="tpl">
+  <div class="ex"><img src="img/vereinsfest-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>✏️ Freie Vorlage</h3>
+   <p>Für alles neben dem Spielbetrieb: Vereinsfest, Trainingszeiten, Jahreshauptversammlung, Spendenaufruf. Titel, Symbol/Emoji oder Wappen, eine hervorgehobene Zeile und freier Text. Eigene Fotos als Hintergrund wählen.</p>
+  </div>
+ </div>
+ <div class="tpl">
+  <div class="ex"><img src="img/sponsor-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>🤝 Danke an Sponsor <span class="adv">ADVANCED</span></h3>
+   <p>Sponsor wählen, Titel, Text und Zusatz eintragen (z. B. „Neue Trikots für die Saison 2026/27“). Unter <b>Logo-Kasten</b>: Form (abgerundet, eckig, Kreis, Schild, ohne Kasten, mit Schatten), Kasten-Farbe, Rahmen und ob der Name angezeigt wird.</p>
+  </div>
+ </div>
+</section>
+
+<section class="page">
+ <div class="tpl">
+  <div class="ex"><img src="img/neuzugang-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>🆕 Neuzugang &amp; Spielervorstellung <span class="adv">ADVANCED</span></h3>
+   <ol class="steps">
+    <li><b>Neuzugang</b> (mit „Kommt von“ und Wappen des alten Vereins) oder <b>Spielervorstellung</b> (mit Mannschaft) wählen.</li>
+    <li>Spieler wählen – Position und Rückennummer kommen aus den Spielerdaten.</li>
+   </ol>
+   <p class="muted">Tipp: Vor der Saison die ganze Mannschaft vorstellen – mit <span class="ui">👥 Für mehrere Spieler auf einmal erstellen (Bilder &amp; Reels)</span> entsteht die Vorstellung für den kompletten Kader in einem Rutsch.</p>
+  </div>
+ </div>
+ <div class="tpl">
+  <div class="ex"><img src="img/wochenende-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>📊 Wochenende – alle Mannschaften <span class="adv">ADVANCED</span></h3>
+   <ol class="steps">
+    <li><b>Vorschau (Spieltag):</b> <span class="ui">📥 Spiele aus den Ankündigungen aller Versionen übernehmen</span> – Gegner, Tag und Anstoß aller Mannschaften auf einer Grafik.</li>
+    <li>Am Sonntag auf <b>Ergebnisse</b> umschalten – Mannschaften und Gegner bleiben stehen, nur die Ergebnisse eintragen (eigene Tore zuerst). Sieg, Remis und Niederlage werden farbig markiert.</li>
+   </ol>
+  </div>
+  <div class="ed"><img src="img/wochenende.jpg"></div>
+ </div>
+ <div class="tpl">
+  <div class="ex"><img src="img/eckball-g.jpg"></div>
+  <div class="txt" style="flex:1">
+   <h3>📐 Eckball-Taktik <span class="adv">ADVANCED</span> <span class="muted" style="font-weight:400">– für Trainer</span></h3>
+   <ul>
+    <li>Spieler mit <b>Rollen</b> aufs Feld stellen (Schütze, Zielspieler, Blocker, Torwart stören, Absicherung …), Gegenspieler und Zonen ergänzen.</li>
+    <li><b>Pfeile</b> für Laufwege und Pässe (Farbe, Linie, Bogen).</li>
+    <li>Genau verschieben mit dem <b>Steuerkreuz</b> (fein/grob), mehrere <b>Varianten</b> speichern.</li>
+    <li>Export im <b>16:9-Format</b> – für den Fernseher in der Kabine oder PowerPoint. Mit <span class="ui">Vollbild</span> direkt am Tablet zeigen.</li>
+   </ul>
+  </div>
+ </div>
+</section>
+
+<!-- ============ 5 SPIELTAG ============ -->
+<section class="page">
+ <h1>5 · Ein typischer Spieltag</h1>
+ <p>So spielen die Vorlagen zusammen – jede baut auf der vorherigen auf:</p>
+ <div class="day">
+  <div>Saisonstart</div><div>Spielplan einfügen, Mannschaftsfoto, Spielervorstellung für den ganzen Kader, Sponsoren-Dank.</div>
+  <div>Montag</div><div>„Nächste Spiele“ als Beitrag (Kalender). Geburtstage der Woche.</div>
+  <div>Donnerstag</div><div><b>Ankündigung</b> mit „Nächsten Termin übernehmen“ – in jeder Version (Mannschaft). Der Trainer schickt den <b>Kader</b> mit Treffpunkt in die WhatsApp-Gruppe.</div>
+  <div>Freitag</div><div><b>Wochenende-Vorschau</b>: alle Spiele aller Mannschaften auf einer Grafik, mit einem Tipp aus den Ankündigungen.</div>
+  <div>Spieltag</div><div>1 Stunde vorher: <b>Aufstellung</b> (gern als Reel). Während des Spiels: <b>Tor</b>-Updates als Story, zur Pause die <b>Halbzeit</b>.</div>
+  <div>Abpfiff</div><div><b>Ergebnis</b> – Torschützen sind dank „Tor beim Ergebnis eintragen“ schon drin. Dazu <b>Player of the Match</b>.</div>
+  <div>Sonntagabend</div><div><b>Wochenende → Ergebnisse</b> umschalten und alle Spielstände eintragen.</div>
+ </div>
+ <div class="tip"><b>Zeitspar-Tipp</b>Nutze <span class="ui">💬 Text für den Beitrag</span> bei jeder Grafik – der Instagram-Text mit Gegner, Datum, Torschützen und euren Hashtags ist schon fertig.</div>
+ <div class="tip"><b>Mehrere Helfer im Verein?</b>Einer richtet alles ein und schickt das Backup an die anderen (<span class="ui">📤 Backup teilen</span>). Die importieren es mit „Zusammenführen“. Neue Spieler später einfach wieder per Backup verteilen.</div>
+</section>
+
+<!-- ============ 6 FAQ ============ -->
+<section class="page faq">
+ <h1>6 · Häufige Fragen</h1>
+
+ <h3>Wo werden meine Daten gespeichert?</h3>
+ <p>Nur auf deinem Gerät, im Speicher des Browsers bzw. der App. Es gibt kein Konto und keine Cloud. Auch das Freistellen per KI passiert direkt auf dem Gerät. Deshalb: regelmäßig ein Backup machen.</p>
+
+ <h3>Ich habe ein neues Handy – wie nehme ich alles mit?</h3>
+ <p>Auf dem alten Gerät <span class="ui">📤 Backup teilen</span> (z. B. per Mail an dich), auf dem neuen Gerät mit dem Vereinscode anmelden und unter <span class="ui">💾 Backup &amp; Export</span> → <b>JSON Datei importieren</b> einlesen.</p>
+
+ <h3>Können mehrere Personen im Verein Match-Shot nutzen?</h3>
+ <p>Ja – der Vereinscode gilt für beliebig viele Geräte. Die Daten teilt ihr per Backup (siehe oben, beim Import „Zusammenführen“ wählen).</p>
+
+ <h3>Auf dem iPhone sind meine Daten weg – warum?</h3>
+ <p>Safari löscht Daten von Webseiten, die 7 Tage nicht genutzt wurden. Lege Match-Shot deshalb auf den Home-Bildschirm (Kapitel 1) und spiele dein letztes Backup ein.</p>
+
+ <h3>Funktioniert Match-Shot ohne Internet?</h3>
+ <p>Ja. Nach dem ersten Öffnen läuft die App auch offline, z. B. am Sportplatz ohne Empfang. Ab und zu wird mit Internet geprüft, ob euer Vereinscode noch gültig ist, und Updates werden geladen.</p>
+
+ <h3>Wie teile ich eine Grafik auf Instagram?</h3>
+ <p><span class="ui">📲 In Fotos / Teilen</span> → „Bild sichern“ (landet in deinen Fotos) oder direkt Instagram wählen. Danach in Instagram einen Beitrag bzw. eine Story mit dem Bild erstellen und den <span class="ui">💬 Text für den Beitrag</span> einfügen.</p>
+
+ <h3>Ein Text oder Logo ist verrutscht – wie bekomme ich es zurück?</h3>
+ <p>Element antippen und in der Werkzeugleiste ↺ wählen. Für den ganzen Reiter: <span class="ui">🔄 Zurücksetzen (Positionen &amp; Design) …</span> unten im Bearbeiten-Bereich.</p>
+
+ <h3>Wie ändere ich den Namen eines Spielers oder lösche ihn?</h3>
+ <p>Unter <span class="ui">🗃️ Daten</span> → <span class="ui">👤 Spieler &amp; Trainer</span> beim Spieler bearbeiten oder löschen. Viele auf einmal: <span class="ui">✏️ Alle Spieler auf einmal bearbeiten</span>. Umbenennungen werden in allen Aufstellungen übernommen.</p>
+
+ <h3>Das Freistellen per KI dauert lange.</h3>
+ <p>Beim ersten Mal lädt die App die KI einmalig herunter – am besten im WLAN. Danach geht es schneller. Bei vielen Spielern einfach <span class="ui">✂️ Hintergrund bei allen Spielern entfernen</span> laufen lassen.</p>
+
+ <h3>Welche Größe sollten eigene Hintergründe haben?</h3>
+ <p>1080 × 1350 px für Beiträge, 1080 × 1920 px für Storys. Mit dem Format „Story &amp; Beitrag“ reicht ein Bild, Match-Shot schneidet passend zu.</p>
+</section>
+
+<section class="page faq">
+ <h3>Warum steht auf meinen Bildern ein Wasserzeichen?</h3>
+ <p>Das passiert nur im Demo-Modus („Kostenlos testen“). Mit eurem Vereinscode gibt es kein Wasserzeichen. Code eingeben: <span class="ui">🏠 Start</span> → <span class="ui">Code ändern</span>.</p>
+
+ <h3>Ich sehe eine neue Funktion aus diesem Handbuch nicht.</h3>
+ <p>Die App aktualisiert sich selbst. Schließe sie einmal ganz und öffne sie neu (mit Internet). Die aktuelle Versionsnummer steht ganz unten auf der Startseite. Prüfe außerdem, ob die Funktion zum <b>Advanced</b>-Paket gehört und ob sie unter <span class="ui">👁️ Ansicht anpassen</span> ausgeblendet ist.</p>
+
+ <h3>Dürfen wir Fotos von Kindern und Jugendlichen posten?</h3>
+ <p>Nur mit Einwilligung der Eltern bzw. der Spieler. Match-Shot hilft dabei: <span class="ui">🛡️ Einwilligungen verwalten (DSGVO)</span> unter <span class="ui">👤 Spieler &amp; Trainer</span> – beim Teilen warnt die App, wenn jemand ohne Einwilligung im Bild ist.</p>
+
+ <h3>Dürfen wir eigene Schriften und Musik verwenden?</h3>
+ <p>Schriften: nur mit passender Lizenz (z. B. gekaufte oder kostenlose Schriften mit freier Lizenz). Musik: Die Videos von Match-Shot haben keinen Ton. Füge Musik in Instagram hinzu – für Vereins- und Firmenkonten am besten aus „Lizenzfrei“.</p>
+
+ <h3>Mein Vereinscode funktioniert nicht oder ist abgelaufen.</h3>
+ <p>Prüfe die Schreibweise (Bindestriche) und ob du online bist. Ist die Saison-Lizenz abgelaufen, meldet die App das beim Start. Nach der Verlängerung läuft alles automatisch weiter. Deine Daten bleiben auch bei einer abgelaufenen Lizenz erhalten – ein Backup ist jederzeit möglich. Schreib uns bei Problemen einfach.</p>
+
+ <h3>Wie kündige ich?</h3>
+ <p>Im Testmonat jederzeit per E-Mail. Danach läuft die Lizenz 12 Monate und kann bis 4 Wochen vor Ablauf per E-Mail an info@match-shot.de gekündigt werden (siehe AGB).</p>
+
+ <h2>7 · Basis oder Advanced?</h2>
+ <table>
+  <tr><th></th><th style="width:30mm">Basis<br><span class="muted" style="font-weight:400">24,99 € / Saison</span></th><th style="width:30mm">Advanced<br><span class="muted" style="font-weight:400">39,99 € / Saison</span></th></tr>
+  <tr><td>Ankündigung, Aufstellung (11er/9er/7er), Tor, Ergebnis, Kader, Player of the Match, Kalender, Geburtstag, Mannschaftsfoto, freie Vorlage</td><td>✓</td><td>✓</td></tr>
+  <tr><td>Beitrag &amp; Story, Vereinsfarben, Wappen, Schriften, eigene Hintergründe, Beitragstexte</td><td>✓</td><td>✓</td></tr>
+  <tr><td>Beliebig viele Geräte im Verein, 3 Versionen</td><td>✓</td><td>✓</td></tr>
+  <tr><td>Eckball-Taktik, Neuzugang &amp; Spielervorstellung, Sponsoren-Dank, Wochenende (Vorschau &amp; Ergebnisse)</td><td>–</td><td>✓</td></tr>
+  <tr><td>Sponsorenleisten &amp; „Präsentiert von“</td><td>–</td><td>✓</td></tr>
+  <tr><td>Reels &amp; Videos, Hintergrund weg per KI</td><td>–</td><td>✓</td></tr>
+  <tr><td>Spielplan-Import &amp; viele Grafiken auf einmal</td><td>–</td><td>✓</td></tr>
+ </table>
+ <p class="muted" style="font-size:8.6pt">Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Es gelten die AGB auf match-shot.de.</p>
+
+ <div class="contact">
+  <b style="font-size:13pt">Noch Fragen? Wir helfen gern.</b><br>
+  E-Mail: <b>info@match-shot.de</b> · Web: <b>match-shot.de</b> · Instagram: <b>@match_shot_de</b><br>
+  <span style="color:#c3cfe6">Schreib uns auch gern, welche Vorlage oder Funktion euch noch fehlt – viele Funktionen in Match-Shot sind aus Wünschen von Vereinen entstanden.</span>
+ </div>
+</section>
+</body></html>
