@@ -527,6 +527,26 @@ async function makePhotos(browser) {
             applyLayout('tor', 'classic'); return r; });
         check('Layouts: Tor-Plakat, Ankündigung mit Spieler, Ergebnis-Anzeigetafel; Zurücksetzen zum Layout; Export', lay.applied && lay.reset && lay.export && lay.player && lay.back && lay.board, JSON.stringify(lay));
         check('Layouts: gespeichert, alte Stände klassisch', lay.saved && lay.old, JSON.stringify(lay));
+        // Foto-Effekte + Sticker (✨ Extras)
+        const fx = await page.evaluate(async () => { const r = {}; switchTab('potm');
+            const img = $('out-potm-img'), before = img.getAttribute('src');
+            setVal('in-photo-fx-potm', 'outline-w'); updateAllViews(); await new Promise(res => setTimeout(res, 1200));
+            r.fx = img.getAttribute('src') !== before && /^data:image\/(webp|png)/.test(img.getAttribute('src')) && img.dataset.fxSrc === before;
+            updatePotm(); afterViewsUpdated(); await new Promise(res => setTimeout(res, 400)); r.stays = img.getAttribute('src') !== before;
+            setVal('in-photo-fx-potm', 'none'); updateAllViews(); r.off = img.getAttribute('src') === before;
+            customTexts.potm = (customTexts.potm || []).filter(c => c.type !== 'sticker');
+            addSticker('potm', 'blitz'); addSticker('potm', 'stern');
+            const st = document.querySelectorAll('#capture-potm .sticker-el');
+            r.sticker = st.length === 2 && st[0].style.left !== st[1].style.left && !!st[0].querySelector('img.ct-sticker') && document.querySelectorAll('#st-list-potm .st-item').length === 2 && $('ct-count-potm').textContent === '0';
+            const it = document.querySelector('#st-list-potm .st-item select[data-field="colorMode"]'); it.value = 'white'; it.dispatchEvent(new Event('change', { bubbles: true }));
+            r.color = decodeURIComponent(document.querySelector('#capture-potm .ct-sticker').src).includes('#ffffff');
+            r.saved = (collectSlotData().customTexts.potm || []).filter(c => c.type === 'sticker').length === 2;
+            updateTabDesign('potm'); r.badge = /2 aktiv/.test($('ex-count-potm').textContent);
+            r.export = (await renderElementToCanvas($('capture-potm'))).width === 1200;
+            customTexts.potm = customTexts.potm.filter(c => c.type !== 'sticker'); renderCustomTextEditors('potm'); renderCustomTextElements('potm'); updateTabDesign('potm');
+            return r; });
+        check('Foto-Effekte (Sticker-Rand, bleibt nach Aktualisieren, abschaltbar)', fx.fx && fx.stays && fx.off, JSON.stringify(fx));
+        check('Sticker: einfügen (versetzt), Farbe, gespeichert, Zähler, Export', fx.sticker && fx.color && fx.saved && fx.badge && fx.export, JSON.stringify(fx));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));

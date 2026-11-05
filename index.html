@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.1</title>
+    <title>Match-Shot – Grafiken für Vereine 24.2</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -227,6 +227,12 @@
         :is(.tt-vert-l, .tt-vert-r) .title-dyn { position: absolute; top: 0; width: auto !important; white-space: nowrap; transform-origin: left top; }
         .tt-vert-l .title-dyn { left: 16px; transform: rotate(-90deg) translateX(-100%); }
         .tt-vert-r .title-dyn { left: calc(100% - 16px); transform: rotate(90deg); }
+        .sticker-pick { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 4px 0 6px; }
+        .sticker-pick button { background: #fff; border: 1px solid #cfd8dc; border-radius: 8px; padding: 4px; cursor: pointer; aspect-ratio: 1; }
+        .sticker-pick img { width: 100%; height: 100%; display: block; }
+        .st-item { display: grid; grid-template-columns: 34px 1fr 38px 1fr 34px; gap: 6px; align-items: center; }
+        .st-thumb { width: 32px; height: 32px; background: #6b7280; border-radius: 6px; padding: 3px; box-sizing: border-box; }
+        .ct-sticker { width: 100px; height: 100px; display: block; margin: 0 auto; pointer-events: none; }
         .ex-count { font-size: 11px; font-weight: bold; color: #fff; background: #e07a2f; border-radius: 10px; padding: 1px 8px; margin-left: 4px; }
         .ex-sub { font-weight: normal; color: #6b7280; font-size: 11px; }
         .post-template { width: 400px; height: 400px; }
@@ -3083,7 +3089,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.1";
+        const APP_VERSION = "24.2";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4949,7 +4955,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             { key: 'ovGradStr', id: 'in-ov-gradstr', def: () => '70', extra: true },
             { key: 'ovPattern', id: 'in-ov-pattern', def: () => 'none', extra: true },
             { key: 'ovPatOp', id: 'in-ov-patop', def: () => '25', extra: true },
-            { key: 'ovFrame', id: 'in-ov-frame', def: () => 'none', extra: true }
+            { key: 'ovFrame', id: 'in-ov-frame', def: () => 'none', extra: true },
+            { key: 'photoFx', id: 'in-photo-fx', def: () => 'none', extra: true }
         ];
         /* Felder, die zu den Extras zählen (inkl. der dorthin verschobenen Text-Effekte) */
         const EXTRA_KEYS = EXTRA_DESIGN.filter(f => f.extra).map(f => f.key).concat(['textEffect', 'letterSpacing', 'titleUpper', 'titleItalic']);
@@ -5003,9 +5010,9 @@ Alle sind herzlich eingeladen!</textarea></div>
             'boxMode', 'boxColor', 'boxText', 'boxOpacity', 'accentLine', 'textAlign', 'logoGap', 'logoDir', 'vsPos', 'vsSize',
             'fieldStyle', 'fieldView', 'fieldShape', 'fieldOpacity', 'fieldSize', 'playerStyle', 'playerSize', 'pitchNameMode', 'pitchShadow', 'pitchBigNum',
             'lmLayout', 'lmLogoSize', 'lmTextSize', 'lmVs',
-            'boxFill', 'boxShape', 'boxEdge', 'boxShadow', 'titleStyle', 'titleRot', 'ovGrad', 'ovGradColor', 'ovGradStr', 'ovPattern', 'ovPatOp', 'ovFrame'];
+            'boxFill', 'boxShape', 'boxEdge', 'boxShadow', 'titleStyle', 'titleRot', 'ovGrad', 'ovGradColor', 'ovGradStr', 'ovPattern', 'ovPatOp', 'ovFrame', 'photoFx'];
         /* Diese Extras setzt jeder Stil – fehlen sie im Stil, gilt der Standard (sonst bliebe z.B. „Neon“ nach „Klassisch“ stehen) */
-        const STYLE_EXTRA_RESET = ['boxFill', 'boxShape', 'boxEdge', 'boxShadow', 'titleStyle', 'titleRot', 'ovGrad', 'ovGradColor', 'ovGradStr', 'ovPattern', 'ovPatOp', 'ovFrame'];
+        const STYLE_EXTRA_RESET = ['boxFill', 'boxShape', 'boxEdge', 'boxShadow', 'titleStyle', 'titleRot', 'ovGrad', 'ovGradColor', 'ovGradStr', 'ovPattern', 'ovPatOp', 'ovFrame', 'photoFx'];
         const F = n => FONT_LIST.find(f => f[0].includes(n))?.[0] || 'Arial, sans-serif';
         const STYLE_PRESETS = [
             { id: 'klassisch', name: '🏟️ Klassisch', v: { frameShape: 'circle', colorFrame: '#ffffff', colorText: '#ffffff', font: 'Arial, sans-serif', titleFont: '', titleColorMode: 'text',
@@ -5023,7 +5030,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             // Neue Stile mit Extras (Advanced)
             { id: 'neonnacht', name: '🌃 Neon-Nacht', adv: true, v: { frameShape: 'circle', colorFrame: '@jersey', colorText: '#ffffff', font: F('Kanit'), titleFont: F('Teko'), titleColorMode: 'text',
                 textEffect: 'glow', letterSpacing: '3', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#05070d', boxText: '#ffffff', boxOpacity: '80',
-                boxEdge: 'neon', boxShape: 'round', titleStyle: 'normal', ovGrad: 'vignette', ovGradColor: 'black', ovGradStr: '85', ovPattern: 'rays', ovPatOp: '20', ovFrame: 'none' } },
+                boxEdge: 'neon', boxShape: 'round', titleStyle: 'normal', ovGrad: 'vignette', ovGradColor: 'black', ovGradStr: '85', ovPattern: 'rays', ovPatOp: '20', ovFrame: 'none', photoFx: 'glow' } },
             { id: 'zeitung', name: '📰 Zeitung', adv: true, v: { frameShape: 'square', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Oswald'), titleFont: F('Anton'), titleColorMode: 'text',
                 textEffect: 'strong', letterSpacing: '0.5', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#ffffff', boxText: '#111111', boxOpacity: '96', accentLine: false,
                 boxShape: 'square', boxShadow: 'hard', boxEdge: 'left', titleRot: 's', ovPattern: 'halftone', ovPatOp: '30', ovGrad: 'bottom', ovGradColor: 'black', ovGradStr: '60' } },
@@ -5032,7 +5039,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 boxFill: 'jersey', boxShape: 'skew', boxEdge: 'bottom', titleStyle: 'echo-down', ovPattern: 'stripes', ovPatOp: '15', ovGrad: 'diag', ovGradColor: 'primary', ovGradStr: '55', ovFrame: 'line' } },
             { id: 'comic', name: '💥 Comic', adv: true, v: { frameShape: 'rounded', colorFrame: '#111111', colorText: '#ffffff', font: F('Bangers') !== 'Arial, sans-serif' ? F('Bangers') : F('Anton'), titleFont: F('Bangers') !== 'Arial, sans-serif' ? F('Bangers') : F('Anton'), titleColorMode: 'custom', titleColor: '#ffd23f',
                 textEffect: '3d', letterSpacing: '1', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#ffd23f', boxText: '#111111', boxOpacity: '100',
-                boxShadow: 'hard', boxShape: 'round', boxFill: 'dots', titleRot: 's', ovPattern: 'halftone', ovPatOp: '35', ovGrad: 'none', ovFrame: 'corners' } }
+                boxShadow: 'hard', boxShape: 'round', boxFill: 'dots', titleRot: 's', ovPattern: 'halftone', ovPatOp: '35', ovGrad: 'none', ovFrame: 'corners', photoFx: 'outline-w' } }
         ];
         function styleDesignHTML(tab) {
             return `
@@ -5470,6 +5477,17 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <div class="control-group"><label>Stärke Muster</label><input type="range" id="in-ov-patop-${tab}" min="5" max="80" step="5" value="25" oninput="updateTabDesign('${tab}')"></div>
                             </div>
                             <span class="hint">Liegt über dem Hintergrund und unter allen Inhalten – gut, um eigene Fotos in Vereinsfarben einzufärben oder Texte lesbarer zu machen. Der Bild-Rahmen nutzt die Rahmenfarbe.</span>
+                            <div class="design-sub">🧍 Spielerfotos</div>
+                            <div class="control-group"><label>Foto-Effekt</label>
+                                <select id="in-photo-fx-${tab}" onchange="updateTabDesign('${tab}'); afterViewsUpdated(); scheduleSave();">
+                                    <option value="none">Kein Effekt</option><option value="outline-w">Sticker-Rand weiß</option><option value="outline-j">Sticker-Rand Akzentfarbe</option>
+                                    <option value="glow">Leuchten in Akzentfarbe</option><option value="duotone">Duotone (Vereinsfarben)</option><option value="bw">Schwarz-Weiß</option>
+                                </select>
+                                <span class="hint">Am schönsten mit freigestellten Fotos (Rahmenform „Freigestellt mit Schatten“). Gilt für alle Spielerfotos dieser Vorlage.</span></div>
+                            <div class="design-sub">⭐ Sticker</div>
+                            <div id="st-list-${tab}" data-tab="${tab}"></div>
+                            <div class="sticker-pick">${STICKERS.map(st => `<button type="button" title="${esc(st.name)}" onclick="addSticker('${tab}', '${st.id}')"><img src="${stickerSrc(st.id, '#1d2433')}" alt=""></button>`).join('')}</div>
+                            <span class="hint">Antippen = Sticker hinzufügen. In der Vorschau verschieben, größer ziehen und unten die Farbe wählen.</span>
                             <!--EXTRAS-MORE-->
                             <button type="button" class="copy-action-btn" style="background:#6c757d;" onclick="resetExtras('${tab}')">↩️ Alle Extras zurücksetzen</button>
                         </div>
@@ -5477,6 +5495,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                     ${labelEditorHTML(tab)}`;
                 $(`ct-list-${tab}`).addEventListener('input', onCustomTextInput);
                 $(`ct-list-${tab}`).addEventListener('change', onCustomTextInput);
+                $(`st-list-${tab}`)?.addEventListener('input', onCustomTextInput);
+                $(`st-list-${tab}`)?.addEventListener('change', onCustomTextInput);
 
                 // Erst die Inhalte (Gegner, Datum …), darunter gesammelt das Aussehen inkl. Zurücksetzen
                 const resetBtn = $(`editor-${tab}`)?.querySelector(`button[onclick="resetTabDefaults('${tab}')"]`);
@@ -5861,6 +5881,39 @@ Alle sind herzlich eingeladen!</textarea></div>
             editorTabs.forEach(updateTabDesign);
         }
 
+        /* ⭐ Sticker (✨ Extras): einfärbbare Formen, intern wie „Eigene Texte“ (gleiche Speicherung, verschiebbar, skalierbar) */
+        const STICKERS = [
+            { id: 'ball', name: 'Ball', svg: c => `<circle cx='50' cy='50' r='44' fill='none' stroke='${c}' stroke-width='7'/><path d='M50 30l17 12-6 20H39l-6-20z' fill='${c}'/><path d='M50 30V9M67 42l20-7M61 62l12 17M39 62L27 79M33 42l-20-7' stroke='${c}' stroke-width='6'/>` },
+            { id: 'blitz', name: 'Blitz', svg: c => `<path d='M58 4L18 56h26l-8 40 42-56H52z' fill='${c}'/>` },
+            { id: 'flamme', name: 'Flamme', svg: c => `<path d='M52 4c4 18 26 28 26 54a28 28 0 0 1-56 0c0-14 8-22 14-30 2 10 6 14 10 16-2-14 2-28 6-40z' fill='${c}'/>` },
+            { id: 'stern', name: 'Stern', svg: c => `<path d='M50 5l13 28 31 4-23 21 6 31-27-15-27 15 6-31L6 37l31-4z' fill='${c}'/>` },
+            { id: 'krone', name: 'Krone', svg: c => `<path d='M8 78L14 28l20 22 16-34 16 34 20-22 6 50z' fill='${c}'/><rect x='8' y='82' width='84' height='10' rx='3' fill='${c}'/>` },
+            { id: 'pokal', name: 'Pokal', svg: c => `<path d='M28 8h44v20a22 22 0 0 1-44 0z' fill='${c}'/><path d='M28 14H12c0 16 8 22 18 24M72 14h16c0 16-8 22-18 24' fill='none' stroke='${c}' stroke-width='6'/><rect x='45' y='50' width='10' height='22' fill='${c}'/><rect x='28' y='72' width='44' height='10' rx='3' fill='${c}'/><rect x='22' y='84' width='56' height='10' rx='3' fill='${c}'/>` },
+            { id: 'boom', name: 'Boom', svg: c => { let d = ''; for (let i = 0; i < 24; i++) { const r = i % 2 ? 26 : 47, a = Math.PI * i / 12; d += (i ? 'L' : 'M') + (50 + r * Math.cos(a)).toFixed(1) + ' ' + (50 + r * Math.sin(a)).toFixed(1); } return `<path d='${d}Z' fill='${c}'/>`; } },
+            { id: 'herz', name: 'Herz', svg: c => `<path d='M50 88S8 62 8 34a20 20 0 0 1 42-8 20 20 0 0 1 42 8c0 28-42 54-42 54z' fill='${c}'/>` },
+            { id: 'pfeil', name: 'Pfeil', svg: c => `<path d='M6 40h52V18l36 32-36 32V60H6z' fill='${c}'/>` },
+            { id: 'ring', name: 'Kreis', svg: c => `<circle cx='50' cy='50' r='40' fill='none' stroke='${c}' stroke-width='8'/>` },
+            { id: 'pinsel', name: 'Pinselstrich', svg: c => `<path d='M4 46c18-6 40-4 62-8 10-2 22-2 30 2-6 6-4 12 0 16-24 4-50 10-74 8-8 0-16-4-18-8 6-2 4-6 0-10z' fill='${c}'/>` },
+            { id: 'live', name: 'LIVE', svg: c => `<rect x='2' y='26' width='96' height='48' rx='10' fill='${c}'/><circle cx='20' cy='50' r='7' fill='#fff'/><text x='60' y='61' font-family='Arial, sans-serif' font-weight='900' font-size='30' text-anchor='middle' fill='#fff'>LIVE</text>` }
+        ];
+        function stickerSrc(id, color) {
+            const st = STICKERS.find(x => x.id === id) || STICKERS[0];
+            const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 100 100'>${st.svg(color)}</svg>`;
+            return 'data:image/svg+xml,' + encodeURIComponent(svg).replace(/'/g, '%27');
+        }
+        function stickerColor(ct) {
+            return ct.colorMode === 'primary' ? (val('cfg-color-primary') || '#005f73') : ct.colorMode === 'white' ? '#ffffff' : ct.colorMode === 'black' ? '#111111'
+                : ct.colorMode === 'custom' ? (ct.color || '#ffffff') : (val('cfg-color-jersey') || '#bb3e03');
+        }
+        function addSticker(tab, shape) {
+            if (!customTexts[tab]) customTexts[tab] = [];
+            customTexts[tab].push({ id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), type: 'sticker', shape, colorMode: 'jersey', color: '#ffffff', target: 'both', size: 2.2 });
+            renderCustomTextEditors(tab);
+            renderCustomTextElements(tab);
+            scheduleSave();
+            toast('⭐ Sticker eingefügt – in der Vorschau verschieben');
+        }
+
         function addCustomText(tab) {
             if (!customTexts[tab]) customTexts[tab] = [];
             customTexts[tab].push({
@@ -5883,8 +5936,22 @@ Alle sind herzlich eingeladen!</textarea></div>
         function renderCustomTextEditors(tab) {
             const host = $(`ct-list-${tab}`);
             if (!host) return;
-            const list = customTexts[tab] || [];
+            const all = customTexts[tab] || [], list = all.filter(ct => ct.type !== 'sticker');
             setText(`ct-count-${tab}`, list.length);
+            const sHost = $(`st-list-${tab}`);
+            if (sHost) sHost.innerHTML = all.filter(ct => ct.type === 'sticker').map(ct => `
+                <div class="ct-item st-item" data-id="${ct.id}">
+                    <img class="st-thumb" src="${stickerSrc(ct.shape, stickerColor(ct))}" alt="">
+                    <select data-field="colorMode" title="Farbe">
+                        <option value="jersey" ${ct.colorMode === 'jersey' ? 'selected' : ''}>Akzentfarbe</option><option value="primary" ${ct.colorMode === 'primary' ? 'selected' : ''}>Hauptfarbe</option>
+                        <option value="white" ${ct.colorMode === 'white' ? 'selected' : ''}>Weiß</option><option value="black" ${ct.colorMode === 'black' ? 'selected' : ''}>Schwarz</option><option value="custom" ${ct.colorMode === 'custom' ? 'selected' : ''}>Eigene →</option>
+                    </select>
+                    <input type="color" data-field="color" value="${esc(ct.color || '#ffffff')}" title="Eigene Farbe">
+                    <select data-field="target" title="Wo?">
+                        <option value="both" ${ct.target === 'both' ? 'selected' : ''}>Feed + Story</option><option value="feed" ${ct.target === 'feed' ? 'selected' : ''}>Nur Feed</option><option value="story" ${ct.target === 'story' ? 'selected' : ''}>Nur Story</option>
+                    </select>
+                    <button type="button" class="kal-clear-btn" onclick="removeCustomText('${tab}', '${ct.id}')" title="Entfernen">🗑️</button>
+                </div>`).join('');
             host.innerHTML = list.map(ct => `
                 <div class="ct-item" data-id="${ct.id}">
                     <textarea rows="2" data-field="text" placeholder="Text eingeben">${esc(ct.text)}</textarea>
@@ -5918,6 +5985,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (e.target.type === 'checkbox') ct[field] = e.target.checked;
             else if (field === 'size') ct[field] = parseFloat(e.target.value) || 1.4;
             else ct[field] = e.target.value;
+            if (field === 'color' && ct.type === 'sticker') ct.colorMode = 'custom';
+            if (ct.type === 'sticker') { const th = item.querySelector('.st-thumb'); if (th) th.src = stickerSrc(ct.shape, stickerColor(ct)); const cm = item.querySelector('[data-field="colorMode"]'); if (cm) cm.value = ct.colorMode; }
             renderCustomTextElements(tab);
             scheduleSave();
         }
@@ -5936,16 +6005,19 @@ Alle sind herzlich eingeladen!</textarea></div>
                     wanted.add(elId);
                     let el = $(elId);
                     if (!el) {
-                        const top = Math.round(fmt === 'story' ? (tpl.offsetHeight || 711) * 0.45 : 180) + 'px';
+                        // Sticker nicht übereinander stapeln: abwechselnd links/rechts versetzt
+                        const nSt = list.filter(c => c.type === 'sticker').indexOf(ct);
+                        const top = Math.round((fmt === 'story' ? (tpl.offsetHeight || 711) * 0.45 : 180) + (nSt >= 0 ? [-90, -90, 40, 40, -20, -20][nSt % 6] : 0)) + 'px';
+                        const left = nSt >= 0 ? [-120, 120, -120, 120, -140, 140][nSt % 6] + 'px' : '0px';
                         el = document.createElement('div');
                         el.id = elId;
                         el.className = 'draggable-text custom-text';
                         el.dataset.ctId = ct.id;
                         el.dataset.ctTab = tab;
                         el.setAttribute('data-default-top', top);
-                        el.setAttribute('data-default-left', '0px');
+                        el.setAttribute('data-default-left', left);
                         el.style.top = top;
-                        el.style.left = '0px';
+                        el.style.left = left;
                         el.innerHTML = '<span class="ct-inner"></span>';
                         const content = tpl.querySelector(':scope > .tpl-content');
                         if (content) content.appendChild(el);
@@ -5955,6 +6027,12 @@ Alle sind herzlich eingeladen!</textarea></div>
                         bindDraggable(el);
                     }
                     const inner = el.firstElementChild;
+                    if (ct.type === 'sticker') {
+                        el.classList.add('sticker-el');
+                        const src = stickerSrc(ct.shape, stickerColor(ct));
+                        if (inner.dataset.src !== src) { inner.innerHTML = `<img class="ct-sticker" src="${src}" alt="">`; inner.dataset.src = src; }
+                        return;
+                    }
                     inner.textContent = ct.text;
                     inner.style.fontSize = ct.size + 'rem';
                     inner.style.color = ct.color;
@@ -5966,7 +6044,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             view.querySelectorAll('.custom-text').forEach(el => {
                 if (!wanted.has(el.id)) { if (selectedEl === el) selectElement(null); el.remove(); }
             });
-            setText(`ct-count-${tab}`, list.length);
+            setText(`ct-count-${tab}`, list.filter(ct => ct.type !== 'sticker').length);
         }
 
         function renderAllCustomTexts() {
@@ -6303,9 +6381,88 @@ Alle sind herzlich eingeladen!</textarea></div>
                 }
                 ov.innerHTML = html;
             });
-            const cnt = adv ? countActiveExtras(tab) : 0, badge = $(`ex-count-${tab}`);
+            const cnt = adv ? countActiveExtras(tab) + (customTexts[tab] || []).filter(ct => ct.type === 'sticker').length : 0, badge = $(`ex-count-${tab}`);
             if (badge) { badge.hidden = !cnt; badge.textContent = cnt ? `· ${cnt} aktiv` : ''; }
         }
+        /* 🧍 Foto-Effekte: das Foto wird einmal bearbeitet (Canvas) und als neues Bild eingesetzt –
+           so sehen Vorschau, Bild-Export und Reel garantiert gleich aus (keine CSS-Filter nötig) */
+        const PHOTO_FX_SEL = 'img.tor-player-img-feed, img.tor-player-img-story, img.potm-player-img, img.bday-photo, img.transfer-photo, img.xp-img, img.player-img, img.kader-grid-img, img.list-item-img, #img-tor-assist, #img-tor-assist-feed';
+        const fxCache = new Map();
+        function mixHex(a, b, t) {
+            const pa = parseInt((a || '#000000').slice(1), 16), pb = parseInt((b || '#000000').slice(1), 16);
+            return [16, 8, 0].map(sh => Math.round(((pa >> sh) & 255) * (1 - t) + ((pb >> sh) & 255) * t));
+        }
+        async function fxImage(src, fx, primary, jersey) {
+            const key = [fx, primary, jersey, src.length, src.slice(0, 40), src.slice(-80)].join('|');
+            if (fxCache.has(key)) return fxCache.get(key);
+            const img = new Image();
+            img.src = src;
+            await img.decode();
+            let W = img.naturalWidth, H = img.naturalHeight;
+            const k = Math.min(1, 900 / Math.max(W, H)); W = Math.round(W * k); H = Math.round(H * k);
+            const c = document.createElement('canvas'); c.width = W; c.height = H;
+            const ctx = c.getContext('2d');
+            if (fx === 'outline-w' || fx === 'outline-j' || fx === 'glow') {
+                const pad = Math.round(Math.min(W, H) * (fx === 'glow' ? 0.07 : 0.035));
+                const sc = Math.min((W - 2 * pad) / W, (H - 2 * pad) / H), dw = W * sc, dh = H * sc, x = (W - dw) / 2, y = H - dh - pad * 0.3;
+                const col = fx === 'outline-w' ? '#ffffff' : jersey;
+                if (fx === 'glow') {
+                    ctx.shadowColor = col; ctx.shadowBlur = pad * 1.6;
+                    ctx.drawImage(img, x, y, dw, dh); ctx.drawImage(img, x, y, dw, dh);
+                    ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+                } else {
+                    const r = Math.max(2, Math.round(pad * 0.8));
+                    for (let i = 0; i < 16; i++) { const a = Math.PI * i / 8; ctx.drawImage(img, x + r * Math.cos(a), y + r * Math.sin(a), dw, dh); }
+                    ctx.globalCompositeOperation = 'source-in'; ctx.fillStyle = col; ctx.fillRect(0, 0, W, H);
+                    ctx.globalCompositeOperation = 'source-over';
+                }
+                ctx.drawImage(img, x, y, dw, dh);
+            } else {
+                ctx.drawImage(img, 0, 0, W, H);
+                const d = ctx.getImageData(0, 0, W, H), px = d.data;
+                const dark = mixHex(primary, '#000000', 0.45), light = mixHex(jersey, '#ffffff', 0.35);
+                for (let i = 0; i < px.length; i += 4) {
+                    const l = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) / 255;
+                    if (fx === 'bw') { const v = Math.round(Math.min(255, l * 255 * 1.05)); px[i] = px[i + 1] = px[i + 2] = v; }
+                    else { px[i] = dark[0] + (light[0] - dark[0]) * l; px[i + 1] = dark[1] + (light[1] - dark[1]) * l; px[i + 2] = dark[2] + (light[2] - dark[2]) * l; }
+                }
+                ctx.putImageData(d, 0, 0);
+            }
+            const alpha = fx !== 'bw' && fx !== 'duotone' || canvasHasTransparency(c);
+            const out = alpha ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.92) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.9);
+            freeCanvas(c);
+            if (fxCache.size > 150) fxCache.delete(fxCache.keys().next().value);
+            fxCache.set(key, out);
+            return out;
+        }
+        function applyPhotoFx(tab) {
+            const view = $(`view-${tab}`);
+            if (!view) return;
+            const fx = isAdvanced() ? (val(`in-photo-fx-${tab}`) || 'none') : 'none';
+            const primary = val('cfg-color-primary') || '#005f73', jersey = val('cfg-color-jersey') || '#bb3e03';
+            view.querySelectorAll(PHOTO_FX_SEL).forEach(img => {
+                const cur = img.getAttribute('src') || '';
+                if (!cur) return;
+                const orig = img.dataset.fxOut && cur === img.dataset.fxOut ? img.dataset.fxSrc : cur;
+                img.dataset.fxSrc = orig;
+                if (fx === 'none' || orig === PLAYER_FALLBACK) {
+                    if (img.dataset.fxOut && cur === img.dataset.fxOut) img.src = orig;
+                    delete img.dataset.fxOut;
+                    return;
+                }
+                if (img.dataset.fxKey === fx + primary + jersey && img.dataset.fxOut && cur === img.dataset.fxOut) return;
+                fxImage(orig, fx, primary, jersey).then(out => {
+                    if (img.dataset.fxSrc !== orig) return;
+                    img.dataset.fxOut = out; img.dataset.fxKey = fx + primary + jersey;
+                    if (img.getAttribute('src') !== out) img.src = out;
+                }).catch(e => console.warn('Foto-Effekt', e));
+            });
+        }
+        /* Nach dem Aktualisieren der Inhalte (dort werden Fotos neu gesetzt) die Foto-Effekte wieder anwenden */
+        function afterViewsUpdated() {
+            if (editorTabs.includes(activeTab)) applyPhotoFx(activeTab);
+        }
+
         /* Riesen-Text: „Automatisch“ je Vorlage passender Inhalt, sonst eigener Text */
         function bigTextAuto(tab, tpl) {
             const num = n => findPlayer(n)?.number || '';
@@ -9434,6 +9591,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             updateSponsorPost();
             updateWochenende();
             updateEckball();
+            editorTabs.forEach(applyPhotoFx);
         }
 
         const scheduleRoleHints = debounce(tab => renderRoleHints(tab), 600);
@@ -9462,6 +9620,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 case 'frei': updateFrei(); break;
             }
             if (editorTabs.includes(activeTab)) updateCaption(activeTab);
+            afterViewsUpdated();
         }
 
         function switchTab(tab) {
@@ -11479,7 +11638,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         const DESIGN_COPY_VALUES = ['frame-shape', 'color-frame', 'color-text', 'font', 'font-title', 'title-color-mode', 'color-title', 'text-effect',
             'letter-spacing', 'logo-size', 'sponsor-layout', 'sponsor-cols', 'sponsor-size',
             'box-mode', 'box-color', 'box-text', 'box-opacity', 'text-align', 'box-fill', 'box-shape', 'box-edge', 'box-shadow', 'title-style', 'title-rot',
-            'ov-grad', 'ov-gradcolor', 'ov-gradstr', 'ov-pattern', 'ov-patop', 'ov-frame'];
+            'ov-grad', 'ov-gradcolor', 'ov-gradstr', 'ov-pattern', 'ov-patop', 'ov-frame', 'photo-fx'];
         const DESIGN_COPY_CHECKS = ['title-upper', 'title-italic', 'cutout', 'accent-line'];
         function applyDesignToAllTabs(tab) {
             if (!confirm('Das Design dieses Reiters (Rahmen, Farben, Schriften, Text-Effekte, Logo- und Sponsoren-Einstellungen) auf alle anderen Reiter übertragen?\n\nMit ↩️ lässt sich das rückgängig machen.')) return;
