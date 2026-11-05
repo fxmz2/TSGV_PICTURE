@@ -57,4 +57,27 @@ await shot('farben','post','summary:Farben & Schrift',{maxH:800,openParent:true}
 await shot('beitragstext','post','summary:Text für den Beitrag',{maxH:500,openParent:true});
 await shot('reel','post','summary:Video (Reel)',{maxH:500,openParent:true});
 await shot('sponsoren-tab','post','summary:Sponsoren',{maxH:600,openParent:true});
+await pg.evaluate(()=>{switchTab('tor');applyLayout('tor','poster');});
+await pg.setViewportSize({width:1280,height:2400});
+async function hostShot(name,openSec,maxH){
+  await pg.evaluate(o=>{const h=$('design-controls-tor');h.querySelectorAll('details:not(.sect)').forEach(d=>d.open=false);h.querySelectorAll('details.sect').forEach(d=>d.open=true);for(let d=h.closest('details');d;d=d.parentElement.closest('details'))d.open=true;
+    document.querySelectorAll('#editor-tor details').forEach(d=>{if(d.contains(h))d.open=true;});if(o)h.querySelector(`details[data-section="${o}"]`).open=true;},openSec);
+  await germanize();await pg.waitForTimeout(300);
+  const r=await pg.evaluate(o=>{const h=$('design-controls-tor');const el=o?h.querySelector(`details[data-section="${o}"]`):h;el.scrollIntoView({block:'start'});const b=el.getBoundingClientRect();return {x:b.x-4,y:Math.max(0,b.y-4),width:b.width+8,height:b.height+8};},openSec);
+  r.height=Math.min(r.height,maxH);await pg.screenshot({path:OUT+name+'.png',clip:r});console.log('ok',name);
+}
+await hostShot('aussehen',null,900);
+await hostShot('layout','layout',420);
+await pg.evaluate(()=>{applyLayout('tor','classic');setVal('in-box-fill-tor','stripes');setVal('in-ov-grad-tor','bottom');updateAllViews();});
+await hostShot('extras','extras',1800);await pg.setViewportSize({width:1280,height:1000});
+await pg.setViewportSize({width:390,height:844});await pg.evaluate(()=>{switchTab('ergebnis');if(!document.body.classList.contains('show-preview'))toggleMobileView();selectElement($('out-ergebnis-score'));rotateSelected(-6);toggleElMore(true);});
+await pg.waitForTimeout(300);
+await pg.screenshot({path:OUT+'werkzeug.png',clip:await pg.evaluate(()=>{const r=$('el-toolbar').getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}})});
+await pg.evaluate(()=>{toggleElMore(false);selectElement(null);resetExtras('tor');if(document.body.classList.contains('show-preview'))toggleMobileView();});await pg.setViewportSize({width:1280,height:1000});
+await pg.evaluate(()=>{switchTab('tor');applyStyle('tor','neonnacht');applyLayout('tor','split');updateAllViews();});await pg.waitForTimeout(1200);
+await pg.evaluate(async()=>{const c=await renderElementToCanvas($('capture-tor'));window.__x=c.toDataURL('image/jpeg',0.85);});
+require('fs').writeFileSync(OUT+'bsp-neon.jpg',Buffer.from((await pg.evaluate(()=>window.__x)).split(',')[1],'base64'));
+await pg.evaluate(()=>{switchTab('ergebnis');applyStyle('ergebnis','zeitung');applyLayout('ergebnis','bigscore');updateAllViews();});await pg.waitForTimeout(800);
+await pg.evaluate(async()=>{const c=await renderElementToCanvas($('capture-ergebnis'));window.__x=c.toDataURL('image/jpeg',0.85);});
+require('fs').writeFileSync(OUT+'bsp-zeitung.jpg',Buffer.from((await pg.evaluate(()=>window.__x)).split(',')[1],'base64'));
 await b.close();srv.close();})();
