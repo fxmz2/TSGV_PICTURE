@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.2</title>
+    <title>Match-Shot – Grafiken für Vereine 24.3</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -944,10 +944,10 @@
         body.show-safe-zones .safe-zone { display: block; }
 
         /* Verschieben & Skalieren von Texten/Bildern */
-        .draggable-text { transform: scale(var(--el-scale, 1)); transform-origin: center top; }
-        .draggable-img { transform: scale(var(--el-scale, 1)); transform-origin: top left; }
+        .draggable-text { transform: scale(var(--el-scale, 1)) rotate(var(--el-rot, 0deg)); transform-origin: center top; }
+        .draggable-img { transform: scale(var(--el-scale, 1)) rotate(var(--el-rot, 0deg)); transform-origin: top left; }
         /* Feste Blöcke (Logos, Spielfeld, Listen, Bilder …): per Versatz verschiebbar, Layout bleibt unverändert */
-        .movable { transform: translate(var(--el-x, 0px), var(--el-y, 0px)) scale(var(--el-scale, 1)); transform-origin: center top; cursor: move; touch-action: pan-y; user-select: none; }
+        .movable { transform: translate(var(--el-x, 0px), var(--el-y, 0px)) scale(var(--el-scale, 1)) rotate(var(--el-rot, 0deg)); transform-origin: center top; cursor: move; touch-action: pan-y; user-select: none; }
         /* Handy: große Blöcke erst antippen (auswählen), dann ziehen – so bleibt die Vorschau scrollbar */
         .movable.el-selected { touch-action: none; }
         .el-selected { outline: 2px dashed #ffd60a; outline-offset: 2px; }
@@ -985,6 +985,12 @@
         .el-toolbar .tb-sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.25); margin: 0 2px; }
 
         /* Hilfslinien beim Verschieben (Einrasten in der Mitte) */
+        .el-more { flex-basis: 100%; display: flex; flex-direction: column; gap: 6px; padding: 6px 2px 2px; border-top: 1px solid rgba(255,255,255,0.15); margin-top: 4px; }
+        .el-more[hidden] { display: none; }
+        .em-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; color: #fff; font-size: 12px; }
+        .em-row input { width: 58px; padding: 4px; border-radius: 6px; border: none; font-size: 13px; }
+        .em-row button { min-width: 0; padding: 4px 8px; font-size: 12px; }
+        .em-hint { color: rgba(255,255,255,0.7); font-size: 10.5px; line-height: 1.3; }
         .snap-guide { position: absolute; z-index: 60; pointer-events: none; background: #ff2d95; box-shadow: 0 0 0 1px rgba(255,255,255,0.6); }
         .snap-guide.v { top: 0; bottom: 0; width: 2px; margin-left: -1px; }
         .snap-guide.h { left: 0; right: 0; height: 2px; margin-top: -1px; }
@@ -3055,7 +3061,19 @@ Alle sind herzlich eingeladen!</textarea></div>
         <button type="button" id="el-align-btn" onclick="cycleAlignSelected()" title="Text: mittig / links / rechts" hidden>⇔</button>
         <button type="button" id="el-style-btn" onclick="showElementRoles()" title="Welche Farbe/Schrift steuert das?">🎨</button>
         <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
+        <button type="button" id="el-more-btn" onclick="toggleElMore()" title="Mehr: Drehen, genaue Werte">⋯</button>
         <button type="button" onclick="selectElement(null)" title="Fertig">✓</button>
+        <div class="el-more" id="el-more" hidden>
+            <div class="em-row"><span>Drehen</span>
+                <button type="button" onclick="rotateSelected(-5)" title="5° nach links">↶ 5°</button>
+                <input type="number" id="em-rot" step="1" min="-180" max="180" oninput="setSelectedExact('rot', this.value)" title="Drehung in Grad">
+                <button type="button" onclick="rotateSelected(5)" title="5° nach rechts">↷ 5°</button>
+                <button type="button" onclick="setSelectedExact('rot', 0)" title="Gerade">0°</button></div>
+            <div class="em-row"><span>Größe %</span><input type="number" id="em-scale" step="5" min="20" max="400" oninput="setSelectedExact('scale', this.value)">
+                <span>X</span><input type="number" id="em-x" step="1" oninput="setSelectedExact('x', this.value)">
+                <span>Y</span><input type="number" id="em-y" step="1" oninput="setSelectedExact('y', this.value)"></div>
+            <div class="em-hint">X/Y in Bildpunkten der Vorlage. Beim Ziehen rastet das Element an Mitte, Rändern und anderen Elementen ein (am PC mit gedrückter Alt-Taste frei).</div>
+        </div>
     </div>
 
     <div id="role-pop" class="role-pop" hidden></div>
@@ -3089,7 +3107,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.2";
+        const APP_VERSION = "24.3";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4937,6 +4955,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             { key: 'vidSpeed', id: 'in-vid-speed', def: () => 'normal' },
             { key: 'vidGap', id: 'in-vid-gap', def: () => 'normal' },
             { key: 'vidDist', id: 'in-vid-dist', def: () => 'short' },
+            { key: 'vidAnim', id: 'in-vid-anim', def: () => 'fly', extra: true },
             { key: 'layout', id: 'in-layout', def: () => 'classic' },
             // ✨ Extras (Advanced) – Standard „aus“, ältere Stände sehen dadurch unverändert aus
             { key: 'boxFill', id: 'in-box-fill', def: () => 'solid', extra: true },
@@ -5374,6 +5393,11 @@ Alle sind herzlich eingeladen!</textarea></div>
                             <div class="control-group"><label>Zeit zwischen den Elementen</label>
                                 <select id="in-vid-gap-${tab}" onchange="scheduleSave();">
                                     <option value="short">Kurz</option><option value="normal">Normal</option><option value="long">Lang</option><option value="xlong">Sehr lang</option>
+                                </select></div>
+                            <div class="control-group adv-only"><label>Einflug-Art <small>(✨)</small></label>
+                                <select id="in-vid-anim-${tab}" onchange="scheduleSave();">
+                                    <option value="fly">Hereinfliegen (Standard)</option><option value="zoom">Heranzoomen</option><option value="pop">Aufploppen</option>
+                                    <option value="side">Von der Seite wischen</option><option value="spin">Hereindrehen</option><option value="fade">Einblenden</option>
                                 </select></div>
                             <div class="control-group"><label>Einflug-Weg</label>
                                 <select id="in-vid-dist-${tab}" onchange="scheduleSave();">
@@ -6311,7 +6335,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 .bx-shape-square ${L} { border-radius: 0 !important; }
                 .bx-shape-round ${L} { border-radius: 16px !important; }
                 .bx-shape-skew ${L} { transform: skewX(-9deg); border-radius: 3px !important; }
-                .bx-shape-skew ${L}.movable { transform: translate(var(--el-x, 0px), var(--el-y, 0px)) scale(var(--el-scale, 1)) skewX(-9deg); }
+                .bx-shape-skew ${L}.movable { transform: translate(var(--el-x, 0px), var(--el-y, 0px)) scale(var(--el-scale, 1)) rotate(var(--el-rot, 0deg)) skewX(-9deg); }
                 .bx-shadow-soft ${L} { box-shadow: 0 6px 16px rgba(0,0,0,0.5) !important; }
                 .bx-shadow-hard ${L} { box-shadow: 5px 5px 0 rgba(0,0,0,0.85) !important; }
                 .bx-edge-left ${L} { border-left: 5px solid var(--jersey-color) !important; }
@@ -7075,6 +7099,13 @@ Alle sind herzlich eingeladen!</textarea></div>
         const SCALE_MIN = 0.3, SCALE_MAX = 4;
 
         function getElScale(el) { return parseFloat(el.dataset.scale || '1') || 1; }
+        /* Drehung in Grad (⋯ Mehr in der Werkzeugleiste) */
+        function getElRot(el) { return parseFloat(el.dataset.rot || '0') || 0; }
+        function setElRot(el, r) {
+            r = Math.round((((r % 360) + 540) % 360 - 180) * 10) / 10;
+            if (!r) { delete el.dataset.rot; el.style.removeProperty('--el-rot'); }
+            else { el.dataset.rot = r; el.style.setProperty('--el-rot', r + 'deg'); }
+        }
         function setElScale(el, s) {
             s = Math.round(Math.min(SCALE_MAX, Math.max(SCALE_MIN, s)) * 100) / 100;
             el.dataset.scale = s;
@@ -7113,16 +7144,43 @@ Alle sind herzlich eingeladen!</textarea></div>
 
         /* Einrasten an der Mitte der Vorlage (waagerecht & senkrecht) mit Hilfslinie */
         const SNAP_PX = 6;
+        /* Sichtbare Fläche eines Elements: Text-Container sind oft so breit wie die Vorlage – dann zählt der Inhalt */
+        function contentRect(o) {
+            const r = o.getBoundingClientRect();
+            if (!o.classList.contains('draggable-text') || !o.children.length) return r;
+            let l = Infinity, t = Infinity, rr = -Infinity, b = -Infinity;
+            Array.from(o.children).forEach(c => { const q = c.getBoundingClientRect(); if (!q.width) return; l = Math.min(l, q.left); t = Math.min(t, q.top); rr = Math.max(rr, q.right); b = Math.max(b, q.bottom); });
+            return l === Infinity ? r : { left: l, top: t, right: rr, bottom: b, width: rr - l, height: b - t };
+        }
         function snapInfo(el) {
             const tpl = el.closest('.post-template, .story-template, .eckball-board');
             if (!tpl || !tpl.offsetWidth) return null;
-            const tr = tpl.getBoundingClientRect(), er = el.getBoundingClientRect();
+            const tr = tpl.getBoundingClientRect(), er = contentRect(el);
             const ts = tr.width / tpl.offsetWidth || 1;
             const W = tpl.offsetWidth, H = tpl.offsetHeight;
             const cx = (er.left + er.width / 2 - tr.left) / ts, cy = (er.top + er.height / 2 - tr.top) / ts;
             const info = { tpl, sx: 0, sy: 0, gx: null, gy: null };
-            if (Math.abs(W / 2 - cx) < SNAP_PX) { info.sx = (W / 2 - cx) * ts; info.gx = W / 2; }
-            if (Math.abs(H / 2 - cy) < SNAP_PX) { info.sy = (H / 2 - cy) * ts; info.gy = H / 2; }
+            // Ziele: Mitte, Rand mit 16 px Abstand, Mitten und Kanten der anderen sichtbaren Elemente
+            const ex = [[W / 2, 'c']], ey = [[H / 2, 'c']];
+            if (!tpl.classList.contains('eckball-board')) {
+                ex.push([16, 'l'], [W - 16, 'r']); ey.push([16, 't'], [H - 16, 'b']);
+                tpl.querySelectorAll(DRAG_SEL).forEach(o => {
+                    if (o === el || o.contains(el) || el.contains(o) || !o.offsetWidth || o.closest('.sponsor-banner') && !o.classList.contains('sponsor-banner')) return;
+                    const r = contentRect(o);
+                    if (!r.width || r.width > tr.width * 0.95) return;
+                    const l = (r.left - tr.left) / ts, t = (r.top - tr.top) / ts, w = r.width / ts, h = r.height / ts;
+                    ex.push([l + w / 2, 'c'], [l, 'l'], [l + w, 'r']); ey.push([t + h / 2, 'c'], [t, 't'], [t + h, 'b']);
+                });
+            }
+            const el0 = { l: (er.left - tr.left) / ts, r: (er.right - tr.left) / ts, t: (er.top - tr.top) / ts, b: (er.bottom - tr.top) / ts };
+            const best = (targets, mine) => {
+                let hit = null;
+                targets.forEach(([pos]) => mine.forEach(m => { const d = pos - m; if (Math.abs(d) < SNAP_PX && (!hit || Math.abs(d) < Math.abs(hit.d))) hit = { d, pos }; }));
+                return hit;
+            };
+            const hx = best(ex, [cx, el0.l, el0.r]), hy = best(ey, [cy, el0.t, el0.b]);
+            if (hx) { info.sx = hx.d * ts; info.gx = hx.pos; }
+            if (hy) { info.sy = hy.d * ts; info.gy = hy.pos; }
             return info;
         }
         function showSnapGuides(info) {
@@ -7158,6 +7216,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (!pos) return;
             setElLayer(el, pos.z || 0);
             setElAlign(el, pos.align || '');
+            setElRot(el, pos.rot || 0);
             if (el.classList.contains('movable')) { setElOffset(el, pos.x || 0, pos.y || 0); setElScale(el, pos.scale || 1); return; }
             if (pos.top) el.style.top = pos.top;
             if (pos.left) el.style.left = pos.left;
@@ -7223,11 +7282,49 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (el) el.classList.add('el-selected');
             updateToolbar();
         }
+        /* ⋯ Mehr: Drehen und genaue Werte für das ausgewählte Element */
+        function toggleElMore(force) {
+            const m = $('el-more');
+            if (!m) return;
+            m.hidden = force !== undefined ? !force : !m.hidden;
+            $('el-more-btn')?.classList.toggle('tb-on', !m.hidden);
+            updateElMore();
+        }
+        function elPos(el) {
+            if (el.classList.contains('movable')) return getElOffset(el);
+            return { x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0 };
+        }
+        function updateElMore() {
+            const m = $('el-more');
+            if (!m || m.hidden || !selectedEl) return;
+            const p = elPos(selectedEl), act = document.activeElement;
+            [['em-rot', getElRot(selectedEl)], ['em-scale', Math.round(getElScale(selectedEl) * 100)], ['em-x', Math.round(p.x)], ['em-y', Math.round(p.y)]]
+                .forEach(([id, v]) => { const i = $(id); if (i && i !== act) i.value = v; });
+        }
+        function rotateSelected(d) {
+            if (!selectedEl) return;
+            forSelectedGroup(el => setElRot(el, getElRot(el) + d));
+            updateElMore();
+            scheduleSave();
+        }
+        function setSelectedExact(kind, v) {
+            if (!selectedEl || v === '' || isNaN(parseFloat(v))) return;
+            v = parseFloat(v);
+            forSelectedGroup(el => {
+                if (kind === 'rot') setElRot(el, v);
+                else if (kind === 'scale') setElScale(el, v / 100);
+                else if (el.classList.contains('movable')) { const o = getElOffset(el); setElOffset(el, kind === 'x' ? v : o.x, kind === 'y' ? v : o.y); }
+                else el.style[kind === 'x' ? 'left' : 'top'] = v + 'px';
+            });
+            if (kind === 'rot' && v === 0) updateElMore();
+            scheduleSave();
+        }
         function updateToolbar() {
             const bar = $('el-toolbar');
             if (!bar) return;
             bar.hidden = !selectedEl;
-            if (!selectedEl) return;
+            if (!selectedEl) { if ($('el-more')) $('el-more').hidden = true; $('el-more-btn')?.classList.remove('tb-on'); return; }
+            updateElMore();
             setText('el-scale-label', Math.round(getElScale(selectedEl) * 100) + ' %');
             $('el-delete-btn').hidden = !selectedEl.classList.contains('custom-text');
             const alignBtn = $('el-align-btn');
@@ -7376,6 +7473,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 el.style.left = defLeft !== null ? defLeft : '0px';
             }
             setElScale(el, parseFloat(el.dataset.defScale) || 1);
+            setElRot(el, 0);
             setElLayer(el, 0);
             setElAlign(el, el.dataset.defAlign || '');
         }
@@ -9822,14 +9920,16 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (!el.id) return;
                 data.positions[el.id] = { top: el.style.top, left: el.style.left, scale: getElScale(el) };
                 if (getElLayer(el)) data.positions[el.id].z = getElLayer(el);
+                if (getElRot(el)) data.positions[el.id].rot = getElRot(el);
                 if (getElAlign(el)) data.positions[el.id].align = getElAlign(el);
             });
             document.querySelectorAll('.movable').forEach(el => {
                 if (!el.id) return;
-                const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el), al = getElAlign(el);
-                if (x || y || sc !== 1 || z || al) {
+                const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el), al = getElAlign(el), rot = getElRot(el);
+                if (x || y || sc !== 1 || z || al || rot) {
                     data.positions[el.id] = z ? { x, y, scale: sc, z } : { x, y, scale: sc };
                     if (al) data.positions[el.id].align = al;
+                    if (rot) data.positions[el.id].rot = rot;
                 }
             });
             // Einzeln verschobene Sponsorenlogos merken, auch wenn „einzeln verschieben“ gerade aus ist
@@ -10996,7 +11096,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             return {
                 dur: { fast: 0.4, normal: 0.6, slow: 1.0, xslow: 1.5 }[v('speed')] || 0.6,
                 gap: { short: [0.25, 3], normal: [0.42, 3.6], long: [0.75, 7], xlong: [1.1, 10] }[v('gap')] || [0.42, 3.6],
-                dist: { short: 1, mid: 2.5, far: 6 }[v('dist')] || 1
+                dist: { short: 1, mid: 2.5, far: 6 }[v('dist')] || 1,
+                anim: (isAdvanced() && v('anim')) || 'fly'
             };
         }
         async function recordVideo(base, layers, onStatus, opts = videoOptions(null)) {
@@ -11027,12 +11128,27 @@ Alle sind herzlich eingeladen!</textarea></div>
                     const p = (t - start - i * stagger) / dur;
                     if (p <= 0) return;
                     const q = Math.min(1, p);
-                    const sc = L.row ? 0.7 + 0.3 * easeOutBack(q) : 0.85 + 0.15 * easeOutBack(q);
-                    const dy = (1 - easeOut(q)) * (L.row ? 40 : 28) * opts.dist * VIDEO_SCALE / 2.7;
+                    const a = opts.anim, k = opts.dist * VIDEO_SCALE / 2.7;
+                    let sc = L.row ? 0.7 + 0.3 * easeOutBack(q) : 0.85 + 0.15 * easeOutBack(q);
+                    let dx = 0, dy = (1 - easeOut(q)) * (L.row ? 40 : 28) * k, rot = 0, alpha = Math.min(1, q * 1.6);
+                    if (a === 'zoom') { sc = 1.9 - 0.9 * easeOut(q); dy = 0; }
+                    else if (a === 'pop') { sc = Math.max(0.01, easeOutBack(q) * (q < 1 ? 1 : 1)); sc = 0.2 + 0.8 * sc; dy = 0; alpha = Math.min(1, q * 3); }
+                    else if (a === 'side') { dy = 0; sc = 1; dx = (1 - easeOut(q)) * (i % 2 ? 1 : -1) * W * 0.6; alpha = Math.min(1, q * 2); }
+                    else if (a === 'spin') { dy = 0; sc = 0.4 + 0.6 * easeOutBack(q); rot = (1 - easeOut(q)) * -Math.PI * 0.6; }
+                    else if (a === 'fade') { dy = 0; sc = 1; alpha = easeOut(q); }
                     const cx = L.x + L.canvas.width / 2, cy = L.y + L.canvas.height / 2;
-                    ctx.globalAlpha = Math.min(1, q * 1.6);
-                    setT(z * sc, z * sc, W * (1 - z) / 2 + z * (cx - cx * sc), H * (1 - z) / 2 + z * (cy - cy * sc + dy));
-                    ctx.drawImage(L.canvas, L.x, L.y);
+                    ctx.globalAlpha = alpha;
+                    if (rot) {
+                        // Drehung um die Mitte des Elements
+                        ctx.setTransform(gx, 0, 0, gy, 0, 0);
+                        ctx.translate(W * (1 - z) / 2 + z * (cx + dx), H * (1 - z) / 2 + z * (cy + dy));
+                        ctx.rotate(rot);
+                        ctx.scale(z * sc, z * sc);
+                        ctx.drawImage(L.canvas, -L.canvas.width / 2, -L.canvas.height / 2);
+                    } else {
+                        setT(z * sc, z * sc, W * (1 - z) / 2 + z * (cx - cx * sc + dx), H * (1 - z) / 2 + z * (cy - cy * sc + dy));
+                        ctx.drawImage(L.canvas, L.x, L.y);
+                    }
                 });
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.globalAlpha = 1;
