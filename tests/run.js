@@ -510,6 +510,23 @@ async function makePhotos(browser) {
         check('Extras: Kasten-Muster/Neon, Umriss- und Hochkant-Titel, Riesen-Text, Hintergrund-Ebenen, Export', ex.box && ex.title && ex.big && ex.ov && ex.badge && ex.export, JSON.stringify(ex));
         check('Extras: gespeichert, alte Stände unverändert, Stile setzen/entfernen Extras, Zurücksetzen', ex.saved && ex.old && ex.style && ex.styleReset && ex.reset, JSON.stringify(ex));
         check('*Wort* erscheint in Akzentfarbe, Beitragstext ohne Sternchen', ex.hl, JSON.stringify(ex));
+        // 🧩 Layouts (alle Pakete): Elemente neu anordnen, Zurücksetzen führt zum Layout, gespeichert, alte Stände = Klassisch
+        const lay = await page.evaluate(async () => { const r = {};
+            switchTab('tor'); applyLayout('tor', 'poster');
+            const ph = $('img-tor-player-feed'), tpl = $('capture-tor-feed');
+            r.applied = $('view-tor').classList.contains('lay-tor-poster') && ph.style.top === Math.round(30 * tpl.querySelector('.tpl-content').offsetHeight / 500) + 'px' && document.querySelector('#layout-grid-tor [data-layout="poster"]').classList.contains('active');
+            ph.style.top = '5px'; resetTabAll('tor'); r.reset = ph.style.top === ph.getAttribute('data-default-top') && ph.getAttribute('data-default-top') !== '200px';
+            r.export = (await renderElementToCanvas($('capture-tor'))).width === 1200;
+            r.saved = collectSlotData().tabSettings.tor.layout === 'poster';
+            switchTab('post'); applyLayout('post', 'player'); r.player = val('in-logo-dir-post') === 'column' && parseFloat($('team-logos-post-container').dataset.x) < 0;
+            applyLayout('post', 'classic'); r.back = val('in-logo-dir-post') === 'row' && !parseFloat($('team-logos-post-container').dataset.x || 0) && !$('view-post').classList.contains('lay-post-player');
+            switchTab('ergebnis'); applyLayout('ergebnis', 'scoreboard'); r.board = $('view-ergebnis').classList.contains('lay-ergebnis-scoreboard') && val('in-logo-gap-ergebnis') === '65';
+            applyLayout('ergebnis', 'classic');
+            const old = JSON.parse(JSON.stringify(collectSlotData())); delete old.tabSettings.tor.layout;
+            applySlotData(old); updateTabDesign('tor'); r.old = val('in-layout-tor') === 'classic' && !$('view-tor').classList.contains('lay-tor-poster');
+            applyLayout('tor', 'classic'); return r; });
+        check('Layouts: Tor-Plakat, Ankündigung mit Spieler, Ergebnis-Anzeigetafel; Zurücksetzen zum Layout; Export', lay.applied && lay.reset && lay.export && lay.player && lay.back && lay.board, JSON.stringify(lay));
+        check('Layouts: gespeichert, alte Stände klassisch', lay.saved && lay.old, JSON.stringify(lay));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
