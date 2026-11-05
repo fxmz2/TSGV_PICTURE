@@ -478,6 +478,38 @@ async function makePhotos(browser) {
         check('7er-Aufstellung mit 7 Spielern', small.cards === 7 && small.f === '2-3-1', JSON.stringify(small));
         check('Spielform wird gespeichert', small.restored === '2-3-1/7', small.restored);
         // Präsentiert von
+        // Design neu geordnet + ✨ Extras (Kästen, Überschriften, Riesen-Text, Hintergrund-Ebenen, neue Stile)
+        const ex = await page.evaluate(async () => { const r = {}, host = $('design-controls-tor'), sec = k => host.querySelector(`details[data-section="${k}"]`);
+            const order = [...host.querySelectorAll('details[data-section]')].map(d => d.dataset.section);
+            r.order = ['styles', 'colors', 'boxes', 'design', 'logo', 'extras'].every((k, i, a) => !i || order.indexOf(k) > order.indexOf(a[i - 1]));
+            r.moved = !sec('colors').querySelector('#in-text-effect-tor') && !!sec('extras').querySelector('#in-text-effect-tor') && !!sec('boxes').querySelector('#in-box-mode-tor') && !!sec('boxes').querySelector('#in-frame-shape-tor')
+                && !!$('design-controls-post').querySelector('details[data-section="logo"] #in-logo-size-post');
+            switchTab('tor'); setVal('in-tor-minute', '67. Min');
+            setVal('in-box-fill-tor', 'stripes'); setVal('in-box-edge-tor', 'neon'); setVal('in-title-style-tor', 'outline'); setVal('in-title-rot-tor', 'vl');
+            setVal('in-big-mode-tor', 'auto'); setVal('in-ov-grad-tor', 'bottom'); setVal('in-ov-pattern-tor', 'halftone'); updateAllViews();
+            const v = $('view-tor'), big = $('bigtxt-capture-tor');
+            r.box = v.classList.contains('bx-img') && /svg/.test(v.style.getPropertyValue('--box-img')) && v.classList.contains('bx-edge-neon');
+            r.title = v.classList.contains('tt-outline') && v.classList.contains('tt-vert-l') && getComputedStyle(document.querySelector('#capture-tor .title-dyn')).color === 'rgba(0, 0, 0, 0)';
+            r.big = big.style.display !== 'none' && big.textContent === "67'";
+            r.ov = document.querySelector('#capture-tor .bg-ov').classList.contains('on') && document.querySelectorAll('#capture-tor .bg-ov > div').length === 2;
+            r.badge = $('ex-count-tor').textContent.includes('aktiv') && !$('ex-count-tor').hidden;
+            r.export = (await renderElementToCanvas($('capture-tor'))).width === 1200;
+            const d = collectSlotData(); r.saved = d.tabSettings.tor.boxFill === 'stripes' && d.tabSettings.tor.bigMode === 'auto';
+            const old = JSON.parse(JSON.stringify(d)); ['boxFill', 'boxEdge', 'titleStyle', 'titleRot', 'bigMode', 'ovGrad', 'ovPattern'].forEach(k => delete old.tabSettings.tor[k]);
+            applySlotData(old); updateAllViews(); r.old = val('in-box-fill-tor') === 'solid' && !v.classList.contains('bx-img') && $('bigtxt-capture-tor').style.display === 'none';
+            applyStyle('tor', 'neonnacht'); r.style = val('in-box-edge-tor') === 'neon' && val('in-ov-grad-tor') === 'vignette';
+            applyStyle('tor', 'klassisch'); r.styleReset = val('in-box-edge-tor') === 'none' && val('in-ov-grad-tor') === 'none';
+            setVal('in-box-shadow-tor', 'hard'); resetExtras('tor'); r.reset = val('in-box-shadow-tor') === 'none' && $('ex-count-tor').hidden;
+            setVal('in-tor-minute', ''); updateAllViews();
+            // *Wort* = Akzentfarbe, Beitragstext ohne Sternchen
+            switchTab('sponsor'); const keepT = val('in-spon-title'); setVal('in-spon-title', '*DANKE* Partner'); updateSponsorPost();
+            r.hl = !!document.querySelector('#out-spon-title .hl') && $('out-spon-title').textContent === 'DANKE Partner' && !buildCaption('sponsor').includes('*');
+            setVal('in-spon-title', keepT); updateSponsorPost();
+            return r; });
+        check('Design-Bereiche neu geordnet (Kästen & Rahmen, Hintergrund, Wappen beim Logo, Extras)', ex.order && ex.moved, JSON.stringify(ex));
+        check('Extras: Kasten-Muster/Neon, Umriss- und Hochkant-Titel, Riesen-Text, Hintergrund-Ebenen, Export', ex.box && ex.title && ex.big && ex.ov && ex.badge && ex.export, JSON.stringify(ex));
+        check('Extras: gespeichert, alte Stände unverändert, Stile setzen/entfernen Extras, Zurücksetzen', ex.saved && ex.old && ex.style && ex.styleReset && ex.reset, JSON.stringify(ex));
+        check('*Wort* erscheint in Akzentfarbe, Beitragstext ohne Sternchen', ex.hl, JSON.stringify(ex));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
