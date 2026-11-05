@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.0</title>
+    <title>Match-Shot – Grafiken für Vereine 24.1</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -197,6 +197,27 @@
         .bigtxt-in { font-size: 9rem; font-weight: 900; line-height: 0.95; white-space: nowrap; font-family: var(--title-font, inherit); text-shadow: none !important; letter-spacing: -2px; }
         .story-template .bigtxt-in { font-size: 11rem; }
         .hl { color: var(--jersey-color); }
+        /* 🧩 Layout-Auswahl */
+        .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+        .layout-chip { text-align: left; border: 1px solid #cfd8dc; background: #fff; border-radius: 10px; padding: 7px 9px; cursor: pointer; line-height: 1.25; }
+        .layout-chip b { display: block; font-size: 13px; }
+        .layout-chip small { color: #5c6670; font-size: 11px; }
+        .layout-chip.active { border-color: #005f73; background: #e6f4f7; box-shadow: 0 0 0 1px #005f73 inset; }
+        /* 🧩 Layouts: Tor */
+        .lay-tor-split .tor-container-story { align-items: flex-start; padding-left: 22px; }
+        .lay-tor-split .tor-player-name { text-align: left; }
+        .lay-tor-split .post-template .tor-player-name { margin-top: 95px !important; }
+        .lay-tor-split .story-template .tor-player-name { margin-top: 190px !important; }
+        .lay-tor-poster .tor-player-name { margin-top: auto !important; }
+        .lay-tor-poster :is(.tor-lbl, .tor-lbl-br) { display: none; }
+        .lay-tor-poster .tor-container-story { padding-bottom: 22px; }
+        .lay-tor-poster .story-template .tor-container-story { padding-bottom: 64px; }
+        .lay-tor-vertical .title-dyn { position: absolute; top: 0; left: 16px; width: auto !important; white-space: nowrap; transform-origin: left top; transform: rotate(-90deg) translateX(-100%); }
+        .lay-tor-vertical .draggable-text:has(> .title-dyn) { transform-origin: left top; }
+        .lay-tor-vertical .tor-container-story { align-items: flex-end; padding-right: 22px; }
+        .lay-tor-vertical .tor-player-name { text-align: right; }
+        /* 🧩 Layouts: Ergebnis */
+        .lay-ergebnis-scoreboard .logos-vs { visibility: hidden; }
         /* ✨ Extras: Überschriften */
         .tt-outline .title-dyn { color: transparent !important; -webkit-text-stroke: 1.6px var(--tt-col, #fff); text-shadow: none !important; }
         .tt-echo-up .title-dyn { text-shadow: 0 -0.62em 0 var(--tt-echo1), 0 -1.24em 0 var(--tt-echo2) !important; }
@@ -3062,7 +3083,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.0";
+        const APP_VERSION = "24.1";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4910,6 +4931,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             { key: 'vidSpeed', id: 'in-vid-speed', def: () => 'normal' },
             { key: 'vidGap', id: 'in-vid-gap', def: () => 'normal' },
             { key: 'vidDist', id: 'in-vid-dist', def: () => 'short' },
+            { key: 'layout', id: 'in-layout', def: () => 'classic' },
             // ✨ Extras (Advanced) – Standard „aus“, ältere Stände sehen dadurch unverändert aus
             { key: 'boxFill', id: 'in-box-fill', def: () => 'solid', extra: true },
             { key: 'boxShape', id: 'in-box-shape', def: () => 'std', extra: true },
@@ -5154,7 +5176,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             Object.entries(TAB_DESIGN).forEach(([tab, cfg]) => {
                 const host = $(`design-controls-${tab}`);
                 if (!host) return;
-                host.innerHTML = styleDesignHTML(tab) + (cfg.pitch ? pitchDesignHTML(tab) : '') + `
+                host.innerHTML = layoutDesignHTML(tab) + styleDesignHTML(tab) + (cfg.pitch ? pitchDesignHTML(tab) : '') + `
                     <details class="design-details" data-section="colors" ontoggle="if (this.open) renderRoleHints('${tab}')">
                         <summary>🎨 Farben & Schrift</summary>
                         <div class="details-body">
@@ -6036,6 +6058,122 @@ Alle sind herzlich eingeladen!</textarea></div>
             applyClubBranding();
         }
 
+        /* ================= 🧩 LAYOUTS: fertige Aufteilungen je Vorlage (alle Pakete) =================
+           Positionen sind für Beitrag 4:5 (500 px hoch) bzw. Story (711 px) angegeben; 1:1-Beiträge werden umgerechnet.
+           Ein Layout setzt die Standard-Positionen der Elemente – „Zurücksetzen“ führt danach zum gewählten Layout zurück. */
+        const LAYOUTS = {
+            tor: [
+                { id: 'classic', name: '▦ Klassisch', desc: 'Titel oben, Spieler darunter' },
+                { id: 'split', name: '◧ Geteilt', desc: 'Texte links, Spieler groß rechts',
+                    feed: { title: { top: 40, align: 'left' }, photo: { top: 150, left: 190, scale: 1.35 } },
+                    story: { title: { top: 120, align: 'left' }, photo: { top: 330, left: 150, scale: 1.55 } } },
+                { id: 'poster', name: '▣ Plakat', desc: 'Spieler groß, Titel unten',
+                    feed: { photo: { top: 30, left: 115, scale: 1.0 }, title: { top: 300, scale: 1.3 } },
+                    story: { photo: { top: 100, left: 90, scale: 1.75 }, title: { top: 468, scale: 1.55 } } },
+                { id: 'vertical', name: '⫼ Hochkant', desc: 'Titel hochkant am Rand',
+                    feed: { title: { top: 20, scale: 1.5 }, photo: { top: 215, left: 175, scale: 1.2 } },
+                    story: { title: { top: 80, scale: 1.5 }, photo: { top: 320, left: 140, scale: 1.6 } } }
+            ],
+            post: [
+                { id: 'classic', name: '▦ Klassisch', desc: 'Wappen nebeneinander' },
+                { id: 'player', name: '👤 Spieler', desc: 'Wappen links, Spieler groß rechts',
+                    set: { 'in-logo-dir': 'column', 'in-logo-gap': '6' },
+                    feed: { logos: { x: -112, y: -10, scale: 0.85 }, info: { top: 92, align: 'right' }, xp1: { top: 205, left: 222, scale: 1.75 } },
+                    story: { logos: { x: -105, y: -40, scale: 0.95 }, info: { top: 150, align: 'right' }, xp1: { top: 330, left: 205, scale: 1.9 } } },
+                { id: 'poster', name: '▣ Plakat', desc: 'Wappen oben, Titel groß',
+                    feed: { logos: { y: -78, scale: 1.1 }, title: { top: 258, scale: 1.5 }, info: { top: 350, scale: 1.15 } },
+                    story: { logos: { y: -150, scale: 1.35 }, title: { top: 345, scale: 1.75 }, info: { top: 470, scale: 1.3 } } }
+            ],
+            ergebnis: [
+                { id: 'classic', name: '▦ Klassisch', desc: 'Ergebnis über den Wappen' },
+                { id: 'scoreboard', name: '🟰 Anzeigetafel', desc: 'Ergebnis zwischen den Wappen',
+                    set: { 'in-logo-gap': '65' },
+                    feed: { score: { top: 168 }, logos: { y: -40 } },
+                    story: { score: { top: 252, scale: 0.8 }, logos: { y: -60 } } },
+                { id: 'bigscore', name: '🔢 Riesen-Ergebnis', desc: 'Spielstand ganz groß',
+                    feed: { score: { top: 62, scale: 1.9 }, logos: { y: -12, scale: 0.8 }, text: { top: 335 }, scorers: { top: 372 } },
+                    story: { score: { top: 110, scale: 2.2 }, logos: { y: 110, scale: 0.9 }, text: { top: 520 }, scorers: { top: 570 } } }
+            ]
+        };
+        const LAYOUT_ROLES = {
+            title: tpl => tpl.querySelector('.title-dyn')?.closest('.draggable-text'),
+            photo: tpl => tpl.querySelector('.tor-player-img-feed, .tor-player-img-story'),
+            logos: tpl => tpl.querySelector('.team-logos'),
+            info: tpl => tpl.querySelector('[id^="out-post-date"]')?.closest('.draggable-text'),
+            score: tpl => tpl.querySelector('[id^="out-ergebnis-score"]'),
+            text: tpl => tpl.querySelector('[id^="out-ergebnis-text"]')?.closest('.draggable-text'),
+            scorers: tpl => tpl.querySelector('[id^="out-erg-scorers-wrap"]'),
+            xp1: tpl => tpl.querySelector('.extra-player[data-xp="1"]')
+        };
+        const LAYOUT_SET_DEFAULTS = { 'in-logo-dir': 'row', 'in-logo-gap': '20' };
+        function layoutOf(tab) { const k = val(`in-layout-${tab}`) || 'classic'; return (LAYOUTS[tab] || []).find(l => l.id === k) || LAYOUTS[tab]?.[0]; }
+        function layoutDesignHTML(tab) {
+            const list = LAYOUTS[tab];
+            if (!list) return '';
+            return `
+                    <details class="design-details" data-section="layout" open>
+                        <summary>🧩 Layout</summary>
+                        <div class="details-body">
+                            <input type="hidden" id="in-layout-${tab}" value="classic">
+                            <div class="layout-grid" id="layout-grid-${tab}">${list.map(l => `<button type="button" class="layout-chip" data-layout="${l.id}" onclick="applyLayout('${tab}', '${l.id}')"><b>${l.name}</b><small>${esc(l.desc)}</small></button>`).join('')}</div>
+                            <span class="hint">Ein Layout ordnet die Elemente neu an (in Beitrag und Story). Danach kannst du alles wie gewohnt verschieben – „Zurücksetzen“ führt zum gewählten Layout zurück.${tab === 'post' ? ' Für „Spieler“ unter „👥 Spielerfotos & zusätzliche Spieler“ einen Spieler wählen – am schönsten freigestellt.' : ''}</span>
+                        </div>
+                    </details>`;
+        }
+        /* Standard-Positionen passend zum Layout setzen (ohne etwas zu verschieben) */
+        function setLayoutDefaults(tab) {
+            const list = LAYOUTS[tab];
+            if (!list) return;
+            const lay = layoutOf(tab);
+            const roles = [...new Set(list.flatMap(l => [...Object.keys(l.feed || {}), ...Object.keys(l.story || {})]))];
+            $(`view-${tab}`)?.querySelectorAll('.post-template, .story-template').forEach(tpl => {
+                const story = tpl.classList.contains('story-template');
+                // Beiträge: Inhalte liegen in einem 400 px hohen Bereich (bei 4:5 mittig verschoben) – Angaben sind für 500 px gedacht
+                const fy = story ? 1 : ((tpl.querySelector(':scope > .tpl-content')?.offsetHeight || tpl.offsetHeight || 500) / 500);
+                const spec = (story ? lay.story : lay.feed) || {};
+                roles.forEach(role => {
+                    const el = LAYOUT_ROLES[role]?.(tpl);
+                    if (!el) return;
+                    const s = spec[role] || {};
+                    if (el.classList.contains('movable')) {
+                        el.dataset.defX = s.x || 0;
+                        el.dataset.defY = Math.round((s.y || 0) * fy);
+                    } else {
+                        if (el.dataset.l0Top === undefined) { el.dataset.l0Top = el.getAttribute('data-default-top') || ''; el.dataset.l0Left = el.getAttribute('data-default-left') || '0px'; }
+                        el.setAttribute('data-default-top', s.top != null ? Math.round(s.top * fy) + 'px' : el.dataset.l0Top);
+                        el.setAttribute('data-default-left', s.left != null ? s.left + 'px' : el.dataset.l0Left);
+                    }
+                    if (s.scale) el.dataset.defScale = s.scale; else delete el.dataset.defScale;
+                    if (s.align) el.dataset.defAlign = s.align; else delete el.dataset.defAlign;
+                });
+            });
+        }
+        function applyLayout(tab, id) {
+            const list = LAYOUTS[tab];
+            const lay = list?.find(l => l.id === id);
+            if (!lay) return;
+            setVal(`in-layout-${tab}`, id);
+            // Einstellungen, die ein Layout braucht (z.B. Wappen übereinander) – andere Layouts setzen sie zurück
+            const setKeys = [...new Set(list.flatMap(l => Object.keys(l.set || {})))];
+            setKeys.forEach(k => setVal(`${k}-${tab}`, lay.set?.[k] ?? LAYOUT_SET_DEFAULTS[k]));
+            setLayoutDefaults(tab);
+            const roles = [...new Set(list.flatMap(l => [...Object.keys(l.feed || {}), ...Object.keys(l.story || {})]))];
+            $(`view-${tab}`)?.querySelectorAll('.post-template, .story-template').forEach(tpl => roles.forEach(r => { const el = LAYOUT_ROLES[r]?.(tpl); if (el) resetElement(el); }));
+            updateTabDesign(tab);
+            updateAllViews();
+            scheduleSave();
+            if (tab === 'post' && id === 'player' && (val('in-xp1-post') || 'Keiner') === 'Keiner') toast('🧩 Layout „Spieler“ – jetzt unter „👥 Spielerfotos“ einen Spieler wählen');
+            else toast(`🧩 Layout „${lay.name.replace(/^\S+\s/, '')}“ – mit ↩️ rückgängig`);
+        }
+        function updateLayoutClasses(tab, vc) {
+            const list = LAYOUTS[tab];
+            if (!list) return;
+            const key = layoutOf(tab).id;
+            list.forEach(l => vc.classList.toggle(`lay-${tab}-${l.id}`, l.id === key && key !== 'classic'));
+            $(`layout-grid-${tab}`)?.querySelectorAll('.layout-chip').forEach(b => b.classList.toggle('active', b.dataset.layout === key));
+            setLayoutDefaults(tab);
+        }
+
         /* ================= ✨ EXTRAS: Kästen, Überschriften, Riesen-Text, Hintergrund-Ebenen ================= */
         const svgTile = (w, h, body) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'>${body}</svg>`).replace(/'/g, '%27')}")`;
         function hexRgba(hex, a) {
@@ -6095,6 +6233,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 .bx-shape-square ${L} { border-radius: 0 !important; }
                 .bx-shape-round ${L} { border-radius: 16px !important; }
                 .bx-shape-skew ${L} { transform: skewX(-9deg); border-radius: 3px !important; }
+                .bx-shape-skew ${L}.movable { transform: translate(var(--el-x, 0px), var(--el-y, 0px)) scale(var(--el-scale, 1)) skewX(-9deg); }
                 .bx-shadow-soft ${L} { box-shadow: 0 6px 16px rgba(0,0,0,0.5) !important; }
                 .bx-shadow-hard ${L} { box-shadow: 5px 5px 0 rgba(0,0,0,0.85) !important; }
                 .bx-edge-left ${L} { border-left: 5px solid var(--jersey-color) !important; }
@@ -6283,6 +6422,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const darkText = (0.299 * ((tn >> 16) & 255) + 0.587 * ((tn >> 8) & 255) + 0.114 * (tn & 255)) < 110;
                 setOrClear('--tpl-text-shadow', eff === 'soft' ? (darkText ? '0 1px 3px rgba(255,255,255,0.55)' : '') : TEXT_EFFECTS[eff]);
 
+                updateLayoutClasses(tab, viewContainer);
                 applyExtras(tab, viewContainer, { adv, textColVal });
 
                 renderExtraPlayers(tab);
@@ -7071,15 +7211,16 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
         function setSelectedScale(s) { if (selectedEl) { forSelectedGroup(el => setElScale(el, s)); scheduleSave(); } }
         function resetElement(el) {
-            if (el.classList.contains('movable')) setElOffset(el, 0, 0);
+            // Standard = Position des gewählten Layouts (🧩), sonst der Vorlage
+            if (el.classList.contains('movable')) setElOffset(el, parseFloat(el.dataset.defX) || 0, parseFloat(el.dataset.defY) || 0);
             else {
                 const defTop = el.getAttribute('data-default-top'), defLeft = el.getAttribute('data-default-left');
                 el.style.top = defTop !== null ? defTop : '';
                 el.style.left = defLeft !== null ? defLeft : '0px';
             }
-            setElScale(el, 1);
+            setElScale(el, parseFloat(el.dataset.defScale) || 1);
             setElLayer(el, 0);
-            setElAlign(el, '');
+            setElAlign(el, el.dataset.defAlign || '');
         }
         function resetSelectedElement() {
             if (!selectedEl) return;
@@ -7267,7 +7408,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             setVal(`in-logo-size-${tab}`, '75');
             // Text-Design, Foto-Art und Wappen zurücksetzen – zusätzliche Spieler und Sponsoren-Einstellungen bleiben
             const keep = {};
-            ['xp1', 'xp2', 'xp3', 'xpNames', 'sponsorLayout', 'sponsorCols', 'sponsorSize', 'sponsorFree'].forEach(k => {
+            ['xp1', 'xp2', 'xp3', 'xpNames', 'sponsorLayout', 'sponsorCols', 'sponsorSize', 'sponsorFree', 'layout'].forEach(k => {
                 const f = EXTRA_DESIGN.find(d => d.key === k), el = $(`${f.id}-${tab}`);
                 if (el) keep[k] = f.check ? el.checked : el.value;
             });
@@ -7796,7 +7937,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             // Vorlagengeber: bei „Vor- und Nachname“ kurz als „M. Mustermann“, sonst wie der Torschütze
             const assistShown = hasAssist ? playerNameHtml(assistName, torFmt === 'full' ? 'short' : torFmt) : '';
             const assistLine = hasAssist && assistMode === 'line' ? `<span class="tor-assist-line">${esc(L('tor', 'assist'))} ${assistShown}</span>` : '';
-            const scorerHtml = (scorerLbl ? esc(scorerLbl) + '<br>' : '') + shownName + assistLine;
+            const scorerHtml = (scorerLbl ? `<span class="tor-lbl">${esc(scorerLbl)}</span><br class="tor-lbl-br">` : '') + shownName + assistLine;
             if ($('out-tor-player-name')) $('out-tor-player-name').innerHTML = scorerHtml;
             if ($('out-tor-player-name-feed')) $('out-tor-player-name-feed').innerHTML = scorerHtml;
 
