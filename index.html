@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 23.7</title>
+    <title>Match-Shot – Grafiken für Vereine 24.0</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -188,6 +188,26 @@
             overflow: hidden;
         }
 
+        /* Eigener Stapelkontext: Hintergrund-Ebenen (z-index -1) liegen über dem Hintergrund und unter allen Inhalten */
+        .post-template, .story-template { z-index: 0; }
+        .bg-ov { position: absolute; inset: 0; z-index: -1; pointer-events: none; display: none; }
+        .bg-ov.on { display: block; }
+        .bg-ov > div { position: absolute; inset: 0; }
+        .draggable-text.bigtxt { z-index: -1; }
+        .bigtxt-in { font-size: 9rem; font-weight: 900; line-height: 0.95; white-space: nowrap; font-family: var(--title-font, inherit); text-shadow: none !important; letter-spacing: -2px; }
+        .story-template .bigtxt-in { font-size: 11rem; }
+        .hl { color: var(--jersey-color); }
+        /* ✨ Extras: Überschriften */
+        .tt-outline .title-dyn { color: transparent !important; -webkit-text-stroke: 1.6px var(--tt-col, #fff); text-shadow: none !important; }
+        .tt-echo-up .title-dyn { text-shadow: 0 -0.62em 0 var(--tt-echo1), 0 -1.24em 0 var(--tt-echo2) !important; }
+        .tt-echo-down .title-dyn { text-shadow: 0 0.62em 0 var(--tt-echo1), 0 1.24em 0 var(--tt-echo2) !important; }
+        .tt-rot-s .title-dyn { transform: rotate(-4deg); }
+        .tt-rot-m .title-dyn { transform: rotate(-8deg); }
+        :is(.tt-vert-l, .tt-vert-r) .title-dyn { position: absolute; top: 0; width: auto !important; white-space: nowrap; transform-origin: left top; }
+        .tt-vert-l .title-dyn { left: 16px; transform: rotate(-90deg) translateX(-100%); }
+        .tt-vert-r .title-dyn { left: calc(100% - 16px); transform: rotate(90deg); }
+        .ex-count { font-size: 11px; font-weight: bold; color: #fff; background: #e07a2f; border-radius: 10px; padding: 1px 8px; margin-left: 4px; }
+        .ex-sub { font-weight: normal; color: #6b7280; font-size: 11px; }
         .post-template { width: 400px; height: 400px; }
         .post-template.fmt-45 { height: 500px; }
         .story-template { width: 400px; height: 711px; }
@@ -3042,7 +3062,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "23.7";
+        const APP_VERSION = "24.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3480,7 +3500,14 @@ Alle sind herzlich eingeladen!</textarea></div>
             }
             return `<option value="">${esc(emptyLabel)}</option>` + list.map(m => `<option value="${esc(valueOf(m))}">${esc(labelOf(m))}</option>`).join('');
         }
-        function setText(id, v) { const el = $(id); if (el) el.innerText = v; }
+        function setText(id, v) {
+            const el = $(id);
+            if (!el) return;
+            const t = v == null ? '' : String(v);
+            // *Wort* in Grafiken = Wort in Akzentfarbe (✨ Extras-Tipp)
+            if (/\*[^*\n]+\*/.test(t) && el.closest('.post-template, .story-template')) el.innerHTML = esc(t).replace(/\*([^*\n]+)\*/g, '<span class="hl">$1</span>').replace(/\n/g, '<br>');
+            else el.innerText = t;
+        }
         function pad(n) { return String(n).padStart(2, '0'); }
         function normName(s) { return String(s || '').replace(/\s+/g, ' ').trim(); }
 
@@ -4882,8 +4909,48 @@ Alle sind herzlich eingeladen!</textarea></div>
             { key: 'pbText', id: 'in-pb-text', def: () => 'Präsentiert von' },
             { key: 'vidSpeed', id: 'in-vid-speed', def: () => 'normal' },
             { key: 'vidGap', id: 'in-vid-gap', def: () => 'normal' },
-            { key: 'vidDist', id: 'in-vid-dist', def: () => 'short' }
+            { key: 'vidDist', id: 'in-vid-dist', def: () => 'short' },
+            // ✨ Extras (Advanced) – Standard „aus“, ältere Stände sehen dadurch unverändert aus
+            { key: 'boxFill', id: 'in-box-fill', def: () => 'solid', extra: true },
+            { key: 'boxShape', id: 'in-box-shape', def: () => 'std', extra: true },
+            { key: 'boxEdge', id: 'in-box-edge', def: () => 'none', extra: true },
+            { key: 'boxShadow', id: 'in-box-shadow', def: () => 'none', extra: true },
+            { key: 'titleStyle', id: 'in-title-style', def: () => 'normal', extra: true },
+            { key: 'titleRot', id: 'in-title-rot', def: () => 'none', extra: true },
+            { key: 'bigMode', id: 'in-big-mode', def: () => 'off', extra: true },
+            { key: 'bigText', id: 'in-big-text', def: () => '', extra: true },
+            { key: 'bigLook', id: 'in-big-look', def: () => 'fill', extra: true },
+            { key: 'bigColor', id: 'in-big-color', def: () => 'text', extra: true },
+            { key: 'bigOpacity', id: 'in-big-opacity', def: () => '18', extra: true },
+            { key: 'ovGrad', id: 'in-ov-grad', def: () => 'none', extra: true },
+            { key: 'ovGradColor', id: 'in-ov-gradcolor', def: () => 'primary', extra: true },
+            { key: 'ovGradStr', id: 'in-ov-gradstr', def: () => '70', extra: true },
+            { key: 'ovPattern', id: 'in-ov-pattern', def: () => 'none', extra: true },
+            { key: 'ovPatOp', id: 'in-ov-patop', def: () => '25', extra: true },
+            { key: 'ovFrame', id: 'in-ov-frame', def: () => 'none', extra: true }
         ];
+        /* Felder, die zu den Extras zählen (inkl. der dorthin verschobenen Text-Effekte) */
+        const EXTRA_KEYS = EXTRA_DESIGN.filter(f => f.extra).map(f => f.key).concat(['textEffect', 'letterSpacing', 'titleUpper', 'titleItalic']);
+        /* Wie viele Extras weichen vom Standard ab? (für „✨ Extras · 3 aktiv“) */
+        function countActiveExtras(t) {
+            return EXTRA_DESIGN.filter(f => EXTRA_KEYS.includes(f.key) && f.key !== 'bigText').filter(f => {
+                const el = $(`${f.id}-${t}`); if (!el) return false;
+                const v = f.check ? el.checked : el.value, d = f.def(t);
+                if (['bigLook', 'bigColor', 'bigOpacity'].includes(f.key) && val(`in-big-mode-${t}`) === 'off') return false;
+                if (['ovGradColor', 'ovGradStr'].includes(f.key) && val(`in-ov-grad-${t}`) === 'none') return false;
+                if (f.key === 'ovPatOp' && val(`in-ov-pattern-${t}`) === 'none') return false;
+                return String(v) !== String(d);
+            }).length;
+        }
+        function resetExtras(tab) {
+            EXTRA_DESIGN.filter(f => EXTRA_KEYS.includes(f.key)).forEach(f => {
+                const el = $(`${f.id}-${tab}`); if (!el) return;
+                if (f.check) el.checked = !!f.def(tab); else el.value = f.def(tab);
+            });
+            updateTabDesign(tab);
+            scheduleSave();
+            toast('↩️ Extras zurückgesetzt');
+        }
         function collectExtraDesign(t) {
             const o = {};
             EXTRA_DESIGN.forEach(f => { const el = $(`${f.id}-${t}`); if (el) o[f.key] = f.check ? el.checked : el.value; });
@@ -4913,7 +4980,10 @@ Alle sind herzlich eingeladen!</textarea></div>
         const STYLE_EXTRA = ['titleFont', 'titleColorMode', 'titleColor', 'textEffect', 'letterSpacing', 'titleUpper', 'titleItalic',
             'boxMode', 'boxColor', 'boxText', 'boxOpacity', 'accentLine', 'textAlign', 'logoGap', 'logoDir', 'vsPos', 'vsSize',
             'fieldStyle', 'fieldView', 'fieldShape', 'fieldOpacity', 'fieldSize', 'playerStyle', 'playerSize', 'pitchNameMode', 'pitchShadow', 'pitchBigNum',
-            'lmLayout', 'lmLogoSize', 'lmTextSize', 'lmVs'];
+            'lmLayout', 'lmLogoSize', 'lmTextSize', 'lmVs',
+            'boxFill', 'boxShape', 'boxEdge', 'boxShadow', 'titleStyle', 'titleRot', 'ovGrad', 'ovGradColor', 'ovGradStr', 'ovPattern', 'ovPatOp', 'ovFrame'];
+        /* Diese Extras setzt jeder Stil – fehlen sie im Stil, gilt der Standard (sonst bliebe z.B. „Neon“ nach „Klassisch“ stehen) */
+        const STYLE_EXTRA_RESET = ['boxFill', 'boxShape', 'boxEdge', 'boxShadow', 'titleStyle', 'titleRot', 'ovGrad', 'ovGradColor', 'ovGradStr', 'ovPattern', 'ovPatOp', 'ovFrame'];
         const F = n => FONT_LIST.find(f => f[0].includes(n))?.[0] || 'Arial, sans-serif';
         const STYLE_PRESETS = [
             { id: 'klassisch', name: '🏟️ Klassisch', v: { frameShape: 'circle', colorFrame: '#ffffff', colorText: '#ffffff', font: 'Arial, sans-serif', titleFont: '', titleColorMode: 'text',
@@ -4927,19 +4997,34 @@ Alle sind herzlich eingeladen!</textarea></div>
             { id: 'minimal', name: '◻️ Minimal', v: { frameShape: 'none', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Montserrat'), titleFont: '', titleColorMode: 'text',
                 textEffect: 'none', letterSpacing: '3', titleUpper: true, titleItalic: false, boxMode: 'none', accentLine: false } },
             { id: 'neon', name: '⚡ Leuchten', v: { frameShape: 'circle', colorFrame: '@jersey', colorText: '#ffffff', font: F('Kanit'), titleFont: F('Teko'), titleColorMode: 'text',
-                textEffect: 'glow', letterSpacing: '2', titleUpper: true, titleItalic: true, boxMode: 'custom', boxColor: '#000000', boxText: '#ffffff', boxOpacity: '70' } }
+                textEffect: 'glow', letterSpacing: '2', titleUpper: true, titleItalic: true, boxMode: 'custom', boxColor: '#000000', boxText: '#ffffff', boxOpacity: '70' } },
+            // Neue Stile mit Extras (Advanced)
+            { id: 'neonnacht', name: '🌃 Neon-Nacht', adv: true, v: { frameShape: 'circle', colorFrame: '@jersey', colorText: '#ffffff', font: F('Kanit'), titleFont: F('Teko'), titleColorMode: 'text',
+                textEffect: 'glow', letterSpacing: '3', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#05070d', boxText: '#ffffff', boxOpacity: '80',
+                boxEdge: 'neon', boxShape: 'round', titleStyle: 'normal', ovGrad: 'vignette', ovGradColor: 'black', ovGradStr: '85', ovPattern: 'rays', ovPatOp: '20', ovFrame: 'none' } },
+            { id: 'zeitung', name: '📰 Zeitung', adv: true, v: { frameShape: 'square', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Oswald'), titleFont: F('Anton'), titleColorMode: 'text',
+                textEffect: 'strong', letterSpacing: '0.5', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#ffffff', boxText: '#111111', boxOpacity: '96', accentLine: false,
+                boxShape: 'square', boxShadow: 'hard', boxEdge: 'left', titleRot: 's', ovPattern: 'halftone', ovPatOp: '30', ovGrad: 'bottom', ovGradColor: 'black', ovGradStr: '60' } },
+            { id: 'trikot', name: '👕 Trikot', adv: true, v: { frameShape: 'shield', colorFrame: '#ffffff', colorText: '#ffffff', font: F('Barlow'), titleFont: F('Graduate'), titleColorMode: 'text',
+                textEffect: 'strong', letterSpacing: '2', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '@primary', boxText: '#ffffff', boxOpacity: '92',
+                boxFill: 'jersey', boxShape: 'skew', boxEdge: 'bottom', titleStyle: 'echo-down', ovPattern: 'stripes', ovPatOp: '15', ovGrad: 'diag', ovGradColor: 'primary', ovGradStr: '55', ovFrame: 'line' } },
+            { id: 'comic', name: '💥 Comic', adv: true, v: { frameShape: 'rounded', colorFrame: '#111111', colorText: '#ffffff', font: F('Bangers') !== 'Arial, sans-serif' ? F('Bangers') : F('Anton'), titleFont: F('Bangers') !== 'Arial, sans-serif' ? F('Bangers') : F('Anton'), titleColorMode: 'custom', titleColor: '#ffd23f',
+                textEffect: '3d', letterSpacing: '1', titleUpper: true, titleItalic: false, boxMode: 'custom', boxColor: '#ffd23f', boxText: '#111111', boxOpacity: '100',
+                boxShadow: 'hard', boxShape: 'round', boxFill: 'dots', titleRot: 's', ovPattern: 'halftone', ovPatOp: '35', ovGrad: 'none', ovFrame: 'corners' } }
         ];
         function styleDesignHTML(tab) {
             return `
                     <details class="design-details" data-section="styles">
                         <summary>✨ Design-Stile</summary>
                         <div class="details-body">
-                            <div class="style-grid">${STYLE_PRESETS.map(p => `<button type="button" class="style-chip" onclick="applyStyle('${tab}', '${p.id}')">${p.name}</button>`).join('')}</div>
+                            <div class="style-grid">${STYLE_PRESETS.map(p => `<button type="button" class="style-chip${p.adv ? ' adv-only' : ''}" onclick="applyStyle('${tab}', '${p.id}')">${p.name}</button>`).join('')}</div>
                             <label class="style-scope"><input type="checkbox" id="style-all-${tab}"> Auf alle Reiter anwenden</label>
                             <div class="design-sub">Meine Stile</div>
                             <div class="style-list" id="style-list-${tab}"></div>
                             <button type="button" class="copy-action-btn" onclick="saveCurrentStyle('${tab}')">💾 Aktuelles Design als Stil speichern</button>
-                            <span class="hint">Ein Stil setzt Farben, Schriften, Kästen und Rahmen auf einmal. Eigene Stile enthalten auch Hintergrund und Spielfeld-Look und sind in allen Versionen verfügbar. Mit ↩️ machst du alles rückgängig.</span>
+                            <span class="hint">Ein Stil setzt Farben, Schriften, Kästen, Rahmen und Extras auf einmal. Eigene Stile enthalten auch Hintergrund und Spielfeld-Look und sind in allen Versionen verfügbar. Mit ↩️ machst du alles rückgängig.</span>
+                            <button type="button" class="copy-action-btn" style="background:#5a4fcf;" onclick="applyDesignToAllTabs('${tab}')">🎨 Dieses Design auf alle Reiter übertragen</button>
+                            <span class="hint">Überträgt Farben, Schriften, Kästen, Rahmen, Extras, Logo- und Sponsoren-Einstellungen – auf Wunsch auch die Hintergründe.</span>
                         </div>
                     </details>`;
         }
@@ -4955,10 +5040,12 @@ Alle sind herzlich eingeladen!</textarea></div>
             const resolve = x => x === '@primary' ? (val('cfg-color-primary') || '#005f73') : x === '@jersey' ? (val('cfg-color-jersey') || '#bb3e03') : x;
             STYLE_BASE.forEach(([k, id]) => { const el = $(`${id}-${tab}`); if (el && v[k] !== undefined) el.value = resolve(v[k]); });
             EXTRA_DESIGN.forEach(f => {
-                if (!STYLE_EXTRA.includes(f.key) || v[f.key] === undefined) return;
+                if (!STYLE_EXTRA.includes(f.key)) return;
                 const el = $(`${f.id}-${tab}`);
                 if (!el) return;
-                if (f.check) el.checked = !!v[f.key]; else el.value = resolve(v[f.key]);
+                const x = v[f.key] !== undefined ? v[f.key] : STYLE_EXTRA_RESET.includes(f.key) ? f.def(tab) : undefined;
+                if (x === undefined) return;
+                if (f.check) el.checked = !!x; else el.value = resolve(x);
             });
             if (v.bgFeed && $(`in-bg-${tab}-feed`)) setVal(`in-bg-${tab}-feed`, v.bgFeed);
             if (v.bgStory && $(`in-bg-${tab}-story`)) setVal(`in-bg-${tab}-story`, v.bgStory);
@@ -5105,23 +5192,12 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <div class="control-group"><label>Größe Überschriften</label><input type="range" id="in-size-title-${tab}" min="0.8" max="6" step="0.1" value="2.0" oninput="updateTabDesign('${tab}')"></div>
                                 <div class="control-group"><label>Größe Texte</label><input type="range" id="in-size-info-${tab}" min="0.6" max="4" step="0.1" value="1.1" oninput="updateTabDesign('${tab}')"></div>
                             </div>` : ''}
-                            <div class="adv-only" style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Text-Effekt <small>(alle Texte)</small></label>
-                                    <select id="in-text-effect-${tab}" onchange="updateTabDesign('${tab}')">
-                                        <option value="soft">Schatten (Standard)</option>
-                                        <option value="strong">Starker Schatten</option>
-                                        <option value="outline">Kontur</option>
-                                        <option value="glow">Leuchten (Akzentfarbe)</option>
-                                        <option value="3d">3D-Versatz</option>
-                                        <option value="none">Ohne</option>
-                                    </select></div>
-                                <div class="control-group"><label>Buchstabenabstand <small>(Überschriften)</small></label><input type="range" id="in-letter-spacing-${tab}" min="-2" max="12" step="0.5" value="0" oninput="updateTabDesign('${tab}')"></div>
-                            </div>
-                            <div class="ct-checks adv-only">
-                                <label><input type="checkbox" id="in-title-upper-${tab}" checked onchange="updateTabDesign('${tab}')"> GROSSBUCHSTABEN</label>
-                                <label><input type="checkbox" id="in-title-italic-${tab}" onchange="updateTabDesign('${tab}')"> <i>Kursiv</i></label>
-                                <small style="color:#5c6670;">– gilt für die Überschriften</small>
-                            </div>
+                            <span class="hint">Kästen und Rahmen findest du direkt darunter, Effekte wie Umriss-Schrift oder Muster unter „✨ Extras“. Einzelne Texte und Bilder kannst du in der Vorschau antippen und größer/kleiner ziehen.</span>
+                        </div>
+                    </details>
+                    <details class="design-details" data-section="boxes" ontoggle="if (this.open) renderRoleHints('${tab}')">
+                        <summary>🔲 Kästen & Rahmen</summary>
+                        <div class="details-body">
                             <div class="design-sub">Kästen <small>– Namensschilder, Listen, Ersatzbank, Termine</small></div>
                             <div class="control-group">
                                 <select id="in-box-mode-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
@@ -5133,15 +5209,26 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <div class="control-group" data-role-ctl="boxbg"><label>Kasten-Farbe</label><input type="color" id="in-box-color-${tab}" value="#000000" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"><div class="role-hint" data-role="boxbg"></div></div>
                                 <div class="control-group" data-role-ctl="boxfg"><label>Schrift im Kasten</label><input type="color" id="in-box-text-${tab}" value="#ffffff" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"><div class="role-hint" data-role="boxfg"></div></div>
                             </div>
-                            <div class="control-group"><label><input type="checkbox" id="in-accent-line-${tab}" checked onchange="updateTabDesign('${tab}'); scheduleSave();"> Akzent-Linie unter Namen (in Akzent-/Trikotfarbe)</label></div>
                             <div class="control-group"><label>Deckkraft der Kästen</label><input type="range" id="in-box-opacity-${tab}" min="0" max="100" step="5" value="60" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
+                            <div class="control-group"><label><input type="checkbox" id="in-accent-line-${tab}" checked onchange="updateTabDesign('${tab}'); scheduleSave();"> Akzent-Linie unter Namen (in Akzent-/Trikotfarbe)</label></div>
                             <div class="design-sub">Rahmen <small>– um Fotos und Wappen</small></div>
                             <div class="control-group" data-role-ctl="frame"><label>Rahmenfarbe</label><input type="color" id="in-color-frame-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"><div class="role-hint" data-role="frame"></div></div>
-                            <span class="hint">Einzelne Texte und Bilder kannst du zusätzlich in der Vorschau antippen und größer/kleiner ziehen. Eigene Texte haben ihre Farbe unter „✍️ Eigene Texte“.</span>
+                            <div class="control-group"${/nicht verwendet/.test(cfg.frameLabel) ? ' hidden' : ''}>
+                                <label>${cfg.frameLabel.replace('Rahmenform', 'Form')}</label>
+                                <select id="in-frame-shape-${tab}" onchange="updateTabDesign('${tab}')">
+                                    <option value="circle">Kreis (Standard)</option>
+                                    <option value="rounded">Abgerundet</option>
+                                    <option value="square">Quadrat</option>
+                                    <option value="shield">Schild-Form</option>
+                                    <option value="none">Ohne Rahmen</option>
+                                    <option value="free">Freigestellt mit Schatten</option>
+                                </select>
+                            </div>
+                            <span class="hint">Muster, Verläufe, schräge Kästen und Neon-Ränder gibt es unter „✨ Extras“.</span>
                         </div>
                     </details>
                     <details class="design-details" data-section="design">
-                        <summary>🖼️ Hintergrund & Formen</summary>
+                        <summary>🖼️ Hintergrund</summary>
                         <div class="details-body">
                             <div class="control-group">
                                 <label>Hintergrund Beitrag</label>
@@ -5153,36 +5240,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <input type="hidden" id="in-bg-${tab}-story" value="${DEFAULT_BG}">
                                 <div class="bg-thumb-grid" id="thumb-grid-${tab}-story"></div>
                             </div>
-                            <div class="control-group"${/nicht verwendet/.test(cfg.frameLabel) ? ' hidden' : ''}>
-                                <label>${cfg.frameLabel}</label>
-                                <select id="in-frame-shape-${tab}" onchange="updateTabDesign('${tab}')">
-                                    <option value="circle">Kreis (Standard)</option>
-                                    <option value="rounded">Abgerundet</option>
-                                    <option value="square">Quadrat</option>
-                                    <option value="shield">Schild-Form</option>
-                                    <option value="none">Ohne Rahmen</option>
-                                    <option value="free">Freigestellt mit Schatten</option>
-                                </select>
-                            </div>
-                            ${cfg.teamNames ? `
-                            <div class="control-group"><label>Wappen-Größe</label><input type="range" id="in-logo-size-${tab}" min="50" max="150" step="5" value="75" oninput="updateTabDesign('${tab}')"></div>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div class="control-group"><label>Wappen-Anordnung</label>
-                                    <select id="in-logo-dir-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
-                                        <option value="row">↔️ Nebeneinander</option>
-                                        <option value="column">↕️ Übereinander</option>
-                                    </select></div>
-                                <div class="control-group"><label>Abstand der Wappen</label><input type="range" id="in-logo-gap-${tab}" min="0" max="140" step="5" value="20" oninput="updateTabDesign('${tab}')"></div>
-                                <div class="control-group"><label>Position „VS“</label>
-                                    <select id="in-vs-pos-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
-                                        <option value="center">Mittig zu den Wappen</option>
-                                        <option value="top">Oben</option>
-                                        <option value="bottom">Unten</option>
-                                    </select></div>
-                                <div class="control-group"><label>Größe „VS“</label><input type="range" id="in-vs-size-${tab}" min="50" max="250" step="10" value="100" oninput="updateTabDesign('${tab}')"></div>
-                            </div>` : ''}
-                            <button type="button" class="copy-action-btn" style="background:#5a4fcf;" onclick="applyDesignToAllTabs('${tab}')">🎨 Dieses Design auf alle Reiter übertragen</button>
-                            <span class="hint">Überträgt Farben, Schriften, Kästen, Rahmen, Logo- und Sponsoren-Einstellungen – auf Wunsch auch die Hintergründe.</span>
+                            <span class="hint">Eigene Hintergründe lädst du unter „🗃️ Daten → 🖼️ Eigene Hintergründe“ hoch. Farbverläufe, Muster und Rahmen darüber gibt es unter „✨ Extras“.</span>
                         </div>
                     </details>
                     <details class="design-details" data-section="photos">
@@ -5210,8 +5268,25 @@ Alle sind herzlich eingeladen!</textarea></div>
                         </div>
                     </details>
                     <details class="design-details" data-section="logo">
-                        <summary>🏷️ Vereinslogo${cfg.teamNames ? ' & Team-Namen' : ''}</summary>
+                        <summary>🏷️ ${cfg.teamNames ? 'Wappen, Team-Namen & Vereinslogo' : 'Vereinslogo'}</summary>
                         <div class="details-body">
+                            ${cfg.teamNames ? `
+                            <div class="control-group"><label>Wappen-Größe</label><input type="range" id="in-logo-size-${tab}" min="50" max="150" step="5" value="75" oninput="updateTabDesign('${tab}')"></div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Wappen-Anordnung</label>
+                                    <select id="in-logo-dir-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="row">↔️ Nebeneinander</option>
+                                        <option value="column">↕️ Übereinander</option>
+                                    </select></div>
+                                <div class="control-group"><label>Abstand der Wappen</label><input type="range" id="in-logo-gap-${tab}" min="0" max="140" step="5" value="20" oninput="updateTabDesign('${tab}')"></div>
+                                <div class="control-group"><label>Position „VS“</label>
+                                    <select id="in-vs-pos-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="center">Mittig zu den Wappen</option>
+                                        <option value="top">Oben</option>
+                                        <option value="bottom">Unten</option>
+                                    </select></div>
+                                <div class="control-group"><label>Größe „VS“</label><input type="range" id="in-vs-size-${tab}" min="50" max="250" step="10" value="100" oninput="updateTabDesign('${tab}')"></div>
+                            </div>` : ''}
                     ${cfg.teamNames ? `
                     <div class="control-group">
                         <label><input type="checkbox" id="in-show-teamnames-${tab}" onchange="updateMatchup();" checked> Team-Namen unter den Wappen anzeigen</label>
@@ -5277,6 +5352,104 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 </select></div>
                             <button type="button" class="copy-action-btn" style="margin:4px 0 6px;" onclick="openVidOrder('${tab}')">🔀 Reihenfolge der Elemente festlegen</button>
                             <span class="hint">Gilt für „🎬 Als Video (Reel)“ in diesem Reiter. Langsamer und mit mehr Abstand wird das Video länger (max. 25 Sekunden). Ohne eigene Reihenfolge fliegen die Elemente von oben nach unten ein.</span>
+                        </div>
+                    </details>
+                    <details class="design-details adv-only extras-details" data-section="extras">
+                        <summary>✨ Extras <small class="ex-sub">– für Design-Profis</small> <span class="ex-count" id="ex-count-${tab}" hidden></span></summary>
+                        <div class="details-body">
+                            <div class="role-intro">Spielereien für einen besonderen Look. Alles ist optional – „Alle Extras zurücksetzen“ ganz unten macht es rückgängig. Die Design-Stile „Neon-Nacht“, „Zeitung“, „Trikot“ und „Comic“ nutzen diese Extras schon.</div>
+                            <div class="design-sub">🔲 Kästen</div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Füllung</label>
+                                    <select id="in-box-fill-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="solid">Einfarbig</option><option value="grad">Verlauf (Vereinsfarben)</option><option value="stripes">Streifen</option>
+                                        <option value="dots">Pünktchen</option><option value="check">Karo</option><option value="diamond">Rauten</option><option value="net">Netz</option><option value="jersey">Trikot-Streifen</option>
+                                    </select></div>
+                                <div class="control-group"><label>Form</label>
+                                    <select id="in-box-shape-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="std">Standard</option><option value="square">Eckig</option><option value="round">Stark gerundet</option><option value="skew">Schräg (TV-Look)</option>
+                                    </select></div>
+                                <div class="control-group"><label>Rand</label>
+                                    <select id="in-box-edge-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="none">Keiner</option><option value="left">Balken links</option><option value="bottom">Linie unten</option><option value="frame">Rahmen rundum</option><option value="neon">Neon-Leuchten</option>
+                                    </select></div>
+                                <div class="control-group"><label>Schatten</label>
+                                    <select id="in-box-shadow-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="none">Keiner</option><option value="soft">Weich</option><option value="hard">Hart (Retro)</option>
+                                    </select></div>
+                            </div>
+                            <div class="design-sub">🔤 Überschriften & Texte</div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Überschrift-Stil</label>
+                                    <select id="in-title-style-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="normal">Normal</option><option value="outline">Umriss (hohl)</option><option value="echo-up">Echo nach oben</option><option value="echo-down">Echo nach unten</option>
+                                    </select></div>
+                                <div class="control-group"><label>Überschrift-Richtung</label>
+                                    <select id="in-title-rot-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="none">Gerade</option><option value="s">Leicht schräg</option><option value="m">Schräg</option><option value="vl">Hochkant links ⬆</option><option value="vr">Hochkant rechts ⬇</option>
+                                    </select></div>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Text-Effekt <small>(alle Texte)</small></label>
+                                    <select id="in-text-effect-${tab}" onchange="updateTabDesign('${tab}')">
+                                        <option value="soft">Schatten (Standard)</option>
+                                        <option value="strong">Starker Schatten</option>
+                                        <option value="outline">Kontur</option>
+                                        <option value="glow">Leuchten (Akzentfarbe)</option>
+                                        <option value="3d">3D-Versatz</option>
+                                        <option value="none">Ohne</option>
+                                    </select></div>
+                                <div class="control-group"><label>Buchstabenabstand <small>(Überschriften)</small></label><input type="range" id="in-letter-spacing-${tab}" min="-2" max="12" step="0.5" value="0" oninput="updateTabDesign('${tab}')"></div>
+                            </div>
+                            <div class="ct-checks">
+                                <label><input type="checkbox" id="in-title-upper-${tab}" checked onchange="updateTabDesign('${tab}')"> GROSSBUCHSTABEN</label>
+                                <label><input type="checkbox" id="in-title-italic-${tab}" onchange="updateTabDesign('${tab}')"> <i>Kursiv</i></label>
+                                <small style="color:#5c6670;">– gilt für die Überschriften</small>
+                            </div>
+                            <span class="hint">Tipp: Ein Wort in *Sternchen* schreiben (z.B. „*TOR* für Lilaheim“) – dann erscheint es in der Akzentfarbe.</span>
+                            <div class="design-sub">🔢 Riesen-Text im Hintergrund</div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Inhalt</label>
+                                    <select id="in-big-mode-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="off">Aus</option><option value="auto">Automatisch</option><option value="custom">Eigener Text ↓</option>
+                                    </select></div>
+                                <div class="control-group"><label>Darstellung</label>
+                                    <select id="in-big-look-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="fill">Gefüllt</option><option value="outline">Umriss</option>
+                                    </select></div>
+                                <div class="control-group"><label>Farbe</label>
+                                    <select id="in-big-color-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="text">Schriftfarbe</option><option value="jersey">Akzent-/Trikotfarbe</option><option value="primary">Hauptfarbe</option>
+                                    </select></div>
+                                <div class="control-group"><label>Deckkraft</label><input type="range" id="in-big-opacity-${tab}" min="5" max="70" step="5" value="18" oninput="updateTabDesign('${tab}')"></div>
+                            </div>
+                            <div class="control-group"><input type="text" id="in-big-text-${tab}" maxlength="12" placeholder="Eigener Text, z.B. 10 oder DERBY" oninput="updateTabDesign('${tab}')"></div>
+                            <span class="hint">„Automatisch“ zeigt je Vorlage z.B. die Minute beim Tor, den Spielstand beim Ergebnis oder die Rückennummer. In der Vorschau antippen, verschieben und größer ziehen.</span>
+                            <div class="design-sub">🌫️ Hintergrund-Ebenen</div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="control-group"><label>Farbverlauf</label>
+                                    <select id="in-ov-grad-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="none">Aus</option><option value="bottom">Von unten</option><option value="top">Von oben</option><option value="diag">Diagonal</option><option value="vignette">Dunkler Rand (Vignette)</option>
+                                    </select></div>
+                                <div class="control-group"><label>Verlaufsfarbe</label>
+                                    <select id="in-ov-gradcolor-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="primary">Hauptfarbe</option><option value="jersey">Akzent-/Trikotfarbe</option><option value="black">Schwarz</option>
+                                    </select></div>
+                                <div class="control-group"><label>Muster</label>
+                                    <select id="in-ov-pattern-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="none">Aus</option><option value="halftone">Halbton-Punkte</option><option value="stripes">Streifen</option><option value="check">Karo</option>
+                                        <option value="grain">Körnung</option><option value="rays">Lichtstrahlen</option><option value="speed">Speedlines</option><option value="net">Tornetz</option>
+                                    </select></div>
+                                <div class="control-group"><label>Rahmen ums Bild</label>
+                                    <select id="in-ov-frame-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                        <option value="none">Aus</option><option value="line">Linie</option><option value="double">Doppelt</option><option value="corners">Ecken</option>
+                                    </select></div>
+                                <div class="control-group"><label>Stärke Verlauf</label><input type="range" id="in-ov-gradstr-${tab}" min="10" max="100" step="5" value="70" oninput="updateTabDesign('${tab}')"></div>
+                                <div class="control-group"><label>Stärke Muster</label><input type="range" id="in-ov-patop-${tab}" min="5" max="80" step="5" value="25" oninput="updateTabDesign('${tab}')"></div>
+                            </div>
+                            <span class="hint">Liegt über dem Hintergrund und unter allen Inhalten – gut, um eigene Fotos in Vereinsfarben einzufärben oder Texte lesbarer zu machen. Der Bild-Rahmen nutzt die Rahmenfarbe.</span>
+                            <!--EXTRAS-MORE-->
+                            <button type="button" class="copy-action-btn" style="background:#6c757d;" onclick="resetExtras('${tab}')">↩️ Alle Extras zurücksetzen</button>
                         </div>
                     </details>
                     ${labelEditorHTML(tab)}`;
@@ -5471,7 +5644,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 }
             }
             const tags = normName(val('cfg-hashtags'));
-            return lines.join('\n').trim() + (tags ? `\n\n${tags}` : '');
+            return lines.join('\n').replace(/\*([^*\n]+)\*/g, '$1').trim() + (tags ? `\n\n${tags}` : '');
         }
 
         function updateCaption(tab) {
@@ -5863,6 +6036,169 @@ Alle sind herzlich eingeladen!</textarea></div>
             applyClubBranding();
         }
 
+        /* ================= ✨ EXTRAS: Kästen, Überschriften, Riesen-Text, Hintergrund-Ebenen ================= */
+        const svgTile = (w, h, body) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'>${body}</svg>`).replace(/'/g, '%27')}")`;
+        function hexRgba(hex, a) {
+            const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+            const n = m ? parseInt(m[1], 16) : 0;
+            return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+        }
+        /* Muster für Kästen (Kacheln mit fester Größe – so zeichnet sie auch der Bild-Export sauber) */
+        function boxPattern(kind, ink, jersey) {
+            switch (kind) {
+                case 'stripes': return [svgTile(12, 12, `<path d='M-3 3l6-6M0 12L12 0M9 15l6-6' stroke='${ink}' stroke-width='3'/>`), '12px 12px'];
+                case 'dots': return [svgTile(10, 10, `<circle cx='5' cy='5' r='1.6' fill='${ink}'/>`), '10px 10px'];
+                case 'check': return [svgTile(16, 16, `<rect width='8' height='8' fill='${ink}'/><rect x='8' y='8' width='8' height='8' fill='${ink}'/>`), '16px 16px'];
+                case 'diamond': return [svgTile(16, 16, `<path d='M8 1l7 7-7 7-7-7z' fill='${ink}'/>`), '16px 16px'];
+                case 'net': return [svgTile(14, 14, `<path d='M0 0L14 14M14 0L0 14' stroke='${ink}' stroke-width='1'/>`), '14px 14px'];
+                case 'jersey': return [svgTile(16, 16, `<rect width='8' height='16' fill='${hexRgba(jersey, 0.55)}'/>`), '16px 16px'];
+                default: return null;
+            }
+        }
+        /* Muster über dem ganzen Hintergrund */
+        function overlayPattern(kind, w, h, ink) {
+            switch (kind) {
+                case 'halftone': return [svgTile(12, 12, `<circle cx='6' cy='6' r='2.2' fill='${ink}'/>`), '12px 12px'];
+                case 'stripes': return [svgTile(24, 24, `<path d='M-6 6l12-12M0 24L24 0M18 30l12-12' stroke='${ink}' stroke-width='5'/>`), '24px 24px'];
+                case 'check': return [svgTile(40, 40, `<rect width='20' height='20' fill='${ink}'/><rect x='20' y='20' width='20' height='20' fill='${ink}'/>`), '40px 40px'];
+                case 'net': return [svgTile(26, 26, `<path d='M0 0L26 26M26 0L0 26' stroke='${ink}' stroke-width='1.2'/>`), '26px 26px'];
+                case 'grain': return [svgTile(160, 160, `<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -0.45'/></filter><rect width='160' height='160' filter='url(#n)'/>`), '160px 160px'];
+                case 'rays': {
+                    const cx = w / 2, cy = -h * 0.15, R = Math.hypot(w, h) * 1.3, n = 18;
+                    let d = '';
+                    for (let i = 0; i < n; i++) {
+                        const a1 = Math.PI * (0.08 + 0.84 * i / n), a2 = a1 + Math.PI * 0.84 / n / 2;
+                        d += `M${cx} ${cy}L${(cx + R * Math.cos(a1)).toFixed(1)} ${(cy + R * Math.sin(a1)).toFixed(1)}L${(cx + R * Math.cos(a2)).toFixed(1)} ${(cy + R * Math.sin(a2)).toFixed(1)}Z`;
+                    }
+                    return [svgTile(w, h, `<path d='${d}' fill='${ink}'/>`), '100% 100%'];
+                }
+                case 'speed': {
+                    let d = '';
+                    for (let i = 0; i < 26; i++) {
+                        const y = (h * ((i * 37) % 100) / 100).toFixed(1), len = 60 + ((i * 53) % 140), x = i % 2 ? w - len : 0;
+                        d += `<rect x='${x}' y='${y}' width='${len}' height='${1 + (i % 3)}' rx='1' fill='${ink}'/>`;
+                    }
+                    return [svgTile(w, h, d), '100% 100%'];
+                }
+                default: return null;
+            }
+        }
+        const BOX_LIST = '.sponsor-text, .player-name, .pitch-bench .pb-line, .list-section-title, .list-item, .bench-tag, .tor-details, .xp-name, .potm-player-name, .kal-row, .kal-empty, .spon-name, .wk-row, .scorer-box, .tf-names, .bday-name, .transfer-name, .transfer-chip, .kader-info-block, .kader-freetext, .kader-grid-name';
+        /* CSS-Regeln für die Kasten-Extras einmalig erzeugen (gleiche Kasten-Liste wie „Ohne Kästen“) */
+        function injectExtrasCss() {
+            if ($('extras-css')) return;
+            const L = `:is(${BOX_LIST})`;
+            const st = document.createElement('style');
+            st.id = 'extras-css';
+            st.textContent = `
+                .bx-img ${L} { background-image: var(--box-img) !important; background-size: var(--box-img-size, auto) !important; background-repeat: repeat !important; }
+                .bx-shape-square ${L} { border-radius: 0 !important; }
+                .bx-shape-round ${L} { border-radius: 16px !important; }
+                .bx-shape-skew ${L} { transform: skewX(-9deg); border-radius: 3px !important; }
+                .bx-shadow-soft ${L} { box-shadow: 0 6px 16px rgba(0,0,0,0.5) !important; }
+                .bx-shadow-hard ${L} { box-shadow: 5px 5px 0 rgba(0,0,0,0.85) !important; }
+                .bx-edge-left ${L} { border-left: 5px solid var(--jersey-color) !important; }
+                .bx-edge-bottom ${L} { border-bottom: 3px solid var(--jersey-color) !important; }
+                .bx-edge-frame ${L} { border: 2px solid var(--tab-frame, #fff) !important; }
+                .bx-edge-neon ${L} { border: 2px solid var(--jersey-color) !important; box-shadow: 0 0 6px var(--jersey-color), 0 0 16px var(--jersey-color) !important; }`;
+            document.head.appendChild(st);
+        }
+        const TT_CLASSES = ['tt-outline', 'tt-echo-up', 'tt-echo-down', 'tt-rot-s', 'tt-rot-m', 'tt-vert-l', 'tt-vert-r'];
+        function applyExtras(tab, vc, { adv, textColVal }) {
+            injectExtrasCss();
+            const X = k => { const f = EXTRA_DESIGN.find(d => d.key === k); return adv ? (val(`${f.id}-${tab}`) || f.def(tab)) : f.def(tab); };
+            const primary = val('cfg-color-primary') || '#005f73', jersey = val('cfg-color-jersey') || '#bb3e03';
+            // Kästen
+            const boxesOn = val(`in-box-mode-${tab}`) !== 'none';
+            const fill = boxesOn ? X('boxFill') : 'solid', shape = boxesOn ? X('boxShape') : 'std', edge = boxesOn ? X('boxEdge') : 'none', shadow = boxesOn ? X('boxShadow') : 'none';
+            const boxBase = val(`in-box-mode-${tab}`) === 'custom' ? (val(`in-box-color-${tab}`) || '#000000') : '#000000';
+            const ink = val(`in-box-mode-${tab}`) !== 'custom' ? 'rgba(140,140,140,0.22)' : contrastText(boxBase) === '#ffffff' ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.13)';
+            const pat = fill === 'grad' ? [`linear-gradient(135deg, ${hexRgba(primary, 0.92)} 0%, ${hexRgba(jersey, 0.92)} 100%)`, '100% 100%'] : boxPattern(fill, ink, jersey);
+            vc.classList.toggle('bx-img', !!pat);
+            if (pat) { vc.style.setProperty('--box-img', pat[0]); vc.style.setProperty('--box-img-size', pat[1]); }
+            else { vc.style.removeProperty('--box-img'); vc.style.removeProperty('--box-img-size'); }
+            ['square', 'round', 'skew'].forEach(k => vc.classList.toggle('bx-shape-' + k, shape === k));
+            ['left', 'bottom', 'frame', 'neon'].forEach(k => vc.classList.toggle('bx-edge-' + k, edge === k));
+            ['soft', 'hard'].forEach(k => vc.classList.toggle('bx-shadow-' + k, shadow === k));
+            // Überschriften
+            const tMode = val(`in-title-color-mode-${tab}`) || 'text';
+            const tCol = !adv || tMode === 'text' ? textColVal : tMode === 'jersey' ? jersey : tMode === 'primary' ? primary : (val(`in-color-title-${tab}`) || '#f1c40f');
+            vc.style.setProperty('--tt-col', tCol);
+            vc.style.setProperty('--tt-echo1', hexRgba(tCol, 0.38));
+            vc.style.setProperty('--tt-echo2', hexRgba(tCol, 0.16));
+            const ts = X('titleStyle'), tr = X('titleRot');
+            const want = { 'tt-outline': ts === 'outline', 'tt-echo-up': ts === 'echo-up', 'tt-echo-down': ts === 'echo-down', 'tt-rot-s': tr === 's', 'tt-rot-m': tr === 'm', 'tt-vert-l': tr === 'vl', 'tt-vert-r': tr === 'vr' };
+            TT_CLASSES.forEach(c => vc.classList.toggle(c, !!want[c]));
+            // Riesen-Text
+            updateBigText(tab, { adv, textColVal });
+            // Hintergrund-Ebenen
+            const grad = X('ovGrad'), patK = X('ovPattern'), frame = X('ovFrame');
+            const gcK = X('ovGradColor'), gc = gcK === 'jersey' ? jersey : gcK === 'black' ? '#000000' : primary;
+            const gs = (parseFloat(X('ovGradStr')) || 70) / 100, po = (parseFloat(X('ovPatOp')) || 25) / 100;
+            const frameCol = val(`in-color-frame-${tab}`) || val('cfg-color-frame') || '#ffffff';
+            vc.querySelectorAll('.post-template, .story-template').forEach(tpl => {
+                const ov = tpl.querySelector(':scope > .bg-ov');
+                if (!ov) return;
+                const w = 400, h = Math.round(tpl.offsetHeight || (tpl.classList.contains('story-template') ? 711 : 500));
+                const key = [grad, gc, gs, patK, po, frame, frameCol, h].join('|');
+                ov.classList.toggle('on', grad !== 'none' || patK !== 'none' || frame !== 'none');
+                if (ov.dataset.key === key) return;
+                ov.dataset.key = key;
+                let html = '';
+                if (grad !== 'none') {
+                    const c = hexRgba(gc, gs), z = hexRgba(gc, 0);
+                    const bg = grad === 'bottom' ? `linear-gradient(0deg, ${c} 0%, ${z} 65%)` : grad === 'top' ? `linear-gradient(180deg, ${c} 0%, ${z} 60%)`
+                        : grad === 'diag' ? `linear-gradient(135deg, ${c} 0%, ${z} 70%)` : `radial-gradient(ellipse at center, ${z} 45%, ${c} 100%)`;
+                    html += `<div style="background:${bg};"></div>`;
+                }
+                if (patK !== 'none') {
+                    const pp = overlayPattern(patK, w, h, patK === 'grain' ? '#fff' : '#ffffff');
+                    if (pp) html += `<div style="background-image:${pp[0].replace(/"/g, "'")}; background-size:${pp[1]}; background-repeat:repeat; opacity:${po};"></div>`;
+                }
+                if (frame === 'line') html += `<div style="inset:12px; border:2px solid ${frameCol};"></div>`;
+                else if (frame === 'double') html += `<div style="inset:10px; border:6px double ${frameCol};"></div>`;
+                else if (frame === 'corners') {
+                    const k = 34, m = 14, sw = 4;
+                    const d = `M${m} ${m + k}V${m}H${m + k}M${w - m - k} ${m}H${w - m}V${m + k}M${w - m} ${h - m - k}V${h - m}H${w - m - k}M${m + k} ${h - m}H${m}V${h - m - k}`;
+                    html += `<div style="background-image:${svgTile(w, h, `<path d='${d}' fill='none' stroke='${frameCol}' stroke-width='${sw}'/>`).replace(/"/g, "'")}; background-size:100% 100%;"></div>`;
+                }
+                ov.innerHTML = html;
+            });
+            const cnt = adv ? countActiveExtras(tab) : 0, badge = $(`ex-count-${tab}`);
+            if (badge) { badge.hidden = !cnt; badge.textContent = cnt ? `· ${cnt} aktiv` : ''; }
+        }
+        /* Riesen-Text: „Automatisch“ je Vorlage passender Inhalt, sonst eigener Text */
+        function bigTextAuto(tab, tpl) {
+            const num = n => findPlayer(n)?.number || '';
+            switch (tab) {
+                case 'tor': { const m = /^(\d+(?:\+\d+)?)/.exec(val('in-tor-minute') || ''); return m ? m[1] + "'" : normName(val('in-tor-score')).replace(/\s/g, ''); }
+                case 'ergebnis': return normName(val('in-ergebnis-score')).replace(/\s/g, '');
+                case 'neuzugang': return newPlayerInfo().number || num(val('in-new-player')) || 'NEU';
+                case 'potm': return num(val('in-potm-player')) || 'MVP';
+                case 'geburtstag': return num(val('in-bday-player')) || 'HBD';
+                case 'post': return 'VS';
+                case 'story': return (val('formation-select') || '').replace(/[^0-9-]/g, '') || 'XI';
+                default: return normName(tpl.querySelector('.title-dyn')?.textContent || '').split(' ')[0] || '';
+            }
+        }
+        function updateBigText(tab, { adv, textColVal }) {
+            const mode = adv ? (val(`in-big-mode-${tab}`) || 'off') : 'off';
+            const colK = val(`in-big-color-${tab}`) || 'text';
+            const col = colK === 'jersey' ? (val('cfg-color-jersey') || '#bb3e03') : colK === 'primary' ? (val('cfg-color-primary') || '#005f73') : textColVal;
+            const op = (parseFloat(val(`in-big-opacity-${tab}`)) || 18) / 100, outline = val(`in-big-look-${tab}`) === 'outline';
+            $(`view-${tab}`)?.querySelectorAll('.post-template, .story-template').forEach(tpl => {
+                const big = tpl.querySelector(':scope > .bigtxt');
+                if (!big) return;
+                const text = mode === 'custom' ? normName(val(`in-big-text-${tab}`)) : mode === 'auto' ? bigTextAuto(tab, tpl) : '';
+                big.style.display = text ? '' : 'none';
+                big.classList.toggle('look-outline', outline);
+                const inner = big.firstElementChild;
+                if (inner.textContent !== text) inner.textContent = text;
+                inner.style.color = outline ? 'transparent' : hexRgba(col, op);
+                inner.style.webkitTextStroke = outline ? `2px ${hexRgba(col, Math.min(1, op * 2.2))}` : '';
+            });
+        }
+
         function updateTabDesign(tab) {
             if (!editorTabs.includes(tab)) return;
             renderPresentedBy(tab);
@@ -5946,6 +6282,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const tn = tc ? parseInt(tc[1], 16) : 0xffffff;
                 const darkText = (0.299 * ((tn >> 16) & 255) + 0.587 * ((tn >> 8) & 255) + 0.114 * (tn & 255)) < 110;
                 setOrClear('--tpl-text-shadow', eff === 'soft' ? (darkText ? '0 1px 3px rgba(255,255,255,0.55)' : '') : TEXT_EFFECTS[eff]);
+
+                applyExtras(tab, viewContainer, { adv, textColVal });
 
                 renderExtraPlayers(tab);
                 if (tab === 'story') fitStoryTitles();
@@ -6714,11 +7052,11 @@ Alle sind herzlich eingeladen!</textarea></div>
             const host = $(`design-controls-${tab}`);
             host?.closest('details')?.setAttribute('open', '');
             host?.querySelector('.sect-design')?.setAttribute('open', '');
-            const colors = host?.querySelector('details[data-section="colors"]');
-            if (colors) { colors.hidden = false; colors.open = true; }
             renderRoleHints(tab);
             const grp = host?.querySelector(`[data-role-ctl="${key}"]`);
             if (!grp) return;
+            const sec = grp.closest('details[data-section]');
+            if (sec) { sec.hidden = false; sec.open = true; }
             setTimeout(() => {
                 grp.scrollIntoView({ block: 'center', behavior: 'smooth' });
                 grp.classList.add('ctl-flash');
@@ -6866,11 +7204,29 @@ Alle sind herzlich eingeladen!</textarea></div>
                             host.insertBefore(el, host.querySelector(':scope > .sponsor-banner'));
                         });
                     }
+                    // ✨ Extras: Ebene über dem Hintergrund + Riesen-Text (eigene feste IDs, verschieben die Positions-IDs der anderen Elemente nicht)
+                    if (!tpl.querySelector(':scope > .bg-ov')) {
+                        const ov = document.createElement('div');
+                        ov.className = 'bg-ov';
+                        ov.setAttribute('aria-hidden', 'true');
+                        tpl.appendChild(ov);
+                        const isStory = tpl.classList.contains('story-template');
+                        const big = document.createElement('div');
+                        big.className = 'draggable-text bigtxt';
+                        big.id = `bigtxt-${tpl.id}`;
+                        big.setAttribute('data-fixed-id', '');
+                        const top = isStory ? 230 : 110;
+                        big.setAttribute('data-default-top', top + 'px');
+                        big.setAttribute('data-default-left', '0px');
+                        big.style.cssText = `top:${top}px; left:0px; display:none;`;
+                        big.innerHTML = '<div class="bigtxt-in"></div>';
+                        tpl.appendChild(big);
+                    }
                     if (tpl.classList.contains('post-template') && !tpl.querySelector(':scope > .tpl-content')) {
                         const content = document.createElement('div');
                         content.className = 'tpl-content';
                         Array.from(tpl.childNodes).forEach(n => {
-                            if (n.nodeType === 1 && n.classList.contains('sponsor-banner')) return;
+                            if (n.nodeType === 1 && (n.classList.contains('sponsor-banner') || n.classList.contains('bg-ov') || n.classList.contains('bigtxt'))) return;
                             content.appendChild(n);
                         });
                         tpl.insertBefore(content, tpl.firstChild);
@@ -8941,7 +9297,7 @@ Alle sind herzlich eingeladen!</textarea></div>
 
         const scheduleRoleHints = debounce(tab => renderRoleHints(tab), 600);
         function updateAllViews() {
-            if ($(`design-controls-${activeTab}`)?.querySelector('details[data-section="colors"][open]')) scheduleRoleHints(activeTab);
+            if ($(`design-controls-${activeTab}`)?.querySelector('details[data-section="colors"][open], details[data-section="boxes"][open]')) scheduleRoleHints(activeTab);
             applyLabels();
             updateDesignSettings();
             if (editorTabs.includes(activeTab)) {
@@ -10900,11 +11256,11 @@ Alle sind herzlich eingeladen!</textarea></div>
            ========================================================= */
         const UI_FIXED_TABS = ['start', 'stammdaten'];
         const UI_SECTIONS = [
-            ['styles', '✨ Design-Stile'], ['pitch', '⚽ Spielfeld & Spieler-Look'], ['colors', '🎨 Farben & Schrift'], ['design', '🖼️ Hintergrund & Formen'], ['photos', '👥 Spielerfotos & Zusatzspieler'],
-            ['logo', '🏷️ Vereinslogo oben rechts'], ['sponsors', '🤝 Sponsoren'], ['ctexts', '✍️ Eigene Texte'], ['labels', '🔤 Feste Texte ändern'],
+            ['layout', '🧩 Layout'], ['styles', '✨ Design-Stile'], ['pitch', '⚽ Spielfeld & Spieler-Look'], ['colors', '🎨 Farben & Schrift'], ['boxes', '🔲 Kästen & Rahmen'], ['design', '🖼️ Hintergrund'], ['photos', '👥 Spielerfotos & Zusatzspieler'],
+            ['logo', '🏷️ Wappen & Vereinslogo'], ['sponsors', '🤝 Sponsoren'], ['ctexts', '✍️ Eigene Texte'], ['video', '🎬 Video (Reel)'], ['extras', '✨ Extras'], ['labels', '🔤 Feste Texte ändern'],
             ['caption', '💬 Text für den Beitrag'], ['tabcopy', '📋 Aus anderer Version übernehmen'], ['pack', '📦 Mehrere Grafiken teilen']
         ];
-        const UI_SIMPLE_HIDDEN = ['ctexts', 'labels', 'tabcopy', 'pack'];
+        const UI_SIMPLE_HIDDEN = ['ctexts', 'labels', 'tabcopy', 'pack', 'extras', 'video'];
         function uiPrefs() {
             if (!prefs.ui || typeof prefs.ui !== 'object') prefs.ui = { hiddenTabs: [], hiddenSections: {} };
             prefs.ui.hiddenTabs = prefs.ui.hiddenTabs || [];
@@ -10980,8 +11336,10 @@ Alle sind herzlich eingeladen!</textarea></div>
            DESIGN AUF ALLE REITER ÜBERTRAGEN
            ========================================================= */
         const DESIGN_COPY_VALUES = ['frame-shape', 'color-frame', 'color-text', 'font', 'font-title', 'title-color-mode', 'color-title', 'text-effect',
-            'letter-spacing', 'logo-size', 'sponsor-layout', 'sponsor-cols', 'sponsor-size'];
-        const DESIGN_COPY_CHECKS = ['title-upper', 'title-italic', 'cutout'];
+            'letter-spacing', 'logo-size', 'sponsor-layout', 'sponsor-cols', 'sponsor-size',
+            'box-mode', 'box-color', 'box-text', 'box-opacity', 'text-align', 'box-fill', 'box-shape', 'box-edge', 'box-shadow', 'title-style', 'title-rot',
+            'ov-grad', 'ov-gradcolor', 'ov-gradstr', 'ov-pattern', 'ov-patop', 'ov-frame'];
+        const DESIGN_COPY_CHECKS = ['title-upper', 'title-italic', 'cutout', 'accent-line'];
         function applyDesignToAllTabs(tab) {
             if (!confirm('Das Design dieses Reiters (Rahmen, Farben, Schriften, Text-Effekte, Logo- und Sponsoren-Einstellungen) auf alle anderen Reiter übertragen?\n\nMit ↩️ lässt sich das rückgängig machen.')) return;
             const withBg = confirm('Sollen auch die Hintergründe (Beitrag und Story) übertragen werden?\n\nOK = ja · Abbrechen = Hintergründe behalten');
