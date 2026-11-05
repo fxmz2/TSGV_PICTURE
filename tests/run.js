@@ -547,6 +547,31 @@ async function makePhotos(browser) {
             return r; });
         check('Foto-Effekte (Sticker-Rand, bleibt nach Aktualisieren, abschaltbar)', fx.fx && fx.stays && fx.off, JSON.stringify(fx));
         check('Sticker: einfügen (versetzt), Farbe, gespeichert, Zähler, Export', fx.sticker && fx.color && fx.saved && fx.badge && fx.export, JSON.stringify(fx));
+        // Werkzeuge (⋯ Mehr: Drehen, genaue Werte), Einrasten an anderen Elementen, Reel-Einflug-Arten
+        const tools = await page.evaluate(async () => { const r = {}; switchTab('ergebnis');
+            const el = $('out-ergebnis-score'); selectElement(el); toggleElMore(true);
+            r.panel = !$('el-more').hidden && $('em-scale').value === String(Math.round(getElScale(el) * 100));
+            rotateSelected(5); rotateSelected(5); r.rot = el.dataset.rot === '10' && el.style.getPropertyValue('--el-rot') === '10deg';
+            setSelectedExact('y', 150); r.exact = el.style.top === '150px';
+            const d = collectSlotData(); r.saved = d.positions['out-ergebnis-score']?.rot === 10;
+            setElRot(el, 0); applySlotData(d); r.loaded = $('out-ergebnis-score').dataset.rot === '10';
+            resetElement($('out-ergebnis-score')); r.reset = !$('out-ergebnis-score').dataset.rot;
+            selectElement(null); r.closed = $('el-more').hidden;
+            // Einrasten: Text nahe an der linken Kante eines anderen Elements
+            const t = $('out-ergebnis-text').closest('.draggable-text'), tpl = $('capture-ergebnis');
+            const sc = $('out-erg-scorers-wrap'); const box = sc.querySelector('.scorer-box').getBoundingClientRect(), tr = tpl.getBoundingClientRect(), k = tr.width / tpl.offsetWidth;
+            const keep = [t.style.left]; const tb = contentRect(t); t.style.left = ((parseFloat(t.style.left) || 0) + (box.left - tb.left) / k + 3) + 'px';
+            const info = snapInfo(t); r.snap = !!info && info.gx !== null && Math.abs(info.gx - (box.left - tr.left) / k) < 1;
+            t.style.left = keep[0]; resetElement(t);
+            // Reel
+            r.anim = !!$('in-vid-anim-ergebnis') && (setVal('in-vid-anim-ergebnis', 'spin'), videoOptions('ergebnis').anim === 'spin');
+            const { base, layers } = await renderVideoLayers($('capture-ergebnis-feed'));
+            r.vid = typeof MediaRecorder === 'undefined' || (await recordVideo(base, layers.slice(0, 2), null, { ...videoOptions('ergebnis'), gap: [0.1, 1] })).size > 1000;
+            setVal('in-vid-anim-ergebnis', 'fly');
+            return r; });
+        check('Werkzeuge: ⋯ Mehr mit Drehen und genauen Werten (gespeichert, zurücksetzbar)', tools.panel && tools.rot && tools.exact && tools.saved && tools.loaded && tools.reset && tools.closed, JSON.stringify(tools));
+        check('Einrasten an Kanten anderer Elemente', tools.snap, JSON.stringify(tools));
+        check('Reel: Einflug-Arten (z.B. Hereindrehen) und Aufnahme', tools.anim && tools.vid, JSON.stringify(tools));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
