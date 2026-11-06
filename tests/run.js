@@ -627,7 +627,17 @@ async function makePhotos(browser) {
             r.zoom = img.getAttribute('src') !== orig && img.dataset.fxSrc === orig && parseFloat($('cr-rect').style.width) > 40 && parseFloat($('cr-rect').style.width) < 60;
             setCropFit('contain'); await new Promise(res => setTimeout(res, 300));
             r.whole = getComputedStyle(img).objectFit === 'contain' && img.getAttribute('src') === orig && $('cr-rect').hidden;
-            setCropFit('cover'); await new Promise(res => setTimeout(res, 600)); r.back = img.getAttribute('src') !== orig;
+            const P2 = stammdaten.players.find(p => p.img && p.name !== P).name; setVal('in-bday-player', P2); updateGeburtstag(); afterViewsUpdated();
+            r.keep = getComputedStyle(img).objectFit === 'contain' && !!imgFit[frameKeyOf(img)] && !findPlayer(P2).focus;
+            r.savedFit = collectSlotData().imgFit[frameKeyOf(img)] === 'contain';
+            setVal('in-bday-player', P); updateGeburtstag(); afterViewsUpdated(); selectElement(img.closest('.draggable-img')); openCropEdit();
+            setCropFit('cover'); await new Promise(res => setTimeout(res, 600)); r.back = img.getAttribute('src') !== orig && !imgFit[frameKeyOf(img)];
+            // für alle Fotos einer Vorlage (Spielfeld)
+            switchTab('kader'); updateKader(); afterViewsUpdated(); const grid = document.querySelector('#capture-kader .kader-grid-pitch'); selectElement(grid); openCropEdit();
+            if ($('cr-all')) { $('cr-all').checked = true; setCropFit('contain'); }
+            const imgs = [...document.querySelectorAll('#view-kader img.kader-grid-img')];
+            r.all = imgFit['tab:kader'] === 'contain' && imgs.length > 3 && imgs.every(i => getComputedStyle(i).objectFit === 'contain');
+            $('cr-all').checked = true; setCropFit('cover'); r.allOff = !imgFit['tab:kader']; closeCropEdit(); selectElement(null); switchTab('geburtstag'); selectElement(img.closest('.draggable-img')); openCropEdit();
             switchTab('story'); r.other = true;
             switchTab('geburtstag'); r.export = (await renderElementToCanvas($('capture-geburtstag-feed'))).width === 1200;
             selectElement(img.closest('.draggable-img')); openCropEdit(); setCrop(null, true); await new Promise(res => setTimeout(res, 300));
@@ -636,7 +646,7 @@ async function makePhotos(browser) {
             const first = document.querySelector('#editor-ergebnis .clear-tab-btn'), sec = first.closest('.details-body') || first.parentElement;
             r.clearTop = [...sec.children].indexOf(first) <= 1;
             return r; });
-        check('🔍 Bildausschnitt: Rahmen ziehen/zoomen, ganzes Bild, gespeichert, Export, zurücksetzen', crop.btn && crop.open && crop.rect && crop.saved && crop.zoom && crop.whole && crop.back && crop.export && crop.reset, JSON.stringify(crop));
+        check('🔍 Bildausschnitt: Rahmen ziehen/zoomen, ganzes Bild, gespeichert, Export, zurücksetzen', crop.btn && crop.open && crop.rect && crop.saved && crop.zoom && crop.whole && crop.keep && crop.savedFit && crop.back && crop.all && crop.allOff && crop.export && crop.reset, JSON.stringify(crop));
         check('🧹 Leeren-Knopf steht oben im Inhalt', crop.clearTop, JSON.stringify(crop));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
