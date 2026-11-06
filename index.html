@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.4</title>
+    <title>Match-Shot – Grafiken für Vereine 24.5</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1016,6 +1016,7 @@
         .ee-actions button { flex: 1; border: 1px solid #cfd8dc; background: #f6f7f9; border-radius: 8px; padding: 7px; cursor: pointer; font-size: 12px; }
         .el-edit .hint { font-size: 11px; color: #5c6670; }
         /* 🔒 Sperre */
+        .clear-tab-btn { background: #fff !important; color: #c1121f !important; border: 1px solid #f1b8bd !important; margin-top: 4px; }
         .lock-bar { width: 100%; display: flex; justify-content: center; margin: 0 0 8px; }
         .lock-all-btn { border: 1px solid #cfd8dc; background: #fff; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: bold; cursor: pointer; color: #333; }
         .lock-all-btn.on { background: #fff3e0; border-color: #e07a2f; color: #a24e0f; }
@@ -3150,7 +3151,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.4";
+        const APP_VERSION = "24.5";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -5570,6 +5571,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const resetBtn = $(`editor-${tab}`)?.querySelector(`button[onclick="resetTabDefaults('${tab}')"]`);
                 if (resetBtn) { resetBtn.before(host); host.appendChild(resetBtn); }
                 host.insertAdjacentHTML('afterbegin', '<div class="design-head">🎨 Aussehen anpassen <small>– optional</small></div>');
+                host.insertAdjacentHTML('beforebegin', clearBtnHTML(tab));
                 $(`editor-${tab}`)?.insertAdjacentHTML('beforeend', captionHTML(tab) + tabCopyHTML(tab) + packButtonHTML(tab));
             });
             $('tabcopy-host-eckball').innerHTML = labelEditorHTML('eckball') + tabCopyHTML('eckball', false) + packButtonHTML('eckball');
@@ -5799,6 +5801,38 @@ Alle sind herzlich eingeladen!</textarea></div>
             frei:       { keys: [], inputs: [/^in-frei-/] },
             eckball:    { keys: ['eck2', 'eckNameFmt'], inputs: [] }
         };
+        /* 🧹 Inhalte eines Reiters leeren (neues Spiel): Inhalte zurück auf den Ausgangszustand, Design und Anzeige-Einstellungen bleiben */
+        let freshSlot = null;
+        const CLEAR_KEEP_KEYS = ['torOppMode', 'torAssistMode', 'torNameFmt', 'ergShowScorers', 'ergNameFmt', 'potmNameFmt', 'bdayConfetti', 'bdayNameFmt', 'kaderNameFmt', 'season'];
+        const CLEAR_KEEP_INPUT = /(mode|namefmt)$|^in-tf-photo$|^in-tf-team$/;
+        const CLEAR_TABS = ['post', 'tor', 'ergebnis', 'potm', 'kalender', 'geburtstag', 'neuzugang', 'sponsor', 'wochenende', 'teamfoto', 'frei'];
+        function clearBtnHTML(tab) {
+            if (!CLEAR_TABS.includes(tab)) return '';
+            return `<button type="button" class="copy-action-btn clear-tab-btn" onclick="clearTabContent('${tab}')">🧹 Inhalte leeren${['post', 'tor', 'ergebnis'].includes(tab) ? ' (neues Spiel)' : ''}</button>`;
+        }
+        function clearTabContent(tab) {
+            const spec = TAB_CONTENT[tab];
+            if (!spec || !freshSlot) return;
+            const what = { post: 'Gegner, Datum und Uhrzeit', tor: 'Torschütze, Vorlage, Spielstand und Minute', ergebnis: 'Spielstand, Texte und Torschützen', kalender: 'die eingetragenen Termine (der eingefügte Spielplan bleibt)', wochenende: 'alle Spiele und Ergebnisse', teamfoto: 'die Verteilung der Spieler und die Texte (das Foto bleibt)' }[tab] || 'die Inhalte';
+            if (!confirm(`${tabTitle(tab)}: ${what} leeren?\n\nDesign, Positionen und Einstellungen bleiben. Mit ↩️ rückgängig.`)) return;
+            const copy = o => JSON.parse(JSON.stringify(o ?? null));
+            const data = collectSlotData();
+            (spec.keys || []).filter(k => !CLEAR_KEEP_KEYS.includes(k)).forEach(k => { if (freshSlot[k] !== undefined) data[k] = copy(freshSlot[k]); else delete data[k]; });
+            Object.keys(data.inputs || {}).forEach(k => {
+                if (!(spec.inputs || []).some(re => re.test(k)) || CLEAR_KEEP_INPUT.test(k)) return;
+                if (freshSlot.inputs && k in freshSlot.inputs) data.inputs[k] = freshSlot.inputs[k]; else data.inputs[k] = /^erg-scorer-|^player-|^bench-|^kader-player-/.test(k) ? 'Keiner' : '';
+            });
+            if (tab === 'ergebnis') data.ergScore = '0 : 0';
+            if (tab === 'tor') { data.torMinute = ''; data.torScore = '1 : 0'; }
+            if (tab === 'ergebnis') data.inputs && Object.keys(data.inputs).forEach(k => { if (/^erg-scorer-/.test(k)) data.inputs[k] = 'Keiner'; if (/^erg-minute-/.test(k)) data.inputs[k] = ''; });
+            applySlotData(data);
+            renderAll();
+            captionDirty[tab] = false;
+            updateCaption(tab);
+            syncAllTimePicks();
+            scheduleSave();
+            toast('🧹 Inhalte geleert – mit ↩️ rückgängig');
+        }
         const TAB_DESIGN_EXTRA = {
             story:    { keys: ['pitchMode', 'showNumbers2'], inputs: [] },
             neuzugang: { keys: ['newShowNumber', 'newShowPosition', 'newShowTeam', 'newNameFmt'], inputs: [] },
@@ -12728,6 +12762,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 renderConfetti();
                 setupTabBar();
 
+                freshSlot = JSON.parse(JSON.stringify(collectSlotData()));   // Ausgangszustand für „🧹 Inhalte leeren“
                 applySlotData(await localforage.getItem(STORE.slot(currentVersion)));
                 renderAll();
                 resetEckHistory();
