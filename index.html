@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.7</title>
+    <title>Match-Shot – Grafiken für Vereine 24.8</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1019,6 +1019,7 @@
         .cr-modes { display: flex; gap: 6px; }
         .cr-modes button { flex: 1; border: 1px solid #cfd8dc; background: #fff; border-radius: 8px; padding: 7px 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .cr-modes button.on { background: #e6f4f7; border-color: #005f73; color: #005f73; }
+        .cr-all { font-size: 12px; display: flex; gap: 6px; align-items: center; }
         .cr-pick { position: relative; align-self: center; max-width: 100%; cursor: crosshair; touch-action: none; overflow: hidden; border-radius: 8px; user-select: none; }
         .cr-pick img { display: block; max-width: 100%; max-height: 34vh; background: repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 14px 14px; pointer-events: none; }
         .cr-pick.whole { cursor: default; outline: 3px solid #2a9d8f; outline-offset: -3px; }
@@ -3169,7 +3170,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.7";
+        const APP_VERSION = "24.8";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3409,6 +3410,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         let selectedSponsors = {};
         let season = [];               // eingefügter Saison-Spielplan: [{ date, time, opp, venue }]
         let labels = {};               // je Reiter: { key: eigener Text } → siehe LABEL_DEFS
+        let imgFit = {};               // „🖼️ Ganzes Bild“ je Rahmen (Element-ID) oder je Vorlage ('tab:<Reiter>'): 'contain' | 'cover'
         let elStyles = {};             // je Element-ID: eigene Text-Formatierung ({ font, color, weight, style, tt, ls, fx, box })
         let customTexts = {};          // je Reiter: [{ id, text, target, size, color, bold, box, font }]
         let prefs = { versionNames: {}, safeZones: true, lastBackupAt: null, backupSnoozeUntil: null };
@@ -6572,6 +6574,19 @@ Alle sind herzlich eingeladen!</textarea></div>
             for (const p of stammdaten.players || []) for (const f of PHOTO_FIELDS) if (p[f] && p[f].length === src.length && p[f] === src) return { p, field: FOCUS_SHARED[f] || f };
             return null;
         }
+        /* Rahmen eines Fotos (bleibt beim Spielerwechsel gleich) und „ganzes Bild“-Einstellung: Rahmen > Vorlage > Spieler */
+        function frameKeyOf(img) {
+            const host = img.closest('.draggable-img, .draggable-text, .movable');
+            return (host && host.id) || img.id || null;
+        }
+        function tabOfImg(img) { return (img.closest('.template-container')?.id || '').replace(/^view-/, ''); }
+        function effectiveFit(img, orig) {
+            const k = frameKeyOf(img);
+            if (k && imgFit[k]) return imgFit[k];
+            const t = imgFit['tab:' + tabOfImg(img)];
+            if (t) return t;
+            return photoFocus(orig)?.fit === 'contain' ? 'contain' : 'cover';
+        }
         function photoFocus(src) {
             const o = photoOwner(src);
             const f = o && o.p.focus && o.p.focus[o.field];
@@ -6619,10 +6634,10 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const orig = img.dataset.fxOut && cur === img.dataset.fxOut ? img.dataset.fxSrc : cur;
                 img.dataset.fxSrc = orig;
                 const fc = photoFocus(orig);
-                const whole = fc && fc.fit === 'contain';
+                const whole = effectiveFit(img, orig) === 'contain';
                 const a = fc && !whole ? imgBoxAspect(img) : null;
                 const zoom = !!(fc && a);                       // Ausschnitt exakt für dieses Rahmen-Format zuschneiden
-                const key = fx + primary + jersey + (fc ? `${fc.x},${fc.y},${fc.z},${fc.fit || ''},${a ? a.toFixed(3) : ''}` : '');
+                const key = fx + primary + jersey + (whole ? 'W' : '') + (fc ? `${fc.x},${fc.y},${fc.z},${a ? a.toFixed(3) : ''}` : '');
                 img.style.removeProperty('object-position');
                 if (whole) img.style.objectFit = 'contain'; else img.style.removeProperty('object-fit');
                 if ((fx === 'none' && !zoom) || orig === PLAYER_FALLBACK) {
@@ -6656,13 +6671,17 @@ Alle sind herzlich eingeladen!</textarea></div>
             const label = { img: 'Foto', torImg: 'Torjubel-Foto', specialImg: 'Spezial-Foto' }[o.field] || 'Foto';
             const ce = $('crop-edit');
             ce.dataset.player = o.p.name; ce.dataset.field = o.field;
+            ce.dataset.frame = frameKeyOf(img) || ''; ce.dataset.tab = tabOfImg(img);
+            cropImgEl = img;
             ce.dataset.aspect = imgBoxAspect(img) || 1;
             $('crop-body').innerHTML = `
                 <div class="cr-modes"><button type="button" data-fit="cover" onclick="setCropFit('cover')">✂️ Ausschnitt wählen</button><button type="button" data-fit="contain" onclick="setCropFit('contain')">🖼️ Ganzes Bild zeigen</button></div>
+                <label class="cr-all"><input type="checkbox" id="cr-all"> Für alle Fotos dieser Vorlage (z.B. alle Spieler auf dem Spielfeld)</label>
+                <span class="hint" id="cr-fit-hint">„Ganzes Bild“ merkt sich dieser Rahmen – auch wenn du einen anderen Spieler auswählst.</span>
                 <div class="cr-pick" id="cr-pick"><img id="cr-img" src="${orig}" alt="" draggable="false"><div class="cr-rect" id="cr-rect"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div></div>
                 <span class="hint" id="cr-hint">Rahmen verschieben, an den Ecken größer/kleiner ziehen – oder ins Foto tippen, um den Rahmen dorthin zu setzen. Der helle Bereich ist im Bild zu sehen.</span>
                 <label class="cr-zl">Zoom <small id="cr-zv"></small></label><input type="range" id="cr-z" min="1" max="4" step="0.05">
-                <div class="ee-actions"><button type="button" onclick="setCrop(null, true)">↩️ Standard (Mitte, ohne Zoom)</button></div>
+                <div class="ee-actions"><button type="button" onclick="setCrop(null, true); if (curCrop().fit === 'contain') setCropFit('cover')">↩️ Standard (Mitte, ohne Zoom)</button></div>
                 <span class="hint">Gilt für das ${label} von <b>${esc(o.p.name)}</b> – in allen Vorlagen und Versionen (passend zur Form des jeweiligen Rahmens).</span>`;
             ce.hidden = false;
             const im = $('cr-img');
@@ -6718,9 +6737,27 @@ Alle sind herzlich eingeladen!</textarea></div>
         function curCrop() {
             const ce = $('crop-edit'), p = findPlayer(ce.dataset.player);
             const f = p?.focus?.[ce.dataset.field];
-            return { x: f?.x ?? 50, y: f?.y ?? 50, z: f?.z ?? 1, fit: f?.fit || 'cover' };
+            const fit = cropImgEl ? effectiveFit(cropImgEl, cropImgEl.dataset.fxSrc || cropImgEl.getAttribute('src')) : 'cover';
+            return { x: f?.x ?? 50, y: f?.y ?? 50, z: f?.z ?? 1, fit };
         }
-        function setCropFit(fit) { setCrop({ ...curCrop(), fit }, true); }
+        let cropImgEl = null;
+        function setCropFit(fit) {
+            const ce = $('crop-edit'), all = $('cr-all')?.checked, tab = ce.dataset.tab, k = ce.dataset.frame;
+            if (all) {
+                // für die ganze Vorlage: einzelne Rahmen-Einstellungen dieser Vorlage entfernen
+                Object.keys(imgFit).forEach(x => { if (!x.startsWith('tab:') && $(`view-${tab}`)?.querySelector(`[id="${x}"]`)) delete imgFit[x]; });
+                if (fit === 'contain') imgFit['tab:' + tab] = 'contain'; else delete imgFit['tab:' + tab];
+            } else if (k) {
+                if (fit === (imgFit['tab:' + tab] || 'cover')) delete imgFit[k]; else imgFit[k] = fit;
+            }
+            // älteres „ganzes Bild“ am Spieler aufheben – das gilt jetzt je Rahmen
+            const p = findPlayer(ce.dataset.player), f = p?.focus?.[ce.dataset.field];
+            if (f && f.fit) { delete f.fit; if (f.x === 50 && f.y === 50 && (f.z || 1) <= 1) delete p.focus[ce.dataset.field]; saveStammdaten(); }
+            drawCropRect();
+            editorTabs.forEach(applyPhotoFx);
+            scheduleSave();
+            toast(fit === 'contain' ? (all ? '🖼️ Ganzes Bild bei allen Fotos dieser Vorlage' : '🖼️ Ganzes Bild – gilt für diesen Rahmen, auch bei anderen Spielern') : '✂️ Ausschnitt');
+        }
         let cropSaveTimer = null, cropRaf = 0;
         function setCrop(fc, final) {
             const ce = $('crop-edit'), p = findPlayer(ce.dataset.player);
@@ -6733,10 +6770,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                     const W = im.naturalWidth, H = im.naturalHeight, r = cropRect(W, H, parseFloat(ce.dataset.aspect) || 1, fc);
                     fc = { ...fc, x: (r.l + r.w / 2) / W * 100, y: (r.t + r.h / 2) / H * 100 };
                 }
-                fc = { x: Math.round(fc.x * 10) / 10, y: Math.round(fc.y * 10) / 10, z: Math.round(Math.max(1, fc.z || 1) * 100) / 100, fit: fc.fit === 'contain' ? 'contain' : undefined };
-                if (!fc.fit) delete fc.fit;
+                fc = { x: Math.round(fc.x * 10) / 10, y: Math.round(fc.y * 10) / 10, z: Math.round(Math.max(1, fc.z || 1) * 100) / 100 };
             }
-            if (!fc || (!fc.fit && Math.abs(fc.x - 50) < 0.5 && Math.abs(fc.y - 50) < 0.5 && fc.z <= 1)) delete p.focus[ce.dataset.field];
+            if (!fc || (Math.abs(fc.x - 50) < 0.5 && Math.abs(fc.y - 50) < 0.5 && fc.z <= 1)) delete p.focus[ce.dataset.field];
             else p.focus[ce.dataset.field] = fc;
             if (!Object.keys(p.focus).length) delete p.focus;
             drawCropRect();
@@ -8064,7 +8100,9 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         function resetTabAll(tab) {
-            $(`view-${tab}`)?.querySelectorAll(DRAG_SEL).forEach(el => { resetElement(el); setElLock(el, false); if (elStyles[el.id]) { delete elStyles[el.id]; applyElStyle(el, null); } });
+            $(`view-${tab}`)?.querySelectorAll(DRAG_SEL).forEach(el => { resetElement(el); setElLock(el, false); if (elStyles[el.id]) { delete elStyles[el.id]; applyElStyle(el, null); } delete imgFit[el.id]; });
+            delete imgFit['tab:' + tab];
+            applyPhotoFx(tab);
             if (tab === 'story') for (const id in pendingPositions) if (id.startsWith('pc-')) delete pendingPositions[id];
             resetTabBackgrounds(tab);
             resetTabStyle(tab);
@@ -10312,6 +10350,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 season: season,
                 customTexts: customTexts,
                 elStyles: elStyles,
+                imgFit: imgFit,
                 labels: labels,
 
                 inputs: {},
@@ -10451,6 +10490,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             pendingPositions = data.positions || {};
             customTexts = data.customTexts || {};
             elStyles = data.elStyles && typeof data.elStyles === 'object' ? data.elStyles : {};   // ältere Stände: keine
+            imgFit = data.imgFit && typeof data.imgFit === 'object' ? data.imgFit : {};
             renderAllCustomTexts();
             labels = data.labels || {};
             syncLabelInputs();
