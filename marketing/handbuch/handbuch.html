@@ -63,7 +63,7 @@ th { background:var(--soft); color:var(--navy); }
 .faq h3 { margin:3.5mm 0 1mm; font-size:10.6pt; }
 .faq h3::before { content:"F: "; color:var(--blue); }
 .faq p { margin-left:0; }
-.contact { background:var(--navy); color:#fff; border-radius:3mm; padding:6mm; margin-top:6mm; }
+.contact { break-inside:avoid; page-break-inside:avoid; background:var(--navy); color:#fff; border-radius:3mm; padding:6mm; margin-top:6mm; }
 .contact b { color:#fff; }
 .contact a { color:#9cc0ff; }
 </style></head><body>
@@ -79,7 +79,7 @@ th { background:var(--soft); color:var(--navy); }
    <img src="img/ergebnis-g.jpg" style="right:14mm; top:16mm; transform:rotate(7deg)">
    <img src="img/tor-g.jpg" style="left:50%; margin-left:-31mm; top:0; width:62mm; z-index:2">
   </div>
-  <div class="foot"><span>match-shot.de · info@match-shot.de</span><span>Stand: November 2026 · App-Version 24.4</span></div>
+  <div class="foot"><span>match-shot.de · info@match-shot.de</span><span>Stand: November 2026 · App-Version 24.5</span></div>
  </div>
 </section>
 
@@ -428,6 +428,7 @@ th { background:var(--soft); color:var(--navy); }
     <li><span class="ui">📅 Letztes Spiel aus Kalender übernehmen</span>, Spielstand und Zusatztext eintragen.</li>
     <li><b>Torschützen</b> mit Minute auswählen (bis zu 25).</li>
    </ol>
+   <p class="muted">Neues Spiel? <span class="ui">🧹 Inhalte leeren (neues Spiel)</span> entfernt Spielstand, Texte und Torschützen des alten Spiels – Design und Einstellungen bleiben.</p>
    <p class="muted">Tipp: Die Halbzeit-Grafik eignet sich perfekt als Story während des Spiels. Für mehr Wirkung das Layout „Riesen-Ergebnis“ oder „Anzeigetafel“ wählen.</p>
   </div>
   <div class="ed"><img src="img/ergebnis.jpg"></div>
@@ -585,6 +586,9 @@ th { background:var(--soft); color:var(--navy); }
  <h3>Ein Text oder Logo ist verrutscht – wie bekomme ich es zurück?</h3>
  <p>Element antippen und in der Werkzeugleiste ↺ wählen. Für den ganzen Reiter: <span class="ui">🔄 Zurücksetzen (Positionen &amp; Design) …</span> unten im Bearbeiten-Bereich – mit einem gewählten Layout führt das zum Layout zurück.</p>
 
+ <h3>Wie bekomme ich das alte Spiel weg?</h3>
+ <p>In Ankündigung, Tor, Ergebnis und den meisten anderen Vorlagen gibt es am Ende des Inhalts-Bereichs <span class="ui">🧹 Inhalte leeren</span>. Das setzt nur die Inhalte zurück (Gegner, Spielstand, Torschützen, Texte …) – Design, Positionen und Einstellungen bleiben. Bei Aufstellung und Kader heißen die Knöpfe „Aufstellung leeren“ bzw. „Kader leeren“. Danach z. B. mit „Nächsten Termin aus Kalender übernehmen“ das neue Spiel holen.</p>
+
  <h3>Beim Scrollen verschiebe ich ständig aus Versehen etwas.</h3>
  <p>Tippe über der Vorschau auf <span class="ui">🔓 Verschieben erlaubt</span> – dann ist das Verschieben gesperrt und du kannst die Vorschau normal scrollen. Antippen und „✏️ Bearbeiten“ funktionieren weiter. Einzelne Elemente sperrst du mit 🔒 in der Werkzeugleiste.</p>
 
@@ -594,14 +598,14 @@ th { background:var(--soft); color:var(--navy); }
  <h3>Wie ändere ich den Namen eines Spielers oder lösche ihn?</h3>
  <p>Unter <span class="ui">🗃️ Daten</span> → <span class="ui">👤 Spieler &amp; Trainer</span> beim Spieler bearbeiten oder löschen. Viele auf einmal: <span class="ui">✏️ Alle Spieler auf einmal bearbeiten</span>. Umbenennungen werden in allen Aufstellungen übernommen.</p>
 
+</section>
+
+<section class="page faq">
  <h3>Das Freistellen per KI dauert lange.</h3>
  <p>Beim ersten Mal lädt die App die KI einmalig herunter – am besten im WLAN. Danach geht es schneller. Bei vielen Spielern einfach <span class="ui">✂️ Hintergrund bei allen Spielern entfernen</span> laufen lassen.</p>
 
  <h3>Welche Größe sollten eigene Hintergründe haben?</h3>
  <p>1080 × 1350 px für Beiträge, 1080 × 1920 px für Storys. Mit dem Format „Story &amp; Beitrag“ reicht ein Bild, Match-Shot schneidet passend zu.</p>
-</section>
-
-<section class="page faq">
  <h3>Warum steht auf meinen Bildern ein Wasserzeichen?</h3>
  <p>Das passiert nur im Demo-Modus („Kostenlos testen“). Mit eurem Vereinscode gibt es kein Wasserzeichen. Code eingeben: <span class="ui">🏠 Start</span> → <span class="ui">Code ändern</span>.</p>
 
@@ -620,7 +624,10 @@ th { background:var(--soft); color:var(--navy); }
  <h3>Wie kündige ich?</h3>
  <p>Im Testmonat jederzeit per E-Mail. Danach läuft die Lizenz 12 Monate und kann bis 4 Wochen vor Ablauf per E-Mail an info@match-shot.de gekündigt werden (siehe AGB).</p>
 
- <h2>7 · Basis oder Advanced?</h2>
+</section>
+
+<section class="page">
+ <h1>7 · Basis oder Advanced?</h1>
  <table>
   <tr><th></th><th style="width:30mm">Basis<br><span class="muted" style="font-weight:400">24,99 € / Saison</span></th><th style="width:30mm">Advanced<br><span class="muted" style="font-weight:400">39,99 € / Saison</span></th></tr>
   <tr><td>Ankündigung, Aufstellung (11er/9er/7er), Tor, Ergebnis, Kader, Player of the Match, Kalender, Geburtstag, Mannschaftsfoto, freie Vorlage</td><td>✓</td><td>✓</td></tr>
