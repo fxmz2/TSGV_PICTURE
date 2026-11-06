@@ -601,6 +601,21 @@ async function makePhotos(browser) {
             selectElement(null); return r; });
         check('✏️ Textfeld bearbeiten: Text, Farbe/Stärke/Effekt nur für dieses Feld, gespeichert, Export, zurücksetzen', ee.btn && ee.open && ee.text && ee.style && ee.saved && ee.loaded && ee.export && ee.reset && ee.label, JSON.stringify(ee));
         check('🔒 Verschieben sperren (je Element gespeichert, für alle)', ee.lock && ee.noMove && ee.unlock && ee.all && ee.allOff, JSON.stringify(ee));
+        // 🧹 Inhalte eines Reiters leeren (neues Spiel) – Design und Einstellungen bleiben
+        const clr = await page.evaluate(() => { const r = {}, P = stammdaten.players[0].name, O = stammdaten.opponents[0].name;
+            switchTab('ergebnis'); setVal('in-ergebnis-score', '4 : 2'); setVal('in-ergebnis-text', 'Derbysieg'); setVal('erg-scorer-1', P); setVal('erg-minute-1', '12');
+            setVal('in-erg-shownames', ''); setVal('in-box-fill-ergebnis', 'dots'); updateErgebnis();
+            r.btn = !!document.querySelector('#editor-ergebnis .clear-tab-btn');
+            clearTabContent('ergebnis');
+            r.erg = val('in-ergebnis-score') === '0 : 0' && val('in-ergebnis-text') !== 'Derbysieg' && val('erg-scorer-1') === 'Keiner' && val('erg-minute-1') === '' && val('in-box-fill-ergebnis') === 'dots';
+            setVal('in-box-fill-ergebnis', 'solid'); updateTabDesign('ergebnis');
+            switchTab('tor'); setVal('in-tor-player', P); setVal('in-tor-minute', '67. Min'); setVal('in-tor-opp-mode', 'names'); updateTor();
+            clearTabContent('tor'); r.tor = val('in-tor-player') === 'Keiner' && val('in-tor-minute') === '' && val('in-tor-opp-mode') === 'names';
+            setVal('in-tor-opp-mode', 'logos'); updateTor();
+            switchTab('post'); setVal('in-post-opponent-select', O); clearTabContent('post'); r.post = val('in-post-opponent-select') === '';
+            r.story = !document.querySelector('#editor-story .clear-tab-btn');
+            return r; });
+        check('🧹 Inhalte leeren (Ergebnis, Tor, Ankündigung), Design und Einstellungen bleiben', clr.btn && clr.erg && clr.tor && clr.post && clr.story, JSON.stringify(clr));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
