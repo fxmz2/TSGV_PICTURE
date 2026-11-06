@@ -616,6 +616,25 @@ async function makePhotos(browser) {
             r.story = !document.querySelector('#editor-story .clear-tab-btn');
             return r; });
         check('🧹 Inhalte leeren (Ergebnis, Tor, Ankündigung), Design und Einstellungen bleiben', clr.btn && clr.erg && clr.tor && clr.post && clr.story, JSON.stringify(clr));
+        // 🔍 Bildausschnitt je Spielerfoto (Fokus + Zoom), Leeren-Knopf oben im Inhalt
+        const crop = await page.evaluate(async () => { const r = {}; switchTab('geburtstag');
+            const P = stammdaten.players.find(p => p.img).name; setVal('in-bday-player', P); updateGeburtstag(); afterViewsUpdated();
+            const img = $('out-bday-img-feed'); selectElement(img.closest('.draggable-img'));
+            r.btn = !$('el-crop-btn').hidden; openCropEdit(); r.open = !$('crop-edit').hidden && !!$('cr-img');
+            const orig = img.getAttribute('src');
+            setCrop({ x: 50, y: 20, z: 1 }); r.pos = img.style.objectPosition === '50% 20%' && findPlayer(P).focus?.img?.y === 20;
+            setCrop({ x: 50, y: 20, z: 2 }); await new Promise(res => setTimeout(res, 800));
+            r.zoom = img.getAttribute('src') !== orig && img.dataset.fxSrc === orig;
+            switchTab('story'); r.other = true;
+            switchTab('geburtstag'); r.export = (await renderElementToCanvas($('capture-geburtstag-feed'))).width === 1200;
+            selectElement(img.closest('.draggable-img')); openCropEdit(); setCrop(null); await new Promise(res => setTimeout(res, 300));
+            r.reset = !findPlayer(P).focus && img.getAttribute('src') === orig;
+            closeCropEdit(); selectElement(null);
+            const first = document.querySelector('#editor-ergebnis .clear-tab-btn'), sec = first.closest('.details-body') || first.parentElement;
+            r.clearTop = [...sec.children].indexOf(first) <= 1;
+            return r; });
+        check('🔍 Bildausschnitt: Fokus und Zoom je Spielerfoto, gespeichert, Export, zurücksetzen', crop.btn && crop.open && crop.pos && crop.zoom && crop.export && crop.reset, JSON.stringify(crop));
+        check('🧹 Leeren-Knopf steht oben im Inhalt', crop.clearTop, JSON.stringify(crop));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
