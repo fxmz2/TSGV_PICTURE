@@ -73,7 +73,10 @@ await hostShot('extras','extras',1800);await pg.setViewportSize({width:1280,heig
 await pg.setViewportSize({width:390,height:844});await pg.evaluate(()=>{switchTab('ergebnis');if(!document.body.classList.contains('show-preview'))toggleMobileView();selectElement($('out-ergebnis-score'));rotateSelected(-6);toggleElMore(true);});
 await pg.waitForTimeout(300);
 await pg.screenshot({path:OUT+'werkzeug.png',clip:await pg.evaluate(()=>{const r=$('el-toolbar').getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}})});
-await pg.evaluate(()=>{toggleElMore(false);selectElement(null);resetExtras('tor');if(document.body.classList.contains('show-preview'))toggleMobileView();});await pg.setViewportSize({width:1280,height:1000});
+await pg.evaluate(()=>{toggleElMore(false);selectElement(document.querySelector('#capture-ergebnis-feed .title-dyn').closest('.draggable-text'));openElEdit();});
+await pg.waitForTimeout(300);
+await pg.screenshot({path:OUT+'textedit.png',clip:await pg.evaluate(()=>{const r=$('el-edit').getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}})});
+await pg.evaluate(()=>{closeElEdit();selectElement(null);resetExtras('tor');if(document.body.classList.contains('show-preview'))toggleMobileView();});await pg.setViewportSize({width:1280,height:1000});
 await pg.evaluate(()=>{switchTab('tor');applyStyle('tor','neonnacht');applyLayout('tor','split');updateAllViews();});await pg.waitForTimeout(1200);
 await pg.evaluate(async()=>{const c=await renderElementToCanvas($('capture-tor'));window.__x=c.toDataURL('image/jpeg',0.85);});
 require('fs').writeFileSync(OUT+'bsp-neon.jpg',Buffer.from((await pg.evaluate(()=>window.__x)).split(',')[1],'base64'));
