@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.5</title>
+    <title>Match-Shot – Grafiken für Vereine 24.6</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1015,8 +1015,12 @@
         .ee-actions { flex-direction: row; gap: 8px; }
         .ee-actions button { flex: 1; border: 1px solid #cfd8dc; background: #f6f7f9; border-radius: 8px; padding: 7px; cursor: pointer; font-size: 12px; }
         .el-edit .hint { font-size: 11px; color: #5c6670; }
+        .crop-body { display: flex; flex-direction: column; gap: 6px; }
+        .cr-pick { position: relative; align-self: center; max-width: 100%; cursor: crosshair; touch-action: none; }
+        .cr-pick img { display: block; max-width: 100%; max-height: 30vh; border-radius: 8px; background: repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 14px 14px; }
+        .cr-dot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 2px #e07a2f, 0 2px 6px rgba(0,0,0,0.5); pointer-events: none; }
         /* 🔒 Sperre */
-        .clear-tab-btn { background: #fff !important; color: #c1121f !important; border: 1px solid #f1b8bd !important; margin-top: 4px; }
+        .clear-tab-btn { background: #fff !important; color: #c1121f !important; border: 1px solid #f1b8bd !important; margin: 0 0 10px !important; font-size: 13px !important; padding: 9px !important; }
         .lock-bar { width: 100%; display: flex; justify-content: center; margin: 0 0 8px; }
         .lock-all-btn { border: 1px solid #cfd8dc; background: #fff; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: bold; cursor: pointer; color: #333; }
         .lock-all-btn.on { background: #fff3e0; border-color: #e07a2f; color: #a24e0f; }
@@ -3097,6 +3101,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         <button type="button" id="el-name-btn" onclick="togglePitchName()" title="Namen dieses Spielers ein-/ausblenden" hidden>🏷️</button>
         <button type="button" id="el-align-btn" onclick="cycleAlignSelected()" title="Text: mittig / links / rechts" hidden>⇔</button>
         <button type="button" id="el-edit-btn" class="tb-edit" onclick="openElEdit()" title="Dieses Textfeld bearbeiten: Text, Schrift, Farbe, Effekte" hidden>✏️ Bearbeiten</button>
+        <button type="button" id="el-crop-btn" class="tb-edit" onclick="openCropEdit()" title="Bildausschnitt: Fokus und Zoom des Fotos" hidden>🔍 Ausschnitt</button>
         <button type="button" id="el-lock-btn" onclick="toggleLockSelected()" title="Element sperren / entsperren">🔓</button>
         <button type="button" id="el-style-btn" onclick="showElementRoles()" title="Welche Farbe/Schrift steuert das?">🎨</button>
         <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
@@ -3116,6 +3121,11 @@ Alle sind herzlich eingeladen!</textarea></div>
     </div>
 
     <div id="role-pop" class="role-pop" hidden></div>
+
+    <div id="crop-edit" class="el-edit crop-edit" hidden>
+        <div class="ee-head"><b>🔍 Bildausschnitt</b><button type="button" onclick="closeCropEdit()">✓ Fertig</button></div>
+        <div class="ee-body crop-body" id="crop-body"></div>
+    </div>
 
     <div id="el-edit" class="el-edit" hidden>
         <div class="ee-head"><b>✏️ Textfeld bearbeiten</b><button type="button" onclick="closeElEdit()" title="Fertig">✓ Fertig</button></div>
@@ -3151,7 +3161,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.5";
+        const APP_VERSION = "24.6";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -5568,10 +5578,11 @@ Alle sind herzlich eingeladen!</textarea></div>
                 $(`st-list-${tab}`)?.addEventListener('change', onCustomTextInput);
 
                 // Erst die Inhalte (Gegner, Datum …), darunter gesammelt das Aussehen inkl. Zurücksetzen
+                // 🧹 „Inhalte leeren“ ganz oben im Inhalt (vor dem Verschieben des Design-Bereichs an seine alte Stelle)
+                host.insertAdjacentHTML('beforebegin', clearBtnHTML(tab));
                 const resetBtn = $(`editor-${tab}`)?.querySelector(`button[onclick="resetTabDefaults('${tab}')"]`);
                 if (resetBtn) { resetBtn.before(host); host.appendChild(resetBtn); }
                 host.insertAdjacentHTML('afterbegin', '<div class="design-head">🎨 Aussehen anpassen <small>– optional</small></div>');
-                host.insertAdjacentHTML('beforebegin', clearBtnHTML(tab));
                 $(`editor-${tab}`)?.insertAdjacentHTML('beforeend', captionHTML(tab) + tabCopyHTML(tab) + packButtonHTML(tab));
             });
             $('tabcopy-host-eckball').innerHTML = labelEditorHTML('eckball') + tabCopyHTML('eckball', false) + packButtonHTML('eckball');
@@ -6544,6 +6555,36 @@ Alle sind herzlich eingeladen!</textarea></div>
             fxCache.set(key, out);
             return out;
         }
+        /* 🔍 Bildausschnitt: Fokuspunkt (x/y in %) und Zoom je Spielerfoto – gespeichert am Spieler (p.focus[Feld]),
+           gilt damit in allen Vorlagen. Zoom wird ins Bild gerechnet (Vorschau = Export = Reel), der Fokus über object-position. */
+        const PHOTO_FIELDS = ['img', 'torImg', 'specialImg', 'cutImg', 'torCutImg', 'specialCutImg'];
+        const FOCUS_SHARED = { cutImg: 'img', torCutImg: 'torImg', specialCutImg: 'specialImg' };   // freigestellt = gleicher Ausschnitt wie Original
+        function photoOwner(src) {
+            if (!src || src === PLAYER_FALLBACK) return null;
+            for (const p of stammdaten.players || []) for (const f of PHOTO_FIELDS) if (p[f] && p[f].length === src.length && p[f] === src) return { p, field: FOCUS_SHARED[f] || f };
+            return null;
+        }
+        function photoFocus(src) {
+            const o = photoOwner(src);
+            const f = o && o.p.focus && o.p.focus[o.field];
+            return f ? { x: f.x ?? 50, y: f.y ?? 50, z: f.z ?? 1 } : null;
+        }
+        async function cropImage(src, fc) {
+            const key = ['crop', fc.x, fc.y, fc.z, src.length, src.slice(-60)].join('|');
+            if (fxCache.has(key)) return fxCache.get(key);
+            const img = new Image(); img.src = src; await img.decode();
+            const W = img.naturalWidth, H = img.naturalHeight, cw = W / fc.z, ch = H / fc.z;
+            const x0 = Math.min(W - cw, Math.max(0, W * fc.x / 100 - cw / 2)), y0 = Math.min(H - ch, Math.max(0, H * fc.y / 100 - ch / 2));
+            const k = Math.min(1, 1100 / Math.max(cw, ch));
+            const c = document.createElement('canvas'); c.width = Math.round(cw * k); c.height = Math.round(ch * k);
+            const ctx = c.getContext('2d'); ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, x0, y0, cw, ch, 0, 0, c.width, c.height);
+            const out = canvasHasTransparency(c) ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.92) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.92);
+            freeCanvas(c);
+            const res = { src: out, fx: Math.round((W * fc.x / 100 - x0) / cw * 1000) / 10, fy: Math.round((H * fc.y / 100 - y0) / ch * 1000) / 10 };
+            fxCache.set(key, res);
+            return res;
+        }
         function applyPhotoFx(tab) {
             const view = $(`view-${tab}`);
             if (!view) return;
@@ -6554,19 +6595,77 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (!cur) return;
                 const orig = img.dataset.fxOut && cur === img.dataset.fxOut ? img.dataset.fxSrc : cur;
                 img.dataset.fxSrc = orig;
-                if (fx === 'none' || orig === PLAYER_FALLBACK) {
+                const fc = photoFocus(orig);
+                const zoom = fc && fc.z > 1.01;
+                const key = fx + primary + jersey + (fc ? `${fc.x},${fc.y},${fc.z}` : '');
+                if (!fc) img.style.removeProperty('object-position');
+                else if (!zoom) img.style.objectPosition = `${fc.x}% ${fc.y}%`;
+                if ((fx === 'none' && !zoom) || orig === PLAYER_FALLBACK) {
                     if (img.dataset.fxOut && cur === img.dataset.fxOut) img.src = orig;
                     delete img.dataset.fxOut;
                     return;
                 }
-                if (img.dataset.fxKey === fx + primary + jersey && img.dataset.fxOut && cur === img.dataset.fxOut) return;
-                fxImage(orig, fx, primary, jersey).then(out => {
+                if (img.dataset.fxKey === key && img.dataset.fxOut && cur === img.dataset.fxOut) return;
+                (async () => {
+                    let src = orig;
+                    if (zoom) { const c = await cropImage(orig, fc); src = c.src; img.style.objectPosition = `${c.fx}% ${c.fy}%`; }
+                    return fx === 'none' ? src : fxImage(src, fx, primary, jersey);
+                })().then(out => {
                     if (img.dataset.fxSrc !== orig) return;
-                    img.dataset.fxOut = out; img.dataset.fxKey = fx + primary + jersey;
+                    img.dataset.fxOut = out; img.dataset.fxKey = key;
                     if (img.getAttribute('src') !== out) img.src = out;
-                }).catch(e => console.warn('Foto-Effekt', e));
+                }).catch(e => console.warn('Foto-Bearbeitung', e));
             });
         }
+        /* Dialog „🔍 Ausschnitt“ für das ausgewählte Foto */
+        function selectedPhotoImg() {
+            if (!selectedEl) return null;
+            const img = selectedEl.matches('img') ? selectedEl : selectedEl.querySelector('img');
+            return img && img.matches(PHOTO_FX_SEL) ? img : null;
+        }
+        function openCropEdit() {
+            const img = selectedPhotoImg();
+            const orig = img && (img.dataset.fxSrc || img.getAttribute('src'));
+            const o = photoOwner(orig);
+            if (!o) { toast('Für dieses Bild gibt es keinen Ausschnitt (kein Spielerfoto)'); return; }
+            const fc = photoFocus(orig) || { x: 50, y: 50, z: 1 };
+            const label = { img: 'Foto', torImg: 'Torjubel-Foto', specialImg: 'Spezial-Foto' }[o.field] || 'Foto';
+            $('crop-body').innerHTML = `
+                <div class="cr-pick"><img id="cr-img" src="${orig}" alt=""><div class="cr-dot" id="cr-dot"></div></div>
+                <span class="hint">In das Foto tippen, wo die Mitte des Ausschnitts sein soll (z.B. aufs Gesicht).</span>
+                <label>Zoom <small id="cr-zv">${Math.round(fc.z * 100)} %</small></label><input type="range" id="cr-z" min="1" max="3" step="0.05" value="${fc.z}">
+                <div class="ee-actions"><button type="button" onclick="setCrop(null)">↩️ Mitte &amp; ohne Zoom</button></div>
+                <span class="hint">Gilt für das ${label} von <b>${esc(o.p.name)}</b> – in allen Vorlagen und Versionen.</span>`;
+            $('crop-edit').hidden = false;
+            $('crop-edit').dataset.player = o.p.name; $('crop-edit').dataset.field = o.field;
+            const dot = () => { const f = curCrop(); $('cr-dot').style.left = f.x + '%'; $('cr-dot').style.top = f.y + '%'; };
+            dot();
+            $('cr-img').addEventListener('pointerdown', e => {
+                const r = e.currentTarget.getBoundingClientRect();
+                setCrop({ ...curCrop(), x: Math.round((e.clientX - r.left) / r.width * 100), y: Math.round((e.clientY - r.top) / r.height * 100) });
+                dot();
+            });
+            $('cr-z').addEventListener('input', e => { setCrop({ ...curCrop(), z: parseFloat(e.target.value) }); setText('cr-zv', Math.round(e.target.value * 100) + ' %'); });
+        }
+        function curCrop() {
+            const ce = $('crop-edit'), p = findPlayer(ce.dataset.player);
+            const f = p?.focus?.[ce.dataset.field];
+            return { x: f?.x ?? 50, y: f?.y ?? 50, z: f?.z ?? 1 };
+        }
+        let cropSaveTimer = null;
+        function setCrop(fc) {
+            const ce = $('crop-edit'), p = findPlayer(ce.dataset.player);
+            if (!p) return;
+            p.focus = { ...(p.focus || {}) };
+            if (!fc || (fc.x === 50 && fc.y === 50 && fc.z <= 1)) delete p.focus[ce.dataset.field];
+            else p.focus[ce.dataset.field] = { x: fc.x, y: fc.y, z: Math.round(fc.z * 100) / 100 };
+            if (!Object.keys(p.focus).length) delete p.focus;
+            if (!fc) { openCropEdit(); }
+            editorTabs.forEach(applyPhotoFx);
+            clearTimeout(cropSaveTimer);
+            cropSaveTimer = setTimeout(() => saveStammdaten(), 400);
+        }
+        function closeCropEdit() { const c = $('crop-edit'); if (c) c.hidden = true; }
         /* Nach dem Aktualisieren der Inhalte (dort werden Fotos neu gesetzt) die Foto-Effekte wieder anwenden */
         function afterViewsUpdated() {
             if (editorTabs.includes(activeTab)) applyPhotoFx(activeTab);
@@ -7506,7 +7605,7 @@ Alle sind herzlich eingeladen!</textarea></div>
 
         function selectElement(el) {
             if ($('role-pop')) $('role-pop').hidden = true;
-            if (selectedEl && selectedEl !== el) { selectedEl.classList.remove('el-selected'); closeElEdit(); }
+            if (selectedEl && selectedEl !== el) { selectedEl.classList.remove('el-selected'); closeElEdit(); closeCropEdit(); }
             selectedEl = el;
             if (el) el.classList.add('el-selected');
             updateToolbar();
@@ -7552,12 +7651,14 @@ Alle sind herzlich eingeladen!</textarea></div>
             const bar = $('el-toolbar');
             if (!bar) return;
             bar.hidden = !selectedEl;
-            if (!selectedEl) { if ($('el-more')) $('el-more').hidden = true; $('el-more-btn')?.classList.remove('tb-on'); closeElEdit(); return; }
+            if (!selectedEl) { if ($('el-more')) $('el-more').hidden = true; $('el-more-btn')?.classList.remove('tb-on'); closeElEdit(); closeCropEdit(); return; }
             updateElMore();
             setText('el-scale-label', Math.round(getElScale(selectedEl) * 100) + ' %');
             $('el-delete-btn').hidden = !selectedEl.classList.contains('custom-text');
             const editBtn = $('el-edit-btn');
             if (editBtn) editBtn.hidden = !isTextElement(selectedEl);
+            const cropBtn = $('el-crop-btn');
+            if (cropBtn) { const im = selectedPhotoImg(); cropBtn.hidden = !(im && photoOwner(im.dataset.fxSrc || im.getAttribute('src'))); }
             const lockBtn = $('el-lock-btn');
             if (lockBtn) { const lk = !!selectedEl.dataset.lock; lockBtn.textContent = lk ? '🔒' : '🔓'; lockBtn.classList.toggle('tb-on', lk); lockBtn.title = lk ? 'Gesperrt – tippen zum Entsperren' : 'Element sperren (nicht mehr verschiebbar)'; }
             const alignBtn = $('el-align-btn');
@@ -10873,7 +10974,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             ctx.beginPath();
             ctx.rect(x0, y0, cw, ch);
             ctx.clip();
-            ctx.drawImage(img, x0 + (cw - dw) / 2, y0 + (ch - dh) / 2, dw, dh);
+            const [px0, py0] = objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
+            ctx.drawImage(img, x0 + px0, y0 + py0, dw, dh);
             let out = null;
             try { out = canvas.toDataURL('image/png'); } catch (e) {}
             freeCanvas(canvas);
@@ -10913,7 +11015,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 ctx.save();
                 ctx.beginPath(); ctx.rect(pad + x0, pad + y0, cw, ch); ctx.clip();
             }
-            ctx.drawImage(img, pad + x0 + (cw - dw) / 2, pad + y0 + (ch - dh) / 2, dw, dh);
+            const [px0, py0] = objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
+            ctx.drawImage(img, pad + x0 + px0, pad + y0 + py0, dw, dh);
             if (cs.objectFit === 'cover') ctx.restore();
             let data;
             try { data = canvas.toDataURL('image/png'); } catch (e) { freeCanvas(canvas); return false; }
