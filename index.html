@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.6</title>
+    <title>Match-Shot – Grafiken für Vereine 24.7</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1016,9 +1016,17 @@
         .ee-actions button { flex: 1; border: 1px solid #cfd8dc; background: #f6f7f9; border-radius: 8px; padding: 7px; cursor: pointer; font-size: 12px; }
         .el-edit .hint { font-size: 11px; color: #5c6670; }
         .crop-body { display: flex; flex-direction: column; gap: 6px; }
-        .cr-pick { position: relative; align-self: center; max-width: 100%; cursor: crosshair; touch-action: none; }
-        .cr-pick img { display: block; max-width: 100%; max-height: 30vh; border-radius: 8px; background: repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 14px 14px; }
-        .cr-dot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 2px #e07a2f, 0 2px 6px rgba(0,0,0,0.5); pointer-events: none; }
+        .cr-modes { display: flex; gap: 6px; }
+        .cr-modes button { flex: 1; border: 1px solid #cfd8dc; background: #fff; border-radius: 8px; padding: 7px 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .cr-modes button.on { background: #e6f4f7; border-color: #005f73; color: #005f73; }
+        .cr-pick { position: relative; align-self: center; max-width: 100%; cursor: crosshair; touch-action: none; overflow: hidden; border-radius: 8px; user-select: none; }
+        .cr-pick img { display: block; max-width: 100%; max-height: 34vh; background: repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 14px 14px; pointer-events: none; }
+        .cr-pick.whole { cursor: default; outline: 3px solid #2a9d8f; outline-offset: -3px; }
+        .cr-rect { position: absolute; box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); outline: 2px solid #fff; cursor: move; }
+        .cr-rect[hidden] { display: none; }
+        .cr-rect i { position: absolute; width: 22px; height: 22px; background: #fff; border: 2px solid #e07a2f; border-radius: 50%; box-sizing: border-box; }
+        .cr-rect i[data-h="nw"] { left: -3px; top: -3px; cursor: nwse-resize; } .cr-rect i[data-h="ne"] { right: -3px; top: -3px; cursor: nesw-resize; }
+        .cr-rect i[data-h="sw"] { left: -3px; bottom: -3px; cursor: nesw-resize; } .cr-rect i[data-h="se"] { right: -3px; bottom: -3px; cursor: nwse-resize; }
         /* 🔒 Sperre */
         .clear-tab-btn { background: #fff !important; color: #c1121f !important; border: 1px solid #f1b8bd !important; margin: 0 0 10px !important; font-size: 13px !important; padding: 9px !important; }
         .lock-bar { width: 100%; display: flex; justify-content: center; margin: 0 0 8px; }
@@ -3161,7 +3169,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.6";
+        const APP_VERSION = "24.7";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -6567,23 +6575,38 @@ Alle sind herzlich eingeladen!</textarea></div>
         function photoFocus(src) {
             const o = photoOwner(src);
             const f = o && o.p.focus && o.p.focus[o.field];
-            return f ? { x: f.x ?? 50, y: f.y ?? 50, z: f.z ?? 1 } : null;
+            return f ? { x: f.x ?? 50, y: f.y ?? 50, z: f.z ?? 1, fit: f.fit || 'cover' } : null;
         }
-        async function cropImage(src, fc) {
-            const key = ['crop', fc.x, fc.y, fc.z, src.length, src.slice(-60)].join('|');
+        /* Sichtbarer Bereich im Foto (Pixel) für Rahmen mit Seitenverhältnis a: Mitte (x/y %) und Zoom z (1 = größtmöglicher Ausschnitt) */
+        function cropRect(W, H, a, fc) {
+            let bw = W, bh = W / a;
+            if (W / H > a) { bh = H; bw = H * a; }
+            const z = Math.max(1, fc.z || 1), w = bw / z, h = bh / z;
+            const l = Math.min(W - w, Math.max(0, W * fc.x / 100 - w / 2)), t = Math.min(H - h, Math.max(0, H * fc.y / 100 - h / 2));
+            return { l, t, w, h, bw, bh };
+        }
+        async function cropImage(src, fc, a) {
+            const key = ['crop2', fc.x, fc.y, fc.z, a.toFixed(3), src.length, src.slice(-60)].join('|');
             if (fxCache.has(key)) return fxCache.get(key);
             const img = new Image(); img.src = src; await img.decode();
-            const W = img.naturalWidth, H = img.naturalHeight, cw = W / fc.z, ch = H / fc.z;
-            const x0 = Math.min(W - cw, Math.max(0, W * fc.x / 100 - cw / 2)), y0 = Math.min(H - ch, Math.max(0, H * fc.y / 100 - ch / 2));
-            const k = Math.min(1, 1100 / Math.max(cw, ch));
-            const c = document.createElement('canvas'); c.width = Math.round(cw * k); c.height = Math.round(ch * k);
+            const W = img.naturalWidth, H = img.naturalHeight, r = cropRect(W, H, a, fc);
+            const k = Math.min(1, 1100 / Math.max(r.w, r.h));
+            const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(r.w * k)); c.height = Math.max(1, Math.round(r.h * k));
             const ctx = c.getContext('2d'); ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, x0, y0, cw, ch, 0, 0, c.width, c.height);
+            ctx.drawImage(img, r.l, r.t, r.w, r.h, 0, 0, c.width, c.height);
             const out = canvasHasTransparency(c) ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.92) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.92);
             freeCanvas(c);
-            const res = { src: out, fx: Math.round((W * fc.x / 100 - x0) / cw * 1000) / 10, fy: Math.round((H * fc.y / 100 - y0) / ch * 1000) / 10 };
-            fxCache.set(key, res);
-            return res;
+            if (fxCache.size > 150) fxCache.delete(fxCache.keys().next().value);
+            fxCache.set(key, out);
+            return out;
+        }
+        /* Seitenverhältnis des Inhaltsbereichs eines Fotos (ohne Rahmen/Innenabstand); auch in ausgeblendeten Reitern über die CSS-Maße */
+        function imgBoxAspect(img) {
+            const cs = getComputedStyle(img), px = v => parseFloat(v) || 0;
+            let w = img.offsetWidth || px(cs.width), h = img.offsetHeight || px(cs.height);
+            w -= px(cs.borderLeftWidth) + px(cs.borderRightWidth) + px(cs.paddingLeft) + px(cs.paddingRight);
+            h -= px(cs.borderTopWidth) + px(cs.borderBottomWidth) + px(cs.paddingTop) + px(cs.paddingBottom);
+            return w > 0 && h > 0 ? w / h : null;
         }
         function applyPhotoFx(tab) {
             const view = $(`view-${tab}`);
@@ -6596,10 +6619,12 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const orig = img.dataset.fxOut && cur === img.dataset.fxOut ? img.dataset.fxSrc : cur;
                 img.dataset.fxSrc = orig;
                 const fc = photoFocus(orig);
-                const zoom = fc && fc.z > 1.01;
-                const key = fx + primary + jersey + (fc ? `${fc.x},${fc.y},${fc.z}` : '');
-                if (!fc) img.style.removeProperty('object-position');
-                else if (!zoom) img.style.objectPosition = `${fc.x}% ${fc.y}%`;
+                const whole = fc && fc.fit === 'contain';
+                const a = fc && !whole ? imgBoxAspect(img) : null;
+                const zoom = !!(fc && a);                       // Ausschnitt exakt für dieses Rahmen-Format zuschneiden
+                const key = fx + primary + jersey + (fc ? `${fc.x},${fc.y},${fc.z},${fc.fit || ''},${a ? a.toFixed(3) : ''}` : '');
+                img.style.removeProperty('object-position');
+                if (whole) img.style.objectFit = 'contain'; else img.style.removeProperty('object-fit');
                 if ((fx === 'none' && !zoom) || orig === PLAYER_FALLBACK) {
                     if (img.dataset.fxOut && cur === img.dataset.fxOut) img.src = orig;
                     delete img.dataset.fxOut;
@@ -6608,7 +6633,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (img.dataset.fxKey === key && img.dataset.fxOut && cur === img.dataset.fxOut) return;
                 (async () => {
                     let src = orig;
-                    if (zoom) { const c = await cropImage(orig, fc); src = c.src; img.style.objectPosition = `${c.fx}% ${c.fy}%`; }
+                    if (zoom) src = await cropImage(orig, fc, a);
                     return fx === 'none' ? src : fxImage(src, fx, primary, jersey);
                 })().then(out => {
                     if (img.dataset.fxSrc !== orig) return;
@@ -6628,42 +6653,101 @@ Alle sind herzlich eingeladen!</textarea></div>
             const orig = img && (img.dataset.fxSrc || img.getAttribute('src'));
             const o = photoOwner(orig);
             if (!o) { toast('Für dieses Bild gibt es keinen Ausschnitt (kein Spielerfoto)'); return; }
-            const fc = photoFocus(orig) || { x: 50, y: 50, z: 1 };
             const label = { img: 'Foto', torImg: 'Torjubel-Foto', specialImg: 'Spezial-Foto' }[o.field] || 'Foto';
+            const ce = $('crop-edit');
+            ce.dataset.player = o.p.name; ce.dataset.field = o.field;
+            ce.dataset.aspect = imgBoxAspect(img) || 1;
             $('crop-body').innerHTML = `
-                <div class="cr-pick"><img id="cr-img" src="${orig}" alt=""><div class="cr-dot" id="cr-dot"></div></div>
-                <span class="hint">In das Foto tippen, wo die Mitte des Ausschnitts sein soll (z.B. aufs Gesicht).</span>
-                <label>Zoom <small id="cr-zv">${Math.round(fc.z * 100)} %</small></label><input type="range" id="cr-z" min="1" max="3" step="0.05" value="${fc.z}">
-                <div class="ee-actions"><button type="button" onclick="setCrop(null)">↩️ Mitte &amp; ohne Zoom</button></div>
-                <span class="hint">Gilt für das ${label} von <b>${esc(o.p.name)}</b> – in allen Vorlagen und Versionen.</span>`;
-            $('crop-edit').hidden = false;
-            $('crop-edit').dataset.player = o.p.name; $('crop-edit').dataset.field = o.field;
-            const dot = () => { const f = curCrop(); $('cr-dot').style.left = f.x + '%'; $('cr-dot').style.top = f.y + '%'; };
-            dot();
-            $('cr-img').addEventListener('pointerdown', e => {
-                const r = e.currentTarget.getBoundingClientRect();
-                setCrop({ ...curCrop(), x: Math.round((e.clientX - r.left) / r.width * 100), y: Math.round((e.clientY - r.top) / r.height * 100) });
-                dot();
+                <div class="cr-modes"><button type="button" data-fit="cover" onclick="setCropFit('cover')">✂️ Ausschnitt wählen</button><button type="button" data-fit="contain" onclick="setCropFit('contain')">🖼️ Ganzes Bild zeigen</button></div>
+                <div class="cr-pick" id="cr-pick"><img id="cr-img" src="${orig}" alt="" draggable="false"><div class="cr-rect" id="cr-rect"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div></div>
+                <span class="hint" id="cr-hint">Rahmen verschieben, an den Ecken größer/kleiner ziehen – oder ins Foto tippen, um den Rahmen dorthin zu setzen. Der helle Bereich ist im Bild zu sehen.</span>
+                <label class="cr-zl">Zoom <small id="cr-zv"></small></label><input type="range" id="cr-z" min="1" max="4" step="0.05">
+                <div class="ee-actions"><button type="button" onclick="setCrop(null, true)">↩️ Standard (Mitte, ohne Zoom)</button></div>
+                <span class="hint">Gilt für das ${label} von <b>${esc(o.p.name)}</b> – in allen Vorlagen und Versionen (passend zur Form des jeweiligen Rahmens).</span>`;
+            ce.hidden = false;
+            const im = $('cr-img');
+            const ready = () => { drawCropRect(); };
+            if (im.complete) ready(); else im.onload = ready;
+            const pick = $('cr-pick');
+            let drag = null;
+            pick.addEventListener('pointerdown', e => {
+                if (curCrop().fit === 'contain') return;
+                e.preventDefault();
+                const r = im.getBoundingClientRect(), f = curCrop();
+                const handle = e.target.dataset.h;
+                if (!e.target.closest('.cr-rect')) {   // ins Foto getippt: Rahmen dorthin
+                    setCrop({ ...f, x: (e.clientX - r.left) / r.width * 100, y: (e.clientY - r.top) / r.height * 100 });
+                }
+                drag = { handle, sx: e.clientX, sy: e.clientY, f: curCrop(), r };
+                try { pick.setPointerCapture(e.pointerId); } catch (err) {}
             });
-            $('cr-z').addEventListener('input', e => { setCrop({ ...curCrop(), z: parseFloat(e.target.value) }); setText('cr-zv', Math.round(e.target.value * 100) + ' %'); });
+            pick.addEventListener('pointermove', e => {
+                if (!drag) return;
+                const { r, f } = drag, W = im.naturalWidth, H = im.naturalHeight, a = parseFloat(ce.dataset.aspect) || 1;
+                if (!drag.handle) {
+                    setCrop({ ...f, x: f.x + (e.clientX - drag.sx) / r.width * 100, y: f.y + (e.clientY - drag.sy) / r.height * 100 });
+                } else {
+                    // Ecke ziehen: Größe um die Mitte ändern (Seitenverhältnis bleibt)
+                    const cr = cropRect(W, H, a, f), cx = r.left + (cr.l + cr.w / 2) / W * r.width, cy = r.top + (cr.t + cr.h / 2) / H * r.height;
+                    const halfW = Math.max(Math.abs(e.clientX - cx), Math.abs(e.clientY - cy) * a * r.width / W * H / r.height);
+                    const wPx = 2 * halfW / r.width * W;
+                    setCrop({ ...f, z: Math.min(4, Math.max(1, cr.bw / wPx)) });
+                }
+            });
+            const end = () => { if (drag) { drag = null; setCrop(curCrop(), true); } };
+            pick.addEventListener('pointerup', end);
+            pick.addEventListener('pointercancel', end);
+            $('cr-z').addEventListener('input', e => setCrop({ ...curCrop(), z: parseFloat(e.target.value) }));
+            $('cr-z').addEventListener('change', () => setCrop(curCrop(), true));
+        }
+        function drawCropRect() {
+            const ce = $('crop-edit'), im = $('cr-img'), rect = $('cr-rect');
+            if (!im || !rect || !im.naturalWidth) return;
+            const f = curCrop(), whole = f.fit === 'contain';
+            ce.querySelectorAll('.cr-modes button').forEach(b => b.classList.toggle('on', b.dataset.fit === (whole ? 'contain' : 'cover')));
+            rect.hidden = whole;
+            $('cr-pick').classList.toggle('whole', whole);
+            ['cr-z', 'cr-hint'].forEach(id => { if ($(id)) $(id).style.display = whole ? 'none' : ''; });
+            ce.querySelector('.cr-zl').style.display = whole ? 'none' : '';
+            if (whole) return;
+            const W = im.naturalWidth, H = im.naturalHeight, r = cropRect(W, H, parseFloat(ce.dataset.aspect) || 1, f);
+            Object.assign(rect.style, { left: r.l / W * 100 + '%', top: r.t / H * 100 + '%', width: r.w / W * 100 + '%', height: r.h / H * 100 + '%' });
+            const zi = $('cr-z'); if (zi && document.activeElement !== zi) zi.value = f.z;
+            setText('cr-zv', Math.round(f.z * 100) + ' %');
         }
         function curCrop() {
             const ce = $('crop-edit'), p = findPlayer(ce.dataset.player);
             const f = p?.focus?.[ce.dataset.field];
-            return { x: f?.x ?? 50, y: f?.y ?? 50, z: f?.z ?? 1 };
+            return { x: f?.x ?? 50, y: f?.y ?? 50, z: f?.z ?? 1, fit: f?.fit || 'cover' };
         }
-        let cropSaveTimer = null;
-        function setCrop(fc) {
+        function setCropFit(fit) { setCrop({ ...curCrop(), fit }, true); }
+        let cropSaveTimer = null, cropRaf = 0;
+        function setCrop(fc, final) {
             const ce = $('crop-edit'), p = findPlayer(ce.dataset.player);
             if (!p) return;
             p.focus = { ...(p.focus || {}) };
-            if (!fc || (fc.x === 50 && fc.y === 50 && fc.z <= 1)) delete p.focus[ce.dataset.field];
-            else p.focus[ce.dataset.field] = { x: fc.x, y: fc.y, z: Math.round(fc.z * 100) / 100 };
+            if (fc) {
+                // Mitte so begrenzen, dass der Rahmen im Foto bleibt (für das aktuelle Rahmen-Format)
+                const im = $('cr-img');
+                if (im && im.naturalWidth) {
+                    const W = im.naturalWidth, H = im.naturalHeight, r = cropRect(W, H, parseFloat(ce.dataset.aspect) || 1, fc);
+                    fc = { ...fc, x: (r.l + r.w / 2) / W * 100, y: (r.t + r.h / 2) / H * 100 };
+                }
+                fc = { x: Math.round(fc.x * 10) / 10, y: Math.round(fc.y * 10) / 10, z: Math.round(Math.max(1, fc.z || 1) * 100) / 100, fit: fc.fit === 'contain' ? 'contain' : undefined };
+                if (!fc.fit) delete fc.fit;
+            }
+            if (!fc || (!fc.fit && Math.abs(fc.x - 50) < 0.5 && Math.abs(fc.y - 50) < 0.5 && fc.z <= 1)) delete p.focus[ce.dataset.field];
+            else p.focus[ce.dataset.field] = fc;
             if (!Object.keys(p.focus).length) delete p.focus;
-            if (!fc) { openCropEdit(); }
-            editorTabs.forEach(applyPhotoFx);
-            clearTimeout(cropSaveTimer);
-            cropSaveTimer = setTimeout(() => saveStammdaten(), 400);
+            drawCropRect();
+            // Beim Ziehen nur die sichtbare Vorlage aktualisieren, am Ende alle und speichern
+            cancelAnimationFrame(cropRaf);
+            cropRaf = requestAnimationFrame(() => { if (editorTabs.includes(activeTab)) applyPhotoFx(activeTab); });
+            if (final) {
+                editorTabs.forEach(applyPhotoFx);
+                clearTimeout(cropSaveTimer);
+                cropSaveTimer = setTimeout(() => saveStammdaten(), 300);
+            }
         }
         function closeCropEdit() { const c = $('crop-edit'); if (c) c.hidden = true; }
         /* Nach dem Aktualisieren der Inhalte (dort werden Fotos neu gesetzt) die Foto-Effekte wieder anwenden */
