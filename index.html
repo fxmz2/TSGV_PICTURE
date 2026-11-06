@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.3</title>
+    <title>Match-Shot – Grafiken für Vereine 24.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -985,6 +985,42 @@
         .el-toolbar .tb-sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.25); margin: 0 2px; }
 
         /* Hilfslinien beim Verschieben (Einrasten in der Mitte) */
+        /* ✏️ Textfeld-Formatierung (gilt für das Element und alle Texte darin) */
+        :is(.es-font, .es-font *) { font-family: var(--es-font) !important; }
+        :is(.es-color, .es-color *) { color: var(--es-color) !important; }
+        :is(.es-weight, .es-weight *) { font-weight: var(--es-weight) !important; }
+        :is(.es-style, .es-style *) { font-style: var(--es-fstyle) !important; }
+        :is(.es-tt, .es-tt *) { text-transform: var(--es-tt) !important; }
+        :is(.es-ls, .es-ls *) { letter-spacing: var(--es-ls) !important; }
+        :is(.es-fx, .es-fx *) { text-shadow: var(--es-shadow) !important; }
+        :is(.es-hollow, .es-hollow *) { color: transparent !important; -webkit-text-stroke: 1.5px var(--es-color, #fff); text-shadow: none !important; }
+        .es-box > * { background: var(--es-box) !important; display: inline-block; width: auto !important; padding: 2px 12px; border-radius: 6px; }
+        .es-box.custom-text > .ct-inner { background: var(--es-box) !important; }
+        /* ✏️ Bearbeiten-Dialog */
+        .tb-edit { font-weight: bold; }
+        .el-edit { position: fixed; z-index: 9001; left: 50%; transform: translateX(-50%); bottom: calc(12px + env(safe-area-inset-bottom)); width: min(460px, calc(100vw - 16px));
+            max-height: 52vh; overflow: auto; background: #fff; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.35); font-size: 13px; }
+        .el-edit[hidden] { display: none; }
+        .ee-head { position: sticky; top: 0; background: #1d2433; color: #fff; display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 14px 14px 0 0; }
+        .ee-head button { background: #2a9d8f; color: #fff; border: none; border-radius: 8px; padding: 5px 12px; font-weight: bold; cursor: pointer; }
+        .ee-body { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; padding: 10px 12px 12px; }
+        .ee-row { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .ee-row > label { font-weight: bold; font-size: 12px; color: #333; }
+        .ee-row select, .ee-row textarea { width: 100%; box-sizing: border-box; font-size: 13px; padding: 5px; }
+        .ee-full { grid-column: 1 / -1; }
+        .ee-inline { display: flex; gap: 6px; align-items: center; }
+        .ee-inline input[type=color] { width: 44px; height: 30px; padding: 0; border: 1px solid #ccc; border-radius: 6px; }
+        .ee-mini { border: 1px solid #cfd8dc; background: #fff; border-radius: 8px; padding: 4px 9px; cursor: pointer; font-size: 12px; }
+        .ee-mini.on { background: #e6f4f7; border-color: #005f73; }
+        .ee-actions { flex-direction: row; gap: 8px; }
+        .ee-actions button { flex: 1; border: 1px solid #cfd8dc; background: #f6f7f9; border-radius: 8px; padding: 7px; cursor: pointer; font-size: 12px; }
+        .el-edit .hint { font-size: 11px; color: #5c6670; }
+        /* 🔒 Sperre */
+        .lock-bar { width: 100%; display: flex; justify-content: center; margin: 0 0 8px; }
+        .lock-all-btn { border: 1px solid #cfd8dc; background: #fff; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: bold; cursor: pointer; color: #333; }
+        .lock-all-btn.on { background: #fff3e0; border-color: #e07a2f; color: #a24e0f; }
+        body.lock-move :is(.draggable-text, .draggable-img, .movable) { cursor: pointer; touch-action: pan-y; }
+        [data-lock].el-selected { outline-color: #e07a2f !important; }
         .el-more { flex-basis: 100%; display: flex; flex-direction: column; gap: 6px; padding: 6px 2px 2px; border-top: 1px solid rgba(255,255,255,0.15); margin-top: 4px; }
         .el-more[hidden] { display: none; }
         .em-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; color: #fff; font-size: 12px; }
@@ -3059,6 +3095,8 @@ Alle sind herzlich eingeladen!</textarea></div>
         <button type="button" id="el-sync-btn" onclick="toggleSyncFormats()" title="Beitrag & Story gemeinsam anpassen">🔗</button>
         <button type="button" id="el-name-btn" onclick="togglePitchName()" title="Namen dieses Spielers ein-/ausblenden" hidden>🏷️</button>
         <button type="button" id="el-align-btn" onclick="cycleAlignSelected()" title="Text: mittig / links / rechts" hidden>⇔</button>
+        <button type="button" id="el-edit-btn" class="tb-edit" onclick="openElEdit()" title="Dieses Textfeld bearbeiten: Text, Schrift, Farbe, Effekte" hidden>✏️ Bearbeiten</button>
+        <button type="button" id="el-lock-btn" onclick="toggleLockSelected()" title="Element sperren / entsperren">🔓</button>
         <button type="button" id="el-style-btn" onclick="showElementRoles()" title="Welche Farbe/Schrift steuert das?">🎨</button>
         <button type="button" id="el-delete-btn" class="danger" onclick="deleteSelectedCustomText()" title="Text löschen" hidden>🗑️</button>
         <button type="button" id="el-more-btn" onclick="toggleElMore()" title="Mehr: Drehen, genaue Werte">⋯</button>
@@ -3077,6 +3115,11 @@ Alle sind herzlich eingeladen!</textarea></div>
     </div>
 
     <div id="role-pop" class="role-pop" hidden></div>
+
+    <div id="el-edit" class="el-edit" hidden>
+        <div class="ee-head"><b>✏️ Textfeld bearbeiten</b><button type="button" onclick="closeElEdit()" title="Fertig">✓ Fertig</button></div>
+        <div class="ee-body" id="ee-body"></div>
+    </div>
 
     <!-- BOTTOM NAVBAR -->
     <div class="bottom-bar">
@@ -3107,7 +3150,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.3";
+        const APP_VERSION = "24.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3347,6 +3390,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         let selectedSponsors = {};
         let season = [];               // eingefügter Saison-Spielplan: [{ date, time, opp, venue }]
         let labels = {};               // je Reiter: { key: eigener Text } → siehe LABEL_DEFS
+        let elStyles = {};             // je Element-ID: eigene Text-Formatierung ({ font, color, weight, style, tt, ls, fx, box })
         let customTexts = {};          // je Reiter: [{ id, text, target, size, color, bold, box, font }]
         let prefs = { versionNames: {}, safeZones: true, lastBackupAt: null, backupSnoozeUntil: null };
         let selectedEl = null;
@@ -5206,7 +5250,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     <details class="design-details" data-section="colors" ontoggle="if (this.open) renderRoleHints('${tab}')">
                         <summary>🎨 Farben & Schrift</summary>
                         <div class="details-body">
-                            <div class="role-intro">Unter jeder Einstellung steht, was sie in dieser Vorlage verändert. <b>👁</b> markiert die Stellen in der Vorschau. Umgekehrt geht's auch: ein Element in der Vorschau antippen und oben auf <b>🎨</b> tippen.</div>
+                            <div class="role-intro"><b>Nur ein bestimmter Text?</b> Einfach im Bild antippen und oben auf <b>✏️ Bearbeiten</b> – dort stellst du Text, Schrift, Farbe und Effekte nur für dieses Feld ein. Hier gelten die Einstellungen für alle Texte der Vorlage.<br>Unter jeder Einstellung steht, was sie in dieser Vorlage verändert. <b>👁</b> markiert die Stellen in der Vorschau. Umgekehrt geht's auch: ein Element in der Vorschau antippen und oben auf <b>🎨</b> tippen.</div>
                             <div class="design-sub">Vereinsfarben <small>– gelten für alle Reiter</small></div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div class="control-group" data-role-ctl="primary"><label>Hauptfarbe</label><input type="color" class="club-color-mirror" data-target="cfg-color-primary" value="#005f73" oninput="mirrorClubColor(this)"><div class="role-hint" data-role="primary"></div></div>
@@ -5810,6 +5854,12 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (what !== 'content' && LABEL_DEFS[tab]) data.labels = { ...data.labels, [tab]: copy(src.labels?.[tab] || {}) };
             if (what !== 'content' && tab !== 'eckball') {
                 if (src.tabSettings?.[tab]) data.tabSettings[tab] = copy(src.tabSettings[tab]);
+                {
+                    const vw = $(`view-${tab}`), inTab = k => vw?.contains($(k)) || (k.startsWith('ct-') && vw?.querySelector(`[id="${k}"]`));
+                    data.elStyles = { ...(data.elStyles || {}) };
+                    Object.keys(data.elStyles).forEach(k => { if (inTab(k)) delete data.elStyles[k]; });
+                    for (const k in (src.elStyles || {})) if (inTab(k) || (k.startsWith('ct-') && (src.customTexts?.[tab] || []).some(c => k.startsWith(`ct-${c.id}-`)))) data.elStyles[k] = copy(src.elStyles[k]);
+                }
                 data.customTexts = { ...data.customTexts, [tab]: copy(src.customTexts?.[tab] || []) };
                 data.selectedSponsors = { ...data.selectedSponsors, [tab]: copy(src.selectedSponsors?.[tab] || []) };
                 const view = $(`view-${tab}`);
@@ -6048,6 +6098,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                         else tpl.insertBefore(el, tpl.querySelector(':scope > .sponsor-banner'));
                         const saved = pendingPositions[elId];
                         if (saved) applyPosition(el, saved);
+                        if (elStyles[elId]) applyElStyle(el, elStyles[elId]);
                         bindDraggable(el);
                     }
                     const inner = el.firstElementChild;
@@ -7217,6 +7268,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             setElLayer(el, pos.z || 0);
             setElAlign(el, pos.align || '');
             setElRot(el, pos.rot || 0);
+            setElLock(el, !!pos.lock);
             if (el.classList.contains('movable')) { setElOffset(el, pos.x || 0, pos.y || 0); setElScale(el, pos.scale || 1); return; }
             if (pos.top) el.style.top = pos.top;
             if (pos.left) el.style.left = pos.left;
@@ -7270,6 +7322,149 @@ Alle sind herzlich eingeladen!</textarea></div>
             toast(prefs.syncFormats ? '🔗 Beitrag & Story werden jetzt gemeinsam angepasst' : 'Beitrag & Story werden wieder getrennt angepasst');
         }
         /* Änderung am ausgewählten Element (inkl. Partner) ausführen */
+        /* ✏️ Ein Textfeld im Bild antippen → „Bearbeiten“: Text, Schrift, Farbe, Effekte gelten nur für dieses Feld
+           (bei 🔗 auch für das Gegenstück in Beitrag/Story). Gespeichert in elStyles[Element-ID]. */
+        const ES_FX = { soft: TEXT_EFFECTS.soft, strong: TEXT_EFFECTS.strong, outline: TEXT_EFFECTS.outline, glow: TEXT_EFFECTS.glow, '3d': TEXT_EFFECTS['3d'], none: 'none' };
+        function isTextElement(el) {
+            return !!el && !!el.textContent.trim() && !el.matches('img, .pitch, .player-card, .sponsor-banner, .sticker-el, .team-logos, .kader-grid-pitch') && !el.querySelector('img:not(.list-item-img)')
+                || (!!el && el.classList.contains('custom-text') && !el.classList.contains('sticker-el'));
+        }
+        function applyElStyle(el, st) {
+            st = st || {};
+            const set = (cls, prop, v) => { el.classList.toggle(cls, v !== undefined && v !== ''); if (v !== undefined && v !== '') el.style.setProperty(prop, v); else el.style.removeProperty(prop); };
+            set('es-font', '--es-font', st.font);
+            set('es-color', '--es-color', st.color);
+            set('es-weight', '--es-weight', st.weight);
+            set('es-style', '--es-fstyle', st.style);
+            set('es-tt', '--es-tt', st.tt);
+            set('es-ls', '--es-ls', st.ls !== undefined && st.ls !== '' ? st.ls + 'px' : '');
+            set('es-fx', '--es-shadow', st.fx && st.fx !== 'hollow' ? ES_FX[st.fx] : '');
+            el.classList.toggle('es-hollow', st.fx === 'hollow');
+            set('es-box', '--es-box', st.box ? hexRgba(st.box, st.boxOp != null ? st.boxOp / 100 : 0.8) : '');
+        }
+        function applyAllElStyles() {
+            document.querySelectorAll('.es-font, .es-color, .es-weight, .es-style, .es-tt, .es-ls, .es-fx, .es-hollow, .es-box').forEach(el => { if (!elStyles[el.id]) applyElStyle(el, null); });
+            for (const id in elStyles) { const el = $(id); if (el) applyElStyle(el, elStyles[id]); }
+        }
+        /* Welches Eingabefeld liefert den Text dieses Elements? (eigener Text, fester Text oder Feld links) */
+        function elTextSource(el) {
+            if (el.classList.contains('custom-text')) {
+                const ct = (customTexts[el.dataset.ctTab] || []).find(c => c.id === el.dataset.ctId);
+                return ct ? { get: () => ct.text, set: v => { ct.text = v; renderCustomTextEditors(el.dataset.ctTab); renderCustomTextElements(el.dataset.ctTab); scheduleSave(); } } : null;
+            }
+            const lbl = el.dataset.label ? el : el.querySelector('[data-label]');
+            if (lbl) {
+                const inp = document.querySelector(`[data-lbl="${lbl.dataset.label}"]`);
+                if (inp) return { get: () => inp.value || L(...lbl.dataset.label.split(':')), set: v => { inp.value = v; inp.dispatchEvent(new Event('input', { bubbles: true })); }, label: true };
+            }
+            for (const n of [el, ...el.querySelectorAll('[id]')]) {
+                if (!n.id) continue;
+                const base = n.id.replace(/-(feed|story)$/, '').replace(/^out-/, '');
+                const inp = $('in-' + base);
+                if (inp && (inp.tagName === 'TEXTAREA' || (inp.tagName === 'INPUT' && inp.type === 'text'))) {
+                    return { get: () => inp.value, set: v => { inp.value = v; inp.dispatchEvent(new Event('input', { bubbles: true })); scheduleSave(); }, disabled: inp.disabled };
+                }
+            }
+            return null;
+        }
+        function openElEdit() {
+            if (!selectedEl || !isTextElement(selectedEl)) return;
+            const el = selectedEl, st = elStyles[el.id] || {}, src = elTextSource(el);
+            const fonts = fontOptionsHTML(st.font || '');
+            const opt = (list, cur) => list.map(([v, l]) => `<option value="${v}" ${String(cur ?? '') === v ? 'selected' : ''}>${l}</option>`).join('');
+            const adv = isAdvanced();
+            $('ee-body').innerHTML = `
+                ${src ? `<div class="ee-row ee-full"><label>Text</label><textarea id="ee-text" rows="2" ${src.disabled ? 'disabled' : ''}>${esc(src.get() || '')}</textarea>
+                    ${src.disabled ? '<span class="hint">Wird automatisch erzeugt (z.B. HEIMSPIEL/AUSWÄRTSSPIEL) – links unter „Titel“ auf „Eigener Text“ stellen, um ihn zu ändern.</span>' : src.label ? '<span class="hint">Fester Text dieser Vorlage – gilt für Beitrag und Story.</span>' : '<span class="hint">Tipp: *Wort* in Sternchen = Akzentfarbe.</span>'}</div>`
+                    : '<div class="ee-row ee-full"><span class="hint">Der Inhalt kommt aus deinen Angaben links (z.B. Spielername, Datum). Hier änderst du nur, wie er aussieht.</span></div>'}
+                <div class="ee-row"><label>Schriftart</label><select data-es="font">${fonts}</select></div>
+                <div class="ee-row"><label>Farbe</label><div class="ee-inline"><input type="color" data-es="color" value="${esc(st.color || '#ffffff')}"><button type="button" class="ee-mini${st.color ? '' : ' on'}" onclick="setElStyle('color', '')">Wie Reiter</button></div></div>
+                <div class="ee-row"><label>Stärke</label><select data-es="weight">${opt([['', 'Wie Reiter'], ['400', 'Normal'], ['700', 'Fett'], ['900', 'Extra fett']], st.weight)}</select></div>
+                <div class="ee-row"><label>Schreibweise</label><select data-es="tt">${opt([['', 'Wie Reiter'], ['uppercase', 'GROSSBUCHSTABEN'], ['none', 'Normal']], st.tt)}</select></div>
+                <div class="ee-row"><label>Stil</label><select data-es="style">${opt([['', 'Wie Reiter'], ['italic', 'Kursiv'], ['normal', 'Gerade']], st.style)}</select></div>
+                <div class="ee-row"><label>Effekt</label><select data-es="fx">${opt([['', 'Wie Reiter'], ['none', 'Ohne Schatten'], ['soft', 'Schatten'], ['strong', 'Starker Schatten'], ['outline', 'Kontur'], ['glow', 'Leuchten (Akzentfarbe)'], ['3d', '3D-Versatz'], ['hollow', 'Hohl (nur Umriss)']], st.fx)}</select></div>
+                <div class="ee-row ee-full"><label>Buchstabenabstand <small id="ee-ls-val">${st.ls !== undefined && st.ls !== '' ? st.ls + ' px' : 'wie Reiter'}</small></label><input type="range" data-es="ls" min="-3" max="15" step="0.5" value="${st.ls !== undefined && st.ls !== '' ? st.ls : 0}"></div>
+                <div class="ee-row"><label>Kasten dahinter</label><div class="ee-inline"><input type="color" data-es="box" value="${esc(st.box || '#000000')}"><button type="button" class="ee-mini${st.box ? '' : ' on'}" onclick="setElStyle('box', '')">Ohne</button></div></div>
+                <div class="ee-row"><label>Deckkraft Kasten</label><input type="range" data-es="boxOp" min="10" max="100" step="5" value="${st.boxOp ?? 80}"></div>
+                <div class="ee-row"><label>Ausrichtung</label><select data-es-align>${opt([['', 'Wie Reiter'], ['left', '⇤ Links'], ['center', '⇔ Mitte'], ['right', '⇥ Rechts']], getElAlign(el))}</select></div>
+                <div class="ee-row"><label>Größe</label><div class="ee-inline"><button type="button" class="ee-mini" onclick="nudgeSelectedScale(-0.1); refreshElEditVals()">−</button><span id="ee-scale">${Math.round(getElScale(el) * 100)} %</span><button type="button" class="ee-mini" onclick="nudgeSelectedScale(0.1); refreshElEditVals()">+</button></div></div>
+                <div class="ee-row ee-full ee-actions">
+                    <button type="button" onclick="toggleLockSelected(); refreshElEditVals()" id="ee-lock">${el.dataset.lock ? '🔒 Gesperrt' : '🔓 Sperren'}</button>
+                    <button type="button" onclick="resetElStyle()">↩️ Formatierung zurücksetzen</button>
+                </div>
+                <span class="hint ee-full">Gilt nur für dieses Textfeld${syncPartners(el).length ? (syncOn() ? ' und sein Gegenstück in ' + (el.closest('.story-template') ? 'Beitrag' : 'Story') + ' (🔗 an)' : ' – mit 🔗 in der Leiste auch für ' + (el.closest('.story-template') ? 'den Beitrag' : 'die Story')) : ''}. Für alle Texte einer Vorlage: links unter „🎨 Farben &amp; Schrift“.</span>`;
+            const box = $('el-edit');
+            box.hidden = false;
+            document.body.classList.add('el-editing');
+            $('el-edit-btn')?.classList.add('tb-on');
+            const t = $('ee-text');
+            if (t && src && !src.disabled) t.addEventListener('input', () => src.set(t.value));
+            box.querySelectorAll('[data-es]').forEach(i => i.addEventListener(i.type === 'range' ? 'input' : 'change', () => setElStyle(i.dataset.es, i.value)));
+            box.querySelector('[data-es="color"]').addEventListener('input', e => setElStyle('color', e.target.value));
+            box.querySelector('[data-es="box"]').addEventListener('input', e => setElStyle('box', e.target.value));
+            box.querySelector('[data-es-align]').addEventListener('change', e => { forSelectedGroup(x => setElAlign(x, e.target.value)); updateToolbar(); scheduleSave(); });
+        }
+        function refreshElEditVals() {
+            if ($('el-edit').hidden || !selectedEl) return;
+            setText('ee-scale', Math.round(getElScale(selectedEl) * 100) + ' %');
+            if ($('ee-lock')) $('ee-lock').textContent = selectedEl.dataset.lock ? '🔒 Gesperrt' : '🔓 Sperren';
+        }
+        function closeElEdit() {
+            const box = $('el-edit');
+            if (!box || box.hidden) return;
+            box.hidden = true;
+            document.body.classList.remove('el-editing');
+            $('el-edit-btn')?.classList.remove('tb-on');
+        }
+        function setElStyle(key, value) {
+            if (!selectedEl) return;
+            forSelectedGroup(el => {
+                const st = { ...(elStyles[el.id] || {}) };
+                if (value === '' || value === undefined) delete st[key]; else st[key] = key === 'ls' || key === 'boxOp' ? parseFloat(value) : value;
+                if (!st.box) delete st.boxOp;
+                if (Object.keys(st).length) elStyles[el.id] = st; else delete elStyles[el.id];
+                applyElStyle(el, elStyles[el.id]);
+            });
+            if (key === 'ls') setText('ee-ls-val', value === '' ? 'wie Reiter' : value + ' px');
+            if (key === 'color' || key === 'box') $('el-edit').querySelectorAll('.ee-mini').forEach(b => { if (b.getAttribute('onclick')?.includes(`'${key}'`)) b.classList.toggle('on', !value); });
+            scheduleSave();
+        }
+        function resetElStyle() {
+            forSelectedGroup(el => { delete elStyles[el.id]; applyElStyle(el, null); setElAlign(el, ''); });
+            scheduleSave();
+            openElEdit();
+            toast('↩️ Formatierung dieses Textfelds zurückgesetzt');
+        }
+
+        /* 🔒 Verschieben sperren: für alle Elemente (Gerät) oder je Element (gespeichert) */
+        let lockHintShown = false;
+        function isMoveLocked(el) { return !!prefs.lockMove || !!el.dataset.lock; }
+        function setElLock(el, on) { if (on) el.dataset.lock = '1'; else delete el.dataset.lock; }
+        function toggleLockSelected() {
+            if (!selectedEl) return;
+            const on = !selectedEl.dataset.lock;
+            forSelectedGroup(el => setElLock(el, on));
+            lockHintShown = false;
+            updateToolbar();
+            scheduleSave();
+            toast(on ? '🔒 Element gesperrt – lässt sich nicht mehr versehentlich verschieben' : '🔓 Element wieder frei verschiebbar');
+        }
+        function toggleLockAll() {
+            prefs.lockMove = !prefs.lockMove;
+            lockHintShown = false;
+            savePrefs();
+            applyLockAll();
+            toast(prefs.lockMove ? '🔒 Verschieben gesperrt – antippen und bearbeiten geht weiter' : '🔓 Verschieben wieder erlaubt');
+        }
+        function applyLockAll() {
+            document.body.classList.toggle('lock-move', !!prefs.lockMove);
+            document.querySelectorAll('.lock-all-btn').forEach(b => {
+                b.classList.toggle('on', !!prefs.lockMove);
+                b.textContent = prefs.lockMove ? '🔒 Verschieben gesperrt – tippen zum Entsperren' : '🔓 Verschieben erlaubt – tippen zum Sperren';
+            });
+            updateToolbar();
+        }
+
         function forSelectedGroup(fn) {
             if (!selectedEl) return;
             [selectedEl, ...activePartners(selectedEl)].forEach(fn);
@@ -7277,7 +7472,7 @@ Alle sind herzlich eingeladen!</textarea></div>
 
         function selectElement(el) {
             if ($('role-pop')) $('role-pop').hidden = true;
-            if (selectedEl && selectedEl !== el) selectedEl.classList.remove('el-selected');
+            if (selectedEl && selectedEl !== el) { selectedEl.classList.remove('el-selected'); closeElEdit(); }
             selectedEl = el;
             if (el) el.classList.add('el-selected');
             updateToolbar();
@@ -7323,10 +7518,14 @@ Alle sind herzlich eingeladen!</textarea></div>
             const bar = $('el-toolbar');
             if (!bar) return;
             bar.hidden = !selectedEl;
-            if (!selectedEl) { if ($('el-more')) $('el-more').hidden = true; $('el-more-btn')?.classList.remove('tb-on'); return; }
+            if (!selectedEl) { if ($('el-more')) $('el-more').hidden = true; $('el-more-btn')?.classList.remove('tb-on'); closeElEdit(); return; }
             updateElMore();
             setText('el-scale-label', Math.round(getElScale(selectedEl) * 100) + ' %');
             $('el-delete-btn').hidden = !selectedEl.classList.contains('custom-text');
+            const editBtn = $('el-edit-btn');
+            if (editBtn) editBtn.hidden = !isTextElement(selectedEl);
+            const lockBtn = $('el-lock-btn');
+            if (lockBtn) { const lk = !!selectedEl.dataset.lock; lockBtn.textContent = lk ? '🔒' : '🔓'; lockBtn.classList.toggle('tb-on', lk); lockBtn.title = lk ? 'Gesperrt – tippen zum Entsperren' : 'Element sperren (nicht mehr verschiebbar)'; }
             const alignBtn = $('el-align-btn');
             if (alignBtn) {
                 const hasText = !!selectedEl.textContent.trim() && !selectedEl.matches('img, .pitch, .player-card, .sponsor-banner');
@@ -7509,6 +7708,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
                 if (movable && e.pointerType === 'touch' && selectedEl !== el) { selectElement(el); return; }
                 selectElement(el);
+                // 🔒 Gesperrt: antippen und bearbeiten ja, verschieben nein
+                if (isMoveLocked(el)) { if (!lockHintShown) { lockHintShown = true; toast(prefs.lockMove ? '🔒 Verschieben ist gesperrt – oben über der Vorschau entsperren' : '🔒 Dieses Element ist gesperrt – in der Leiste mit 🔒 entsperren'); } return; }
                 try { el.setPointerCapture(e.pointerId); } catch (err) {}
                 pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
                 start = snapshot();
@@ -7560,7 +7761,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             el.addEventListener('pointercancel', end);
             // Desktop: Mausrad über dem ausgewählten Element ändert die Größe
             el.addEventListener('wheel', e => {
-                if (selectedEl !== el) return;
+                if (selectedEl !== el || isMoveLocked(el)) return;
                 e.preventDefault();
                 const f = e.deltaY < 0 ? 1.05 : 0.95;
                 forSelectedGroup(x => setElScale(x, getElScale(x) * f));
@@ -7577,6 +7778,8 @@ Alle sind herzlich eingeladen!</textarea></div>
            Inhalts-Container, der bei eingeblendeter Sponsorenleiste verkleinert wird */
         function prepareTemplates() {
             editorTabs.forEach(tab => {
+                const view = $(`view-${tab}`);
+                if (view && !view.querySelector(':scope > .lock-bar')) view.insertAdjacentHTML('afterbegin', '<div class="lock-bar"><button type="button" class="lock-all-btn" onclick="toggleLockAll()"></button></div>');
                 $(`view-${tab}`)?.querySelectorAll('.post-template, .story-template').forEach(tpl => {
                     tpl.querySelectorAll('.story-wappen-top-right, .tor-wappen').forEach(l => l.classList.add('corner-logo', 'movable'));
                     if (!tpl.querySelector('.corner-logo')) {
@@ -7642,7 +7845,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         function resetTabAll(tab) {
-            $(`view-${tab}`)?.querySelectorAll(DRAG_SEL).forEach(resetElement);
+            $(`view-${tab}`)?.querySelectorAll(DRAG_SEL).forEach(el => { resetElement(el); setElLock(el, false); if (elStyles[el.id]) { delete elStyles[el.id]; applyElStyle(el, null); } });
             if (tab === 'story') for (const id in pendingPositions) if (id.startsWith('pc-')) delete pendingPositions[id];
             resetTabBackgrounds(tab);
             resetTabStyle(tab);
@@ -9690,6 +9893,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             updateWochenende();
             updateEckball();
             editorTabs.forEach(applyPhotoFx);
+            applyAllElStyles();
+            applyLockAll();
         }
 
         const scheduleRoleHints = debounce(tab => renderRoleHints(tab), 600);
@@ -9887,6 +10092,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 wkOwnLogo: $('in-wk-own-logo')?.checked ?? true,
                 season: season,
                 customTexts: customTexts,
+                elStyles: elStyles,
                 labels: labels,
 
                 inputs: {},
@@ -9921,15 +10127,17 @@ Alle sind herzlich eingeladen!</textarea></div>
                 data.positions[el.id] = { top: el.style.top, left: el.style.left, scale: getElScale(el) };
                 if (getElLayer(el)) data.positions[el.id].z = getElLayer(el);
                 if (getElRot(el)) data.positions[el.id].rot = getElRot(el);
+                if (el.dataset.lock) data.positions[el.id].lock = true;
                 if (getElAlign(el)) data.positions[el.id].align = getElAlign(el);
             });
             document.querySelectorAll('.movable').forEach(el => {
                 if (!el.id) return;
-                const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el), al = getElAlign(el), rot = getElRot(el);
-                if (x || y || sc !== 1 || z || al || rot) {
+                const { x, y } = getElOffset(el), sc = getElScale(el), z = getElLayer(el), al = getElAlign(el), rot = getElRot(el), lk = !!el.dataset.lock;
+                if (x || y || sc !== 1 || z || al || rot || lk) {
                     data.positions[el.id] = z ? { x, y, scale: sc, z } : { x, y, scale: sc };
                     if (al) data.positions[el.id].align = al;
                     if (rot) data.positions[el.id].rot = rot;
+                    if (lk) data.positions[el.id].lock = true;
                 }
             });
             // Einzeln verschobene Sponsorenlogos merken, auch wenn „einzeln verschieben“ gerade aus ist
@@ -10023,6 +10231,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             // Eigene Texte zuerst anlegen, damit ihre gespeicherten Positionen greifen
             pendingPositions = data.positions || {};
             customTexts = data.customTexts || {};
+            elStyles = data.elStyles && typeof data.elStyles === 'object' ? data.elStyles : {};   // ältere Stände: keine
             renderAllCustomTexts();
             labels = data.labels || {};
             syncLabelInputs();

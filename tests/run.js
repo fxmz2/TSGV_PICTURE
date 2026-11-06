@@ -572,6 +572,35 @@ async function makePhotos(browser) {
         check('Werkzeuge: ⋯ Mehr mit Drehen und genauen Werten (gespeichert, zurücksetzbar)', tools.panel && tools.rot && tools.exact && tools.saved && tools.loaded && tools.reset && tools.closed, JSON.stringify(tools));
         check('Einrasten an Kanten anderer Elemente', tools.snap, JSON.stringify(tools));
         check('Reel: Einflug-Arten (z.B. Hereindrehen) und Aufnahme', tools.anim && tools.vid, JSON.stringify(tools));
+        // ✏️ Textfeld im Bild bearbeiten + 🔒 Sperre
+        const ee = await page.evaluate(async () => { const r = {}; switchTab('ergebnis');
+            const t = document.querySelector('#capture-ergebnis-feed .title-dyn').closest('.draggable-text'), other = document.querySelector('#capture-ergebnis-feed [id^="out-ergebnis-text"]').closest('.draggable-text');
+            selectElement(t); r.btn = !$('el-edit-btn').hidden; openElEdit(); r.open = !$('el-edit').hidden && $('ee-text').value === val('in-ergebnis-title');
+            const ta = $('ee-text'); ta.value = 'SIEG!'; ta.dispatchEvent(new Event('input')); r.text = val('in-ergebnis-title') === 'SIEG!' && $('out-ergebnis-title-feed').textContent === 'SIEG!';
+            setElStyle('color', '#ff0000'); setElStyle('weight', '900'); setElStyle('fx', 'hollow');
+            const h = t.querySelector('.title-dyn'), cs = getComputedStyle(h), cs2 = getComputedStyle(other.querySelector('p'));
+            r.style = cs.fontWeight === '900' && cs.color === 'rgba(0, 0, 0, 0)' && cs2.fontWeight !== '900';
+            r.saved = collectSlotData().elStyles[t.id]?.color === '#ff0000';
+            const d = collectSlotData(); applyElStyle(t, null); applySlotData(d); applyAllElStyles(); r.loaded = t.classList.contains('es-hollow');
+            r.export = (await renderElementToCanvas($('capture-ergebnis-feed'))).width === 1200;
+            resetElStyle(); r.reset = !elStyles[t.id] && !t.classList.contains('es-color');
+            closeElEdit(); setVal('in-ergebnis-title', 'ENDERGEBNIS'); updateErgebnis();
+            // Eingabefeld eines festen Textes (Label) wird gefunden
+            switchTab('tor'); const tt = document.querySelector('#capture-tor .title-dyn').closest('.draggable-text'); r.label = !!elTextSource(tt)?.label;
+            // Sperre: Element
+            switchTab('ergebnis'); selectElement(t); toggleLockSelected(); r.lock = t.dataset.lock === '1' && $('el-lock-btn').textContent === '🔒' && collectSlotData().positions[t.id]?.lock === true;
+            const top0 = t.style.top, rc = t.getBoundingClientRect();
+            t.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 7, clientX: rc.x + 20, clientY: rc.y + 10, button: 0, pointerType: 'mouse' }));
+            t.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, pointerId: 7, clientX: rc.x + 80, clientY: rc.y + 60, pointerType: 'mouse' }));
+            t.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 7, pointerType: 'mouse' }));
+            r.noMove = t.style.top === top0;
+            toggleLockSelected(); r.unlock = !t.dataset.lock;
+            // Sperre: alle
+            toggleLockAll(); r.all = document.body.classList.contains('lock-move') && isMoveLocked(other) && /gesperrt/.test(document.querySelector('#view-ergebnis .lock-all-btn').textContent);
+            toggleLockAll(); r.allOff = !document.body.classList.contains('lock-move');
+            selectElement(null); return r; });
+        check('✏️ Textfeld bearbeiten: Text, Farbe/Stärke/Effekt nur für dieses Feld, gespeichert, Export, zurücksetzen', ee.btn && ee.open && ee.text && ee.style && ee.saved && ee.loaded && ee.export && ee.reset && ee.label, JSON.stringify(ee));
+        check('🔒 Verschieben sperren (je Element gespeichert, für alle)', ee.lock && ee.noMove && ee.unlock && ee.all && ee.allOff, JSON.stringify(ee));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
