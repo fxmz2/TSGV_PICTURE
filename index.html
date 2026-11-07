@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.8</title>
+    <title>Match-Shot – Grafiken für Vereine 24.9</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1079,6 +1079,26 @@
         .modal-overlay[hidden] { display: none; }
         .modal-card { background: white; color: #222; border-radius: 14px; padding: 18px; width: 100%; max-width: 440px; max-height: 88vh; overflow: auto; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
         .modal-card h2 { margin: 0 0 6px; font-size: 1.15rem; }
+        /* 👥 Kader-Auswahl */
+        .kader-pick-btn { background: #2a9d8f !important; font-size: 14px !important; padding: 11px !important; }
+        .kader-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 10px; }
+        .kader-chip { background: #eef2fb; border: 1px solid #d5ddf0; border-radius: 12px; padding: 2px 9px; font-size: 12px; }
+        .kader-single { margin-bottom: 10px; }
+        .kader-card { display: flex; flex-direction: column; max-height: 90vh; }
+        .kp-count { font-size: 13px; font-weight: bold; background: #e6f4f7; color: #005f73; border-radius: 10px; padding: 2px 9px; margin-left: 4px; }
+        .kp-count.full { background: #fff3e0; color: #a24e0f; }
+        #kp-search { width: 100%; box-sizing: border-box; padding: 9px; font-size: 15px; border: 1px solid #cfd8dc; border-radius: 10px; margin-bottom: 6px; }
+        .kp-quick { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+        .kp-quick button { border: 1px solid #cfd8dc; background: #fff; border-radius: 14px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+        .kp-list { overflow: auto; flex: 1; min-height: 120px; border-top: 1px solid #eee; }
+        .kp-group { position: sticky; top: 0; background: #f6f7f9; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #5c6670; padding: 5px 4px; z-index: 1; }
+        .kp-row { display: flex; align-items: center; gap: 10px; padding: 7px 4px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        .kp-row input { width: 20px; height: 20px; flex: none; margin: 0; }
+        .kp-row img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #e9ecef; flex: none; }
+        .kp-row span { display: flex; flex-direction: column; line-height: 1.2; font-size: 14px; }
+        .kp-row small { color: #6b7280; font-size: 11px; }
+        .kp-row.on { background: #e9f7f4; }
+        .kp-row.off { opacity: 0.45; }
         .modal-card p { margin: 0 0 10px; font-size: 13px; color: #555; line-height: 1.4; }
         .photo-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
         .photo-row img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; background: #e9edf1; }
@@ -1991,9 +2011,17 @@
                 <div class="control-group"><label>Zusatz / Fließtext</label><input type="text" id="in-kader-freetext" value="12 Bälle, Hütchen, Medi-Tasche" oninput="updateKader();"></div>
                 <div class="control-group"><label>Name anzeigen als</label><select id="in-kader-namefmt" class="namefmt-select" onchange="updateKader(); scheduleSave();"><option value="full">Vor- und Nachname</option><option value="stack">Vor- und Nachname untereinander</option><option value="last">Nur Nachname</option><option value="first">Nur Vorname</option><option value="nick">Spitzname (sonst Nachname)</option></select></div>
 
+                <label>Spieler im Kader <small id="kader-count" style="font-weight:normal; color:#5c6670;"></small></label>
+                <button type="button" class="copy-action-btn kader-pick-btn" onclick="openKaderPicker()">👥 Spieler auswählen (Liste zum Antippen)</button>
+                <div class="kader-chips" id="kader-chips"></div>
+                <details class="design-details kader-single">
+                    <summary>✍️ Einzeln ändern &amp; Reihenfolge</summary>
+                    <div class="details-body">
+                        <span class="hint" style="margin-bottom:6px;">Die Reihenfolge hier ist die Reihenfolge im Bild.</span>
+                        <div class="scrollable-controls-box" id="kader-controls"></div>
+                    </div>
+                </details>
                 <button type="button" class="copy-action-btn" style="background:#c1121f;" onclick="clearKader()">🧹 Kader leeren (alle Spieler entfernen)</button>
-                <label>Spieler auswählen (Kader, max. 20)</label>
-                <div class="scrollable-controls-box" id="kader-controls"></div>
 
                 <button type="button" class="copy-action-btn" onclick="resetTabDefaults('kader')">🔄 Zurücksetzen (Positionen & Design) …</button>
             </div>
@@ -2983,6 +3011,19 @@ Alle sind herzlich eingeladen!</textarea></div>
         </div>
     </div>
 
+    <div id="kader-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closeKaderPicker()">
+        <div class="modal-card kader-card">
+            <h2>👥 Kader auswählen <span class="kp-count" id="kp-count"></span></h2>
+            <input type="search" id="kp-search" placeholder="🔍 Name suchen …" oninput="renderKaderPicker()">
+            <div class="kp-quick" id="kp-quick"></div>
+            <div id="kp-list" class="kp-list"></div>
+            <div class="modal-actions">
+                <button type="button" class="primary" onclick="applyKaderPicker()">✅ Übernehmen</button>
+                <button type="button" class="secondary" onclick="closeKaderPicker()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
     <div id="photo-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closePhotoDialog()">
         <div class="modal-card">
             <h2 id="photo-title">📷 Fotos</h2>
@@ -3170,7 +3211,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.8";
+        const APP_VERSION = "24.9";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -8259,6 +8300,81 @@ Alle sind herzlich eingeladen!</textarea></div>
             scheduleSave();
             toast('🧹 Aufstellung geleert');
         }
+        /* 👥 Kader per Liste auswählen (Pop-up mit Fotos, Suche, ganze Mannschaft) */
+        let kaderPick = null;   // Set der ausgewählten Namen
+        function kaderNames() {
+            const out = [];
+            for (let i = 1; i <= KADER_MAX; i++) { const v = val(`kader-player-${i}`); if (v && v !== 'Keiner' && !out.includes(v)) out.push(v); }
+            return out;
+        }
+        function openKaderPicker() {
+            if (!stammdaten.players.length) { alert('Noch keine Spieler angelegt – unter „🗃️ Daten“ hinzufügen.'); return; }
+            kaderPick = new Set(kaderNames());
+            setVal('kp-search', '');
+            const teams = (stammdaten.teams || []).filter(t => stammdaten.players.some(p => p.team === t));
+            $('kp-quick').innerHTML = teams.map((t, i) => `<button type="button" onclick="kaderPickTeam(${i})">＋ ${esc(t)}</button>`).join('')
+                + `<button type="button" onclick="kaderPickAll(false)">Alle abwählen</button>`;
+            $('kader-overlay').hidden = false;
+            renderKaderPicker();
+        }
+        function kaderGroups() {
+            const players = stammdaten.players;
+            if (hasTeamAssignments()) {
+                return [...(stammdaten.teams || []), ''].map(t => [t || 'Ohne Mannschaft', players.filter(p => (p.team && (stammdaten.teams || []).includes(p.team) ? p.team : '') === t)]);
+            }
+            return PLAYER_GROUPS.map(g => [g, players.filter(p => (PLAYER_GROUPS.includes(p.group) ? p.group : 'Spieler') === g)]);
+        }
+        function renderKaderPicker() {
+            const q = normName(val('kp-search')).toLowerCase(), full = kaderPick.size >= KADER_MAX;
+            $('kp-list').innerHTML = kaderGroups().map(([label, list]) => {
+                const shown = list.filter(p => !q || p.name.toLowerCase().includes(q) || (p.nick || '').toLowerCase().includes(q));
+                if (!shown.length) return '';
+                return `<div class="kp-group">${esc(label)}</div>` + shown.map(p => {
+                    const on = kaderPick.has(p.name);
+                    const meta = [p.number ? '#' + p.number : '', p.position || ''].filter(Boolean).join(' · ');
+                    return `<label class="kp-row${on ? ' on' : ''}${!on && full ? ' off' : ''}"><input type="checkbox" data-name="${esc(p.name)}" ${on ? 'checked' : ''} ${!on && full ? 'disabled' : ''}>
+                        <img src="${p.img || PLAYER_FALLBACK}" alt="" loading="lazy"><span><b>${esc(p.name)}</b>${meta ? `<small>${esc(meta)}</small>` : ''}</span></label>`;
+                }).join('');
+            }).join('') || '<p>Kein Spieler gefunden.</p>';
+            $('kp-list').querySelectorAll('input[data-name]').forEach(cb => cb.addEventListener('change', () => {
+                if (cb.checked) kaderPick.add(cb.dataset.name); else kaderPick.delete(cb.dataset.name);
+                renderKaderPicker();
+            }));
+            $('kp-count').textContent = `${kaderPick.size} / ${KADER_MAX}`;
+            $('kp-count').classList.toggle('full', full);
+        }
+        function kaderPickTeam(i) {
+            const t = (stammdaten.teams || []).filter(x => stammdaten.players.some(p => p.team === x))[i];
+            const add = stammdaten.players.filter(p => p.team === t && (p.group || 'Spieler') === 'Spieler');
+            let skipped = 0;
+            add.forEach(p => { if (kaderPick.has(p.name)) return; if (kaderPick.size < KADER_MAX) kaderPick.add(p.name); else skipped++; });
+            if (skipped) toast(`Max. ${KADER_MAX} Spieler – ${skipped} nicht hinzugefügt`);
+            renderKaderPicker();
+        }
+        function kaderPickAll(on) { if (!on) kaderPick.clear(); renderKaderPicker(); }
+        function applyKaderPicker() {
+            // Reihenfolge: bisherige Kader-Spieler behalten ihren Platz, neue kommen in Listen-Reihenfolge dazu
+            const keep = kaderNames().filter(n => kaderPick.has(n));
+            const order = kaderGroups().flatMap(([, l]) => l.map(p => p.name));
+            const add = order.filter(n => kaderPick.has(n) && !keep.includes(n));
+            const names = [...keep, ...add].slice(0, KADER_MAX);
+            for (let i = 1; i <= KADER_MAX; i++) setVal(`kader-player-${i}`, names[i - 1] || 'Keiner');
+            closeKaderPicker();
+            updateKader();
+            refreshLineupOptions();
+            updateCaption('kader');
+            scheduleSave();
+            toast(`✅ ${names.length} Spieler im Kader`);
+        }
+        function closeKaderPicker() { $('kader-overlay').hidden = true; kaderPick = null; }
+        function renderKaderChips() {
+            const host = $('kader-chips');
+            if (!host) return;
+            const n = kaderNames();
+            setText('kader-count', `(${n.length} / ${KADER_MAX})`);
+            host.innerHTML = n.length ? n.map(x => `<span class="kader-chip">${esc(playerDisplayName(x, 'full'))}</span>`).join('') : '<span class="hint">Noch keine Spieler ausgewählt.</span>';
+        }
+
         function clearKader() {
             if (!confirm('Alle Spieler aus dem Kader entfernen?\nMit ↩️ lässt sich das rückgängig machen.')) return;
             for (let i = 1; i <= KADER_MAX; i++) setVal(`kader-player-${i}`, 'Keiner');
@@ -9082,6 +9198,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         function updateKader() {
+            renderKaderChips();
             let html = '';
             let count = 0;
             for (let i = 1; i <= KADER_MAX; i++) {
