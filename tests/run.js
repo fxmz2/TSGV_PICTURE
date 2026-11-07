@@ -214,6 +214,7 @@ async function makePhotos(browser) {
         check('Warnung bei fehlender Einwilligung', /Einwilligung/.test(page.dialogs[0] || ''));
         // Leeren
         await page.click('.tab-btn[data-tab="kader"]');
+        await page.evaluate(() => { document.querySelector('#editor-kader .kader-single').open = true; });   // Einzel-Auswahl ist eingeklappt (Liste per Pop-up)
         await page.selectOption('#kader-player-1', 'Max Muster');
         await page.click('button:has-text("Kader leeren")');
         await page.waitForTimeout(300);
@@ -648,6 +649,26 @@ async function makePhotos(browser) {
             return r; });
         check('🔍 Bildausschnitt: Rahmen ziehen/zoomen, ganzes Bild, gespeichert, Export, zurücksetzen', crop.btn && crop.open && crop.rect && crop.saved && crop.zoom && crop.whole && crop.keep && crop.savedFit && crop.back && crop.all && crop.allOff && crop.export && crop.reset, JSON.stringify(crop));
         check('🧹 Leeren-Knopf steht oben im Inhalt', crop.clearTop, JSON.stringify(crop));
+        // 👥 Kader per Liste (Pop-up) auswählen
+        const kp = await page.evaluate(() => { const r = {}; switchTab('kader');
+            for (let i = 1; i <= KADER_MAX; i++) setVal(`kader-player-${i}`, 'Keiner');
+            const P = stammdaten.players.filter(p => (p.group || 'Spieler') === 'Spieler').map(p => p.name);
+            setVal('kader-player-1', P[3]); updateKader();
+            openKaderPicker(); r.open = !$('kader-overlay').hidden && document.querySelectorAll('#kp-list .kp-row').length >= P.length;
+            [P[0], P[1]].forEach(n => { const cb = document.querySelector(`#kp-list input[data-name="${CSS.escape(n)}"]`); cb.checked = true; cb.dispatchEvent(new Event('change')); });
+            r.count = $('kp-count').textContent.startsWith('3 /');
+            setVal('kp-search', P[1].split(' ')[0]); renderKaderPicker(); r.search = document.querySelectorAll('#kp-list .kp-row').length >= 1 && document.querySelectorAll('#kp-list .kp-row').length < P.length;
+            applyKaderPicker();
+            r.apply = val('kader-player-1') === P[3] && [val('kader-player-2'), val('kader-player-3')].sort().join() === [P[0], P[1]].sort().join() && val('kader-player-4') === 'Keiner' && $('kader-overlay').hidden;
+            r.chips = document.querySelectorAll('#kader-chips .kader-chip').length === 3 && /3 \/ 20/.test($('kader-count').textContent);
+            r.view = document.querySelectorAll('#capture-kader .kader-grid-img').length === 3;
+            // Höchstzahl
+            openKaderPicker(); stammdaten.players.forEach(p => kaderPick.add(p.name)); [...kaderPick].slice(KADER_MAX).forEach(n => kaderPick.delete(n)); renderKaderPicker();
+            r.max = $('kp-count').classList.contains('full') && !!document.querySelector('#kp-list input:disabled') === (stammdaten.players.length > KADER_MAX);
+            closeKaderPicker(); r.cancel = val('kader-player-4') === 'Keiner';
+            for (let i = 1; i <= KADER_MAX; i++) setVal(`kader-player-${i}`, 'Keiner'); updateKader();
+            return r; });
+        check('👥 Kader per Liste: Pop-up, Suche, Zähler, Reihenfolge bleibt, Abbrechen, Höchstzahl', Object.values(kp).every(Boolean), JSON.stringify(kp));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
