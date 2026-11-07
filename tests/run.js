@@ -388,6 +388,43 @@ async function makePhotos(browser) {
         const vlast = await page.evaluate(() => voState.items[voState.items.length - 1].key);
         await page.mouse.move(va.x + va.width / 2, va.y + va.height / 2); await page.mouse.down(); await page.mouse.move(vb.x + vb.width / 2, vb.y + 2, { steps: 8 }); await page.mouse.up();
         check('Video-Reihenfolge per Ziehen', await page.evaluate(k => { const ok = voState.items[0].key === k && vidOrder['capture-post-feed'][0] === k; delete vidOrder['capture-post-feed']; closeVidOrder(); return ok; }, vlast));
+        // Video: Elemente aufteilen (Wappen einzeln) und Gruppen (gleichzeitig) – Spieler je Reihe / einzeln / alle zusammen
+        const vgr = await page.evaluate(async () => { const r = {};
+            switchTab('post'); delete vidOrder['capture-post-feed']; delete vidCfg['capture-post-feed']; delete vidCfg['capture-post-story'];
+            await openVidOrder('post');
+            const nat = voState.items.length; r.logoBtn = !!document.querySelector('#vo-quick button') && voState.items.some(it => it.kind === 'logos' && it.splittable);
+            const lay0 = (await renderVideoLayers($('capture-post-feed'))).layers.length;
+            await vidPreset('logos', 'single');
+            const wap = voState.items.filter(it => it.kind === 'logos' && it.part);
+            r.split = wap.filter(it => it.label.startsWith('🛡️ Wappen')).length === 2 && voState.items.length > nat;
+            r.story = vidCfgOf('capture-post-story').split.length === 1;
+            const L1 = (await renderVideoLayers($('capture-post-feed'))).layers;
+            r.layers = L1.length === lay0 + wap.length - 1 && new Set(L1.map(l => l.slot)).size === L1.length;
+            const wi = voState.items.findIndex(it => it.part && it.kind === 'logos');
+            toggleVidJoin(wi + 1);
+            const sl = vidSlots(voState.items, voState.tplId); r.join = sl[wi + 1] === sl[wi] && document.querySelectorAll('#vo-list .vo-joined').length === 1;
+            r.saved = collectSlotData().vidCfg['capture-post-feed'].join.length === 1;
+            await unsplitVidUnit(wi); r.unsplit = voState.items.length === nat && !vidCfgOf('capture-post-feed').join.length;
+            await resetVidOrder(); r.reset = !vidCfg['capture-post-feed'] && !vidOrder['capture-post-feed'];
+            delete vidCfg['capture-post-story']; closeVidOrder();
+            // Aufstellung: Spieler einzeln / alle zusammen
+            switchTab('story'); buildFormation(); delete vidOrder['capture-story']; delete vidCfg['capture-story'];
+            await openVidOrder('story'); await selectVidOrderTpl('capture-story');
+            const rows = voState.items.filter(it => it.row).length, cards = document.querySelectorAll('#pitch .player-card').length;
+            await vidPreset('rows', 'single'); r.single = voState.items.filter(it => it.row && it.part).length === cards && cards > rows;
+            await vidPreset('rows', 'all'); const rs = vidSlots(voState.items, 'capture-story').filter((s, i) => voState.items[i].row);
+            const ri = voState.items.map((it, i) => it.row ? i : -1).filter(i => i >= 0);
+            r.all = rows > 1 && new Set(rs).size === 1 && ri[ri.length - 1] - ri[0] === ri.length - 1;
+            const L2 = (await renderVideoLayers($('capture-story'))).layers; r.allLayers = new Set(L2.filter(l => l.row).map(l => l.slot)).size === 1;
+            await vidPreset('rows', 'row'); r.row = new Set(vidSlots(voState.items, 'capture-story').filter((s, i) => voState.items[i].row)).size === rows;
+            for (const t of ['capture-story-feed', 'capture-story', 'capture-story-list']) { delete vidCfg[t]; delete vidOrder[t]; }
+            closeVidOrder();
+            // Ältere Stände: Reihenfolge mit leeren Schlüsseln funktioniert weiter
+            vidOrder['capture-post-feed'] = ['', 'team-logos-post-container'];
+            const u = sortAnimUnits([{ key: 'team-logos-post-container' }, { key: '@0' }], 'capture-post-feed'); r.legacy = u[0].key === '@0';
+            delete vidOrder['capture-post-feed'];
+            return r; });
+        check('Video: Wappen einzeln, Gruppen (gleichzeitig), Spieler je Reihe / einzeln / zusammen', Object.values(vgr).every(Boolean), JSON.stringify(vgr));
         const vsp = await page.evaluate(() => { switchTab('post'); const c = $('team-logos-post-container'), r = {};
             r.def = val('in-vs-pos-post'); const dir = val('in-logo-dir-post'); setVal('in-logo-dir-post', 'row');
             ['top', 'center', 'bottom'].forEach(p => { setVal('in-vs-pos-post', p); updateTabDesign('post'); const a = c.querySelector('.logos-vs').getBoundingClientRect(), b = c.querySelector('.logo').getBoundingClientRect();
