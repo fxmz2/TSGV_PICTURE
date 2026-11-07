@@ -214,6 +214,7 @@ async function makePhotos(browser) {
         check('Warnung bei fehlender Einwilligung', /Einwilligung/.test(page.dialogs[0] || ''));
         // Leeren
         await page.click('.tab-btn[data-tab="kader"]');
+        await page.evaluate(() => { document.querySelector('#editor-kader .kader-single').open = true; });   // Einzel-Auswahl ist eingeklappt (Liste per Pop-up)
         await page.selectOption('#kader-player-1', 'Max Muster');
         await page.click('button:has-text("Kader leeren")');
         await page.waitForTimeout(300);
@@ -478,6 +479,196 @@ async function makePhotos(browser) {
         check('7er-Aufstellung mit 7 Spielern', small.cards === 7 && small.f === '2-3-1', JSON.stringify(small));
         check('Spielform wird gespeichert', small.restored === '2-3-1/7', small.restored);
         // Präsentiert von
+        // Design neu geordnet + ✨ Extras (Kästen, Überschriften, Riesen-Text, Hintergrund-Ebenen, neue Stile)
+        const ex = await page.evaluate(async () => { const r = {}, host = $('design-controls-tor'), sec = k => host.querySelector(`details[data-section="${k}"]`);
+            const order = [...host.querySelectorAll('details[data-section]')].map(d => d.dataset.section);
+            r.order = ['styles', 'colors', 'boxes', 'design', 'logo', 'extras'].every((k, i, a) => !i || order.indexOf(k) > order.indexOf(a[i - 1]));
+            r.moved = !sec('colors').querySelector('#in-text-effect-tor') && !!sec('extras').querySelector('#in-text-effect-tor') && !!sec('boxes').querySelector('#in-box-mode-tor') && !!sec('boxes').querySelector('#in-frame-shape-tor')
+                && !!$('design-controls-post').querySelector('details[data-section="logo"] #in-logo-size-post');
+            switchTab('tor'); setVal('in-tor-minute', '67. Min');
+            setVal('in-box-fill-tor', 'stripes'); setVal('in-box-edge-tor', 'neon'); setVal('in-title-style-tor', 'outline'); setVal('in-title-rot-tor', 'vl');
+            setVal('in-big-mode-tor', 'auto'); setVal('in-ov-grad-tor', 'bottom'); setVal('in-ov-pattern-tor', 'halftone'); updateAllViews();
+            const v = $('view-tor'), big = $('bigtxt-capture-tor');
+            r.box = v.classList.contains('bx-img') && /svg/.test(v.style.getPropertyValue('--box-img')) && v.classList.contains('bx-edge-neon');
+            r.title = v.classList.contains('tt-outline') && v.classList.contains('tt-vert-l') && getComputedStyle(document.querySelector('#capture-tor .title-dyn')).color === 'rgba(0, 0, 0, 0)';
+            r.big = big.style.display !== 'none' && big.textContent === "67'";
+            r.ov = document.querySelector('#capture-tor .bg-ov').classList.contains('on') && document.querySelectorAll('#capture-tor .bg-ov > div').length === 2;
+            r.badge = $('ex-count-tor').textContent.includes('aktiv') && !$('ex-count-tor').hidden;
+            r.export = (await renderElementToCanvas($('capture-tor'))).width === 1200;
+            const d = collectSlotData(); r.saved = d.tabSettings.tor.boxFill === 'stripes' && d.tabSettings.tor.bigMode === 'auto';
+            const old = JSON.parse(JSON.stringify(d)); ['boxFill', 'boxEdge', 'titleStyle', 'titleRot', 'bigMode', 'ovGrad', 'ovPattern'].forEach(k => delete old.tabSettings.tor[k]);
+            applySlotData(old); updateAllViews(); r.old = val('in-box-fill-tor') === 'solid' && !v.classList.contains('bx-img') && $('bigtxt-capture-tor').style.display === 'none';
+            applyStyle('tor', 'neonnacht'); r.style = val('in-box-edge-tor') === 'neon' && val('in-ov-grad-tor') === 'vignette';
+            applyStyle('tor', 'klassisch'); r.styleReset = val('in-box-edge-tor') === 'none' && val('in-ov-grad-tor') === 'none';
+            setVal('in-box-shadow-tor', 'hard'); resetExtras('tor'); r.reset = val('in-box-shadow-tor') === 'none' && $('ex-count-tor').hidden;
+            setVal('in-tor-minute', ''); updateAllViews();
+            // *Wort* = Akzentfarbe, Beitragstext ohne Sternchen
+            switchTab('sponsor'); const keepT = val('in-spon-title'); setVal('in-spon-title', '*DANKE* Partner'); updateSponsorPost();
+            r.hl = !!document.querySelector('#out-spon-title .hl') && $('out-spon-title').textContent === 'DANKE Partner' && !buildCaption('sponsor').includes('*');
+            setVal('in-spon-title', keepT); updateSponsorPost();
+            return r; });
+        check('Design-Bereiche neu geordnet (Kästen & Rahmen, Hintergrund, Wappen beim Logo, Extras)', ex.order && ex.moved, JSON.stringify(ex));
+        check('Extras: Kasten-Muster/Neon, Umriss- und Hochkant-Titel, Riesen-Text, Hintergrund-Ebenen, Export', ex.box && ex.title && ex.big && ex.ov && ex.badge && ex.export, JSON.stringify(ex));
+        check('Extras: gespeichert, alte Stände unverändert, Stile setzen/entfernen Extras, Zurücksetzen', ex.saved && ex.old && ex.style && ex.styleReset && ex.reset, JSON.stringify(ex));
+        check('*Wort* erscheint in Akzentfarbe, Beitragstext ohne Sternchen', ex.hl, JSON.stringify(ex));
+        // 🧩 Layouts (alle Pakete): Elemente neu anordnen, Zurücksetzen führt zum Layout, gespeichert, alte Stände = Klassisch
+        const lay = await page.evaluate(async () => { const r = {};
+            switchTab('tor'); applyLayout('tor', 'poster');
+            const ph = $('img-tor-player-feed'), tpl = $('capture-tor-feed');
+            r.applied = $('view-tor').classList.contains('lay-tor-poster') && ph.style.top === Math.round(30 * tpl.querySelector('.tpl-content').offsetHeight / 500) + 'px' && document.querySelector('#layout-grid-tor [data-layout="poster"]').classList.contains('active');
+            ph.style.top = '5px'; resetTabAll('tor'); r.reset = ph.style.top === ph.getAttribute('data-default-top') && ph.getAttribute('data-default-top') !== '200px';
+            r.export = (await renderElementToCanvas($('capture-tor'))).width === 1200;
+            r.saved = collectSlotData().tabSettings.tor.layout === 'poster';
+            switchTab('post'); applyLayout('post', 'player'); r.player = val('in-logo-dir-post') === 'column' && parseFloat($('team-logos-post-container').dataset.x) < 0;
+            applyLayout('post', 'classic'); r.back = val('in-logo-dir-post') === 'row' && !parseFloat($('team-logos-post-container').dataset.x || 0) && !$('view-post').classList.contains('lay-post-player');
+            switchTab('ergebnis'); applyLayout('ergebnis', 'scoreboard'); r.board = $('view-ergebnis').classList.contains('lay-ergebnis-scoreboard') && val('in-logo-gap-ergebnis') === '65';
+            applyLayout('ergebnis', 'classic');
+            const old = JSON.parse(JSON.stringify(collectSlotData())); delete old.tabSettings.tor.layout;
+            applySlotData(old); updateTabDesign('tor'); r.old = val('in-layout-tor') === 'classic' && !$('view-tor').classList.contains('lay-tor-poster');
+            applyLayout('tor', 'classic'); return r; });
+        check('Layouts: Tor-Plakat, Ankündigung mit Spieler, Ergebnis-Anzeigetafel; Zurücksetzen zum Layout; Export', lay.applied && lay.reset && lay.export && lay.player && lay.back && lay.board, JSON.stringify(lay));
+        check('Layouts: gespeichert, alte Stände klassisch', lay.saved && lay.old, JSON.stringify(lay));
+        // Foto-Effekte + Sticker (✨ Extras)
+        const fx = await page.evaluate(async () => { const r = {}; switchTab('potm');
+            const img = $('out-potm-img'), before = img.getAttribute('src');
+            setVal('in-photo-fx-potm', 'outline-w'); updateAllViews(); await new Promise(res => setTimeout(res, 1200));
+            r.fx = img.getAttribute('src') !== before && /^data:image\/(webp|png)/.test(img.getAttribute('src')) && img.dataset.fxSrc === before;
+            updatePotm(); afterViewsUpdated(); await new Promise(res => setTimeout(res, 400)); r.stays = img.getAttribute('src') !== before;
+            setVal('in-photo-fx-potm', 'none'); updateAllViews(); r.off = img.getAttribute('src') === before;
+            customTexts.potm = (customTexts.potm || []).filter(c => c.type !== 'sticker');
+            addSticker('potm', 'blitz'); addSticker('potm', 'stern');
+            const st = document.querySelectorAll('#capture-potm .sticker-el');
+            r.sticker = st.length === 2 && st[0].style.left !== st[1].style.left && !!st[0].querySelector('img.ct-sticker') && document.querySelectorAll('#st-list-potm .st-item').length === 2 && $('ct-count-potm').textContent === '0';
+            const it = document.querySelector('#st-list-potm .st-item select[data-field="colorMode"]'); it.value = 'white'; it.dispatchEvent(new Event('change', { bubbles: true }));
+            r.color = decodeURIComponent(document.querySelector('#capture-potm .ct-sticker').src).includes('#ffffff');
+            r.saved = (collectSlotData().customTexts.potm || []).filter(c => c.type === 'sticker').length === 2;
+            updateTabDesign('potm'); r.badge = /2 aktiv/.test($('ex-count-potm').textContent);
+            r.export = (await renderElementToCanvas($('capture-potm'))).width === 1200;
+            customTexts.potm = customTexts.potm.filter(c => c.type !== 'sticker'); renderCustomTextEditors('potm'); renderCustomTextElements('potm'); updateTabDesign('potm');
+            return r; });
+        check('Foto-Effekte (Sticker-Rand, bleibt nach Aktualisieren, abschaltbar)', fx.fx && fx.stays && fx.off, JSON.stringify(fx));
+        check('Sticker: einfügen (versetzt), Farbe, gespeichert, Zähler, Export', fx.sticker && fx.color && fx.saved && fx.badge && fx.export, JSON.stringify(fx));
+        // Werkzeuge (⋯ Mehr: Drehen, genaue Werte), Einrasten an anderen Elementen, Reel-Einflug-Arten
+        const tools = await page.evaluate(async () => { const r = {}; switchTab('ergebnis');
+            const el = $('out-ergebnis-score'); selectElement(el); toggleElMore(true);
+            r.panel = !$('el-more').hidden && $('em-scale').value === String(Math.round(getElScale(el) * 100));
+            rotateSelected(5); rotateSelected(5); r.rot = el.dataset.rot === '10' && el.style.getPropertyValue('--el-rot') === '10deg';
+            setSelectedExact('y', 150); r.exact = el.style.top === '150px';
+            const d = collectSlotData(); r.saved = d.positions['out-ergebnis-score']?.rot === 10;
+            setElRot(el, 0); applySlotData(d); r.loaded = $('out-ergebnis-score').dataset.rot === '10';
+            resetElement($('out-ergebnis-score')); r.reset = !$('out-ergebnis-score').dataset.rot;
+            selectElement(null); r.closed = $('el-more').hidden;
+            // Einrasten: Text nahe an der linken Kante eines anderen Elements
+            const t = $('out-ergebnis-text').closest('.draggable-text'), tpl = $('capture-ergebnis');
+            const sc = $('out-erg-scorers-wrap'); const box = sc.querySelector('.scorer-box').getBoundingClientRect(), tr = tpl.getBoundingClientRect(), k = tr.width / tpl.offsetWidth;
+            const keep = [t.style.left]; const tb = contentRect(t); t.style.left = ((parseFloat(t.style.left) || 0) + (box.left - tb.left) / k + 3) + 'px';
+            const info = snapInfo(t); r.snap = !!info && info.gx !== null && Math.abs(info.gx - (box.left - tr.left) / k) < 1;
+            t.style.left = keep[0]; resetElement(t);
+            // Reel
+            r.anim = !!$('in-vid-anim-ergebnis') && (setVal('in-vid-anim-ergebnis', 'spin'), videoOptions('ergebnis').anim === 'spin');
+            const { base, layers } = await renderVideoLayers($('capture-ergebnis-feed'));
+            r.vid = typeof MediaRecorder === 'undefined' || (await recordVideo(base, layers.slice(0, 2), null, { ...videoOptions('ergebnis'), gap: [0.1, 1] })).size > 1000;
+            setVal('in-vid-anim-ergebnis', 'fly');
+            return r; });
+        check('Werkzeuge: ⋯ Mehr mit Drehen und genauen Werten (gespeichert, zurücksetzbar)', tools.panel && tools.rot && tools.exact && tools.saved && tools.loaded && tools.reset && tools.closed, JSON.stringify(tools));
+        check('Einrasten an Kanten anderer Elemente', tools.snap, JSON.stringify(tools));
+        check('Reel: Einflug-Arten (z.B. Hereindrehen) und Aufnahme', tools.anim && tools.vid, JSON.stringify(tools));
+        // ✏️ Textfeld im Bild bearbeiten + 🔒 Sperre
+        const ee = await page.evaluate(async () => { const r = {}; switchTab('ergebnis');
+            const t = document.querySelector('#capture-ergebnis-feed .title-dyn').closest('.draggable-text'), other = document.querySelector('#capture-ergebnis-feed [id^="out-ergebnis-text"]').closest('.draggable-text');
+            selectElement(t); r.btn = !$('el-edit-btn').hidden; openElEdit(); r.open = !$('el-edit').hidden && $('ee-text').value === val('in-ergebnis-title');
+            const ta = $('ee-text'); ta.value = 'SIEG!'; ta.dispatchEvent(new Event('input')); r.text = val('in-ergebnis-title') === 'SIEG!' && $('out-ergebnis-title-feed').textContent === 'SIEG!';
+            setElStyle('color', '#ff0000'); setElStyle('weight', '900'); setElStyle('fx', 'hollow');
+            const h = t.querySelector('.title-dyn'), cs = getComputedStyle(h), cs2 = getComputedStyle(other.querySelector('p'));
+            r.style = cs.fontWeight === '900' && cs.color === 'rgba(0, 0, 0, 0)' && cs2.fontWeight !== '900';
+            r.saved = collectSlotData().elStyles[t.id]?.color === '#ff0000';
+            const d = collectSlotData(); applyElStyle(t, null); applySlotData(d); applyAllElStyles(); r.loaded = t.classList.contains('es-hollow');
+            r.export = (await renderElementToCanvas($('capture-ergebnis-feed'))).width === 1200;
+            resetElStyle(); r.reset = !elStyles[t.id] && !t.classList.contains('es-color');
+            closeElEdit(); setVal('in-ergebnis-title', 'ENDERGEBNIS'); updateErgebnis();
+            // Eingabefeld eines festen Textes (Label) wird gefunden
+            switchTab('tor'); const tt = document.querySelector('#capture-tor .title-dyn').closest('.draggable-text'); r.label = !!elTextSource(tt)?.label;
+            // Sperre: Element
+            switchTab('ergebnis'); selectElement(t); toggleLockSelected(); r.lock = t.dataset.lock === '1' && $('el-lock-btn').textContent === '🔒' && collectSlotData().positions[t.id]?.lock === true;
+            const top0 = t.style.top, rc = t.getBoundingClientRect();
+            t.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 7, clientX: rc.x + 20, clientY: rc.y + 10, button: 0, pointerType: 'mouse' }));
+            t.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, pointerId: 7, clientX: rc.x + 80, clientY: rc.y + 60, pointerType: 'mouse' }));
+            t.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 7, pointerType: 'mouse' }));
+            r.noMove = t.style.top === top0;
+            toggleLockSelected(); r.unlock = !t.dataset.lock;
+            // Sperre: alle
+            toggleLockAll(); r.all = document.body.classList.contains('lock-move') && isMoveLocked(other) && /gesperrt/.test(document.querySelector('#view-ergebnis .lock-all-btn').textContent);
+            toggleLockAll(); r.allOff = !document.body.classList.contains('lock-move');
+            selectElement(null); return r; });
+        check('✏️ Textfeld bearbeiten: Text, Farbe/Stärke/Effekt nur für dieses Feld, gespeichert, Export, zurücksetzen', ee.btn && ee.open && ee.text && ee.style && ee.saved && ee.loaded && ee.export && ee.reset && ee.label, JSON.stringify(ee));
+        check('🔒 Verschieben sperren (je Element gespeichert, für alle)', ee.lock && ee.noMove && ee.unlock && ee.all && ee.allOff, JSON.stringify(ee));
+        // 🧹 Inhalte eines Reiters leeren (neues Spiel) – Design und Einstellungen bleiben
+        const clr = await page.evaluate(() => { const r = {}, P = stammdaten.players[0].name, O = stammdaten.opponents[0].name;
+            switchTab('ergebnis'); setVal('in-ergebnis-score', '4 : 2'); setVal('in-ergebnis-text', 'Derbysieg'); setVal('erg-scorer-1', P); setVal('erg-minute-1', '12');
+            setVal('in-erg-shownames', ''); setVal('in-box-fill-ergebnis', 'dots'); updateErgebnis();
+            r.btn = !!document.querySelector('#editor-ergebnis .clear-tab-btn');
+            clearTabContent('ergebnis');
+            r.erg = val('in-ergebnis-score') === '0 : 0' && val('in-ergebnis-text') !== 'Derbysieg' && val('erg-scorer-1') === 'Keiner' && val('erg-minute-1') === '' && val('in-box-fill-ergebnis') === 'dots';
+            setVal('in-box-fill-ergebnis', 'solid'); updateTabDesign('ergebnis');
+            switchTab('tor'); setVal('in-tor-player', P); setVal('in-tor-minute', '67. Min'); setVal('in-tor-opp-mode', 'names'); updateTor();
+            clearTabContent('tor'); r.tor = val('in-tor-player') === 'Keiner' && val('in-tor-minute') === '' && val('in-tor-opp-mode') === 'names';
+            setVal('in-tor-opp-mode', 'logos'); updateTor();
+            switchTab('post'); setVal('in-post-opponent-select', O); clearTabContent('post'); r.post = val('in-post-opponent-select') === '';
+            r.story = !document.querySelector('#editor-story .clear-tab-btn');
+            return r; });
+        check('🧹 Inhalte leeren (Ergebnis, Tor, Ankündigung), Design und Einstellungen bleiben', clr.btn && clr.erg && clr.tor && clr.post && clr.story, JSON.stringify(clr));
+        // 🔍 Bildausschnitt je Spielerfoto (Fokus + Zoom), Leeren-Knopf oben im Inhalt
+        const crop = await page.evaluate(async () => { const r = {}; switchTab('geburtstag');
+            const P = stammdaten.players.find(p => p.img).name; setVal('in-bday-player', P); updateGeburtstag(); afterViewsUpdated();
+            const img = $('out-bday-img-feed'); selectElement(img.closest('.draggable-img'));
+            r.btn = !$('el-crop-btn').hidden; openCropEdit(); r.open = !$('crop-edit').hidden && !!$('cr-img');
+            const orig = img.getAttribute('src'); r.rect = !!$('cr-rect') && !$('cr-rect').hidden;
+            setCrop({ x: 50, y: 30, z: 2 }, true); await new Promise(res => setTimeout(res, 900));
+            const f = findPlayer(P).focus?.img; r.saved = !!f && f.z === 2 && Math.abs(f.y - 30) < 1;
+            r.zoom = img.getAttribute('src') !== orig && img.dataset.fxSrc === orig && parseFloat($('cr-rect').style.width) > 40 && parseFloat($('cr-rect').style.width) < 60;
+            setCropFit('contain'); await new Promise(res => setTimeout(res, 300));
+            r.whole = getComputedStyle(img).objectFit === 'contain' && img.getAttribute('src') === orig && $('cr-rect').hidden;
+            const P2 = stammdaten.players.find(p => p.img && p.name !== P).name; setVal('in-bday-player', P2); updateGeburtstag(); afterViewsUpdated();
+            r.keep = getComputedStyle(img).objectFit === 'contain' && !!imgFit[frameKeyOf(img)] && !findPlayer(P2).focus;
+            r.savedFit = collectSlotData().imgFit[frameKeyOf(img)] === 'contain';
+            setVal('in-bday-player', P); updateGeburtstag(); afterViewsUpdated(); selectElement(img.closest('.draggable-img')); openCropEdit();
+            setCropFit('cover'); await new Promise(res => setTimeout(res, 600)); r.back = img.getAttribute('src') !== orig && !imgFit[frameKeyOf(img)];
+            // für alle Fotos einer Vorlage (Spielfeld)
+            switchTab('kader'); updateKader(); afterViewsUpdated(); const grid = document.querySelector('#capture-kader .kader-grid-pitch'); selectElement(grid); openCropEdit();
+            if ($('cr-all')) { $('cr-all').checked = true; setCropFit('contain'); }
+            const imgs = [...document.querySelectorAll('#view-kader img.kader-grid-img')];
+            r.all = imgFit['tab:kader'] === 'contain' && imgs.length > 3 && imgs.every(i => getComputedStyle(i).objectFit === 'contain');
+            $('cr-all').checked = true; setCropFit('cover'); r.allOff = !imgFit['tab:kader']; closeCropEdit(); selectElement(null); switchTab('geburtstag'); selectElement(img.closest('.draggable-img')); openCropEdit();
+            switchTab('story'); r.other = true;
+            switchTab('geburtstag'); r.export = (await renderElementToCanvas($('capture-geburtstag-feed'))).width === 1200;
+            selectElement(img.closest('.draggable-img')); openCropEdit(); setCrop(null, true); await new Promise(res => setTimeout(res, 300));
+            r.reset = !findPlayer(P).focus && img.getAttribute('src') === orig;
+            closeCropEdit(); selectElement(null);
+            const first = document.querySelector('#editor-ergebnis .clear-tab-btn'), sec = first.closest('.details-body') || first.parentElement;
+            r.clearTop = [...sec.children].indexOf(first) <= 1;
+            return r; });
+        check('🔍 Bildausschnitt: Rahmen ziehen/zoomen, ganzes Bild, gespeichert, Export, zurücksetzen', crop.btn && crop.open && crop.rect && crop.saved && crop.zoom && crop.whole && crop.keep && crop.savedFit && crop.back && crop.all && crop.allOff && crop.export && crop.reset, JSON.stringify(crop));
+        check('🧹 Leeren-Knopf steht oben im Inhalt', crop.clearTop, JSON.stringify(crop));
+        // 👥 Kader per Liste (Pop-up) auswählen
+        const kp = await page.evaluate(() => { const r = {}; switchTab('kader');
+            for (let i = 1; i <= KADER_MAX; i++) setVal(`kader-player-${i}`, 'Keiner');
+            const P = stammdaten.players.filter(p => (p.group || 'Spieler') === 'Spieler').map(p => p.name);
+            setVal('kader-player-1', P[3]); updateKader();
+            openKaderPicker(); r.open = !$('kader-overlay').hidden && document.querySelectorAll('#kp-list .kp-row').length >= P.length;
+            [P[0], P[1]].forEach(n => { const cb = document.querySelector(`#kp-list input[data-name="${CSS.escape(n)}"]`); cb.checked = true; cb.dispatchEvent(new Event('change')); });
+            r.count = $('kp-count').textContent.startsWith('3 /');
+            setVal('kp-search', P[1].split(' ')[0]); renderKaderPicker(); r.search = document.querySelectorAll('#kp-list .kp-row').length >= 1 && document.querySelectorAll('#kp-list .kp-row').length < P.length;
+            applyKaderPicker();
+            r.apply = val('kader-player-1') === P[3] && [val('kader-player-2'), val('kader-player-3')].sort().join() === [P[0], P[1]].sort().join() && val('kader-player-4') === 'Keiner' && $('kader-overlay').hidden;
+            r.chips = document.querySelectorAll('#kader-chips .kader-chip').length === 3 && /3 \/ 20/.test($('kader-count').textContent);
+            r.view = document.querySelectorAll('#capture-kader .kader-grid-img').length === 3;
+            // Höchstzahl
+            openKaderPicker(); stammdaten.players.forEach(p => kaderPick.add(p.name)); [...kaderPick].slice(KADER_MAX).forEach(n => kaderPick.delete(n)); renderKaderPicker();
+            r.max = $('kp-count').classList.contains('full') && !!document.querySelector('#kp-list input:disabled') === (stammdaten.players.length > KADER_MAX);
+            closeKaderPicker(); r.cancel = val('kader-player-4') === 'Keiner';
+            for (let i = 1; i <= KADER_MAX; i++) setVal(`kader-player-${i}`, 'Keiner'); updateKader();
+            return r; });
+        check('👥 Kader per Liste: Pop-up, Suche, Zähler, Reihenfolge bleibt, Abbrechen, Höchstzahl', Object.values(kp).every(Boolean), JSON.stringify(kp));
         check('„Präsentiert von“ mit Sponsor', await page.evaluate(() => { switchTab('post'); setVal('in-pb-sponsor-post', stammdaten.sponsors[0].name); updateTabDesign('post');
             const ok = [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display !== 'none' && /PRÄSENTIERT/.test(e.textContent));
             setVal('in-pb-sponsor-post', ''); updateTabDesign('post'); return ok && [...document.querySelectorAll('#view-post .presented-by')].every(e => e.style.display === 'none'); }));
