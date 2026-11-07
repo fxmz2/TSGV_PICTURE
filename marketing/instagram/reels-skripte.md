@@ -1,12 +1,12 @@
-# Match-Shot – Reels: Ablauf & Sprechtexte (Stand App 24.9)
+# Match-Shot – Reels: Ablauf & Sprechtexte (Stand App 25.0)
 
 Sprechtexte für die KI-Stimme in Google Vids, je rund 30 Sekunden (70–80 Wörter).
 „Zeigen“ = was im Video zu sehen ist (Bildschirmaufnahme am Handy).
 ⭐ = nur im Advanced-Paket → klein „im Advanced-Paket“ einblenden.
 Webadresse so schreiben, wie die Stimme sie sprechen soll: „match-shot punkt de“.
 
-**Neu oder geändert seit 24.9:** Nr. 1, 2, 6, 11 angepasst · Nr. 13 und 14 neu.
-Nr. 3, 4, 5, 7, 8, 9, 10, 12 bleiben unverändert.
+**Neu oder geändert:** Nr. 1, 2, 3, 6, 11 angepasst · Nr. 13 und 14 neu (Stand 25.0: Reel-Gruppen).
+Nr. 4, 5, 7, 8, 9, 10, 12 bleiben unverändert.
 
 ---
 
@@ -16,14 +16,14 @@ Nr. 3, 4, 5, 7, 8, 9, 10, 12 bleiben unverändert.
 > Siebenundsechzigste Minute, Tor! Und dreißig Sekunden später ist die Story online. Mit Match-Shot wählst du einfach den Torschützen, die Minute und den Spielstand. Gegner und Wappen kommen automatisch aus der Ankündigung. Dir gefällt der Aufbau nicht? Ein Tipp – und dieselbe Grafik steht als Plakat, geteilt oder hochkant da. Der Vorlagengeber ist mit einem Tipp dabei, und mit einem Klick landet das Tor auch beim Endergebnis. Teilen, fertig. Match-Shot – einen Monat kostenlos auf match-shot punkt de.
 
 ## 2 · 📋 Aufstellung + Reel ⭐ *(angepasst)*
-**Zeigen:** Formation wählen → Spieler wählen → schräges Spielfeld → Bereich „Video (Reel)“: Einflug-Art „Aufploppen“ oder „Hereindrehen“ → „Als Video (Reel)“ → Reel abspielen
+**Zeigen:** Formation wählen → Spieler wählen → schräges Spielfeld → Bereich „Video (Reel)“: Einflug-Art „Aufploppen“ oder „Hereindrehen“ → „🔀 Reihenfolge & Gruppen“ → „⚽ Spieler: Einzeln“ → „Als Video (Reel)“ → Reel abspielen
 
-> Die Startelf steht – und deine Grafik in einer Minute. Formation wählen, Spieler eintragen, fertig. Elfer-, Neuner- oder Siebenerfeld, mit Rückennummern, Kapitän, Bank und Trainern. Gegner und Anstoß kommen automatisch aus der Ankündigung. Du willst es wie im Fernsehen? Dann zeig das Spielfeld schräg und die Spieler freigestellt. Und das Highlight: Mit einem Tipp wird aus der Grafik ein Reel. Die Spieler fliegen, ploppen oder drehen sich rein – in deiner Reihenfolge. Match-Shot – auf match-shot punkt de.
+> Die Startelf steht – und deine Grafik in einer Minute. Formation wählen, Spieler eintragen, fertig. Elfer-, Neuner- oder Siebenerfeld, mit Rückennummern, Kapitän, Bank und Trainern. Gegner und Anstoß kommen automatisch aus der Ankündigung. Du willst es wie im Fernsehen? Dann zeig das Spielfeld schräg und die Spieler freigestellt. Und das Highlight: Mit einem Tipp wird aus der Grafik ein Reel. Die Spieler fliegen, ploppen oder drehen sich rein – einzeln, Reihe für Reihe oder alle zusammen. Match-Shot – auf match-shot punkt de.
 
 ## 3 · 📅 Nächstes Spiel (Ankündigung mit Kalender-Knopf)
-**Zeigen:** Kalender → „Spielplan einfügen“ ⭐ → Ankündigung → „Nächsten Termin aus Kalender übernehmen“ → Titel springt auf Heimspiel/Auswärtsspiel → Beitragstext
+**Zeigen:** Kalender → „Spielplan einfügen“ ⭐ → Ankündigung → „Nächsten Termin aus Kalender übernehmen“ → Titel springt auf Heimspiel/Auswärtsspiel → Beitragstext → zum Schluss als Reel mit „🛡️ Wappen: Einzeln nacheinander“ ⭐ (erst euer Wappen, dann VS, dann der Gegner)
 
-> Jede Woche das Gleiche: Gegner raussuchen, Datum tippen, Wappen suchen. Nicht mit Match-Shot. Du fügst den Spielplan einmal für die ganze Saison ein. Ab dann reicht ein Tipp auf „Nächsten Termin aus Kalender übernehmen“ – und Gegner, Wappen, Datum und Anstoß sind sofort drin. Die Überschrift passt sich an: Heimspiel oder Auswärtsspiel. Und der passende Beitragstext mit Hashtags wird gleich mitgeschrieben. Mehr Zeit für den Verein, weniger fürs Handy. Match-Shot – match-shot punkt de.
+> Jede Woche das Gleiche: Gegner raussuchen, Datum tippen, Wappen suchen. Nicht mit Match-Shot. Du fügst den Spielplan einmal für die ganze Saison ein. Ab dann reicht ein Tipp auf „Nächsten Termin aus Kalender übernehmen“ – und Gegner, Wappen, Datum und Anstoß sind sofort drin. Die Überschrift passt sich an: Heimspiel oder Auswärtsspiel. Und der passende Beitragstext mit Hashtags wird gleich mitgeschrieben. Als Reel kommen die Wappen sogar nacheinander rein. Match-Shot – match-shot punkt de.
 
 ## 4 · 🏁 Ergebnis, Halbzeit, Absage
 **Zeigen:** „Letztes Spiel aus Kalender übernehmen“ → Spielstand → Torschützen → die 4 Knöpfe Endergebnis, Halbzeit, Absage, Countdown
