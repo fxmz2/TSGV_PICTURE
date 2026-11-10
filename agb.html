@@ -20,7 +20,7 @@
     <p><a href="./">← Zurück zur App</a></p>
     <div class="box">
         <h1>Allgemeine Geschäfts- und Nutzungsbedingungen</h1>
-        <p><i>für die Web-App „Match-Shot“ – Stand: 31. Oktober 2026</i></p>
+        <p><i>für die Web-App „Match-Shot“ – Stand: 10. November 2026</i></p>
 
         <h2>§ 1 Geltungsbereich und Anbieter</h2>
         <ol>
@@ -37,10 +37,11 @@
         <ol>
             <li>Die Software ist eine im Browser laufende Anwendung zur Erstellung von Grafiken für soziale Medien (z.B. Spielankündigungen, Aufstellungen, Ergebnisse).
                 Sie wird vom Anbieter zentral über das Internet bereitgestellt und über einen persönlichen Vereinscode freigeschaltet.</li>
-            <li>Alle Inhalte des Kunden (z.B. Spielernamen, Fotos, Logos, Termine) werden ausschließlich lokal auf dem Endgerät des Kunden gespeichert.
-                Der Anbieter hat keinen Zugriff auf diese Daten und speichert sie nicht.</li>
+            <li>Alle Inhalte des Kunden (z.B. Spielernamen, Fotos, Logos, Termine) werden lokal auf dem Endgerät des Kunden gespeichert.
+                Der Anbieter hat keinen Zugriff auf diese Daten. Ausnahme ist der freiwillige „Vereins-Sync“ (Advanced, § 12a): Richtet der Kunde ihn ein,
+                wird ein auf dem Gerät verschlüsselter Stand beim Anbieter gespeichert, den der Anbieter nicht lesen kann.</li>
             <li>Die Software wird in zwei Paketen angeboten: „Basis“ und „Advanced“. Advanced enthält zusätzlich weitere Vorlagen und Funktionen
-                (u.a. Eckball-Taktik, Neuzugang/Spielervorstellung, Sponsoren-Dank, Wochenend-Ergebnisse, Sponsorenleisten, KI-Freistellen und Videos).
+                (u.a. Eckball-Taktik, Neuzugang/Spielervorstellung, Sponsoren-Dank, Wochenend-Ergebnisse, Sponsorenleisten, KI-Freistellen, Videos und Vereins-Sync).
                 Die aktuelle Übersicht steht auf der Website.</li>
             <li>Der konkrete Funktionsumfang ergibt sich aus der jeweils aktuellen Version der Software. Der Anbieter darf die Software weiterentwickeln
                 und Funktionen ändern, sofern der wesentliche Zweck (Erstellung von Vereinsgrafiken) erhalten bleibt und dies dem Kunden zumutbar ist.</li>
@@ -143,8 +144,8 @@
             </li>
             <li>Der Kunde stellt den Anbieter von Ansprüchen Dritter frei, die auf einer rechtswidrigen Nutzung der Software oder
                 rechtsverletzenden Inhalten des Kunden beruhen.</li>
-            <li>Da alle Daten nur lokal gespeichert werden, ist der Kunde selbst für deren Sicherung verantwortlich.
-                Die Software bietet hierfür eine Backup-Funktion, die der Kunde regelmäßig nutzen sollte.</li>
+            <li>Da die Daten lokal gespeichert werden, ist der Kunde selbst für deren Sicherung verantwortlich.
+                Die Software bietet hierfür eine Backup-Funktion, die der Kunde regelmäßig nutzen sollte. Der Vereins-Sync (§ 12a) ersetzt keine eigene Datensicherung.</li>
         </ol>
 
         <h2>§ 10 Verfügbarkeit</h2>
@@ -169,7 +170,43 @@
 
         <h2>§ 12 Datenschutz</h2>
         <p>Informationen zur Verarbeitung personenbezogener Daten enthält die <a href="datenschutz.html">Datenschutzerklärung</a>.
-            Da die Inhalte des Kunden nicht an den Anbieter übermittelt werden, findet insoweit keine Auftragsverarbeitung statt.</p>
+            Ohne Vereins-Sync werden die Inhalte des Kunden nicht an den Anbieter übermittelt; insoweit findet keine Auftragsverarbeitung statt.
+            Für den freiwilligen Vereins-Sync gilt § 12a.</p>
+
+        <h2 id="sync">§ 12a Vereins-Sync und Auftragsverarbeitung (Art. 28 DSGVO)</h2>
+        <ol>
+            <li><b>Abschluss.</b> Diese Regelung ist die Vereinbarung zur Auftragsverarbeitung zwischen Kunde (Verein, Verantwortlicher) und Anbieter
+                (Auftragsverarbeiter) für den Vereins-Sync. Sie wird wirksam, wenn der Kunde den Vereins-Sync in der Software einrichtet und dabei
+                seine Zustimmung bestätigt. Ohne Einrichtung des Vereins-Syncs findet keine Auftragsverarbeitung statt.</li>
+            <li><b>Gegenstand, Zweck und Dauer.</b> Der Anbieter speichert auf Veranlassung des Kunden einen verschlüsselten Stand der in der Software
+                erfassten Vereinsdaten, damit mehrere Geräte des Kunden dieselben Daten nutzen können. Eine andere Verarbeitung erfolgt nicht.
+                Die Vereinbarung gilt, solange Daten des Kunden im Vereins-Sync gespeichert sind.</li>
+            <li><b>Art der Daten und Betroffene.</b> Namen, Spitznamen, Positionen, Rückennummern und Fotos von Spielerinnen und Spielern, Trainern und Betreuern
+                (auch Minderjährigen), Namen und Logos von Gegnern und Sponsoren, Termine, Texte und Gestaltungseinstellungen sowie der beim Einrichten
+                angegebene Name der nutzenden Person.</li>
+            <li><b>Weisungen.</b> Der Anbieter verarbeitet die Daten nur auf Weisung des Kunden. Weisungen erteilt der Kunde durch die Bedienung der Software
+                (Hochladen, Holen, Löschen) oder per E-Mail. Hält der Anbieter eine Weisung für rechtswidrig, weist er den Kunden darauf hin.</li>
+            <li><b>Technische und organisatorische Maßnahmen.</b> Die Daten werden vor dem Hochladen auf dem Gerät des Kunden mit einem vom Kunden festgelegten
+                Vereins-Passwort verschlüsselt (AES-256-GCM, Schlüsselableitung PBKDF2). Passwort und Schlüssel verlassen das Gerät nicht; der Anbieter kann
+                die Inhalte nicht lesen. Die Übertragung erfolgt verschlüsselt (TLS). Hochladen ist nur für freigeschaltete Vereine möglich. Die Speicherung
+                erfolgt in der Europäischen Union. Personen, die beim Anbieter Zugang zur Infrastruktur haben, sind zur Vertraulichkeit verpflichtet.</li>
+            <li><b>Unterauftragsverarbeiter.</b> Der Kunde ist einverstanden, dass der Anbieter Cloudflare, Inc. (Cloudflare R2, Speicherort EU; Vertrag zur
+                Auftragsverarbeitung und EU-Standardvertragsklauseln) einsetzt. Über einen beabsichtigten Wechsel oder weitere Unterauftragsverarbeiter
+                informiert der Anbieter vorab per E-Mail oder in der Software; der Kunde kann widersprechen und den Vereins-Sync in diesem Fall beenden und löschen.</li>
+            <li><b>Unterstützung und Meldepflichten.</b> Anfragen betroffener Personen (Auskunft, Berichtigung, Löschung) erfüllt der Kunde selbst über die Software,
+                da nur er die Daten lesen kann; der Anbieter unterstützt im Rahmen des Möglichen. Verletzungen des Schutzes der Daten meldet der Anbieter
+                dem Kunden unverzüglich. Der Anbieter stellt dem Kunden auf Anfrage die Informationen zum Nachweis dieser Pflichten zur Verfügung
+                und ermöglicht Überprüfungen nach vorheriger Absprache.</li>
+            <li><b>Löschung.</b> Der Kunde kann den Stand jederzeit über „Sync-Daten löschen“ vollständig entfernen. Endet die Lizenz, ist kein Zugriff mehr möglich;
+                der Stand wird spätestens 180 Tage nach dem letzten Hochladen automatisch gelöscht. Eine Rückgabe ist nicht erforderlich, da die Daten beim Kunden
+                vorliegen.</li>
+            <li><b>Pflichten des Kunden.</b> Der Kunde stellt sicher, dass für die Speicherung im Vereins-Sync eine Rechtsgrundlage besteht, insbesondere die
+                erforderlichen Einwilligungen der betroffenen Personen bzw. bei Minderjährigen der Erziehungsberechtigten (siehe auch § 9). Er wählt ein sicheres
+                Vereins-Passwort und gibt es nur an berechtigte Personen weiter; scheidet eine Person aus, ändert er das Passwort. Ein vergessenes Passwort
+                kann der Anbieter nicht wiederherstellen.</li>
+            <li><b>Haftung und Freistellung.</b> Es gilt § 11. Der Kunde stellt den Anbieter von Ansprüchen Dritter frei, die darauf beruhen, dass der Kunde
+                Daten ohne erforderliche Rechtsgrundlage oder Einwilligung im Vereins-Sync speichert oder das Vereins-Passwort unbefugten Personen zugänglich macht.</li>
+        </ol>
 
         <h2>§ 13 Schlussbestimmungen</h2>
         <ol>
