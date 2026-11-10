@@ -25,8 +25,12 @@ const BASE = `http://localhost:${PORT}/index.html`;
 /* ---------- kleiner statischer Webserver ---------- */
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
     '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.wasm': 'application/wasm', '.txt': 'text/plain; charset=utf-8', '.tflite': 'application/octet-stream' };
+const CF_PRETTY = ['impressum', 'datenschutz', 'agb'];   // wie Cloudflare Pages: /seite.html → 308 → /seite
 const server = http.createServer((req, res) => {
-    const p = decodeURIComponent(new URL(req.url, BASE).pathname);
+    let p = decodeURIComponent(new URL(req.url, BASE).pathname);
+    const pretty = p.match(/^\/(\w+)\.html$/);
+    if (pretty && CF_PRETTY.includes(pretty[1])) { res.writeHead(308, { Location: '/' + pretty[1] }); return res.end(); }
+    if (CF_PRETTY.includes(p.slice(1))) p += '.html';
     const file = path.join(ROOT, p === '/' ? 'index.html' : p);
     if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end('not found'); }
     res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
@@ -960,7 +964,12 @@ async function makePhotos(browser) {
         await A.evaluate(async () => { await loadDemoData(false); renderAll(); prefs.versionNames = { v1: 'Erste' }; await savePrefs(); });
         const pw = await A.evaluate(() => syncSuggestPw());
         await A.fill('#sync-name', 'Anna'); await A.fill('#sync-pw', pw); await A.click('#sync-setup-btn');
+        await A.waitForTimeout(300);
+        const noConsent = await A.evaluate(() => !prefs.sync);
+        check('Sync: ohne Häkchen (Einwilligungen, § 12a AGB) kein Einrichten', noConsent && /Häkchen/.test(A.dialogs[A.dialogs.length - 1] || ''), A.dialogs.slice(-1)[0]);
+        await A.check('#sync-consent'); await A.click('#sync-setup-btn');
         await A.waitForFunction(() => !!prefs.sync?.key, null, { timeout: 15000 });
+        check('Sync: Zustimmung wird mit Zeitpunkt gespeichert', await A.evaluate(() => !!prefs.sync.consentAt && /12a/.test(prefs.sync.consentTerms)));
         const a1 = await A.evaluate(async () => ({ ok: await syncPush(), ver: prefs.sync.lastVer, n: stammdaten.players.length, img: stammdaten.players.find(p => (p.img || '').length > 2000)?.img.length || 0, name: stammdaten.players[0].name }));
         // Auf dem Server liegt nichts Lesbares (weder Namen noch Bilder)
         const blobs = [...env.BUCKET.store.values()];
@@ -972,7 +981,7 @@ async function makePhotos(browser) {
         // Ganze Nachricht aus „Passwort an Kollegen“ eingefügt → nur das Passwort zählt
         const msg = await A.evaluate(p => `Match-Shot Vereins-Sync für ${club.name}\nVereins-Passwort: ${syncFmtPw(p)} \n\n(In Match-Shot: Start → 🔄 Vereins-Sync → Passwort eingeben → „⬇️ Neueste holen“.)`, pw);
         check('Sync: eingefügte Nachricht ergibt dasselbe Passwort', await A.evaluate(([m, p]) => syncNormPw(m) === syncNormPw(p) && syncNormPw(m.replace(/\n/g, '')) === syncNormPw(p) && syncNormPw(p.toLowerCase().replace(/-/g, ' ')) === syncNormPw(p) && syncNormPw('mein-eigenes-langes-passwort') === 'MEINEIGENESLANGESPASSWORT', [msg, pw]));
-        await B.fill('#sync-name', 'Ben'); await B.fill('#sync-pw', msg);
+        await B.fill('#sync-name', 'Ben'); await B.fill('#sync-pw', msg); await B.check('#sync-consent');
         await B.click('#sync-setup-btn');
         await B.waitForSelector('#sync-overlay:not([hidden])', { timeout: 20000 });
         const btxt = await B.textContent('#sync-dlg-body');
@@ -1039,6 +1048,32 @@ async function makePhotos(browser) {
         check('Sync: nicht im Basis-Paket', await C.evaluate(() => !syncAvailable() && getComputedStyle($('sect-sync')).display === 'none'));
         check('Sync: keine JavaScript-Fehler', [A, B, C].every(p => !p.errors.length), [A, B, C].map(p => p.errors.join(' | ')).join(' # '));
         for (const p of [A, B, C]) await p.context().close();
+    });
+
+    await section('Rechtliche Seiten mit Service Worker (Cloudflare-Weiterleitung)', async () => {
+        const page = await newPage(browser);
+        await page.goto(BASE); await page.waitForTimeout(600);
+        await page.click('#license-demo'); await waitReady(page);
+        await page.evaluate(() => navigator.serviceWorker.ready);
+        await page.reload(); await page.waitForTimeout(800);
+        const ctrl = await page.evaluate(() => !!navigator.serviceWorker.controller);
+        const res = [];
+        for (const f of ['impressum.html', 'datenschutz.html', 'agb.html']) {
+            const p2 = await page.context().newPage();
+            let ok = false, title = '';
+            try { const r = await p2.goto(BASE.replace('index.html', f)); title = await p2.title(); ok = !!r && r.ok() && /Impressum|Datenschutz|Geschäftsbedingungen|AGB/i.test(title); }
+            catch (e) { title = e.message.split('\n')[0]; }
+            res.push({ f, ok, title }); await p2.close();
+        }
+        // Offline: Seiten kommen aus dem Zwischenspeicher – auch dort darf keine umgeleitete Antwort liegen
+        const cached = await page.evaluate(async () => { const out = []; for (const k of await caches.keys()) { const c = await caches.open(k); for (const f of ['impressum.html', 'datenschutz.html', 'agb.html']) { const r = await c.match(f, { ignoreSearch: true }); out.push(f + ':' + (r ? (r.redirected ? 'umgeleitet' : r.status) : 'fehlt')); } } return out; });
+        await page.context().setOffline(true);
+        const p3 = await page.context().newPage();
+        let off = '';
+        try { await p3.goto(BASE.replace('index.html', 'impressum.html')); off = await p3.title(); } catch (e) { off = e.message.split('\n')[0]; }
+        await page.context().setOffline(false);
+        check('Impressum, Datenschutz & AGB öffnen sich auch mit Service Worker (online und offline)', ctrl && res.every(r => r.ok) && /Impressum/.test(off) && cached.every(c => /:200$/.test(c)), JSON.stringify({ ctrl, res, off, cached }));
+        await page.context().close();
     });
 
     await section('Handy (Touch, Samsung-Galaxy-Größe)', async () => {
