@@ -1047,6 +1047,13 @@ async function makePhotos(browser) {
         check('Sync: falsches Passwort sieht nichts, Trennen', wrong === 'empty' && disc, JSON.stringify({ wrong, disc }));
         // Basis-Paket: kein Sync
         const C = await newPage(browser); await C.goto(BASE); await C.waitForTimeout(600); await enterCode(C, 'TEST-BAS1');
+        // Kopfleiste: Wappen statt Name (ohne Wappen der Name)
+        const hdr = await C.evaluate(async () => { const r = { name: $('brand-club-name').textContent, crest: $('brand-crest').hidden };
+            club.logo = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="18" fill="#c00"/></svg>');
+            applyClubBranding(); await new Promise(res => setTimeout(res, 200));
+            r.withCrest = !$('brand-crest').hidden && $('brand-club-name').textContent === '' && $('brand-crest').naturalWidth > 0 && $('brand-club').title === club.name;
+            delete club.logo; applyClubBranding(); r.back = $('brand-crest').hidden && $('brand-club-name').textContent === club.name; return r; });
+        check('Kopfleiste zeigt das Vereinswappen statt des Namens', hdr.name === 'Test Basis SV' && hdr.crest && hdr.withCrest && hdr.back, JSON.stringify(hdr));
         check('Sync: nicht im Basis-Paket', await C.evaluate(() => !syncAvailable() && getComputedStyle($('sect-sync')).display === 'none'));
         check('Sync: keine JavaScript-Fehler', [A, B, C].every(p => !p.errors.length), [A, B, C].map(p => p.errors.join(' | ')).join(' # '));
         for (const p of [A, B, C]) await p.context().close();
