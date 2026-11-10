@@ -1,4 +1,4 @@
-# Match-Shot – Reels: Ablauf & Sprechtexte – eigene Stimme (Stand App 25.0)
+# Match-Shot – Reels: Ablauf & Sprechtexte – eigene Stimme (Stand App 25.8)
 
 Gesprochen von Felix selbst: Spieler, Trainer einer 2. Mannschaft und zuständig für Social Media im Verein.
 Je rund 30 Sekunden. **Nicht Wort für Wort vorlesen** – zweimal laut sagen, dann frei erzählen. Versprecher sind erlaubt.
@@ -103,6 +103,17 @@ Je rund 30 Sekunden. **Nicht Wort für Wort vorlesen** – zweimal laut sagen, d
 
 > Ein paar Sachen, die ich selbst ständig nutze. Ich tipp im Bild auf einen Text und änder Schrift, Farbe und Effekt nur für dieses Feld. Kopf abgeschnitten? Foto antippen, Ausschnitt mit dem Finger verschieben – oder einfach das ganze Bild zeigen. Damit beim Scrollen nichts verrutscht, mach ich das Schloss zu. Und nach dem Spiel: „Inhalte leeren“ – und das alte Spiel ist weg.
 
+## 15 · 🔄 Trainer-Kollegen dazuholen (Vereins-Sync) ⭐ *(neu)*
+**Text im Bild:** „Mehrere Helfer im Verein? So habt ihr alle dieselben Daten 👇“
+**Zeigen (zwei Handys nebeneinander oder hintereinander geschnitten):**
+Handy 1: Start → 🔄 Vereins-Sync → ⬆️ Hochladen → „📤 Passwort an Kollegen“ → WhatsApp
+→ Handy 2: Passwort einfügen → Häkchen → 🔐 Sync einrichten → „Jetzt holen?“ OK → Vorschau „20 Spieler neu …“ → ✅ Übernehmen → Spielerliste ist voll
+→ zum Schluss: Handy 2 legt einen neuen Spieler an → ⬆️ Hochladen → Handy 1 öffnet die App → Hinweis „Neuer Stand“ → ⬇️ Jetzt holen
+
+> Bei uns machen mehrere Leute Grafiken – ich als Trainer, dazu Social Media und die Jugend. Früher hatte jeder seine eigenen Spieler und Fotos auf dem Handy. Jetzt lad ich einmal hoch und schick meinem Kollegen das Vereins-Passwort per WhatsApp. Er fügt es ein, tippt auf „Neueste holen“ – und hat alle Spieler, Fotos, Gegner und Sponsoren. Legt er einen Neuzugang an, seh ich den beim nächsten Öffnen. Und alles ist verschlüsselt: Den Schlüssel haben nur wir.
+
+**Wichtig beim Aufnehmen:** Das Vereins-Passwort ist im Video zu sehen. Nimm für die Aufnahme ein **Wegwerf-Passwort** und richte den Sync danach neu ein (🗑️ Sync-Daten löschen → 🔌 Trennen → neues Passwort mit 🎲 Vorschlagen) – oder mach das Passwort im Schnitt unkenntlich. Am besten mit den Beispieldaten (SC Lilaheim) statt echten Spielerfotos.
+
 ---
 
 ## Schluss-Satz (für jedes Reel einer davon)
@@ -120,6 +131,7 @@ Je rund 30 Sekunden. **Nicht Wort für Wort vorlesen** – zweimal laut sagen, d
 | 3 | Nr. 3 Nächstes Spiel | Genau dein Problem „jede Woche den Gegner wechseln“ |
 | 4 | Nr. 1 Tor live | Zeigt am schnellsten den Nutzen am Spieltag |
 | 5 | Nr. 13 Euer Look | Musik-Reel als Abwechslung zwischendurch |
+| 6 | Nr. 15 Kollegen dazuholen | Größter Vorteil für Vereine mit mehreren Helfern – gut zusammen mit dem Karussell (Folie 6) |
 
 ## Aufnahme-Tipps (eigene Stimme)
 

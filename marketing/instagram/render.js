@@ -1,7 +1,7 @@
 /*
  * Instagram-Grafiken für Match-Shot erzeugen (nicht Teil der App).
  * Start:  node marketing/instagram/render.js
- * Ergebnis: marketing/instagram/out/ (Karussell 1–9 + Einzelbild „Vorteile“, je 1080x1350)
+ * Ergebnis: marketing/instagram/out/ (Karussell 1–11 + Einzelbild „Vorteile“, je 1080x1350)
  * Die Bilder kommen aus landing/ – neue Screenshots dort ersetzen und neu erzeugen.
  */
 const path = require('path'), fs = require('fs');
