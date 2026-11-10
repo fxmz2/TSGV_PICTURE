@@ -69,6 +69,12 @@ Zum Freischalten wird `# R07 = HASH` durch `HASH = Verein = Wappen/Datei.png = g
 **Neuen Verein freischalten:** Zeile aus `code-generator.html` in `vereine.txt` eintragen und Wappen in `Wappen/` legen –
 auf `live` (sofort für den Kunden) **und** auf `main` (damit beide Listen gleich bleiben).
 
+## Vereins-Sync (Server)
+
+Der verschlüsselte Vereins-Sync (Advanced) braucht einen kleinen Cloudflare Worker mit R2-Speicher:
+Programm `sync/worker.js`, Einstellungen `sync/wrangler.toml`, Klick-Anleitung `sync/ANLEITUNG.md`.
+Der Server sieht nur verschlüsselte Daten; die App verbindet sich mit `https://sync.match-shot.de` (`SYNC_URL` in `index.html`).
+
 ## Hilfe-Videos verlinken
 
 In `index.html` die Konstante `HELP_VIDEOS` füllen, z.B.:

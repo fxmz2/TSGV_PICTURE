@@ -918,6 +918,113 @@ async function makePhotos(browser) {
         await page.context().close();
     });
 
+    await section('Vereins-Sync (verschlüsselt, zwei Geräte)', async () => {
+        const { default: worker } = await import(require('url').pathToFileURL(path.join(ROOT, 'sync', 'worker.js')).href);
+        const { FakeR2 } = require('./fake-r2');
+        const env = { BUCKET: new FakeR2(), LICENSE_TEXT: '' };
+        // Server allein: Zugang nur für freigeschaltete Advanced-Vereine, fremde Seiten ohne CORS, Aufräumen
+        {
+            const club = 'a'.repeat(64), basis = 'b'.repeat(64), old = 'c'.repeat(64), sp = '1'.repeat(64), sp2 = '2'.repeat(64), id = 'd'.repeat(64);
+            const e = { BUCKET: new FakeR2(), LICENSE_TEXT: `${club} = A = = 2099-12-31 = advanced\n${basis} = B = = 2099-12-31 = basis\n${old} = O = = 2020-01-01\n`, QUOTA_MB: '1', MAX_SPACES: '1' };
+            const call = async (method, p, h = club, body, origin = 'https://match-shot.de') => worker.fetch(new Request('https://sync.match-shot.de' + p, { method, body, headers: { 'X-MS-Club': h, Origin: origin } }), e);
+            const st = [(await call('GET', `/v1/s/${sp}/ver`, basis)).status, (await call('GET', `/v1/s/${sp}/ver`, old)).status, (await call('GET', `/v1/s/${sp}/ver`, 'f'.repeat(64))).status];
+            const evil = (await call('GET', `/v1/s/${sp}/ver`, club, undefined, 'https://evil.example')).headers.get('access-control-allow-origin');
+            const q = (await call('PUT', `/v1/s/${sp}/b/${id}`, club, new Uint8Array(1200000))).status;
+            await call('PUT', `/v1/s/${sp}/b/${id}`, club, new Uint8Array([1, 2]));
+            const ms = (await call('PUT', `/v1/s/${sp2}/b/${id}`, club, new Uint8Array([1]))).status;
+            e.BUCKET.store.get(`v1/${club}/${sp}/b/${id}`).uploaded = new Date(Date.now() - 8 * 864e5);
+            const cl = await worker.cleanup(e);
+            check('Sync-Server: nur Advanced mit gültiger Lizenz, Speichergrenze, Aufräumen', st.join() === '403,403,403' && evil === null && q === 413 && ms === 403 && cl === 1 && e.BUCKET.store.size === 0, JSON.stringify({ st, evil, q, ms, cl }));
+        }
+        const device = async () => {
+            const page = await newPage(browser, { viewport: { width: 390, height: 844 } });
+            await page.route('https://sync.match-shot.de/**', async route => {
+                const r = route.request(), h = { ...r.headers() }; delete h['content-length'];
+                const res = await worker.fetch(new Request(r.url(), { method: r.method(), headers: h, body: ['GET', 'HEAD'].includes(r.method()) ? undefined : r.postDataBuffer() }), env);
+                route.fulfill({ status: res.status, headers: Object.fromEntries(res.headers.entries()), body: Buffer.from(await res.arrayBuffer()) });
+            });
+            await page.goto(BASE); await page.waitForTimeout(600);
+            await enterCode(page, 'TEST-ADV1');
+            await page.evaluate(() => { switchTab('start'); $('sect-sync').open = true; });
+            return page;
+        };
+        const pull = async page => {   // „Neueste holen“ mit Vorschau → Übernehmen
+            await page.evaluate(() => { window._sp = syncPull(); });
+            await page.waitForSelector('#sync-overlay:not([hidden])', { timeout: 15000 });
+            const txt = await page.textContent('#sync-dlg-body');
+            await page.click('#sync-dlg-ok');
+            return { txt, r: await page.evaluate(() => window._sp) };
+        };
+        const A = await device();
+        env.LICENSE_TEXT = `${await A.evaluate(() => hashLicenseCode(club.code))} = Test Advanced FC = = 2099-12-31 = advanced\n`;
+        await A.evaluate(async () => { await loadDemoData(false); renderAll(); prefs.versionNames = { v1: 'Erste' }; await savePrefs(); });
+        const pw = await A.evaluate(() => syncSuggestPw());
+        await A.fill('#sync-name', 'Anna'); await A.fill('#sync-pw', pw); await A.click('#sync-setup-btn');
+        await A.waitForFunction(() => !!prefs.sync?.key, null, { timeout: 15000 });
+        const a1 = await A.evaluate(async () => ({ ok: await syncPush(), ver: prefs.sync.lastVer, n: stammdaten.players.length, img: stammdaten.players.find(p => (p.img || '').length > 2000)?.img.length || 0, name: stammdaten.players[0].name }));
+        // Auf dem Server liegt nichts Lesbares (weder Namen noch Bilder)
+        const blobs = [...env.BUCKET.store.values()];
+        const plain = blobs.some(v => Buffer.from(v.data).toString('latin1').includes(a1.name) || Buffer.from(v.data).toString('latin1').includes('data:image'));
+        check('Sync: Hochladen (verschlüsselt, Fotos einzeln)', a1.ok === true && !!a1.ver && a1.img > 0 && blobs.length > 3 && !plain, JSON.stringify({ ...a1, blobs: blobs.length, plain }));
+
+        // Gerät B: gleiches Passwort → Stand holen
+        const B = await device();
+        await B.fill('#sync-name', 'Ben'); await B.fill('#sync-pw', pw.toLowerCase().replace(/-/g, ' '));
+        await B.click('#sync-setup-btn');
+        await B.waitForSelector('#sync-overlay:not([hidden])', { timeout: 20000 });
+        const btxt = await B.textContent('#sync-dlg-body');
+        await B.click('#sync-dlg-ok');
+        await B.waitForFunction(() => $('sync-overlay').hidden && prefs.sync?.lastVer, null, { timeout: 20000 });
+        const b1 = await B.evaluate(async n => ({ n: stammdaten.players.length, img: stammdaten.players.find(p => (p.img || '').length > 2000)?.img.length || 0, vn: prefs.versionNames.v1,
+            slot: JSON.stringify(await localforage.getItem(STORE.slot('v1'))).length, same: await syncPull({ quiet: true }) }), a1.name);
+        const aslot = await A.evaluate(async () => JSON.stringify(await localforage.getItem(STORE.slot('v1'))).length);
+        check('Sync: zweites Gerät holt alles (Passwort ohne Bindestriche/klein geht auch)', b1.n === a1.n && b1.img === a1.img && b1.vn === 'Erste' && b1.slot === aslot && b1.same === 'same' && /Stand von Anna/.test(btxt), JSON.stringify({ b1, aslot, btxt: btxt.slice(0, 120) }));
+
+        // B ändert → A sieht den Hinweis und holt
+        await B.evaluate(async () => { stammdaten.players.push({ name: 'Neu Spieler', group: 'Spieler', img: '' }); await saveStammdaten(); });
+        const b2 = await B.evaluate(() => syncPush());
+        await A.evaluate(() => syncCheckOnStart()); await A.waitForTimeout(300);
+        const card = await A.isVisible('#sync-card');
+        const p2 = await pull(A);
+        const a2 = await A.evaluate(() => stammdaten.players.some(p => p.name === 'Neu Spieler'));
+        check('Sync: Hinweis beim Start, Vorschau zeigt Neues, Übernehmen', b2 && card && /Neu Spieler/.test(p2.txt) && p2.r === true && a2, JSON.stringify({ b2, card, txt: p2.txt.slice(0, 160), a2 }));
+
+        // Gleichzeitig geändert: A und B ändern denselben Spieler; B behält seine Version
+        const who = a1.name;
+        await A.evaluate(async n => { stammdaten.players.find(p => p.name === n).position = 'Sturm'; await saveStammdaten(); }, who);
+        await B.evaluate(async n => { stammdaten.players.find(p => p.name === n).position = 'Abwehr'; await saveStammdaten(); }, who);
+        await A.evaluate(() => syncPush());
+        await B.evaluate(() => { window._sp = syncPush(); });
+        await B.waitForSelector('#sync-overlay:not([hidden])', { timeout: 15000 });
+        const ctxt = await B.textContent('#sync-dlg-body');
+        await B.check('input[name="sync-conf"][value="local"]'); await B.click('#sync-dlg-ok');
+        const bpush = await B.evaluate(() => window._sp);
+        const p3 = await pull(A).catch(() => null);
+        const a3 = await A.evaluate(n => stammdaten.players.find(p => p.name === n).position, who);
+        check('Sync: Konflikt wird angezeigt, eigene Version behalten, danach hochgeladen', /beiden Geräten/.test(ctxt) && bpush === true && a3 === 'Abwehr', JSON.stringify({ ctxt: ctxt.slice(0, 160), bpush, a3, p3: p3?.r }));
+
+        // Löschen wird übertragen, eigene Änderungen gehen dabei nicht verloren
+        await A.evaluate(async () => { stammdaten.players = stammdaten.players.filter(p => p.name !== 'Neu Spieler'); await saveStammdaten(); await syncPush(); });
+        await B.evaluate(async () => { stammdaten.opponents.push({ name: 'FC Lokal', logo: '' }); await saveStammdaten(); });
+        const p4 = await pull(B);
+        const b4 = await B.evaluate(() => ({ gone: !stammdaten.players.some(p => p.name === 'Neu Spieler'), mine: stammdaten.opponents.some(o => o.name === 'FC Lokal') }));
+        check('Sync: Entfernen wird übernommen, eigene neue Einträge bleiben', /entfernt/.test(p4.txt) && b4.gone && b4.mine, JSON.stringify({ txt: p4.txt.slice(0, 160), b4 }));
+
+        // Falsches Passwort: anderer (leerer) Bereich, keine Daten
+        const wrong = await B.evaluate(async () => { const keep = prefs.sync; prefs.sync = { ...keep, key: await syncDeriveKey('FALSCHES-PASSWORT-1', club.code) }; syncState = null;
+            const r = await syncPull({ quiet: true }); prefs.sync = keep; syncState = null; return r; });
+        // Trennen
+        B.answers.push(true);
+        await B.evaluate(() => syncDisconnect());
+        const disc = await B.evaluate(() => !prefs.sync && !!document.querySelector('#sync-setup-btn'));
+        check('Sync: falsches Passwort sieht nichts, Trennen', wrong === 'empty' && disc, JSON.stringify({ wrong, disc }));
+        // Basis-Paket: kein Sync
+        const C = await newPage(browser); await C.goto(BASE); await C.waitForTimeout(600); await enterCode(C, 'TEST-BAS1');
+        check('Sync: nicht im Basis-Paket', await C.evaluate(() => !syncAvailable() && getComputedStyle($('sect-sync')).display === 'none'));
+        check('Sync: keine JavaScript-Fehler', [A, B, C].every(p => !p.errors.length), [A, B, C].map(p => p.errors.join(' | ')).join(' # '));
+        for (const p of [A, B, C]) await p.context().close();
+    });
+
     await section('Handy (Touch, Samsung-Galaxy-Größe)', async () => {
         const page = await newPage(browser, { viewport: { width: 360, height: 780 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3,
             userAgent: 'Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/25.0 Chrome/121.0.0.0 Mobile Safari/537.36' });
