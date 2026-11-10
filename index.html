@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.5</title>
+    <title>Match-Shot – Grafiken für Vereine 25.6</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -820,6 +820,10 @@
         #license-backup, #license-demo { display: block; margin: 8px auto 0; }
         #license-backup[hidden], #license-demo[hidden] { display: none; }
 
+        .update-bar { position: fixed; top: calc(52px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 9997; display: flex; align-items: center; gap: 8px; background: #005f73; color: #fff; padding: 8px 8px 8px 14px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); font-size: 14px; max-width: calc(100% - 24px); box-sizing: border-box; }
+        .update-bar[hidden] { display: none; }
+        .update-bar .update-go { background: #fff; color: #005f73; border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 14px; cursor: pointer; white-space: nowrap; }
+        .update-bar .update-x { background: transparent; color: #fff; border: none; font-size: 16px; padding: 6px 8px; cursor: pointer; }
         .toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); background: rgba(20,24,30,0.92); color: white; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: bold; z-index: 9998; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; max-width: 90%; text-align: center; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -3255,12 +3259,17 @@ Alle sind herzlich eingeladen!</textarea></div>
     </div>
 
     <div id="toast" class="toast"></div>
+    <div id="update-bar" class="update-bar" hidden role="status">
+        <span>🔄 <b>Neue Version verfügbar</b></span>
+        <button type="button" class="update-go" onclick="applyAppUpdate()">Jetzt aktualisieren</button>
+        <button type="button" class="update-x" title="Später" onclick="$('update-bar').hidden = true">✕</button>
+    </div>
 
     <script>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.5";
+        const APP_VERSION = "25.6";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -13792,10 +13801,29 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            START
            ========================================================= */
+        /* ---------- App-Update erkennen (wichtig für die App auf dem Home-Bildschirm: iOS lädt sie beim Öffnen oft nicht neu) ---------- */
+        let swReg = null, swLastCheck = 0;
+        function checkForAppUpdate(force) {
+            if (!swReg || !navigator.onLine) return;
+            if (!force && Date.now() - swLastCheck < 60000) return;   // höchstens einmal pro Minute
+            swLastCheck = Date.now();
+            swReg.update().catch(() => {});
+        }
+        function showAppUpdate() { const b = $('update-bar'); if (b) b.hidden = false; }
+        async function applyAppUpdate() {
+            const b = $('update-bar'); if (b) b.hidden = true;
+            try { await saveSlotNow(); } catch (e) {}
+            location.reload();
+        }
+
         async function initApp() {
             try {
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('./sw.js').catch(() => {});
+                    // Neue Version erkannt: der neue Service Worker übernimmt (skipWaiting/claim) → Hinweis „Jetzt aktualisieren“.
+                    // Beim allerersten Start (noch kein Service Worker) gibt es keinen Hinweis.
+                    const hadController = !!navigator.serviceWorker.controller;
+                    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) showAppUpdate(); });
+                    navigator.serviceWorker.register('./sw.js').then(reg => { swReg = reg; }).catch(() => {});
                 }
                 ensurePersistentStorage(true);
                 // Manche Browser gewähren dauerhaften Speicher erst nach einer Nutzeraktion
@@ -13871,7 +13899,11 @@ Alle sind herzlich eingeladen!</textarea></div>
                 sidebarEl.addEventListener('input', debouncedUpdate);
                 sidebarEl.addEventListener('change', () => { updateAllViews(); scheduleSave(); });
 
-                document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveSlotNow(); });
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'hidden') saveSlotNow();
+                    else checkForAppUpdate();   // App kommt aus dem Hintergrund zurück → nach neuer Version schauen
+                });
+                window.addEventListener('focus', () => checkForAppUpdate());
                 window.addEventListener('pagehide', () => saveSlotNow());
 
                 $('license-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitLicenseCode(); });
