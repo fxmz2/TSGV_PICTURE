@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.1</title>
+    <title>Match-Shot – Grafiken für Vereine 25.2</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3258,7 +3258,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.1";
+        const APP_VERSION = "25.2";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -11153,7 +11153,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 const st = await syncCrypto();
                 syncSetStatus('⏳ Neuester Stand wird geladen …');
                 const remote = await syncFetchRemote(st);
-                if (!remote) { syncSetStatus(''); if (!opts.quiet) toast('Im Sync liegt noch nichts – zuerst „⬆️ Hochladen“.'); return 'empty'; }
+                if (!remote) { syncSetStatus(''); if (!opts.quiet) alert('Mit diesem Passwort liegt im Sync noch nichts.\n\n• Bist du der Erste im Verein? Dann tippe auf „⬆️ Hochladen“.\n• Hat ein Kollege schon hochgeladen? Dann vergleicht die „Sync-Kennung“ im Bereich 🔄 Vereins-Sync – sie muss auf beiden Geräten gleich sein. Ist sie unterschiedlich, stimmt das Passwort oder der Vereinscode nicht.'); return 'empty'; }
                 syncSetStatus('⏳ Wird verglichen …');
                 const local = await syncRefForm(st, await syncLocalEntities());
                 const plan = syncPlan(local, remote, prefs.sync.base || {});
@@ -11360,7 +11360,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (ver === null) return;
                 if (ver) {
                     if (confirm('Im Verein gibt es schon einen Stand im Sync.\n\nJetzt holen? Deine Daten auf diesem Gerät bleiben erhalten und werden zusammengeführt.')) await syncPull();
-                } else toast('🔐 Eingerichtet – jetzt „⬆️ Hochladen“, damit die Kollegen den Stand holen können.');
+                } else alert('🔐 Sync eingerichtet.\n\n' + 'Mit diesem Passwort liegt im Sync noch nichts.\n\n• Bist du der Erste im Verein? Dann tippe auf „⬆️ Hochladen“.\n• Hat ein Kollege schon hochgeladen? Dann vergleicht die „Sync-Kennung“ im Bereich 🔄 Vereins-Sync – sie muss auf beiden Geräten gleich sein. Ist sie unterschiedlich, stimmt das Passwort oder der Vereinscode nicht.');
             } finally {
                 if (btn) { btn.disabled = false; btn.textContent = '🔐 Sync einrichten'; }
             }
@@ -11420,7 +11420,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             host.innerHTML = `
                 <div class="sync-info">Verbunden als <b>${esc(cfg.name || '–')}</b><br>
                     Zuletzt hochgeladen: ${esc(syncWhen(cfg.lastPush))}<br>
-                    Zuletzt geholt: ${esc(syncWhen(cfg.lastPull))}${cfg.remoteBy && cfg.remoteAt ? `<br>Stand im Sync: ${esc(cfg.remoteBy)}, ${esc(syncWhen(cfg.remoteAt))}` : ''}</div>
+                    Zuletzt geholt: ${esc(syncWhen(cfg.lastPull))}${cfg.remoteBy && cfg.remoteAt ? `<br>Stand im Sync: ${esc(cfg.remoteBy)}, ${esc(syncWhen(cfg.remoteAt))}` : ''}
+                    <br>Sync-Kennung: <b id="sync-fp">…</b> <small>(muss auf allen Geräten gleich sein)</small></div>
                 <div class="sync-actions">
                     <button type="button" class="copy-action-btn" style="background:#005f73; margin:0;" onclick="syncPush()">⬆️ Hochladen</button>
                     <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin:0;" onclick="syncPull()">⬇️ Neueste holen</button>
@@ -11429,9 +11430,32 @@ Alle sind herzlich eingeladen!</textarea></div>
                 <span class="hint">Tipp: <b>erst holen, dann ändern, dann hochladen</b>. Es wird zusammengeführt – auch wenn zwei Leute gleichzeitig etwas geändert haben, geht nichts verloren.</span>
                 <div class="sync-small">
                     <button type="button" class="sd-btn" onclick="syncSharePw()">📤 Passwort an Kollegen</button>
+                    <button type="button" class="sd-btn" onclick="syncDiagnose()">🔍 Verbindung prüfen</button>
                     <button type="button" class="sd-btn" onclick="syncDisconnect()">🔌 Trennen</button>
                     <button type="button" class="sd-btn danger" onclick="syncDeleteRemote()">🗑️ Sync-Daten löschen</button>
                 </div>`;
+            syncFillFp();
+        }
+        /* Sync-Kennung: kurzer Prüfwert des Speicherplatzes – gleich auf allen Geräten mit gleichem Code + Passwort */
+        const syncFp = st => (st.space.slice(0, 4) + '-' + st.space.slice(4, 8)).toUpperCase();
+        function syncFillFp() { syncCrypto().then(st => { const el = $('sync-fp'); if (el) el.textContent = syncFp(st); }).catch(() => {}); }
+        /* 🔍 Verbindung prüfen: alles Wichtige auf einen Blick (für Screenshots ohne Code/Passwort) */
+        async function syncDiagnose() {
+            const lines = [`App-Version: ${APP_VERSION}`, `Verein: ${club?.name || '–'}`, `Adresse der App: ${location.host}`];
+            try {
+                const st = await syncCrypto();
+                lines.push(`Sync-Kennung: ${syncFp(st)}`);
+                let ping;
+                try { const r = await fetchWithTimeout(SYNC_URL + '/v1/ping', { timeout: 8000, cache: 'no-store' }); ping = r.ok ? '✅ erreichbar' : '❌ Fehler ' + r.status; }
+                catch (e) { ping = '❌ keine Verbindung'; }
+                lines.push('Server: ' + ping);
+                try {
+                    const v = await syncRemoteVer();
+                    lines.push('Stand im Sync: ' + (v ? '✅ vorhanden' : '— leer (mit diesem Passwort wurde noch nichts hochgeladen)'));
+                    if (v) lines.push('Dieses Gerät: ' + (v === prefs.sync.lastVer ? '✅ auf dem neuesten Stand' : '⬇️ neuerer Stand verfügbar'));
+                } catch (e) { lines.push('Stand im Sync: ❌ ' + e.message); }
+            } catch (e) { lines.push('❌ ' + e.message); }
+            alert('🔍 Sync-Prüfung\n\n' + lines.join('\n'));
         }
         /* Beim Start: gibt es einen neueren Stand? (Hinweis auf der Startseite) */
         async function syncCheckOnStart() {

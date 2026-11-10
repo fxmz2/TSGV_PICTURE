@@ -978,6 +978,12 @@ async function makePhotos(browser) {
         const b1 = await B.evaluate(async n => ({ n: stammdaten.players.length, img: stammdaten.players.find(p => (p.img || '').length > 2000)?.img.length || 0, vn: prefs.versionNames.v1,
             slot: JSON.stringify(await localforage.getItem(STORE.slot('v1'))).length, same: await syncPull({ quiet: true }) }), a1.name);
         const aslot = await A.evaluate(async () => JSON.stringify(await localforage.getItem(STORE.slot('v1'))).length);
+        const fps = [await A.evaluate(async () => syncFp(await syncCrypto())), await B.evaluate(() => $('sync-fp')?.textContent)];
+        check('Sync: gleiche Sync-Kennung auf beiden Geräten', /^[0-9A-F]{4}-[0-9A-F]{4}$/.test(fps[0]) && fps[0] === fps[1], JSON.stringify(fps));
+        B.answers.push(true);
+        await B.evaluate(() => syncDiagnose());
+        const diag = B.dialogs[B.dialogs.length - 1] || '';
+        check('Sync: „Verbindung prüfen“ zeigt Version, Kennung, Server und Stand', /25\.\d/.test(diag) && diag.includes(fps[0]) && /Server: ✅/.test(diag) && /Stand im Sync: ✅/.test(diag), diag);
         check('Sync: zweites Gerät holt alles (Passwort ohne Bindestriche/klein geht auch)', b1.n === a1.n && b1.img === a1.img && b1.vn === 'Erste' && b1.slot === aslot && b1.same === 'same' && /Stand von Anna/.test(btxt), JSON.stringify({ b1, aslot, btxt: btxt.slice(0, 120) }));
 
         // B ändert → A sieht den Hinweis und holt
