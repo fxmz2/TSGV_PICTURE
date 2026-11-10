@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.7</title>
+    <title>Match-Shot – Grafiken für Vereine 25.8</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -724,6 +724,12 @@
         .lp-step img { width: 100%; max-width: 240px; border-radius: 10px; display: block; margin: 0 auto; cursor: zoom-in; box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
         .lp-step b { display: block; color: #fff; font-size: 15px; margin: 10px 0 2px; }
         .lp-step b i { font-style: normal; display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: #e07a2f; color: #fff; font-size: 12px; align-items: center; justify-content: center; margin-right: 6px; }
+        .lp-sync { display: flex; gap: 14px; align-items: flex-start; margin-top: 12px; background: linear-gradient(135deg, rgba(42,157,143,0.22), rgba(255,255,255,0.05)); border: 1px solid rgba(127,217,154,0.45); border-radius: 16px; padding: 16px; }
+        .lp-sync-icon { font-size: 34px; line-height: 1; flex: none; }
+        .lp-sync b { display: block; color: #fff; font-size: 16px; margin-bottom: 6px; }
+        .lp-sync p { margin: 0 0 8px; font-size: 13px; line-height: 1.5; color: #bcd3da; font-family: Arial, sans-serif; }
+        .lp-sync p b { display: inline; font-size: inherit; margin: 0; }
+        .lp-sync-tag { display: inline-block; font-size: 11px; font-weight: bold; background: #f0a35e; color: #0b1d26; padding: 3px 8px; border-radius: 6px; }
         .lp-feats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .lp-feat { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px 12px; }
         .lp-feat span { font-size: 24px; }
@@ -1269,7 +1275,7 @@
                     <button type="button" class="lp-btn primary" onclick="lpStartDemo()">🧪 Kostenlos testen</button>
                     <button type="button" class="lp-btn ghost" onclick="lpGoToCode()">🔑 Vereinscode eingeben</button>
                 </div>
-                <div class="lp-note">Kein Konto · keine Installation nötig · Fotos und Daten bleiben auf deinem Gerät</div>
+                <div class="lp-note">Kein Konto · keine Installation nötig · Daten bleiben bei euch – auf Wunsch verschlüsselt für alle Helfer im Verein</div>
             </header>
 
             <section class="lp-section lp-wrap">
@@ -1319,6 +1325,12 @@
                         <ul><li>Kader mit Treffpunkt, Trikots &amp; Diensten – fertig für die WhatsApp-Gruppe</li><li>Aufstellung für die Kabine</li><li>Eckball-Taktik im 16:9-Format für TV oder PowerPoint</li><li>Mehrere Mannschaften getrennt in 3 Versionen</li></ul></div>
                     </div>
                 </div>
+                <div class="lp-sync">
+                    <div class="lp-sync-icon">🔄</div>
+                    <div><b>Ein Verein, viele Helfer – alle mit denselben Daten</b>
+                        <p>Mit dem <b>Vereins-Sync</b> haben Trainer, Social-Media-Team und Jugendleiter dieselben Spieler, Fotos, Gegner und Sponsoren. Einer lädt hoch, die anderen tippen auf „Neueste holen“ – fertig. Alles wird auf dem Handy verschlüsselt: Nur ihr habt den Schlüssel, der Speicher liegt in der EU.</p>
+                        <span class="lp-sync-tag">im Advanced-Paket</span></div>
+                </div>
             </section>
 
             <section class="lp-section lp-wrap">
@@ -1331,8 +1343,8 @@
                     <div class="lp-feat"><span>🎬</span><b>Reels &amp; Videos</b><p>Jede Grafik auch als kurzes animiertes Video.</p></div>
                     <div class="lp-feat"><span>🎨</span><b>Eure Farben &amp; Wappen</b><p>Vereinsfarben, Wappen, Schriften und fertige Design-Stile.</p></div>
                     <div class="lp-feat"><span>🤝</span><b>Sponsoren im Bild</b><p>Sponsorenlogos auf jeder Grafik – frei platzierbar.</p></div>
-                    <div class="lp-feat"><span>👥</span><b>Viele auf einmal</b><p>Z. B. die Spielervorstellung für den ganzen Kader in einem Rutsch.</p></div>
-                    <div class="lp-feat"><span>🔒</span><b>Datenschutz</b><p>Kein Konto, keine Cloud: Fotos und Daten bleiben auf eurem Gerät.</p></div>
+                    <div class="lp-feat"><span>🔄</span><b>Vereins-Sync</b><p>Alle Helfer im Verein mit denselben Spielern, Fotos und Gegnern.</p></div>
+                    <div class="lp-feat"><span>🔒</span><b>Datenschutz</b><p>Kein Konto. Daten bleiben bei euch – im Sync nur verschlüsselt, nur ihr habt den Schlüssel.</p></div>
                 </div>
             </section>
 
@@ -1361,6 +1373,7 @@
                             <li>Sponsorenleisten &amp; „Präsentiert von“</li>
                             <li>Reels &amp; Videos, Hintergrund weg per KI</li>
                             <li>Spielplan-Import &amp; viele Grafiken auf einmal</li>
+                            <li>Vereins-Sync: alle Helfer mit denselben Daten (verschlüsselt)</li>
                         </ul>
                     </div>
                 </div>
@@ -3272,7 +3285,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.7";
+        const APP_VERSION = "25.8";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
