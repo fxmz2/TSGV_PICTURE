@@ -25,6 +25,7 @@ const BASE = `http://localhost:${PORT}/index.html`;
 /* ---------- kleiner statischer Webserver ---------- */
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
     '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.wasm': 'application/wasm', '.txt': 'text/plain; charset=utf-8', '.tflite': 'application/octet-stream' };
+let SW_SUFFIX = '';   // simuliert eine neue App-Version (sw.js ändert sich)
 const CF_PRETTY = ['impressum', 'datenschutz', 'agb'];   // wie Cloudflare Pages: /seite.html → 308 → /seite
 const server = http.createServer((req, res) => {
     let p = decodeURIComponent(new URL(req.url, BASE).pathname);
@@ -34,6 +35,7 @@ const server = http.createServer((req, res) => {
     const file = path.join(ROOT, p === '/' ? 'index.html' : p);
     if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end('not found'); }
     res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
+    if (p === '/sw.js' && SW_SUFFIX) return res.end(fs.readFileSync(file, 'utf8') + SW_SUFFIX);
     fs.createReadStream(file).pipe(res);
 });
 
@@ -1050,7 +1052,7 @@ async function makePhotos(browser) {
         for (const p of [A, B, C]) await p.context().close();
     });
 
-    await section('Rechtliche Seiten mit Service Worker (Cloudflare-Weiterleitung)', async () => {
+    await section('Service Worker: rechtliche Seiten (Cloudflare-Weiterleitung) und App-Update', async () => {
         const page = await newPage(browser);
         await page.goto(BASE); await page.waitForTimeout(600);
         await page.click('#license-demo'); await waitReady(page);
@@ -1072,6 +1074,16 @@ async function makePhotos(browser) {
         let off = '';
         try { await p3.goto(BASE.replace('index.html', 'impressum.html')); off = await p3.title(); } catch (e) { off = e.message.split('\n')[0]; }
         await page.context().setOffline(false);
+        // Neue App-Version: Hinweis erscheint (beim Zurückholen aus dem Hintergrund), Tippen lädt neu
+        const noBar = await page.evaluate(() => $('update-bar').hidden);
+        SW_SUFFIX = '\n// neue Version ' + Date.now();
+        await page.evaluate(() => checkForAppUpdate(true));
+        const shown = await page.waitForSelector('#update-bar:not([hidden])', { timeout: 15000 }).then(() => true).catch(() => false);
+        await Promise.all([page.waitForEvent('load', { timeout: 15000 }).catch(() => null), page.click('#update-bar .update-go')]);
+        await page.waitForTimeout(800);
+        const after = await page.evaluate(() => typeof appReady !== 'undefined' && $('update-bar').hidden);
+        SW_SUFFIX = '';
+        check('Neue App-Version: Hinweis „Jetzt aktualisieren“ erscheint und lädt neu', noBar && shown && after, JSON.stringify({ noBar, shown, after }));
         check('Impressum, Datenschutz & AGB öffnen sich auch mit Service Worker (online und offline)', ctrl && res.every(r => r.ok) && /Impressum/.test(off) && cached.every(c => /:200$/.test(c)), JSON.stringify({ ctrl, res, off, cached }));
         await page.context().close();
     });

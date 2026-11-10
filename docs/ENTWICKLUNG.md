@@ -97,6 +97,7 @@ Codewechsel → `switchClubTo()` speichert, bietet ggf. die Übernahme der bishe
 - `vendor/`, `icons/`, Logo: aus dem Zwischenspeicher.
 - `vereine.txt` und `Wappen/`: immer aus dem Netz (nie zwischengespeichert).
 - Cloudflare Pages leitet `seite.html` → `/seite` um. Umgeleitete Antworten verpackt `unredirect()` in `sw.js` neu (beim Installieren und bei Seitenaufrufen) – sonst verweigert Safari die Seite („Response served by service worker has redirections“). Test „Rechtliche Seiten mit Service Worker“ ahmt die Umleitung nach.
+- App-Update erkennen: `checkForAppUpdate()` ruft `swReg.update()` beim Zurückholen aus dem Hintergrund (`visibilitychange`/`focus`, höchstens 1× pro Minute). Übernimmt ein neuer Service Worker (`controllerchange`, nur wenn vorher schon einer aktiv war), erscheint `#update-bar` „Neue Version verfügbar → Jetzt aktualisieren“ (`applyAppUpdate()`: speichern, neu laden). Wichtig für iOS-Home-Bildschirm-Apps, die beim Öffnen nicht neu laden.
 - Bei jeder neuen Version `CACHE_VERSION` erhöhen; alte Zwischenspeicher werden automatisch gelöscht.
 
 ## Bekannte Grenzen
