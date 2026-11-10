@@ -983,6 +983,13 @@ async function makePhotos(browser) {
         const aslot = await A.evaluate(async () => JSON.stringify(await localforage.getItem(STORE.slot('v1'))).length);
         const fps = [await A.evaluate(async () => syncFp(await syncCrypto())), await B.evaluate(() => $('sync-fp')?.textContent)];
         check('Sync: gleiche Sync-Kennung auf beiden Geräten', /^[0-9A-F]{4}-[0-9A-F]{4}$/.test(fps[0]) && fps[0] === fps[1], JSON.stringify(fps));
+        // Alle Knöpfe im Sync-Bereich echt antippen können (kein Fehler im onclick)
+        const nBefore = B.dialogs.length;
+        await B.click('#sync-body button:has-text("Passwort zeigen")');
+        await B.waitForTimeout(300);
+        const shown = B.dialogs.slice(nBefore).join(' ');
+        const badClick = await B.evaluate(() => [...document.querySelectorAll('#sync-body [onclick], #sync-card [onclick]')].filter(el => { try { new Function(el.getAttribute('onclick')); return false; } catch (e) { return true; } }).length);
+        check('Sync: „Passwort zeigen“ antippen zeigt Passwort und Kennung, alle Knöpfe gültig', shown.includes(await A.evaluate(p => syncFmtPw(p), pw)) && shown.includes(fps[0]) && badClick === 0, JSON.stringify({ shown, badClick }));
         B.answers.push(true);
         await B.evaluate(() => syncDiagnose());
         const diag = B.dialogs[B.dialogs.length - 1] || '';

@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.3</title>
+    <title>Match-Shot – Grafiken für Vereine 25.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3258,7 +3258,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.3";
+        const APP_VERSION = "25.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -11436,13 +11436,14 @@ Alle sind herzlich eingeladen!</textarea></div>
                 <span class="hint">Tipp: <b>erst holen, dann ändern, dann hochladen</b>. Es wird zusammengeführt – auch wenn zwei Leute gleichzeitig etwas geändert haben, geht nichts verloren.</span>
                 <div class="sync-small">
                     <button type="button" class="sd-btn" onclick="syncSharePw()">📤 Passwort an Kollegen</button>
-                    <button type="button" class="sd-btn" onclick="alert('🔑 Vereins-Passwort:\n\n' + syncFmtPw(prefs.sync?.pw))">👁️ Passwort zeigen</button>
+                    <button type="button" class="sd-btn" onclick="syncShowPw()">👁️ Passwort zeigen</button>
                     <button type="button" class="sd-btn" onclick="syncDiagnose()">🔍 Verbindung prüfen</button>
                     <button type="button" class="sd-btn" onclick="syncDisconnect()">🔌 Trennen</button>
                     <button type="button" class="sd-btn danger" onclick="syncDeleteRemote()">🗑️ Sync-Daten löschen</button>
                 </div>`;
             syncFillFp();
         }
+        function syncShowPw() { alert('🔑 Vereins-Passwort:\n\n' + syncFmtPw(prefs.sync?.pw) + '\n\nSync-Kennung: ' + ($('sync-fp')?.textContent || '–')); }
         /* Sync-Kennung: kurzer Prüfwert des Speicherplatzes – gleich auf allen Geräten mit gleichem Code + Passwort */
         const syncFp = st => (st.space.slice(0, 4) + '-' + st.space.slice(4, 8)).toUpperCase();
         function syncFillFp() { syncCrypto().then(st => { const el = $('sync-fp'); if (el) el.textContent = syncFp(st); }).catch(() => {}); }
