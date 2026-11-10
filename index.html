@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.4</title>
+    <title>Match-Shot – Grafiken für Vereine 25.5</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1068,6 +1068,8 @@
         .sect-tag { font-weight: normal; color: #6c757d; font-size: 11px; margin-left: 4px; }
         .sync-intro { font-size: 13px; line-height: 1.45; margin: 0 0 10px; }
         .sync-pwrow { display: flex; gap: 6px; }
+        .sync-consent { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; line-height: 1.4; font-weight: normal; margin: 4px 0 10px; }
+        .sync-consent input { margin-top: 2px; flex: none; width: 18px; height: 18px; }
         .sync-pwrow input { flex: 1; min-width: 0; font-family: monospace; letter-spacing: 1px; }
         .sync-info { font-size: 13px; line-height: 1.5; background: #f6f7f9; border: 1px solid #e2e4e8; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
         .sync-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -3258,7 +3260,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.4";
+        const APP_VERSION = "25.5";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -10935,6 +10937,7 @@ Alle sind herzlich eingeladen!</textarea></div>
            ========================================================= */
         const SYNC_URL = 'https://sync.match-shot.de';
         const SYNC_KDF_ITER = 200000;
+        const SYNC_TERMS = 'AGB 10.11.2026 § 12a';   // Stand der Zustimmung (wird beim Einrichten gespeichert)
         const SYNC_FILE_MIN = 1024;          // Daten-URLs ab dieser Länge werden als eigene Datei übertragen
         const SYNC_COLLS = ['players', 'opponents', 'sponsors', 'templates', 'designStyles', 'fonts', 'teamPhotos'];
         const SYNC_PW_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -11353,12 +11356,13 @@ Alle sind herzlich eingeladen!</textarea></div>
             const pw = syncNormPw(val('sync-pw'));
             if (!name) { alert('Bitte deinen Namen eintragen – er erscheint bei den Kollegen als „Stand von …“.'); return; }
             if (pw.length < 10) { alert('Das Vereins-Passwort braucht mindestens 10 Zeichen. Tipp: „🎲 Vorschlagen“.'); return; }
+            if (!$('sync-consent')?.checked) { alert('Bitte zuerst das Häkchen setzen: Einwilligungen liegen vor und der Verein stimmt der Auftragsverarbeitung (§ 12a AGB) zu.'); return; }
             const btn = $('sync-setup-btn');
             if (btn) { btn.disabled = true; btn.textContent = '⏳ Schlüssel wird erzeugt …'; }
             try {
                 const key = await syncDeriveKey(pw, club.code);
                 prefs.syncName = name;
-                prefs.sync = { pw, key, name, lastVer: '', base: {}, lastPull: null, lastPush: null, remoteBy: '', remoteAt: '' };
+                prefs.sync = { pw, key, name, lastVer: '', base: {}, lastPull: null, lastPush: null, remoteBy: '', remoteAt: '', consentAt: new Date().toISOString(), consentTerms: SYNC_TERMS };
                 syncState = null;
                 await savePrefs();
                 renderSyncSection();
@@ -11419,6 +11423,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     <div class="control-group"><label>Vereins-Passwort</label>
                         <div class="sync-pwrow"><input type="text" id="sync-pw" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="mind. 10 Zeichen">
                         <button type="button" class="sd-btn" onclick="setVal('sync-pw', syncSuggestPw())">🎲 Vorschlagen</button></div></div>
+                    <label class="sync-consent"><input type="checkbox" id="sync-consent"> <span>Ich bin für den Verein berechtigt und bestätige: Für Namen und Fotos liegen die nötigen Einwilligungen vor (bei Minderjährigen die der Eltern). Wir stimmen der <a href="agb.html#sync" target="_blank" rel="noopener">Auftragsverarbeitung nach § 12a AGB</a> zu.</span></label>
                     <button type="button" class="copy-action-btn" id="sync-setup-btn" style="background:#005f73;" onclick="syncSetup()">🔐 Sync einrichten</button>
                     <span class="hint">Erster im Verein? Passwort vorschlagen lassen, einrichten und „⬆️ Hochladen“. Kollegen geben <b>dasselbe Passwort</b> ein und tippen auf „⬇️ Neueste holen“. Passwort vergessen? Einfach ein neues festlegen und neu hochladen – die Daten auf den Geräten bleiben.</span>`;
                 return;

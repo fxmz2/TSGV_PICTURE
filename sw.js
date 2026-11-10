@@ -3,7 +3,7 @@
    - Bibliotheken, Schriften, Icons: aus dem Zwischenspeicher
    - vereine.txt und Wappen: immer aus dem Netz (werden nie zwischengespeichert)
    Bei jeder neuen App-Version CACHE_VERSION erhöhen. */
-const CACHE_VERSION = 'matchshot-v25.4';
+const CACHE_VERSION = 'matchshot-v25.5';
 
 const CORE_FILES = [
     './',
@@ -43,13 +43,25 @@ const CORE_FILES = [
     './agb.html'
 ];
 
+/* Cloudflare Pages leitet „seite.html“ auf „/seite“ um. Eine umgeleitete Antwort darf ein Service Worker
+   nicht für eine Seite zurückgeben (Safari: „Response served by service worker has redirections“).
+   Deshalb solche Antworten neu verpacken – Inhalt bleibt gleich, nur ohne Umleitungs-Kennzeichen. */
+async function unredirect(res) {
+    if (!res || !res.redirected) return res;
+    const body = await res.blob();
+    return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
+}
+
 self.addEventListener('install', event => {
     event.waitUntil((async () => {
         const cache = await caches.open(CACHE_VERSION);
         // Einzeln laden: fehlt eine Datei auf dem Server, funktioniert der Rest trotzdem
-        await Promise.all(CORE_FILES.map(url =>
-            cache.add(new Request(url, { cache: 'reload' })).catch(() => {})
-        ));
+        await Promise.all(CORE_FILES.map(async url => {
+            try {
+                const res = await unredirect(await fetch(new Request(url, { cache: 'reload' })));
+                if (res.ok) await cache.put(url, res);
+            } catch (e) { /* offline oder fehlt – egal */ }
+        }));
         await self.skipWaiting();
     })());
 });
@@ -78,12 +90,12 @@ self.addEventListener('fetch', event => {
         event.respondWith((async () => {
             const cache = await caches.open(CACHE_VERSION);
             try {
-                const res = await fetch(req);
+                const res = await unredirect(await fetch(req.mode === 'navigate' ? new Request(req.url, { credentials: 'same-origin' }) : req));
                 if (res.ok) cache.put(req.mode === 'navigate' && url.pathname.endsWith('/') ? './index.html' : req, res.clone());
                 return res;
             } catch (e) {
-                return (await cache.match(req, { ignoreSearch: true }))
-                    || (await cache.match('./index.html'))
+                return (await unredirect(await cache.match(req, { ignoreSearch: true })))
+                    || (await unredirect(await cache.match('./index.html')))
                     || Response.error();
             }
         })());
