@@ -1,0 +1,22 @@
+# Match-Shot Vereins-Sync – Cloudflare Worker
+# Einrichtung: siehe sync/ANLEITUNG.md
+name = "matchshot-sync"
+main = "worker.js"
+compatibility_date = "2025-09-01"
+
+# Speicher (R2) – beim Anlegen im Dashboard Ort „Europäische Union (EU)“ wählen
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "matchshot-sync"
+jurisdiction = "eu"
+
+# Wöchentliches Aufräumen (Montag 03:17 Uhr UTC)
+[triggers]
+crons = ["17 3 * * 1"]
+
+[vars]
+LICENSE_URL = "https://match-shot.de/vereine.txt"
+ALLOWED_ORIGINS = "https://match-shot.de,https://www.match-shot.de,https://fxmz2.github.io"
+QUOTA_MB = "600"
+MAX_SPACES = "3"
+DELETE_AFTER_DAYS = "180"
