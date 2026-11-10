@@ -16,7 +16,7 @@
     <p><a href="./">← Zurück zur App</a></p>
     <div class="box">
         <h1>Datenschutzerklärung</h1>
-        <p><i>Stand: 31. Oktober 2026</i></p>
+        <p><i>Stand: 10. November 2026</i></p>
 
         <h2>1. Verantwortlicher</h2>
         <p>
@@ -32,7 +32,9 @@
             Die App „Match-Shot“ läuft vollständig in deinem Browser. Alle Inhalte, die du eingibst oder hochlädst –
             insbesondere Spielernamen, Spielerfotos, Gegner, Sponsoren, Hintergründe, Termine und Einstellungen –
             werden ausschließlich <b>lokal auf deinem Gerät</b> im Speicher des Browsers (IndexedDB) abgelegt.
-            Diese Daten werden <b>nicht</b> an uns oder an Dritte übertragen.
+            Diese Daten werden <b>nicht</b> an uns oder an Dritte übertragen. Einzige Ausnahme ist der freiwillige
+            <b>Vereins-Sync</b> (Abschnitt 5b): Schaltet ihr ihn ein, werden die Daten vorher auf deinem Gerät verschlüsselt,
+            sodass wir sie nicht lesen können.
         </p>
         <p>
             Auch die erstellten Grafiken werden direkt auf deinem Gerät berechnet. Sie werden nur dann weitergegeben,
@@ -78,7 +80,29 @@
             zusätzlich verhindert eine Sicherheitsrichtlinie (Content Security Policy) jede Verbindung der App zu fremden Servern.
         </p>
 
-        <h2>5b. Bestellung und Kontakt per E-Mail</h2>
+        <h2>5b. Vereins-Sync (freiwillig, auf dem Gerät verschlüsselt)</h2>
+        <p>
+            Im Advanced-Paket kann ein Verein freiwillig den „Vereins-Sync“ einrichten, um seine Daten zwischen mehreren Geräten
+            abzugleichen (Spieler mit Fotos, Gegner, Sponsoren, Hintergründe, Schriften, Design-Einstellungen und Versionen).
+            Ohne Einrichtung findet keine Übertragung statt.
+        </p>
+        <ul>
+            <li><b>Verschlüsselung auf dem Gerät:</b> Bevor etwas dein Gerät verlässt, wird es mit einem vom Verein selbst festgelegten
+                Vereins-Passwort verschlüsselt (AES-256-GCM, Schlüssel per PBKDF2 aus dem Passwort abgeleitet). Passwort und Schlüssel
+                werden nicht an uns übertragen. Wir und unser Dienstleister können die gespeicherten Inhalte nicht lesen.</li>
+            <li><b>Speicherung:</b> Die verschlüsselten Daten werden bei Cloudflare (Cloudflare R2, Speicherort Europäische Union)
+                gespeichert; es gilt der in Abschnitt 4 genannte Vertrag zur Auftragsverarbeitung.</li>
+            <li><b>Übertragene Angaben:</b> Zur Prüfung der Berechtigung wird ein Prüfwert (Hash) des Vereinscodes übermittelt, nicht der Code selbst.
+                Außerdem fallen technisch notwendige Verbindungsdaten (IP-Adresse, Zeitpunkt) an. Der beim Einrichten eingetragene Name
+                (z. B. „Felix“) wird nur verschlüsselt übertragen und ist für die anderen Geräte des Vereins als „Stand von …“ sichtbar.</li>
+            <li><b>Rollen und Rechtsgrundlage:</b> Für die enthaltenen Spielerdaten ist der Verein verantwortlich; wir verarbeiten sie
+                insoweit in seinem Auftrag (Art. 28 DSGVO). Die Bereitstellung der Funktion erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO.</li>
+            <li><b>Löschung:</b> Über „🗑️ Sync-Daten löschen“ entfernt der Verein den gesamten Stand sofort. Nicht mehr benötigte Fotos werden
+                automatisch gelöscht. Ist ein Verein nicht mehr freigeschaltet, ist kein Zugriff mehr möglich; sein verschlüsselter Stand wird
+                spätestens 180 Tage nach dem letzten Hochladen automatisch gelöscht.</li>
+        </ul>
+
+        <h2>5c. Bestellung und Kontakt per E-Mail</h2>
         <p>
             Wenn du Match-Shot bestellst oder uns per E-Mail kontaktierst, verarbeiten wir die Angaben aus deiner Nachricht – z.B. Name, Verein,
             Anschrift, E-Mail-Adresse, ggf. Telefonnummer sowie das übermittelte Vereinswappen – zur Bearbeitung der Anfrage, zur Abwicklung des
@@ -110,7 +134,8 @@
         <h2>8. Löschung</h2>
         <p>
             Du kannst einzelne Einträge direkt in der App löschen. Alle Daten entfernst du, indem du die Website-Daten
-            dieser Seite in deinem Browser löschst bzw. die installierte App entfernst.
+            dieser Seite in deinem Browser löschst bzw. die installierte App entfernst. Einen eingerichteten Vereins-Sync
+            löschst du in der App über „🔄 Vereins-Sync“ → „🗑️ Sync-Daten löschen“.
         </p>
 
         <h2>9. Deine Rechte</h2>

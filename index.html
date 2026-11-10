@@ -10,9 +10,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.0</title>
+    <title>Match-Shot – Grafiken für Vereine 25.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Match-Shot">
@@ -1065,6 +1065,17 @@
         .title-pick { display: grid; grid-template-columns: 1fr 1.2fr; gap: 6px; }
         .title-pick input:disabled { background: #f1f3f5; color: #555; }
         /* Video: Reihenfolge der Elemente */
+        .sect-tag { font-weight: normal; color: #6c757d; font-size: 11px; margin-left: 4px; }
+        .sync-intro { font-size: 13px; line-height: 1.45; margin: 0 0 10px; }
+        .sync-pwrow { display: flex; gap: 6px; }
+        .sync-pwrow input { flex: 1; min-width: 0; font-family: monospace; letter-spacing: 1px; }
+        .sync-info { font-size: 13px; line-height: 1.5; background: #f6f7f9; border: 1px solid #e2e4e8; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+        .sync-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .sync-status { font-size: 13px; font-weight: bold; color: #005f73; min-height: 1.2em; margin: 6px 0; }
+        .sync-small { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .sync-sum { margin: 4px 0 8px 18px; padding: 0; font-size: 13px; line-height: 1.45; }
+        .sync-conf { background: #fff7e6; border: 1px solid #f3c776; border-radius: 8px; padding: 8px 10px; margin: 8px 0; font-size: 13px; }
+        .sync-conf label { display: flex; gap: 6px; align-items: flex-start; font-weight: normal; margin: 4px 0; }
         .vo-fmt { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
         .vo-fmt button { border: 2px solid #005f73; background: #fff; color: #005f73; border-radius: 16px; padding: 5px 12px; font-size: 13px; font-weight: bold; cursor: pointer; }
         .vo-fmt button.active { background: #005f73; color: #fff; }
@@ -1506,6 +1517,16 @@
                 </div>
             </div>
 
+            <!-- VEREINS-SYNC: neuer Stand -->
+            <div id="sync-card" class="notice-card info" hidden>
+                <b>🔄 Neuer Stand im Vereins-Sync</b>
+                <span>Ein Kollege hat neue Daten hochgeladen.</span>
+                <div class="notice-actions">
+                    <button type="button" class="primary" onclick="syncPull()">⬇️ Jetzt holen</button>
+                    <button type="button" class="secondary" onclick="$('sync-card').hidden = true">Später</button>
+                </div>
+            </div>
+
             <!-- EDITOR: STARTSEITE (GLOBAL) -->
             <div id="editor-start" class="editor-section active">
                 <h2 style="font-size:1.3rem; margin-bottom:8px;">✨ Was möchtest du erstellen?</h2>
@@ -1648,6 +1669,11 @@
                         </div>
                         <span class="hint">Ausgeblendete Reiter und Bereiche bleiben erhalten und lassen sich hier jederzeit wieder einblenden. Gilt für diesen Verein auf diesem Gerät.</span>
                     </div>
+                </details>
+
+                <details class="sect adv-only" id="sect-sync">
+                    <summary>🔄 Vereins-Sync <small class="sect-tag">mehrere Geräte</small></summary>
+                    <div class="details-body" id="sync-body"></div>
                 </details>
 
                 <details class="sect" id="sect-backup">
@@ -2983,6 +3009,18 @@ Alle sind herzlich eingeladen!</textarea></div>
     </div>
 
     <!-- GRAFIK-PAKET -->
+    <div id="sync-overlay" class="modal-overlay" hidden>
+        <div class="modal-card">
+            <h2 id="sync-dlg-title">🔄 Vereins-Sync</h2>
+            <div id="sync-dlg-body"></div>
+            <p class="sync-status" id="sync-dlg-status"></p>
+            <div class="modal-actions">
+                <button type="button" class="primary" id="sync-dlg-ok">✅ Übernehmen</button>
+                <button type="button" class="secondary" id="sync-dlg-cancel">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
     <div id="vidorder-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closeVidOrder()">
         <div class="modal-card">
             <h2>🎬 Reihenfolge & Gruppen im Video</h2>
@@ -3220,7 +3258,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.0";
+        const APP_VERSION = "25.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3253,8 +3291,8 @@ Alle sind herzlich eingeladen!</textarea></div>
         };
         const NS_KEYS = ['stammdaten', 'current_version', 'slot_v1', 'slot_v2', 'slot_v3'];
         // Einstellungen, die zum Verein gehören (werden in prefs.byClub je Verein abgelegt)
-        const CLUB_PREF_KEYS = ['versionNames', 'lastBackupAt', 'backupSnoozeUntil', 'onboardingDone', 'demoSeeded', 'ui'];
-        const clubPrefDefaults = () => ({ versionNames: {}, lastBackupAt: null, backupSnoozeUntil: null, onboardingDone: false, demoSeeded: false, ui: { hiddenTabs: [], hiddenSections: {} } });
+        const CLUB_PREF_KEYS = ['versionNames', 'lastBackupAt', 'backupSnoozeUntil', 'onboardingDone', 'demoSeeded', 'ui', 'sync'];
+        const clubPrefDefaults = () => ({ versionNames: {}, lastBackupAt: null, backupSnoozeUntil: null, onboardingDone: false, demoSeeded: false, ui: { hiddenTabs: [], hiddenSections: {} }, sync: null });
         const pickClubPrefs = () => Object.fromEntries(CLUB_PREF_KEYS.map(k => [k, prefs[k] ?? clubPrefDefaults()[k]]));
         const LEGACY_SLOT = v => 'sva_slot_' + v;
 
@@ -10890,6 +10928,553 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         /* =========================================================
+           🔄 VEREINS-SYNC – mehrere Geräte im Verein, verschlüsselt (Server: sync/worker.js)
+           Alles wird hier auf dem Gerät mit dem Vereins-Passwort verschlüsselt (AES-GCM).
+           Der Server sieht nur verschlüsselte Bytes. Abgleich je Eintrag (Spieler, Gegner …, Versionen)
+           als 3-Wege-Vergleich mit dem zuletzt gemeinsamen Stand (prefs.sync.base).
+           ========================================================= */
+        const SYNC_URL = 'https://sync.match-shot.de';
+        const SYNC_KDF_ITER = 200000;
+        const SYNC_FILE_MIN = 1024;          // Daten-URLs ab dieser Länge werden als eigene Datei übertragen
+        const SYNC_COLLS = ['players', 'opponents', 'sponsors', 'templates', 'designStyles', 'fonts', 'teamPhotos'];
+        const SYNC_PW_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        let syncState = null;                // Schlüssel im Arbeitsspeicher
+        const syncIdCache = new Map();       // Daten-URL → Datei-ID (je Schlüssel)
+        let syncBusy = false;
+        let syncPending = null;              // offene Vorschau beim Holen
+
+        const syncTE = new TextEncoder();
+        const syncHex = bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+        const syncUnhex = hex => new Uint8Array(hex.match(/../g).map(h => parseInt(h, 16)));
+        function syncB64(bytes) {
+            let bin = '';
+            for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+            return btoa(bin);
+        }
+        function syncUnb64(b64) {
+            const bin = atob(b64), out = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+            return out;
+        }
+        function syncAvailable() { return !!club && !club.demo && isAdvanced() && !!window.crypto?.subtle; }
+        function syncNormPw(pw) {
+            let t = String(pw || '').toUpperCase();
+            // Ganze Nachricht aus „📤 Passwort an Kollegen“ eingefügt? Dann nur das Passwort herausnehmen
+            const m = t.match(/PASSWORT:\s*(\S+)/);
+            if (m) t = m[1];
+            return t.replace(/[\s-]/g, '');
+        }
+        function syncSuggestPw() {
+            const r = crypto.getRandomValues(new Uint8Array(16));
+            const s = Array.from(r, b => SYNC_PW_CHARS[b % SYNC_PW_CHARS.length]).join('');
+            return s.match(/.{4}/g).join('-');
+        }
+        function syncFmtPw(pw) { return syncNormPw(pw).match(/.{1,4}/g)?.join('-') || ''; }
+        async function syncDeriveKey(pw, code) {
+            const base = await crypto.subtle.importKey('raw', syncTE.encode(syncNormPw(pw)), 'PBKDF2', false, ['deriveBits']);
+            const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: syncTE.encode('matchshot-sync-v1|' + normalizeCode(code)), iterations: SYNC_KDF_ITER, hash: 'SHA-256' }, base, 512);
+            return syncHex(new Uint8Array(bits));
+        }
+        async function syncCrypto() {
+            const cfg = prefs.sync;
+            if (!cfg?.key || !club) throw new Error('Der Vereins-Sync ist auf diesem Gerät noch nicht eingerichtet.');
+            if (syncState?.keyHex === cfg.key && syncState.code === club.code) return syncState;
+            const raw = syncUnhex(cfg.key);
+            const enc = await crypto.subtle.importKey('raw', raw.slice(0, 32), 'AES-GCM', false, ['encrypt', 'decrypt']);
+            const mac = await crypto.subtle.importKey('raw', raw.slice(32), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+            const space = syncHex(new Uint8Array(await crypto.subtle.sign('HMAC', mac, syncTE.encode('space'))));
+            const clubHash = await hashLicenseCode(club.code);
+            syncIdCache.clear();
+            syncState = { keyHex: cfg.key, code: club.code, enc, mac, space, clubHash };
+            return syncState;
+        }
+        async function syncMacHex(st, str) { return syncHex(new Uint8Array(await crypto.subtle.sign('HMAC', st.mac, syncTE.encode(str)))); }
+        async function syncHash(str) { return syncHex(new Uint8Array(await crypto.subtle.digest('SHA-256', syncTE.encode(str)))).slice(0, 32); }
+        async function syncEncrypt(st, bytes) {
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, st.enc, bytes));
+            const out = new Uint8Array(12 + ct.length);
+            out.set(iv); out.set(ct, 12);
+            return out;
+        }
+        async function syncDecrypt(st, bytes) {
+            return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes.slice(0, 12) }, st.enc, bytes.slice(12)));
+        }
+        /* Daten-URL ↔ Bytes (Base64 wird als echte Bytes übertragen – ein Drittel kleiner) */
+        function syncPackFile(str) {
+            const m = /^data:[^,]*;base64,/.exec(str);
+            if (m) {
+                try {
+                    const head = syncTE.encode(m[0]), body = syncUnb64(str.slice(m[0].length));
+                    if (syncB64(body) === str.slice(m[0].length)) {
+                        const out = new Uint8Array(3 + head.length + body.length);
+                        out[0] = 1; out[1] = head.length >> 8; out[2] = head.length & 255;
+                        out.set(head, 3); out.set(body, 3 + head.length);
+                        return out;
+                    }
+                } catch (e) { /* unten als Text */ }
+            }
+            const t = syncTE.encode(str), out = new Uint8Array(1 + t.length);
+            out[0] = 0; out.set(t, 1);
+            return out;
+        }
+        function syncUnpackFile(bytes) {
+            if (bytes[0] === 1) {
+                const n = (bytes[1] << 8) | bytes[2];
+                return new TextDecoder().decode(bytes.subarray(3, 3 + n)) + syncB64(bytes.subarray(3 + n));
+            }
+            return new TextDecoder().decode(bytes.subarray(1));
+        }
+        function syncWalk(v, fn) {
+            if (typeof v === 'string') return fn(v);
+            if (Array.isArray(v)) return v.map(x => syncWalk(x, fn));
+            if (v && typeof v === 'object') { const o = {}; for (const k of Object.keys(v)) if (v[k] !== undefined) o[k] = syncWalk(v[k], fn); return o; }
+            return v;
+        }
+        const syncIsFile = s => s.length >= SYNC_FILE_MIN && s.startsWith('data:');
+        const SYNC_REF = /^msb:[0-9a-f]{64}$/;
+        const syncItemKey = x => (x && x.id != null && x.id !== '') ? 'i:' + x.id : 'n:' + normName(x?.name || '').toLowerCase();
+
+        /* Alles, was abgeglichen wird, als Einträge: sd.<Feld> · sd.<Liste>#<Schlüssel> · slot.v1..v3 · vn (Versionsnamen) */
+        async function syncLocalEntities() {
+            await saveSlotNow();
+            const ent = {};
+            // Keine Kopie der ganzen Daten (Fotos können 100+ MB sein) – syncRefForm erzeugt ohnehin eine neue Struktur
+            for (const [f, val] of Object.entries(stammdaten)) {
+                if (val === undefined || typeof val === 'function') continue;
+                if (SYNC_COLLS.includes(f) && Array.isArray(val)) {
+                    const seen = new Set();
+                    val.forEach((x, i) => {
+                        let k = syncItemKey(x);
+                        if (k === 'n:' || seen.has(k)) k = 'x:' + i;
+                        seen.add(k);
+                        ent[`sd.${f}#${k}`] = x;
+                    });
+                } else ent['sd.' + f] = val;
+            }
+            for (const v of ['v1', 'v2', 'v3']) {
+                const s = await localforage.getItem(STORE.slot(v));
+                if (s) ent['slot.' + v] = s;
+            }
+            ent.vn = prefs.versionNames || {};
+            return ent;
+        }
+        /* Einträge in die Übertragungsform: große Daten-URLs → „msb:<ID>“, dazu je Eintrag ein Prüfwert */
+        async function syncRefForm(st, ent) {
+            const fresh = new Set();
+            syncWalk(ent, s => { if (syncIsFile(s) && !syncIdCache.has(s)) fresh.add(s); return s; });
+            for (const s of fresh) syncIdCache.set(s, await syncMacHex(st, s));
+            const files = new Map();
+            const ref = syncWalk(ent, s => { if (!syncIsFile(s)) return s; const id = syncIdCache.get(s); files.set(id, s); return 'msb:' + id; });
+            const hashes = {};
+            for (const k of Object.keys(ref)) hashes[k] = await syncHash(JSON.stringify(ref[k]));
+            return { ref, files, hashes };
+        }
+        function syncRefsOf(v, out = new Set()) { syncWalk(v, s => { if (SYNC_REF.test(s)) out.add(s.slice(4)); return s; }); return out; }
+
+        async function syncApi(method, path, { json, raw, timeout = 60000 } = {}) {
+            const st = await syncCrypto();
+            if (!st.clubHash) throw new Error('Dieser Browser kann den Vereinscode nicht prüfen.');
+            let res;
+            try {
+                res = await fetchWithTimeout(`${SYNC_URL}/v1/s/${st.space}${path}`, {
+                    method, cache: 'no-store', timeout,
+                    headers: { 'X-MS-Club': st.clubHash, ...(json ? { 'Content-Type': 'application/json' } : {}) },
+                    body: json ? JSON.stringify(json) : raw
+                });
+            } catch (e) { throw new Error('Keine Verbindung zum Sync – bitte Internet prüfen und nochmal versuchen.'); }
+            if (res.status === 403) throw new Error('Der Sync ist für diesen Vereinscode nicht freigeschaltet (nur Advanced-Paket mit gültiger Lizenz).');
+            if (res.status === 413) throw new Error('Der Sync-Speicher eures Vereins ist voll. Bitte bei info@match-shot.de melden.');
+            if (res.status >= 500) throw new Error('Der Sync ist gerade nicht erreichbar. Bitte später nochmal versuchen.');
+            return res;
+        }
+        async function syncRemoteVer() {
+            const res = await syncApi('GET', '/ver', { timeout: 8000 });
+            if (!res.ok) throw new Error('Sync-Abfrage fehlgeschlagen (' + res.status + ').');
+            return (await res.json()).ver || '';
+        }
+        async function syncFetchRemote(st) {
+            const res = await syncApi('GET', '/m');
+            if (res.status === 404) return null;
+            if (!res.ok) throw new Error('Sync-Abfrage fehlgeschlagen (' + res.status + ').');
+            const ver = res.headers.get('X-MS-Ver') || '';
+            const bytes = new Uint8Array(await res.arrayBuffer());
+            let m;
+            try { m = JSON.parse(new TextDecoder().decode(await syncDecrypt(st, bytes))); }
+            catch (e) { throw new Error('Der Stand im Sync ließ sich nicht entschlüsseln – stimmt das Vereins-Passwort?'); }
+            m.ver = ver;
+            m.entities = m.entities || {};
+            m.hashes = {};
+            for (const k of Object.keys(m.entities)) m.hashes[k] = await syncHash(JSON.stringify(m.entities[k]));
+            return m;
+        }
+        function syncPlan(local, remote, base) {
+            const plan = { take: [], conflicts: [], keep: [] };
+            new Set([...Object.keys(local.hashes), ...Object.keys(remote.hashes)]).forEach(k => {
+                const l = local.hashes[k], r = remote.hashes[k], b = base[k];
+                if (l === r) return;
+                if (r === b) plan.keep.push(k);
+                else if (l === b) plan.take.push(k);
+                else plan.conflicts.push(k);
+            });
+            return plan;
+        }
+        const SYNC_LABELS = { players: '👥 Spieler & Trainer', opponents: '🛡️ Gegner', sponsors: '🤝 Sponsoren', templates: '🖼️ Hintergründe', designStyles: '✨ Design-Stile', fonts: '🔤 Schriften', teamPhotos: '📸 Mannschaftsfotos' };
+        function syncKeyLabel(k) {
+            if (k.startsWith('slot.')) { const v = k.slice(5); return '📋 ' + (prefs.versionNames?.[v] || 'Version ' + v.slice(1)); }
+            if (k === 'vn') return '📋 Namen der Versionen';
+            const m = k.match(/^sd\.([^#]+)#?/);
+            return SYNC_LABELS[m?.[1]] || '🏷️ Vereins-Einstellungen';
+        }
+        function syncItemName(k, local, remote) {
+            const v = remote.entities[k] ?? local.ref[k];
+            return k.includes('#') ? normName(v?.name || '') : '';
+        }
+        /* Übersicht: je Bereich neu / geändert / entfernt (mit Namen) */
+        function syncSummary(keys, local, remote) {
+            const groups = {};
+            keys.forEach(k => {
+                const g = syncKeyLabel(k);
+                const kind = !(k in local.hashes) ? 'neu' : !(k in remote.hashes) ? 'entfernt' : 'geändert';
+                const e = groups[g] = groups[g] || { neu: [], 'geändert': [], entfernt: [] };
+                e[kind].push(syncItemName(k, local, remote));
+            });
+            return Object.entries(groups).map(([g, e]) => {
+                const parts = ['neu', 'geändert', 'entfernt'].filter(t => e[t].length).map(t => {
+                    const names = e[t].filter(Boolean);
+                    return `${e[t].length} ${t}${names.length ? ` (${esc(names.slice(0, 4).join(', '))}${names.length > 4 ? ' …' : ''})` : ''}`;
+                });
+                return `<li><b>${esc(g)}:</b> ${parts.join(' · ')}</li>`;
+            }).join('');
+        }
+
+        function syncSetStatus(text) { const el = $('sync-status'); if (el) el.textContent = text || ''; const d = $('sync-dlg-status'); if (d) d.textContent = text || ''; }
+        async function syncSaveCfg(patch) { prefs.sync = { ...prefs.sync, ...patch }; await savePrefs(); }
+
+        /* ---------- ⬇️ Neueste holen ---------- */
+        async function syncPull(opts = {}) {
+            if (syncBusy && !opts.inner) return false;
+            if (!opts.inner) syncBusy = true;
+            try {
+                const st = await syncCrypto();
+                syncSetStatus('⏳ Neuester Stand wird geladen …');
+                const remote = await syncFetchRemote(st);
+                if (!remote) { syncSetStatus(''); if (!opts.quiet) alert('Mit diesem Passwort liegt im Sync noch nichts.\n\n• Bist du der Erste im Verein? Dann tippe auf „⬆️ Hochladen“.\n• Hat ein Kollege schon hochgeladen? Dann vergleicht die „Sync-Kennung“ im Bereich 🔄 Vereins-Sync – sie muss auf beiden Geräten gleich sein. Ist sie unterschiedlich, stimmt das Passwort oder der Vereinscode nicht.'); return 'empty'; }
+                syncSetStatus('⏳ Wird verglichen …');
+                const local = await syncRefForm(st, await syncLocalEntities());
+                const plan = syncPlan(local, remote, prefs.sync.base || {});
+                if (!plan.take.length && !plan.conflicts.length) {
+                    await syncSaveCfg({ lastVer: remote.ver, base: remote.hashes, lastPull: Date.now(), remoteBy: remote.by || '', remoteAt: remote.stamp || '' });
+                    syncSetStatus('');
+                    renderSyncSection();
+                    if (!opts.quiet) toast('✅ Schon auf dem neuesten Stand');
+                    return 'same';
+                }
+                // Vorschau zeigen und auf die Entscheidung warten
+                return await new Promise(resolve => {
+                    syncPending = { st, local, remote, plan, resolve };
+                    const when = remote.stamp ? formatDate(new Date(remote.stamp).getTime()) + ', ' + new Date(remote.stamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '';
+                    $('sync-dlg-title').textContent = '⬇️ Neuer Stand im Vereins-Sync';
+                    $('sync-dlg-body').innerHTML = `
+                        <p>Stand${remote.by ? ` von <b>${esc(remote.by)}</b>` : ''}${when ? ` (${esc(when)})` : ''}${opts.beforePush ? '. Ein Kollege hat inzwischen hochgeladen – das wird zuerst übernommen, danach wird hochgeladen.' : ''}</p>
+                        ${plan.take.length ? `<p style="margin-bottom:2px;"><b>Wird übernommen:</b></p><ul class="sync-sum">${syncSummary(plan.take, local, remote)}</ul>` : ''}
+                        ${plan.conflicts.length ? `<div class="sync-conf"><b>${prefs.sync.lastVer ? '⚠️ Auf beiden Geräten geändert:' : '⚠️ Auf diesem Gerät gibt es das schon (anders):'}</b><ul class="sync-sum">${syncSummary(plan.conflicts, local, remote)}</ul>
+                            <label><input type="radio" name="sync-conf" value="remote" checked> Stand aus dem Sync nehmen</label>
+                            <label><input type="radio" name="sync-conf" value="local"> Meine Änderungen behalten (werden beim nächsten Hochladen geteilt)</label></div>` : ''}
+                        ${plan.keep.length ? `<p class="hint">Deine eigenen Änderungen (${plan.keep.length}) bleiben erhalten.</p>` : ''}`;
+                    $('sync-dlg-ok').textContent = '✅ Übernehmen';
+                    $('sync-dlg-ok').hidden = false;
+                    $('sync-dlg-ok').onclick = () => syncApplyPending();
+                    $('sync-dlg-cancel').onclick = () => { $('sync-overlay').hidden = true; const p = syncPending; syncPending = null; syncSetStatus(''); p?.resolve(false); };
+                    $('sync-dlg-status').textContent = '';
+                    $('sync-overlay').hidden = false;
+                });
+            } catch (e) {
+                syncSetStatus('');
+                if (!opts.quiet) alert('🔄 ' + e.message);
+                if (opts.inner) throw e;
+                return false;
+            } finally {
+                if (!opts.inner) syncBusy = false;
+            }
+        }
+        async function syncApplyPending() {
+            const p = syncPending;
+            if (!p) return;
+            const { st, local, remote, plan } = p;
+            const useRemote = document.querySelector('input[name="sync-conf"]:checked')?.value !== 'local';
+            const keys = [...plan.take, ...(useRemote ? plan.conflicts : [])];
+            $('sync-dlg-ok').hidden = true;
+            try {
+                // Fehlende Fotos/Dateien laden
+                const need = new Set();
+                keys.forEach(k => { if (k in remote.entities) syncRefsOf(remote.entities[k], need); });
+                const files = new Map();
+                for (const id of need) if (local.files.has(id)) files.set(id, local.files.get(id));
+                const todo = [...need].filter(id => !files.has(id)), total = todo.length;
+                let done = 0;
+                const worker = async () => {
+                    while (todo.length) {
+                        const id = todo.shift();
+                        const res = await syncApi('GET', '/b/' + id);
+                        if (!res.ok) throw new Error('Ein Foto fehlt im Sync. Bitte den Kollegen nochmal hochladen lassen.');
+                        const str = syncUnpackFile(await syncDecrypt(st, new Uint8Array(await res.arrayBuffer())));
+                        if (await syncMacHex(st, str) !== id) throw new Error('Ein Foto im Sync ist beschädigt.');
+                        files.set(id, str);
+                        syncIdCache.set(str, id);
+                        syncSetStatus(`⏳ Fotos laden: ${++done} / ${total}`);
+                    }
+                };
+                syncSetStatus(total ? `⏳ Fotos laden: 0 / ${total}` : '⏳ Wird übernommen …');
+                await Promise.all([1, 2, 3, 4].map(worker));
+                const resolve = v => syncWalk(v, s => SYNC_REF.test(s) ? files.get(s.slice(4)) : s);
+                await syncApplyEntities(keys, remote, resolve);
+                await syncSaveCfg({ lastVer: remote.ver, base: remote.hashes, lastPull: Date.now(), remoteBy: remote.by || '', remoteAt: remote.stamp || '' });
+                $('sync-card').hidden = true;
+                $('sync-overlay').hidden = true;
+                syncPending = null;
+                syncSetStatus('');
+                renderSyncSection();
+                toast('✅ Neuester Stand übernommen');
+                p.resolve(true);
+            } catch (e) {
+                syncSetStatus('');
+                alert('🔄 ' + e.message);
+                $('sync-overlay').hidden = true;
+                syncPending = null;
+                p.resolve(false);
+            }
+        }
+        /* Einträge aus dem Sync in die lokalen Daten schreiben */
+        async function syncApplyEntities(keys, remote, resolve) {
+            const sd = { ...stammdaten };
+            SYNC_COLLS.forEach(f => { if (Array.isArray(sd[f])) sd[f] = [...sd[f]]; });
+            let slotsChanged = [], fontsChanged = false, tplChanged = false;
+            for (const k of keys) {
+                const has = k in remote.entities;
+                const val = has ? resolve(remote.entities[k]) : undefined;
+                let m;
+                if ((m = k.match(/^sd\.([^#]+)#(.+)$/))) {
+                    const f = m[1], key = m[2];
+                    sd[f] = Array.isArray(sd[f]) ? sd[f] : [];
+                    const keysNow = sd[f].map((x, i) => { const kk = syncItemKey(x); return kk === 'n:' ? 'x:' + i : kk; });
+                    const i = keysNow.indexOf(key);
+                    if (has) { if (i >= 0) sd[f][i] = val; else sd[f].push(val); }
+                    else if (i >= 0) sd[f].splice(i, 1);
+                    if (f === 'fonts') fontsChanged = true;
+                    if (f === 'templates') tplChanged = true;
+                } else if ((m = k.match(/^sd\.(.+)$/))) {
+                    if (has) sd[m[1]] = val; else delete sd[m[1]];
+                } else if ((m = k.match(/^slot\.(v[123])$/))) {
+                    if (has) await localforage.setItem(STORE.slot(m[1]), val); else await localforage.removeItem(STORE.slot(m[1]));
+                    slotsChanged.push(m[1]);
+                } else if (k === 'vn') {
+                    prefs.versionNames = has && val && typeof val === 'object' ? val : {};
+                }
+            }
+            stammdaten = { ...emptyStammdaten(), ...sd };
+            sortStammdaten();
+            await saveStammdaten();
+            await savePrefs();
+            applyVersionNames();
+            if (tplChanged) { templateUrlCache.forEach(url => URL.revokeObjectURL(url)); templateUrlCache.clear(); }
+            if (fontsChanged) { registerCustomFonts(); refreshFontSelects(); }
+            refreshPlayerOptions();
+            refreshOpponentDropdown();
+            refreshSponsorChecklists();
+            renderStammdatenLists();
+            editorTabs.forEach(renderBgThumbs);
+            if (slotsChanged.includes(currentVersion)) { applySlotData(await localforage.getItem(STORE.slot(currentVersion))); resetEckHistory(); }
+            renderAll();
+            if (typeof renderStyleList === 'function') renderStyleList();
+            updateBackupReminder();
+        }
+
+        /* ---------- ⬆️ Hochladen ---------- */
+        async function syncPush() {
+            if (syncBusy) return false;
+            syncBusy = true;
+            try {
+                const st = await syncCrypto();
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    syncSetStatus('⏳ Sync wird geprüft …');
+                    const ver = await syncRemoteVer();
+                    if (ver && ver !== (prefs.sync.lastVer || '')) {
+                        const r = await syncPull({ inner: true, beforePush: true });
+                        if (r === false) { syncSetStatus(''); return false; }
+                    }
+                    syncSetStatus('⏳ Wird vorbereitet …');
+                    const local = await syncRefForm(st, await syncLocalEntities());
+                    const ids = [...local.files.keys()];
+                    const hr = await syncApi('POST', '/have', { json: { ids } });
+                    if (!hr.ok) throw new Error('Sync-Abfrage fehlgeschlagen (' + hr.status + ').');
+                    const have = new Set((await hr.json()).have || []);
+                    const todo = ids.filter(id => !have.has(id)), total = todo.length;
+                    let done = 0;
+                    const worker = async () => {
+                        while (todo.length) {
+                            const id = todo.shift();
+                            const body = await syncEncrypt(st, syncPackFile(local.files.get(id)));
+                            const res = await syncApi('PUT', '/b/' + id, { raw: body, timeout: 120000 });
+                            if (!res.ok) throw new Error('Hochladen fehlgeschlagen (' + res.status + ').');
+                            syncSetStatus(`⏳ Fotos hochladen: ${++done} / ${total}`);
+                        }
+                    };
+                    if (total) syncSetStatus(`⏳ Fotos hochladen: 0 / ${total}`);
+                    await Promise.all([1, 2, 3, 4].map(worker));
+                    syncSetStatus('⏳ Stand wird gespeichert …');
+                    const manifest = { format: 1, app: APP_VERSION, stamp: new Date().toISOString(), by: prefs.sync.name || '', entities: local.ref };
+                    const enc = await syncEncrypt(st, syncTE.encode(JSON.stringify(manifest)));
+                    const cr = await syncApi('POST', '/commit', { json: { base: prefs.sync.lastVer || '', m: syncB64(enc), refs: ids } });
+                    if (cr.status === 409) continue;   // jemand war schneller – erst holen, dann nochmal
+                    if (!cr.ok) throw new Error('Hochladen fehlgeschlagen (' + cr.status + ').');
+                    const { ver: newVer } = await cr.json();
+                    await syncSaveCfg({ lastVer: newVer, base: local.hashes, lastPush: Date.now(), remoteBy: prefs.sync.name || '', remoteAt: manifest.stamp });
+                    await markBackupDone();   // der Sync ist zugleich ein Backup
+                    $('sync-card').hidden = true;
+                    syncSetStatus('');
+                    renderSyncSection();
+                    toast(total ? `⬆️ Hochgeladen (${total} neue Fotos/Dateien)` : '⬆️ Hochgeladen');
+                    return true;
+                }
+                throw new Error('Gerade laden mehrere gleichzeitig hoch. Bitte gleich nochmal versuchen.');
+            } catch (e) {
+                syncSetStatus('');
+                alert('🔄 ' + e.message);
+                return false;
+            } finally {
+                syncBusy = false;
+            }
+        }
+
+        /* ---------- Einrichten, Passwort teilen, trennen, löschen ---------- */
+        async function syncSetup() {
+            const name = normName(val('sync-name'));
+            const pw = syncNormPw(val('sync-pw'));
+            if (!name) { alert('Bitte deinen Namen eintragen – er erscheint bei den Kollegen als „Stand von …“.'); return; }
+            if (pw.length < 10) { alert('Das Vereins-Passwort braucht mindestens 10 Zeichen. Tipp: „🎲 Vorschlagen“.'); return; }
+            const btn = $('sync-setup-btn');
+            if (btn) { btn.disabled = true; btn.textContent = '⏳ Schlüssel wird erzeugt …'; }
+            try {
+                const key = await syncDeriveKey(pw, club.code);
+                prefs.syncName = name;
+                prefs.sync = { pw, key, name, lastVer: '', base: {}, lastPull: null, lastPush: null, remoteBy: '', remoteAt: '' };
+                syncState = null;
+                await savePrefs();
+                renderSyncSection();
+                const ver = await syncRemoteVer().catch(e => { alert('🔄 ' + e.message); return null; });
+                if (ver === null) return;
+                if (ver) {
+                    if (confirm('Im Verein gibt es schon einen Stand im Sync.\n\nJetzt holen? Deine Daten auf diesem Gerät bleiben erhalten und werden zusammengeführt.')) await syncPull();
+                } else alert('🔐 Sync eingerichtet.\n\n' + 'Mit diesem Passwort liegt im Sync noch nichts.\n\n• Bist du der Erste im Verein? Dann tippe auf „⬆️ Hochladen“.\n• Hat ein Kollege schon hochgeladen? Dann vergleicht die „Sync-Kennung“ im Bereich 🔄 Vereins-Sync – sie muss auf beiden Geräten gleich sein. Ist sie unterschiedlich, stimmt das Passwort oder der Vereinscode nicht.');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = '🔐 Sync einrichten'; }
+            }
+        }
+        async function syncSharePw() {
+            const pw = syncFmtPw(prefs.sync?.pw);
+            const text = `Match-Shot Vereins-Sync für ${club?.name || 'unseren Verein'}\nVereins-Passwort: ${pw} \n\n(In Match-Shot: Start → 🔄 Vereins-Sync → Passwort eingeben → „⬇️ Neueste holen“.)`;
+            if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+            try { await navigator.clipboard.writeText(text); toast('📋 Passwort kopiert'); } catch (e) { alert(text); }
+        }
+        async function syncDisconnect() {
+            if (!confirm('Sync auf diesem Gerät trennen?\n\nDeine Daten hier bleiben erhalten, ebenso der Stand im Sync für die Kollegen.')) return;
+            prefs.sync = null;
+            syncState = null;
+            await savePrefs();
+            $('sync-card').hidden = true;
+            renderSyncSection();
+        }
+        async function syncDeleteRemote() {
+            if (!confirm('Alle Sync-Daten des Vereins löschen?\n\nDer verschlüsselte Stand im Sync wird für alle entfernt. Die Daten auf den Geräten bleiben erhalten.')) return;
+            try {
+                const res = await syncApi('DELETE', '');
+                if (!res.ok) throw new Error('Löschen fehlgeschlagen (' + res.status + ').');
+                await syncSaveCfg({ lastVer: '', base: {} });
+                renderSyncSection();
+                toast('🗑️ Sync-Daten gelöscht');
+            } catch (e) { alert('🔄 ' + e.message); }
+        }
+        function syncWhen(t) {
+            if (!t) return 'noch nie';
+            const d = new Date(t);
+            return formatDate(d.getTime()) + ', ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+        }
+        function renderSyncSection() {
+            const host = $('sync-body');
+            if (!host) return;
+            const cfg = prefs.sync;
+            // Nur neu aufbauen, wenn sich etwas geändert hat (sonst gingen Eingaben beim Tippen verloren)
+            const sig = JSON.stringify([syncAvailable(), !!club?.demo, cfg?.key ? [cfg.name, cfg.lastPush, cfg.lastPull, cfg.remoteBy, cfg.remoteAt] : 0]);
+            if (host.dataset.sig === sig && host.childElementCount) return;
+            host.dataset.sig = sig;
+            if (!syncAvailable()) {
+                host.innerHTML = `<span class="hint">${club?.demo ? 'Im Demo-Modus nicht verfügbar.' : 'Der Vereins-Sync ist im Advanced-Paket enthalten.'}</span>`;
+                return;
+            }
+            if (!cfg?.key) {
+                host.innerHTML = `
+                    <p class="sync-intro">Mehrere Leute im Verein, <b>gleiche Daten</b>: Spieler, Fotos, Gegner, Sponsoren, Hintergründe und alle Versionen. Alles wird <b>auf diesem Gerät verschlüsselt</b> – lesen kann es nur, wer das Vereins-Passwort kennt. Auch Match-Shot nicht.</p>
+                    <div class="control-group"><label>Dein Name <small>(erscheint als „Stand von …“)</small></label><input type="text" id="sync-name" maxlength="30" value="${esc(prefs.syncName || '')}" placeholder="z.B. Felix"></div>
+                    <div class="control-group"><label>Vereins-Passwort</label>
+                        <div class="sync-pwrow"><input type="text" id="sync-pw" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="mind. 10 Zeichen">
+                        <button type="button" class="sd-btn" onclick="setVal('sync-pw', syncSuggestPw())">🎲 Vorschlagen</button></div></div>
+                    <button type="button" class="copy-action-btn" id="sync-setup-btn" style="background:#005f73;" onclick="syncSetup()">🔐 Sync einrichten</button>
+                    <span class="hint">Erster im Verein? Passwort vorschlagen lassen, einrichten und „⬆️ Hochladen“. Kollegen geben <b>dasselbe Passwort</b> ein und tippen auf „⬇️ Neueste holen“. Passwort vergessen? Einfach ein neues festlegen und neu hochladen – die Daten auf den Geräten bleiben.</span>`;
+                return;
+            }
+            host.innerHTML = `
+                <div class="sync-info">Verbunden als <b>${esc(cfg.name || '–')}</b><br>
+                    Zuletzt hochgeladen: ${esc(syncWhen(cfg.lastPush))}<br>
+                    Zuletzt geholt: ${esc(syncWhen(cfg.lastPull))}${cfg.remoteBy && cfg.remoteAt ? `<br>Stand im Sync: ${esc(cfg.remoteBy)}, ${esc(syncWhen(cfg.remoteAt))}` : ''}
+                    <br>Sync-Kennung: <b id="sync-fp">…</b> <small>(muss auf allen Geräten gleich sein)</small></div>
+                <div class="sync-actions">
+                    <button type="button" class="copy-action-btn" style="background:#005f73; margin:0;" onclick="syncPush()">⬆️ Hochladen</button>
+                    <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin:0;" onclick="syncPull()">⬇️ Neueste holen</button>
+                </div>
+                <p class="sync-status" id="sync-status"></p>
+                <span class="hint">Tipp: <b>erst holen, dann ändern, dann hochladen</b>. Es wird zusammengeführt – auch wenn zwei Leute gleichzeitig etwas geändert haben, geht nichts verloren.</span>
+                <div class="sync-small">
+                    <button type="button" class="sd-btn" onclick="syncSharePw()">📤 Passwort an Kollegen</button>
+                    <button type="button" class="sd-btn" onclick="syncShowPw()">👁️ Passwort zeigen</button>
+                    <button type="button" class="sd-btn" onclick="syncDiagnose()">🔍 Verbindung prüfen</button>
+                    <button type="button" class="sd-btn" onclick="syncDisconnect()">🔌 Trennen</button>
+                    <button type="button" class="sd-btn danger" onclick="syncDeleteRemote()">🗑️ Sync-Daten löschen</button>
+                </div>`;
+            syncFillFp();
+        }
+        function syncShowPw() { alert('🔑 Vereins-Passwort:\n\n' + syncFmtPw(prefs.sync?.pw) + '\n\nSync-Kennung: ' + ($('sync-fp')?.textContent || '–')); }
+        /* Sync-Kennung: kurzer Prüfwert des Speicherplatzes – gleich auf allen Geräten mit gleichem Code + Passwort */
+        const syncFp = st => (st.space.slice(0, 4) + '-' + st.space.slice(4, 8)).toUpperCase();
+        function syncFillFp() { syncCrypto().then(st => { const el = $('sync-fp'); if (el) el.textContent = syncFp(st); }).catch(() => {}); }
+        /* 🔍 Verbindung prüfen: alles Wichtige auf einen Blick (für Screenshots ohne Code/Passwort) */
+        async function syncDiagnose() {
+            const lines = [`App-Version: ${APP_VERSION}`, `Verein: ${club?.name || '–'}`, `Adresse der App: ${location.host}`];
+            try {
+                const st = await syncCrypto();
+                lines.push(`Sync-Kennung: ${syncFp(st)}`);
+                let ping;
+                try { const r = await fetchWithTimeout(SYNC_URL + '/v1/ping', { timeout: 8000, cache: 'no-store' }); ping = r.ok ? '✅ erreichbar' : '❌ Fehler ' + r.status; }
+                catch (e) { ping = '❌ keine Verbindung'; }
+                lines.push('Server: ' + ping);
+                try {
+                    const v = await syncRemoteVer();
+                    lines.push('Stand im Sync: ' + (v ? '✅ vorhanden' : '— leer (mit diesem Passwort wurde noch nichts hochgeladen)'));
+                    if (v) lines.push('Dieses Gerät: ' + (v === prefs.sync.lastVer ? '✅ auf dem neuesten Stand' : '⬇️ neuerer Stand verfügbar'));
+                } catch (e) { lines.push('Stand im Sync: ❌ ' + e.message); }
+            } catch (e) { lines.push('❌ ' + e.message); }
+            alert('🔍 Sync-Prüfung\n\n' + lines.join('\n'));
+        }
+        /* Beim Start: gibt es einen neueren Stand? (Hinweis auf der Startseite) */
+        async function syncCheckOnStart() {
+            if (!syncAvailable() || !prefs.sync?.key || !navigator.onLine) return;
+            try {
+                const ver = await syncRemoteVer();
+                if (ver && ver !== (prefs.sync.lastVer || '')) $('sync-card').hidden = false;
+            } catch (e) { /* offline oder Server weg – kein Hinweis */ }
+        }
+
+        /* =========================================================
            VEREINSCODE / LIZENZ
            ========================================================= */
         function normalizeCode(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
@@ -12406,6 +12991,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             document.body.classList.toggle('tier-basis', !adv);
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('locked', isTabLocked(b.dataset.tab)));
             if ($('tier-card')) $('tier-card').hidden = adv;
+            renderSyncSection();
         }
 
         /* =========================================================
@@ -12961,10 +13547,10 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (!oldNs && await nsHasData('')) {
                     // Daten aus der Zeit vor der Trennung gehören zum ersten freigeschalteten Verein
                     await copyNamespace('', newNs, true);
-                    prefs.byClub[newNs] = pickClubPrefs();
+                    prefs.byClub[newNs] = { ...pickClubPrefs(), sync: null };
                 } else if (oldNs && await nsHasData(oldNs) && confirm(`Für „${newClub.demo ? 'Demo-Modus' : newClub.name}“ sind auf diesem Gerät noch keine Daten gespeichert.\n\nSollen die Daten von „${oldName}“ (Spieler, Gegner, Sponsoren, Hintergründe und Versionen) übernommen werden?\n\nOK = übernehmen · Abbrechen = leer starten`)) {
                     await copyNamespace(oldNs, newNs, false);
-                    prefs.byClub[newNs] = { ...pickClubPrefs(), lastBackupAt: null, backupSnoozeUntil: null, demoSeeded: true };
+                    prefs.byClub[newNs] = { ...pickClubPrefs(), lastBackupAt: null, backupSnoozeUntil: null, demoSeeded: true, sync: null };
                 }
             }
             try { await localforage.setItem(STORE.prefs, prefs); } catch (e) {}
@@ -13267,6 +13853,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 updateStorageInfo();
                 updateBackupReminder();
                 updateInstallCard();
+                renderSyncSection();
 
                 applyTier();
                 renderUiSettings();
@@ -13318,6 +13905,7 @@ Alle sind herzlich eingeladen!</textarea></div>
 
                 setupLandingLinks();
                 if (club) markUnlocked(true);
+                syncCheckOnStart();
                 if (!club && LICENSE_REQUIRED) showLicenseOverlay(false);
                 else {
                     document.documentElement.classList.remove('lp-boot');
