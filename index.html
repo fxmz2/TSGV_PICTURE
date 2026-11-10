@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 24.9</title>
+    <title>Match-Shot – Grafiken für Vereine 25.0</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1069,11 +1069,19 @@
         .vo-fmt button { border: 2px solid #005f73; background: #fff; color: #005f73; border-radius: 16px; padding: 5px 12px; font-size: 13px; font-weight: bold; cursor: pointer; }
         .vo-fmt button.active { background: #005f73; color: #fff; }
         .vo-list { display: flex; flex-direction: column; gap: 5px; margin: 6px 0 4px; }
-        .vo-item { display: grid; grid-template-columns: 30px 24px 1fr 34px 34px; gap: 4px; align-items: center; background: #f6f7f9; border: 1px solid #e2e4e8; border-radius: 8px; padding: 5px 6px; font-size: 13px; user-select: none; }
+        .vo-item { display: grid; grid-template-columns: 26px 22px 1fr 32px 32px 32px 32px; gap: 3px; align-items: center; background: #f6f7f9; border: 1px solid #e2e4e8; border-radius: 8px; padding: 5px 6px; font-size: 13px; user-select: none; }
         .vo-item.dragging { opacity: 0.6; border-color: #e07a2f; background: #fff4ec; }
         .vo-handle { cursor: grab; touch-action: none; font-size: 18px; text-align: center; color: #666; }
         .vo-num { font-weight: bold; color: #005f73; text-align: center; }
         .vo-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+        .vo-item.vo-joined { margin-top: -4px; border-top-left-radius: 0; border-top-right-radius: 0; border-left: 4px solid #e07a2f; }
+        .vo-item.vo-part .vo-label { padding-left: 8px; }
+        .vo-join.on { background: #e07a2f; color: #fff; border-color: #e07a2f; }
+        .vo-quick { display: flex; flex-direction: column; gap: 5px; margin: 4px 0 6px; }
+        .vo-qrow { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font-size: 13px; }
+        .vo-qrow b { margin-right: 2px; }
+        .vo-qrow button { border: 2px solid #e07a2f; background: #fff; color: #b3541e; border-radius: 16px; padding: 4px 10px; font-size: 12.5px; font-weight: bold; cursor: pointer; }
+        .vo-qrow button.on { background: #e07a2f; color: #fff; }
         .vo-flash { outline: 4px solid #e07a2f !important; outline-offset: 3px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9990; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
         .modal-overlay[hidden] { display: none; }
@@ -2977,13 +2985,14 @@ Alle sind herzlich eingeladen!</textarea></div>
     <!-- GRAFIK-PAKET -->
     <div id="vidorder-overlay" class="modal-overlay" hidden onclick="if (event.target === this) closeVidOrder()">
         <div class="modal-card">
-            <h2>🎬 Reihenfolge im Video</h2>
-            <p>Ziehe die Elemente am ☰ in die gewünschte Reihenfolge – oben fliegt zuerst ein. Antippen eines Eintrags markiert ihn kurz in der Vorschau.</p>
+            <h2>🎬 Reihenfolge & Gruppen im Video</h2>
+            <p>Ziehe die Elemente am ☰ in die gewünschte Reihenfolge – oben fliegt zuerst ein. <b>✂️</b> teilt ein Element auf (z.B. Wappen einzeln), <b>🔗</b> lässt ein Element gleichzeitig mit dem darüber kommen (eigene Gruppen). Antippen eines Eintrags markiert ihn kurz in der Vorschau.</p>
             <div class="vo-fmt" id="vo-fmt"></div>
+            <div class="vo-quick" id="vo-quick"></div>
             <div class="vo-list" id="vo-list"></div>
             <div class="modal-actions">
                 <button type="button" class="primary" onclick="closeVidOrder()">Fertig</button>
-                <button type="button" class="secondary" onclick="resetVidOrder()">↺ Wieder von oben nach unten</button>
+                <button type="button" class="secondary" onclick="resetVidOrder()">↺ Standard (von oben nach unten)</button>
             </div>
         </div>
     </div>
@@ -3211,7 +3220,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "24.9";
+        const APP_VERSION = "25.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -5509,7 +5518,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                                 <select id="in-vid-dist-${tab}" onchange="scheduleSave();">
                                     <option value="short">Kurz (sanft)</option><option value="mid">Mittel</option><option value="far">Weit (von unten)</option>
                                 </select></div>
-                            <button type="button" class="copy-action-btn" style="margin:4px 0 6px;" onclick="openVidOrder('${tab}')">🔀 Reihenfolge der Elemente festlegen</button>
+                            <button type="button" class="copy-action-btn" style="margin:4px 0 6px;" onclick="openVidOrder('${tab}')">🔀 Reihenfolge & Gruppen (z.B. Wappen einzeln)</button>
                             <span class="hint">Gilt für „🎬 Als Video (Reel)“ in diesem Reiter. Langsamer und mit mehr Abstand wird das Video länger (max. 25 Sekunden). Ohne eigene Reihenfolge fliegen die Elemente von oben nach unten ein.</span>
                         </div>
                     </details>
@@ -10475,7 +10484,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 tabSettings: {},
                 eck2: JSON.parse(JSON.stringify(eck2)),
                 tfBoard: JSON.parse(JSON.stringify(tfBoard)),
-                vidOrder: JSON.parse(JSON.stringify(vidOrder))
+                vidOrder: JSON.parse(JSON.stringify(vidOrder)),
+                vidCfg: JSON.parse(JSON.stringify(vidCfg))
             };
             NAME_FMT_FIELDS.forEach(([id, k, legacy, def]) => {
                 data[k] = val(id) || def;
@@ -10574,6 +10584,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (data.postTitleMode === undefined && data.postTitle !== undefined)
                 setVal('in-post-title-mode', ['', 'HEIMSPIEL', 'AUSWÄRTSSPIEL'].includes(normName(data.postTitle).toUpperCase()) ? 'auto' : 'custom');
             vidOrder = data.vidOrder && typeof data.vidOrder === 'object' && !Array.isArray(data.vidOrder) ? data.vidOrder : {};
+            vidCfg = data.vidCfg && typeof data.vidCfg === 'object' && !Array.isArray(data.vidCfg) ? data.vidCfg : {};
             if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
             if ($('in-kal-own-logo')) $('in-kal-own-logo').checked = data.kalOwnLogo ?? true;
             if ($('in-wk-own-logo')) $('in-wk-own-logo').checked = data.wkOwnLogo ?? true;
@@ -11489,38 +11500,90 @@ Alle sind herzlich eingeladen!</textarea></div>
             const types = ['video/mp4;codecs=avc1.42E01E', 'video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
             return types.find(t => { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } }) || '';
         }
-        /* Animations-Einheiten: oberste verschiebbare Elemente; das Spielfeld wird in seine Reihen zerlegt */
-        function findAnimUnits(tpl) {
+        /* Animations-Einheiten: oberste verschiebbare Elemente; das Spielfeld wird in seine Reihen zerlegt.
+           Schlüssel: id, sonst „@<Nr.>“; aufgeteilte Elemente (vidCfg.split) werden zu Teilen „<Schlüssel>/<Nr.>“ */
+        function animVisible(el, tpl) {
+            for (let n = el; n && n !== tpl; n = n.parentElement) { const cs = getComputedStyle(n); if (cs.display === 'none' || cs.visibility === 'hidden' || n.classList.contains('logo-hidden')) return false; }
+            return el.offsetWidth > 0 || el.offsetHeight > 0;
+        }
+        /* Teile, in die sich ein Element zerlegen lässt (Wappen, Spieler einer Reihe, Zeilen eines Textblocks …) */
+        function vidParts(el, tpl) {
+            let kids;
+            if (el.classList.contains('row')) kids = el.querySelectorAll(':scope > .player-card');
+            else if (el.querySelector('.tb-row')) kids = el.querySelectorAll('.tb-row > *');
+            else if (el.classList.contains('list-layout-wrap')) kids = el.querySelectorAll(':scope > .list-section-title, :scope > :not(.list-section-title) > *');
+            else kids = el.children;
+            return Array.from(kids).filter(k => animVisible(k, tpl));
+        }
+        function vidKind(el) {
+            if (el.classList.contains('row')) return 'row';
+            if (el.classList.contains('team-logos') || el.querySelector('.tb-row') || el.classList.contains('lm-teams')) return 'logos';
+            return '';
+        }
+        function findAnimUnits(tpl, tplId) {
             const all = Array.from(tpl.querySelectorAll(DRAG_SEL)).filter(el => el.closest('.post-template, .story-template') === tpl);
             const top = all.filter(el => !all.some(o => o !== el && o.contains(el)));
-            const visible = el => { for (let n = el; n && n !== tpl; n = n.parentElement) { const cs = getComputedStyle(n); if (cs.display === 'none' || cs.visibility === 'hidden' || n.classList.contains('logo-hidden')) return false; } return el.offsetWidth > 0 || el.offsetHeight > 0; };
             const tr = tpl.getBoundingClientRect();
             const units = [];
-            top.filter(visible).forEach(el => {
+            top.forEach((el, idx) => {
+                if (!animVisible(el, tpl)) return;
                 if (el.classList.contains('pitch')) {
                     // Reihen von hinten (Torwart) nach vorne
                     Array.from(el.querySelectorAll(':scope > .row')).forEach((r, i) => units.push({ el: r, order: el.getBoundingClientRect().top - tr.top + 0.01 * i, row: true, key: 'row:' + i }));
-                } else units.push({ el, order: el.getBoundingClientRect().top - tr.top, key: el.id || '' });
+                } else units.push({ el, order: el.getBoundingClientRect().top - tr.top, key: el.id || '@' + idx });
             });
-            return units.sort((a, b) => a.order - b.order);
+            units.sort((a, b) => a.order - b.order);
+            const split = vidCfgOf(tplId).split, out = [];
+            units.forEach(u => {
+                const parts = vidParts(u.el, tpl), kind = vidKind(u.el);
+                if (parts.length >= (u.row ? 1 : 2) && split.includes(u.key)) parts.forEach((p, j) => out.push({ el: p, order: u.order + j * 0.001, row: u.row, part: true, parent: u.key, kind, key: u.key + '/' + j }));
+                else out.push({ ...u, kind, splittable: parts.length >= 2 });
+            });
+            return out;
         }
         /* Eigene Reihenfolge je Vorlage (vidOrder[Vorlagen-ID] = Schlüssel); neue Elemente kommen ans Ende */
         let vidOrder = {};
+        /* Aufteilen & Gruppen je Vorlage: vidCfg[Vorlagen-ID] = { split: [Schlüssel], join: [Schlüssel, die mit dem vorherigen gleichzeitig kommen] } */
+        let vidCfg = {};
+        function vidCfgOf(tplId) {
+            const c = (tplId && vidCfg[tplId]) || {};
+            return { split: Array.isArray(c.split) ? c.split : [], join: Array.isArray(c.join) ? c.join : [] };
+        }
+        function setVidCfg(tplId, c) {
+            if (!c.split.length && !c.join.length) delete vidCfg[tplId];
+            else vidCfg[tplId] = { split: [...new Set(c.split)], join: [...new Set(c.join)] };
+        }
         function sortAnimUnits(units, tplId) {
             const order = vidOrder[tplId];
             if (!Array.isArray(order) || !order.length) return units;
-            const rank = (u, i) => { const k = order.indexOf(u.key); return k < 0 ? order.length + i : k; };
-            return units.map((u, i) => ({ u, r: rank(u, i) })).sort((a, b) => a.r - b.r).map(x => x.u);
+            const rankOf = key => {
+                const k = order.indexOf(key);
+                if (k >= 0) return k;
+                const slash = key.lastIndexOf('/');
+                if (slash > 0) { const pr = rankOf(key.slice(0, slash)); if (pr !== null) return pr + (+key.slice(slash + 1) + 1) / 1000; }
+                const kid = order.findIndex(o => o.startsWith(key + '/'));   // wieder zusammengefügt: Platz des ersten Teils
+                if (kid >= 0) return kid;
+                if (key.startsWith('@')) { const old = order.indexOf(''); if (old >= 0) return old; }   // ältere Stände: Elemente ohne id
+                return null;
+            };
+            return units.map((u, i) => { const r = rankOf(u.key); return { u, r: r === null ? order.length + i : r }; }).sort((a, b) => a.r - b.r).map(x => x.u);
+        }
+        /* Zeitpunkt je Einheit: „gleichzeitig“ verbundene Einheiten teilen sich einen Einsatz */
+        function vidSlots(units, tplId) {
+            const join = vidCfgOf(tplId).join;
+            let s = -1;
+            return units.map((u, i) => (i && join.includes(u.key)) ? s : ++s);
         }
         function vidUnitLabel(u) {
             const el = u.el, text = normName((el.innerText || el.textContent || '').replace(/\s+/g, ' '));
             const short = t => t.length > 38 ? t.slice(0, 38) + '…' : t;
-            if (u.row) return '⚽ ' + (text ? short(text) : 'Spielfeld-Reihe');
+            if (u.row) return u.part ? '👤 ' + (text ? short(text) : 'Spieler') : '⚽ ' + (text ? short(text) : 'Spielfeld-Reihe');
             const id = (el.id || '').toLowerCase();
             const img = el.tagName === 'IMG' || !!el.querySelector('img, svg');
+            if (u.part && el.matches('img.logo, .logo-wrapper, .tb-team')) return '🛡️ Wappen' + (text ? ': ' + short(text) : '');
             if (/sponsor|^spl-|^pb-/.test(id) || el.classList.contains('sponsor-banner')) return '🤝 Sponsoren' + (text ? ': ' + short(text) : '');
             if (text) return (img ? '🖼️ ' : '🔤 ') + short(text);
-            if (/logo|crest|wappen|team/.test(id)) return '🛡️ Wappen / Logos';
+            if (/logo|crest|wappen|team/.test(id) || u.kind === 'logos') return '🛡️ Wappen / Logos';
             if (/player|photo|img|foto/.test(id) || img) return '🖼️ Bild';
             return '▫️ Element';
         }
@@ -11547,18 +11610,105 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (!tpl) return [];
             const { holder, clone } = await prepareExportClone(tpl);
             try {
-                return sortAnimUnits(findAnimUnits(clone), tplId).map(u => ({ key: u.key, label: vidUnitLabel(u) }));
+                const items = sortAnimUnits(findAnimUnits(clone, tplId), tplId).map(u => ({ key: u.key, label: vidUnitLabel(u), kind: u.kind || '', part: !!u.part, parent: u.parent || '', splittable: !!u.splittable, row: !!u.row }));
+                // Gleiche Namen durchnummerieren (z.B. „Wappen 1“, „Wappen 2“)
+                const cnt = {}, seen = {};
+                items.forEach(it => { cnt[it.label] = (cnt[it.label] || 0) + 1; });
+                items.forEach(it => { if (cnt[it.label] > 1) { seen[it.label] = (seen[it.label] || 0) + 1; it.label = it.label.replace(/^(\S+ [^:]+)/, `$1 ${seen[it.label]}`); } });
+                return items;
             } finally { holder.remove(); }
         }
         function renderVidOrder() {
-            const items = voState?.items || [];
-            $('vo-list').innerHTML = items.length ? items.map((it, i) => `<div class="vo-item" data-i="${i}">
-                    <span class="vo-handle" title="Ziehen zum Verschieben">☰</span><span class="vo-num">${i + 1}</span>
-                    <span class="vo-label" title="In der Vorschau zeigen" onclick="flashVidUnit(${i})">${esc(it.label)}</span>
+            const items = voState?.items || [], cfg = vidCfgOf(voState?.tplId);
+            const slots = vidSlots(items, voState?.tplId);
+            const hasRows = items.some(it => it.row), hasLogos = items.some(it => it.kind === 'logos');
+            const rowSplit = items.some(it => it.row && it.part), rowJoin = items.some(it => it.row && cfg.join.includes(it.key));
+            const logoSplit = items.some(it => it.kind === 'logos' && it.part);
+            const chip = (on, fn, txt) => `<button type="button" class="${on ? 'on' : ''}" onclick="${fn}">${txt}</button>`;
+            $('vo-quick').innerHTML = (hasRows ? `<div class="vo-qrow"><b>⚽ Spieler:</b>${chip(!rowSplit && !rowJoin, "vidPreset('rows','row')", 'Je Reihe')}${chip(rowSplit, "vidPreset('rows','single')", 'Einzeln')}${chip(!rowSplit && rowJoin, "vidPreset('rows','all')", 'Alle zusammen')}</div>` : '')
+                + (hasLogos ? `<div class="vo-qrow"><b>🛡️ Wappen:</b>${chip(!logoSplit, "vidPreset('logos','together')", 'Zusammen')}${chip(logoSplit, "vidPreset('logos','single')", 'Einzeln nacheinander')}</div>` : '');
+            $('vo-list').innerHTML = items.length ? items.map((it, i) => {
+                const joined = i > 0 && cfg.join.includes(it.key);
+                const cut = it.part ? `<button type="button" class="sd-btn" title="Wieder als ein Element" onclick="unsplitVidUnit(${i})">⤺</button>`
+                    : it.splittable ? `<button type="button" class="sd-btn" title="Aufteilen – Teile kommen einzeln" onclick="splitVidUnit(${i})">✂️</button>` : '<span></span>';
+                return `<div class="vo-item${joined ? ' vo-joined' : ''}${it.part ? ' vo-part' : ''}" data-i="${i}">
+                    <span class="vo-handle" title="Ziehen zum Verschieben">☰</span><span class="vo-num">${slots[i] + 1}</span>
+                    <span class="vo-label" title="In der Vorschau zeigen" onclick="flashVidUnit(${i})">${joined ? '＋ ' : ''}${esc(it.label)}</span>
+                    <button type="button" class="sd-btn vo-join${joined ? ' on' : ''}" title="Gleichzeitig mit dem Element darüber" onclick="toggleVidJoin(${i})" ${i ? '' : 'disabled'}>🔗</button>
+                    ${cut}
                     <button type="button" class="sd-btn" title="Früher" onclick="moveVidOrder(${i}, -1)" ${i ? '' : 'disabled'}>▲</button>
                     <button type="button" class="sd-btn" title="Später" onclick="moveVidOrder(${i}, 1)" ${i < items.length - 1 ? '' : 'disabled'}>▼</button>
-                </div>`).join('') : '<span class="hint">In dieser Vorlage gibt es keine Elemente, die einfliegen.</span>';
+                </div>`; }).join('') : '<span class="hint">In dieser Vorlage gibt es keine Elemente, die einfliegen.</span>';
             $('vo-list').querySelectorAll('.vo-handle').forEach(h => setupVidOrderDrag(h));
+        }
+        function toggleVidJoin(i) {
+            const it = voState?.items[i];
+            if (!it || !i) return;
+            const c = vidCfgOf(voState.tplId);
+            c.join = c.join.includes(it.key) ? c.join.filter(k => k !== it.key) : [...c.join, it.key];
+            setVidCfg(voState.tplId, c);
+            scheduleSave();
+            renderVidOrder();
+        }
+        async function splitVidUnit(i) {
+            const it = voState?.items[i];
+            if (!it || !it.splittable) return;
+            saveVidOrder();
+            const c = vidCfgOf(voState.tplId);
+            c.split = [...c.split, it.key];
+            setVidCfg(voState.tplId, c);
+            voState.items = await vidUnitsFor(voState.tplId);
+            saveVidOrder();
+            renderVidOrder();
+        }
+        async function unsplitVidUnit(i) {
+            const it = voState?.items[i];
+            if (!it || !it.part) return;
+            saveVidOrder();
+            const c = vidCfgOf(voState.tplId);
+            c.split = c.split.filter(k => k !== it.parent);
+            c.join = c.join.filter(k => !k.startsWith(it.parent + '/'));
+            setVidCfg(voState.tplId, c);
+            voState.items = await vidUnitsFor(voState.tplId);
+            saveVidOrder();
+            renderVidOrder();
+        }
+        /* Schnellwahl für Spieler (Reihen) und Wappen – gilt für alle Formate des Reiters (Beitrag und Story) */
+        async function vidPreset(what, mode) {
+            if (!voState) return;
+            for (const t of voState.tpls) {
+                const id = t.id, c = vidCfgOf(id);
+                let items = await vidUnitsFor(id);
+                if (what === 'rows') {
+                    const rowKeys = [...new Set(items.filter(it => it.row).map(it => it.part ? it.parent : it.key))];
+                    const isRow = k => rowKeys.some(r => k === r || k.startsWith(r + '/'));
+                    c.join = c.join.filter(k => !isRow(k));
+                    c.split = c.split.filter(k => !rowKeys.includes(k));
+                    if (mode === 'single') c.split.push(...rowKeys);
+                    if (mode === 'all') c.join.push(...rowKeys.slice(1));
+                } else {
+                    const logoKeys = [...new Set(items.filter(it => it.kind === 'logos').map(it => it.part ? it.parent : it.key))];
+                    c.split = c.split.filter(k => !logoKeys.includes(k));
+                    c.join = c.join.filter(k => !logoKeys.some(l => k.startsWith(l + '/')));
+                    if (mode === 'single') c.split.push(...logoKeys.filter(k => items.some(it => (it.key === k && it.splittable) || it.parent === k)));
+                }
+                // aktuelle Reihenfolge merken, dann neu einlesen (Teile erben den Platz)
+                vidOrder[id] = items.map(it => it.key);
+                setVidCfg(id, c);
+                items = await vidUnitsFor(id);
+                if (what === 'rows' && mode === 'all') {
+                    // Alle Reihen direkt hintereinander an den Platz der ersten Reihe
+                    const first = items.findIndex(it => it.row);
+                    const rows = items.filter(it => it.row), rest = items.filter(it => !it.row);
+                    const before = items.slice(0, first).filter(it => !it.row).length;
+                    items = [...rest.slice(0, before), ...rows, ...rest.slice(before)];
+                }
+                vidOrder[id] = items.map(it => it.key);
+            }
+            scheduleSave();
+            voState.items = await vidUnitsFor(voState.tplId);
+            renderVidOrder();
+            toast(what === 'rows' ? { row: '⚽ Spieler kommen je Reihe', single: '⚽ Spieler kommen einzeln', all: '⚽ Alle Spieler kommen zusammen' }[mode] : mode === 'single' ? '🛡️ Wappen kommen einzeln' : '🛡️ Wappen kommen zusammen');
         }
         function saveVidOrder() {
             vidOrder[voState.tplId] = voState.items.map(it => it.key);
@@ -11602,7 +11752,8 @@ Alle sind herzlich eingeladen!</textarea></div>
         function flashVidUnit(i) {
             const it = voState?.items[i], tpl = $(voState?.tplId);
             if (!it || !tpl) return;
-            const el = it.key.startsWith('row:') ? tpl.querySelectorAll('.pitch > .row')[+it.key.slice(4)] : (it.key && $(it.key));
+            const el = findAnimUnits(tpl, voState.tplId).find(u => u.key === it.key)?.el
+                || (it.key.startsWith('row:') ? tpl.querySelectorAll('.pitch > .row')[parseInt(it.key.slice(4), 10)] : (it.key && !it.key.startsWith('@') && $(it.key)));
             if (!el) return;
             el.classList.add('vo-flash');
             setTimeout(() => el.classList.remove('vo-flash'), 1400);
@@ -11610,6 +11761,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function resetVidOrder() {
             if (!voState) return;
             delete vidOrder[voState.tplId];
+            delete vidCfg[voState.tplId];
             scheduleSave();
             await selectVidOrderTpl(voState.tplId);
             toast('↺ Wieder von oben nach unten');
@@ -11618,7 +11770,8 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function renderVideoLayers(element, onProgress) {
             const { holder, clone } = await prepareExportClone(element);
             try {
-                const units = sortAnimUnits(findAnimUnits(clone), element.id);
+                const units = sortAnimUnits(findAnimUnits(clone, element.id), element.id);
+                const slots = vidSlots(units, element.id);
                 units.forEach((u, i) => u.el.setAttribute('data-au', i));
                 const cr = clone.getBoundingClientRect();
                 // Ausschnitt = Fläche des Elements inkl. aller Inhalte – verschobene Spieler oder Namen ragen oft über die Reihe hinaus
@@ -11668,7 +11821,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     crop.width = Math.max(1, sw); crop.height = Math.max(1, sh);
                     crop.getContext('2d').drawImage(full, sx, sy, crop.width, crop.height, 0, 0, crop.width, crop.height);
                     full.width = full.height = 0;
-                    layers.push({ canvas: crop, x: sx, y: sy, row: !!units[i].row });
+                    layers.push({ canvas: crop, x: sx, y: sy, row: !!units[i].row, slot: slots[i] });
                 }
                 return { base, layers };
             } finally {
@@ -11697,7 +11850,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             const setT = (a, d, e, f) => ctx.setTransform(a * gx, 0, 0, d * gy, e * gx, f * gy);
             let wm = null;
             if (club && club.demo) { wm = document.createElement('canvas'); wm.width = cv.width; wm.height = cv.height; drawDemoWatermark(wm); }
-            const n = layers.length;
+            const slotOf = (L, i) => (Number.isInteger(L.slot) ? L.slot : i);
+            const n = layers.length ? Math.max(...layers.map(slotOf)) + 1 : 0;   // Einsätze (gleichzeitige Elemente zählen einmal)
             const stagger = n ? Math.min(opts.gap[0], opts.gap[1] / n) : 0, dur = opts.dur, start = 0.45;
             const appearEnd = start + Math.max(0, n - 1) * stagger + dur;
             const total = Math.min(25, Math.max(5, appearEnd + 2.8));
@@ -11712,7 +11866,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 setT(z, z, W * (1 - z) / 2, H * (1 - z) / 2);
                 ctx.drawImage(base, 0, 0);
                 layers.forEach((L, i) => {
-                    const p = (t - start - i * stagger) / dur;
+                    const p = (t - start - slotOf(L, i) * stagger) / dur;
                     if (p <= 0) return;
                     const q = Math.min(1, p);
                     const a = opts.anim, k = opts.dist * VIDEO_SCALE / 2.7;
