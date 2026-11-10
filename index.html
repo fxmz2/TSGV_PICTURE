@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.6</title>
+    <title>Match-Shot – Grafiken für Vereine 25.7</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -72,7 +72,10 @@
         .app-header .brand-name { font-family: 'Montserrat', Arial, sans-serif; font-weight: 900; font-size: 19px; letter-spacing: 0.5px; }
         .brand-accent { color: #4f8bff; }
         .brand-hero .brand-accent { color: #1f5cf0; }
-        .app-header .brand-club { margin-left: auto; font-size: 12px; font-weight: bold; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+        .app-header .brand-club { margin-left: auto; font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; display: flex; align-items: center; }
+        .app-header #brand-club-name { opacity: 0.8; overflow: hidden; text-overflow: ellipsis; }
+        .app-header .brand-crest { height: 34px; width: auto; max-width: 64px; object-fit: contain; display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+        .app-header .brand-crest[hidden] { display: none; }
         .brand-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 6px; }
         .brand-hero img { height: 72px; width: auto; max-width: 200px; object-fit: contain; border-radius: 12px; }
         .brand-hero span { font-family: 'Montserrat', Arial, sans-serif; font-weight: 900; font-size: 22px; color: #0b1d26; }
@@ -1474,7 +1477,7 @@
     <header class="app-header">
         <img class="brand-logo" src="matchshot.png" alt="Match-Shot" onerror="this.hidden = true">
         <span class="brand-name">Match-<span class="brand-accent">Shot</span></span>
-        <span class="brand-club" id="brand-club"></span>
+        <span class="brand-club" id="brand-club"><img id="brand-crest" class="brand-crest" alt="" hidden><span id="brand-club-name"></span></span>
         <div id="undo-bar" class="undo-bar">
             <button type="button" id="undo-btn" onclick="undoAction()" title="Rückgängig (Strg+Z)" disabled>↩️</button>
             <button type="button" id="redo-btn" onclick="redoAction()" title="Wiederholen (Strg+Y)" disabled>↪️</button>
@@ -3269,7 +3272,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.6";
+        const APP_VERSION = "25.7";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -7465,7 +7468,16 @@ Alle sind herzlich eingeladen!</textarea></div>
             const src = getClubLogoSrc();
             document.querySelectorAll('.club-logo-img').forEach(img => { if (img.getAttribute('src') !== src) img.src = src; });
             setText('club-card-name', club ? club.name : 'Kein Verein freigeschaltet');
-            setText('brand-club', club ? (club.demo ? 'Demo-Modus' : club.name) : '');
+            // Kopfleiste: Wappen statt Vereinsname (ohne Wappen bzw. im Demo-Modus der Text)
+            const crest = $('brand-crest'), showCrest = !!(club && !club.demo && club.logo);
+            if (crest) {
+                crest.onerror = () => { crest.hidden = true; setText('brand-club-name', club?.name || ''); };
+                if (showCrest && crest.getAttribute('src') !== src) crest.src = src;
+                crest.hidden = !showCrest;
+                crest.alt = club?.name || '';
+            }
+            if ($('brand-club')) $('brand-club').title = club?.name || '';
+            setText('brand-club-name', !club ? '' : club.demo ? 'Demo-Modus' : showCrest ? '' : club.name);
             setText('club-card-code', !club ? 'Bitte Vereinscode eingeben'
                 : club.demo ? 'Demo-Modus – Grafiken mit Wasserzeichen'
                 : `Vereinscode: ${formatCode(club.code)} · ${(club.tier || 'advanced') === 'basis' ? 'Basis' : 'Advanced'}${club.validUntil ? ` · gültig bis ${formatIsoDate(club.validUntil)}` : ''}`);
