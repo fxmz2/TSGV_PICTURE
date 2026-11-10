@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.2</title>
+    <title>Match-Shot – Grafiken für Vereine 25.3</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3258,7 +3258,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.2";
+        const APP_VERSION = "25.3";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -10957,7 +10957,13 @@ Alle sind herzlich eingeladen!</textarea></div>
             return out;
         }
         function syncAvailable() { return !!club && !club.demo && isAdvanced() && !!window.crypto?.subtle; }
-        function syncNormPw(pw) { return String(pw || '').toUpperCase().replace(/[\s-]/g, ''); }
+        function syncNormPw(pw) {
+            let t = String(pw || '').toUpperCase();
+            // Ganze Nachricht aus „📤 Passwort an Kollegen“ eingefügt? Dann nur das Passwort herausnehmen
+            const m = t.match(/PASSWORT:\s*(\S+)/);
+            if (m) t = m[1];
+            return t.replace(/[\s-]/g, '');
+        }
         function syncSuggestPw() {
             const r = crypto.getRandomValues(new Uint8Array(16));
             const s = Array.from(r, b => SYNC_PW_CHARS[b % SYNC_PW_CHARS.length]).join('');
@@ -11367,7 +11373,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
         async function syncSharePw() {
             const pw = syncFmtPw(prefs.sync?.pw);
-            const text = `Match-Shot Vereins-Sync für ${club?.name || 'unseren Verein'}\nVereins-Passwort: ${pw}\n\nIn Match-Shot: Start → 🔄 Vereins-Sync → Passwort eingeben → „⬇️ Neueste holen“.`;
+            const text = `Match-Shot Vereins-Sync für ${club?.name || 'unseren Verein'}\nVereins-Passwort: ${pw} \n\n(In Match-Shot: Start → 🔄 Vereins-Sync → Passwort eingeben → „⬇️ Neueste holen“.)`;
             if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e.name === 'AbortError') return; } }
             try { await navigator.clipboard.writeText(text); toast('📋 Passwort kopiert'); } catch (e) { alert(text); }
         }
@@ -11411,7 +11417,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     <p class="sync-intro">Mehrere Leute im Verein, <b>gleiche Daten</b>: Spieler, Fotos, Gegner, Sponsoren, Hintergründe und alle Versionen. Alles wird <b>auf diesem Gerät verschlüsselt</b> – lesen kann es nur, wer das Vereins-Passwort kennt. Auch Match-Shot nicht.</p>
                     <div class="control-group"><label>Dein Name <small>(erscheint als „Stand von …“)</small></label><input type="text" id="sync-name" maxlength="30" value="${esc(prefs.syncName || '')}" placeholder="z.B. Felix"></div>
                     <div class="control-group"><label>Vereins-Passwort</label>
-                        <div class="sync-pwrow"><input type="text" id="sync-pw" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="mind. 10 Zeichen">
+                        <div class="sync-pwrow"><input type="text" id="sync-pw" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="mind. 10 Zeichen">
                         <button type="button" class="sd-btn" onclick="setVal('sync-pw', syncSuggestPw())">🎲 Vorschlagen</button></div></div>
                     <button type="button" class="copy-action-btn" id="sync-setup-btn" style="background:#005f73;" onclick="syncSetup()">🔐 Sync einrichten</button>
                     <span class="hint">Erster im Verein? Passwort vorschlagen lassen, einrichten und „⬆️ Hochladen“. Kollegen geben <b>dasselbe Passwort</b> ein und tippen auf „⬇️ Neueste holen“. Passwort vergessen? Einfach ein neues festlegen und neu hochladen – die Daten auf den Geräten bleiben.</span>`;
@@ -11430,6 +11436,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 <span class="hint">Tipp: <b>erst holen, dann ändern, dann hochladen</b>. Es wird zusammengeführt – auch wenn zwei Leute gleichzeitig etwas geändert haben, geht nichts verloren.</span>
                 <div class="sync-small">
                     <button type="button" class="sd-btn" onclick="syncSharePw()">📤 Passwort an Kollegen</button>
+                    <button type="button" class="sd-btn" onclick="alert('🔑 Vereins-Passwort:\n\n' + syncFmtPw(prefs.sync?.pw))">👁️ Passwort zeigen</button>
                     <button type="button" class="sd-btn" onclick="syncDiagnose()">🔍 Verbindung prüfen</button>
                     <button type="button" class="sd-btn" onclick="syncDisconnect()">🔌 Trennen</button>
                     <button type="button" class="sd-btn danger" onclick="syncDeleteRemote()">🗑️ Sync-Daten löschen</button>

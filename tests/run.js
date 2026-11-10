@@ -969,7 +969,10 @@ async function makePhotos(browser) {
 
         // Gerät B: gleiches Passwort → Stand holen
         const B = await device();
-        await B.fill('#sync-name', 'Ben'); await B.fill('#sync-pw', pw.toLowerCase().replace(/-/g, ' '));
+        // Ganze Nachricht aus „Passwort an Kollegen“ eingefügt → nur das Passwort zählt
+        const msg = await A.evaluate(p => `Match-Shot Vereins-Sync für ${club.name}\nVereins-Passwort: ${syncFmtPw(p)} \n\n(In Match-Shot: Start → 🔄 Vereins-Sync → Passwort eingeben → „⬇️ Neueste holen“.)`, pw);
+        check('Sync: eingefügte Nachricht ergibt dasselbe Passwort', await A.evaluate(([m, p]) => syncNormPw(m) === syncNormPw(p) && syncNormPw(m.replace(/\n/g, '')) === syncNormPw(p) && syncNormPw(p.toLowerCase().replace(/-/g, ' ')) === syncNormPw(p) && syncNormPw('mein-eigenes-langes-passwort') === 'MEINEIGENESLANGESPASSWORT', [msg, pw]));
+        await B.fill('#sync-name', 'Ben'); await B.fill('#sync-pw', msg);
         await B.click('#sync-setup-btn');
         await B.waitForSelector('#sync-overlay:not([hidden])', { timeout: 20000 });
         const btxt = await B.textContent('#sync-dlg-body');
@@ -984,7 +987,7 @@ async function makePhotos(browser) {
         await B.evaluate(() => syncDiagnose());
         const diag = B.dialogs[B.dialogs.length - 1] || '';
         check('Sync: „Verbindung prüfen“ zeigt Version, Kennung, Server und Stand', /25\.\d/.test(diag) && diag.includes(fps[0]) && /Server: ✅/.test(diag) && /Stand im Sync: ✅/.test(diag), diag);
-        check('Sync: zweites Gerät holt alles (Passwort ohne Bindestriche/klein geht auch)', b1.n === a1.n && b1.img === a1.img && b1.vn === 'Erste' && b1.slot === aslot && b1.same === 'same' && /Stand von Anna/.test(btxt), JSON.stringify({ b1, aslot, btxt: btxt.slice(0, 120) }));
+        check('Sync: zweites Gerät holt alles (ganze Nachricht eingefügt)', b1.n === a1.n && b1.img === a1.img && b1.vn === 'Erste' && b1.slot === aslot && b1.same === 'same' && /Stand von Anna/.test(btxt), JSON.stringify({ b1, aslot, btxt: btxt.slice(0, 120) }));
 
         // B ändert → A sieht den Hinweis und holt
         await B.evaluate(async () => { stammdaten.players.push({ name: 'Neu Spieler', group: 'Spieler', img: '' }); await saveStammdaten(); });
