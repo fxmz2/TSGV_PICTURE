@@ -193,7 +193,28 @@ async function makePhotos(browser) {
         await page.click('.tab-btn[data-tab="potm"]');
         await page.selectOption('#in-potm-player', 'Max Muster');
         await page.evaluate(() => { setVal('in-photo-type-potm', 'tor'); updateAllViews(); });
-        check('Torjubel-Foto umschaltbar', await page.evaluate(() => $('out-potm-img').src === findPlayer('Max Muster').torImg));
+        check('Torjubel-Foto umschaltbar', await page.evaluate(() => { const im = $('out-potm-img'); return [im.src, im.dataset.fxSrc].includes(findPlayer('Max Muster').torImg); }));
+        // Neues Hochformat-Foto: Ausschnitt setzt oben an (Kopf), Foto-Dialog → 🔍 Ausschnitt direkt nach dem Hochladen, über dem Dialog
+        const pf = await page.evaluate(() => { const p = findPlayer('Max Muster'); return { img: p.focus?.img?.y, tor: p.focus?.torImg?.y }; });
+        check('Neues Hochformat-Foto: Ausschnitt oben (Kopf statt Mitte)', pf.img > 20 && pf.img < 50 && pf.tor > 20 && pf.tor < 50, JSON.stringify(pf));
+        await page.evaluate(() => { switchTab('stammdaten'); const i = stammdaten.players.findIndex(p => p.name === 'Max Muster'); const p = stammdaten.players[i];
+            window._keepSpecial = { img: p.specialImg, cut: p.specialCutImg, fc: p.focus?.specialImg }; p.focus = { ...(p.focus || {}), specialImg: { x: 10, y: 10, z: 2 } }; openPhotoDialog(i); });
+        await page.evaluate(() => { const i = stammdaten.players.findIndex(p => p.name === 'Max Muster'); changeEntryImage('players', i, 'specialImg'); });
+        await page.setInputFiles('#hidden-image-input', photos[3]);
+        await page.waitForSelector('#crop-edit:not([hidden])', { timeout: 10000 });
+        const pc = await page.evaluate(() => { const ce = $('crop-edit'), r = ce.getBoundingClientRect(); const top = document.elementFromPoint(r.left + r.width / 2, r.top + 20);
+            const p = findPlayer('Max Muster');
+            return { over: ce.classList.contains('over-modal') && ce.contains(top), isNew: /Neues Foto/.test(ce.textContent), reset: p.focus.specialImg.z === 1 && p.focus.specialImg.y > 20, noModes: !ce.querySelector('.cr-modes') }; });
+        // Rahmen nach unten ziehen ändert den Ausschnitt; Schließen zeigt ihn im Vorschaubild des Dialogs
+        const bb = await (await page.$('#cr-rect')).boundingBox();
+        await page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await page.mouse.down();
+        await page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2 + 60, { steps: 6 }); await page.mouse.up();
+        await page.evaluate(() => closeCropEdit());
+        const after = await page.evaluate(() => { const p = findPlayer('Max Muster'); const row = $('photo-rows').querySelectorAll('.photo-row')[2];
+            return { y: p.focus.specialImg.y, pos: row.querySelector('img').style.objectPosition, btn: !!row.querySelector('button[title^="Ausschnitt"]'), modal: !$('photo-overlay').hidden, cls: $('crop-edit').classList.contains('over-modal') }; });
+        check('Daten → Fotos: 🔍 Ausschnitt nach dem Hochladen, über dem Dialog, Vorschau zeigt Ausschnitt', pc.over && pc.isNew && pc.reset && pc.noModes && after.y > 55 && /px/.test(after.pos) && after.btn && after.modal && !after.cls, JSON.stringify({ pc, after }));
+        await page.evaluate(async () => { const p = findPlayer('Max Muster'), k = window._keepSpecial; p.specialImg = k.img; if (k.cut) p.specialCutImg = k.cut; else delete p.specialCutImg;
+            p.focus = { ...(p.focus || {}) }; if (k.fc) p.focus.specialImg = k.fc; else delete p.focus.specialImg; await saveStammdaten(); closePhotoDialog(); switchTab('potm'); });
         // Spezial-Foto (3. Bild): per Mehrfach-Upload, umschaltbar, ohne Spezial-Foto → normales Foto
         const sp = await page.evaluate(() => { const r = { has: !!findPlayer('Max Muster').specialImg };
             setVal('in-photo-type-potm', 'special'); updateAllViews(); r.shown = $('out-potm-img').src === findPlayer('Max Muster').specialImg;

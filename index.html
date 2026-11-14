@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.8</title>
+    <title>Match-Shot – Grafiken für Vereine 25.9</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1033,6 +1033,8 @@
         .cr-modes button { flex: 1; border: 1px solid #cfd8dc; background: #fff; border-radius: 8px; padding: 7px 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .cr-modes button.on { background: #e6f4f7; border-color: #005f73; color: #005f73; }
         .cr-all { font-size: 12px; display: flex; gap: 6px; align-items: center; }
+        .crop-edit.over-modal { z-index: 10050; }
+        .cr-new { font-size: 13px; line-height: 1.45; background: #eaf6f8; border: 1px solid #a9d8e2; border-radius: 8px; padding: 8px 10px; }
         .cr-pick { position: relative; align-self: center; max-width: 100%; cursor: crosshair; touch-action: none; overflow: hidden; border-radius: 8px; user-select: none; }
         .cr-pick img { display: block; max-width: 100%; max-height: 34vh; background: repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 14px 14px; pointer-events: none; }
         .cr-pick.whole { cursor: default; outline: 3px solid #2a9d8f; outline-offset: -3px; }
@@ -3097,7 +3099,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         <div class="modal-card">
             <h2 id="photo-title">📷 Fotos</h2>
             <p>Normales Foto für alle Grafiken. Torjubel- und Spezial-Foto sind optional und lassen sich je Reiter unter „Spielerfotos“ auswählen – fehlen sie, wird das normale Foto genommen.
-                Mit ✂️ stellst du jedes Foto einzeln frei. Wurde zu viel abgeschnitten, nochmal ✂️ tippen – dann wird wieder das Originalfoto verwendet.</p>
+                Mit 🔍 wählst du den Ausschnitt (z.B. das Gesicht), mit ✂️ stellst du ein Foto frei. Wurde zu viel abgeschnitten, nochmal ✂️ tippen – dann wird wieder das Originalfoto verwendet.</p>
             <div id="photo-rows"></div>
             <button type="button" class="copy-action-btn" style="margin-top:10px;" onclick="closePhotoDialog()">Fertig</button>
         </div>
@@ -3285,7 +3287,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.8";
+        const APP_VERSION = "25.9";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4262,12 +4264,14 @@ Alle sind herzlich eingeladen!</textarea></div>
                     if (position) p.position = position;
                     if (number) p.number = number;
                     if (nick) p.nick = nick;
-                    if (img) { p.img = img; delete p.cutImg; }
-                    if (torImg) { p.torImg = torImg; delete p.torCutImg; }
-                    if (specialImg) { p.specialImg = specialImg; delete p.specialCutImg; }
+                    if (img) await setPlayerPhoto(p, 'img', img);
+                    if (torImg) await setPlayerPhoto(p, 'torImg', torImg);
+                    if (specialImg) await setPlayerPhoto(p, 'specialImg', specialImg);
                 } else {
-                    const np = { name, group, img, torImg };
-                    if (specialImg) np.specialImg = specialImg;
+                    const np = { name, group, img: null, torImg: null };
+                    if (img) await setPlayerPhoto(np, 'img', img);
+                    if (torImg) await setPlayerPhoto(np, 'torImg', torImg);
+                    if (specialImg) await setPlayerPhoto(np, 'specialImg', specialImg);
                     if (team) np.team = team;
                     if (position) np.position = position;
                     if (number) np.number = number;
@@ -4319,9 +4323,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     const data = await compressImage(file, isTor ? IMG_OPTS.torPhoto : IMG_OPTS.photo);
                     let p = stammdaten.players.find(pl => pl.name.toLowerCase() === name.toLowerCase());
                     if (!p) { p = { name, group: 'Spieler', img: null, torImg: null }; stammdaten.players.push(p); created++; }
-                    if (isTor) { p.torImg = data; delete p.torCutImg; }
-                    else if (isSpecial) { p.specialImg = data; delete p.specialCutImg; }
-                    else { p.img = data; delete p.cutImg; }
+                    await setPlayerPhoto(p, isTor ? 'torImg' : isSpecial ? 'specialImg' : 'img', data);
                     processed++;
                 } catch (e) { console.warn(file.name, e); }
             }
@@ -4438,6 +4440,23 @@ Alle sind herzlich eingeladen!</textarea></div>
 
         // Foto-Feld → zugehöriges freigestelltes Foto
         const PHOTO_CUT_FIELD = { img: 'cutImg', torImg: 'torCutImg', specialImg: 'specialCutImg' };
+        /* Neues Spielerfoto setzen: Freistellung und alter Ausschnitt gehören zum alten Foto. Bei Hochformat-Fotos
+           den Ausschnitt oben ansetzen (Kopf statt Bauch) – vorher wurde mittig geschnitten und der Kopf fehlte. */
+        async function defaultPhotoFocus(src) {
+            try {
+                const im = new Image(); im.src = src; await im.decode();
+                const W = im.naturalWidth, H = im.naturalHeight;
+                if (!W || H < W * 1.15) return null;
+                return { x: 50, y: Math.round((4 + 50 * W / H) * 10) / 10, z: 1 };   // quadratischer Ausschnitt beginnt knapp unter dem oberen Rand
+            } catch (e) { return null; }
+        }
+        async function setPlayerPhoto(p, field, data) {
+            p[field] = data;
+            delete p[PHOTO_CUT_FIELD[field]];
+            if (p.focus) { delete p.focus[field]; if (!Object.keys(p.focus).length) delete p.focus; }
+            const fc = data ? await defaultPhotoFocus(data) : null;
+            if (fc) p.focus = { ...(p.focus || {}), [field]: fc };
+        }
         let photoDialogIdx = null;
         function openPhotoDialog(idx) {
             photoDialogIdx = idx;
@@ -4453,12 +4472,25 @@ Alle sind herzlich eingeladen!</textarea></div>
             $('photo-rows').innerHTML = rows.map(([f, label, hint]) => {
                 const cut = p[PHOTO_CUT_FIELD[f]];
                 const src = cut || p[f] || PLAYER_FALLBACK;
-                return `<div class="photo-row"><img src="${src}" class="${cut ? 'cut' : ''}" alt="">
+                const fc = p.focus?.[f];
+                const pos = fc && !cut ? ` data-fx="${fc.x}" data-fy="${fc.y}" data-fz="${fc.z || 1}"` : '';
+                return `<div class="photo-row"><img src="${src}" class="${cut ? 'cut' : ''}"${pos} alt="">
                     <div><b>${label}</b><small>${p[f] ? (cut ? 'vorhanden · freigestellt ✓' : 'vorhanden') : hint}</small></div>
                     <div class="pr-btns"><button type="button" class="sd-btn" title="${p[f] ? 'Ändern' : 'Hochladen'}" onclick="changeEntryImage('players', ${photoDialogIdx}, '${f}')">${p[f] ? '🔄' : '➕'}</button>
+                    ${p[f] ? `<button type="button" class="sd-btn" title="Ausschnitt wählen (z.B. Gesicht)" onclick="openPhotoCrop('${f}')">🔍</button>` : ''}
                     ${p[f] ? `<button type="button" class="sd-btn ${cut ? 'active' : ''}" title="${cut ? 'Freistellung entfernen (Originalfoto verwenden)' : 'Hintergrund entfernen (freistellen)'}" onclick="togglePhotoCutout('${f}')">✂️</button>` : ''}
                     ${p[f] && f !== 'img' ? `<button type="button" class="sd-btn danger" title="Löschen" onclick="deletePlayerPhoto('${f}')">🗑️</button>` : ''}</div></div>`;
             }).join('');
+            $('photo-rows').querySelectorAll('img[data-fx]').forEach(im => { if (im.complete && im.naturalWidth) focusThumb(im); else im.onload = () => focusThumb(im); });
+        }
+        /* Vorschaubild zeigt den gewählten Ausschnitt: Mitte des Bildes auf den Fokuspunkt (object-position in Pixeln, ohne Zoom) */
+        function focusThumb(im) {
+            const W = im.naturalWidth, H = im.naturalHeight, bw = im.clientWidth || 64, bh = im.clientHeight || 64;
+            if (!W || !H) return;
+            const sc = Math.max(bw / W, bh / H), w = W * sc, h = H * sc;
+            const left = Math.min(0, Math.max(bw - w, bw / 2 - (+im.dataset.fx / 100) * w));
+            const top = Math.min(0, Math.max(bh - h, bh / 2 - (+im.dataset.fy / 100) * h));
+            im.style.objectPosition = `${left.toFixed(1)}px ${top.toFixed(1)}px`;
         }
         /* Einzelnes Foto freistellen bzw. Freistellung wieder entfernen */
         async function togglePhotoCutout(field) {
@@ -4501,12 +4533,18 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (!entry) return;
             let opts = IMG_OPTS.logo;
             if (target.type === 'players') opts = target.field === 'torImg' ? IMG_OPTS.torPhoto : IMG_OPTS.photo;
-            try { entry[target.field] = await compressImage(file, opts); }
+            let data;
+            try { data = await compressImage(file, opts); }
             catch (e) { alert(e.message); return; }
-            if (target.type === 'players') delete entry[PHOTO_CUT_FIELD[target.field] || 'cutImg'];
-            else delete entry.imgOrig;
+            const isPhoto = target.type === 'players' && PHOTO_CUT_FIELD[target.field];
+            if (isPhoto) await setPlayerPhoto(entry, target.field, data);
+            else { entry[target.field] = data; if (target.type === 'players') delete entry.cutImg; else delete entry.imgOrig; }
             await onStammdatenChanged(target.type);
-            if (!$('photo-overlay').hidden) renderPhotoDialog();
+            if (!$('photo-overlay').hidden) {
+                renderPhotoDialog();
+                // Gleich fragen, welcher Teil zu sehen sein soll (z.B. das Gesicht)
+                if (isPhoto) { openPhotoCrop(target.field, true); return; }
+            }
             toast('✅ Bild aktualisiert');
         }
 
@@ -6783,16 +6821,27 @@ Alle sind herzlich eingeladen!</textarea></div>
             const orig = img && (img.dataset.fxSrc || img.getAttribute('src'));
             const o = photoOwner(orig);
             if (!o) { toast('Für dieses Bild gibt es keinen Ausschnitt (kein Spielerfoto)'); return; }
+            openCropDialog(o, orig, img);
+        }
+        /* Aus „Daten“ → Fotos eines Spielers: Ausschnitt ohne Vorlage wählen (quadratischer Rahmen wie Kader/Aufstellung) */
+        function openPhotoCrop(field, isNew) {
+            const p = stammdaten.players[photoDialogIdx];
+            if (!p || !p[field]) return;
+            openCropDialog({ p, field }, p[field], null, { isNew });
+        }
+        function openCropDialog(o, orig, img, opts = {}) {
             const label = { img: 'Foto', torImg: 'Torjubel-Foto', specialImg: 'Spezial-Foto' }[o.field] || 'Foto';
             const ce = $('crop-edit');
             ce.dataset.player = o.p.name; ce.dataset.field = o.field;
-            ce.dataset.frame = frameKeyOf(img) || ''; ce.dataset.tab = tabOfImg(img);
-            cropImgEl = img;
-            ce.dataset.aspect = imgBoxAspect(img) || 1;
-            $('crop-body').innerHTML = `
+            ce.dataset.frame = img ? (frameKeyOf(img) || '') : ''; ce.dataset.tab = img ? tabOfImg(img) : '';
+            cropImgEl = img || null;
+            ce.dataset.aspect = (img && imgBoxAspect(img)) || 1;
+            ce.classList.toggle('over-modal', !img);   // aus dem Foto-Dialog: über dem Dialog anzeigen
+            $('crop-body').innerHTML = (img ? `
                 <div class="cr-modes"><button type="button" data-fit="cover" onclick="setCropFit('cover')">✂️ Ausschnitt wählen</button><button type="button" data-fit="contain" onclick="setCropFit('contain')">🖼️ Ganzes Bild zeigen</button></div>
                 <label class="cr-all"><input type="checkbox" id="cr-all"> Für alle Fotos dieser Vorlage (z.B. alle Spieler auf dem Spielfeld)</label>
-                <span class="hint" id="cr-fit-hint">„Ganzes Bild“ merkt sich dieser Rahmen – auch wenn du einen anderen Spieler auswählst.</span>
+                <span class="hint" id="cr-fit-hint">„Ganzes Bild“ merkt sich dieser Rahmen – auch wenn du einen anderen Spieler auswählst.</span>`
+                : `<div class="cr-new">${opts.isNew ? '📸 <b>Neues Foto:</b> Welcher Teil soll zu sehen sein?' : '📸 Welcher Teil des Fotos soll zu sehen sein?'} Zieh den Rahmen aufs <b>Gesicht</b> oder tipp ins Foto. Der Rahmen zeigt den Ausschnitt für runde und eckige Bilder (z.B. Kader, Aufstellung).</div>`) + `
                 <div class="cr-pick" id="cr-pick"><img id="cr-img" src="${orig}" alt="" draggable="false"><div class="cr-rect" id="cr-rect"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div></div>
                 <span class="hint" id="cr-hint">Rahmen verschieben, an den Ecken größer/kleiner ziehen – oder ins Foto tippen, um den Rahmen dorthin zu setzen. Der helle Bereich ist im Bild zu sehen.</span>
                 <label class="cr-zl">Zoom <small id="cr-zv"></small></label><input type="range" id="cr-z" min="1" max="4" step="0.05">
@@ -6900,7 +6949,16 @@ Alle sind herzlich eingeladen!</textarea></div>
                 cropSaveTimer = setTimeout(() => saveStammdaten(), 300);
             }
         }
-        function closeCropEdit() { const c = $('crop-edit'); if (c) c.hidden = true; }
+        function closeCropEdit() {
+            const c = $('crop-edit');
+            if (!c) return;
+            c.hidden = true;
+            if (c.classList.contains('over-modal')) {
+                c.classList.remove('over-modal');
+                clearTimeout(cropSaveTimer); saveStammdaten();
+                if (!$('photo-overlay').hidden) renderPhotoDialog();
+            }
+        }
         /* Nach dem Aktualisieren der Inhalte (dort werden Fotos neu gesetzt) die Foto-Effekte wieder anwenden */
         function afterViewsUpdated() {
             if (editorTabs.includes(activeTab)) applyPhotoFx(activeTab);
