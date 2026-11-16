@@ -950,6 +950,36 @@ async function makePhotos(browser) {
         await page.context().close();
     });
 
+    await section('Versionen getrennt (Leeren betrifft nur die aktuelle Version)', async () => {
+        const page = await newPage(browser);
+        await page.goto(BASE); await page.waitForTimeout(600);
+        await enterCode(page, 'TEST-ADV1');
+        const r = await page.evaluate(async () => {
+            const out = {};
+            await switchVersion('v1');
+            for (const v of ['v2', 'v3']) await localforage.removeItem(STORE.slot(v));   // Version 2/3 auf diesem Gerät noch nie benutzt
+            setVal('cfg-hashtags', '#TestVerein'); setVal('in-frei-title', 'Spiel A'); setVal('in-post-time', '15:00'); updateAllViews(); await saveSlotNow();
+            await switchVersion('v2');
+            out.v2empty = val('in-frei-title') !== 'Spiel A' && val('in-post-time') !== '15:00';
+            out.v2design = val('cfg-hashtags') === '#TestVerein';
+            setVal('in-frei-title', 'Spiel B'); updateAllViews(); await saveSlotNow();
+            window.confirm = () => true;
+            clearTabContent('frei'); await saveSlotNow();
+            out.v2cleared = val('in-frei-title') !== 'Spiel B';
+            await switchVersion('v1');
+            out.v1kept = val('in-frei-title') === 'Spiel A' && val('in-post-time') === '15:00';
+            clearTabContent('frei'); await saveSlotNow();
+            await switchVersion('v3');
+            out.v3empty = val('in-frei-title') !== 'Spiel A';
+            await switchVersion('v1');
+            out.v1cleared = val('in-frei-title') !== 'Spiel A';
+            const st1 = await localforage.getItem(STORE.slot('v1')); out.v1stored = st1?.postTime === '15:00' && st1?.hashtags === '#TestVerein';
+            return out; });
+        check('Neue (nie benutzte) Version übernimmt keine Inhalte, Design bleibt; Leeren nur in der aktuellen Version', Object.values(r).every(Boolean), JSON.stringify(r));
+        check('Keine JavaScript-Fehler', page.errors.length === 0, page.errors.join(' | '));
+        await page.context().close();
+    });
+
     await section('Vereins-Sync (verschlüsselt, zwei Geräte)', async () => {
         const { default: worker } = await import(require('url').pathToFileURL(path.join(ROOT, 'sync', 'worker.js')).href);
         const { FakeR2 } = require('./fake-r2');
