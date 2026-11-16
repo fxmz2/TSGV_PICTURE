@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 26.2</title>
+    <title>Match-Shot – Grafiken für Vereine 26.3</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1187,6 +1187,7 @@
         .modal-actions .primary { background: #2a9d8f; color: white; }
         .modal-actions .secondary { background: #e9ecef; color: #333; }
         .btn-action-group .video-btn { background: #5a4fcf; }
+        .btn-action-group .refresh-btn { flex: 0 0 48px; background: #6c757d; font-size: 18px; padding: 8px 0; }
         .pack-results .vid-thumb { display: flex; align-items: center; justify-content: center; aspect-ratio: 9 / 16; background: #222; color: #fff; font-size: 26px; border-radius: 6px; margin-bottom: 3px; }
         .modal-actions button:disabled { opacity: 0.6; cursor: default; }
         .storage-status { display: block; margin-top: 6px; font-weight: bold; }
@@ -3292,7 +3293,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "26.2";
+        const APP_VERSION = "26.3";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -4147,6 +4148,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function saveStammdaten() {
             try {
                 await localforage.setItem(STORE.stammdaten, stammdaten);
+                markSaved();
             } catch (e) {
                 console.warn('Stammdaten speichern fehlgeschlagen:', e);
                 alert('Speichern fehlgeschlagen – evtl. ist der Gerätespeicher voll.');
@@ -6098,13 +6100,29 @@ Alle sind herzlich eingeladen!</textarea></div>
                     if (inView) data.positions[k] = copy(src.positions[k]);
                 }
                 if (TAB_DESIGN_EXTRA[tab]) takeKeys(TAB_DESIGN_EXTRA[tab]);
+                // Vereinsfarben und Format gelten für die ganze Version, prägen aber das Design jedes Reiters
+                ['primary', 'jerseyColor', 'frameColor', 'feedFormat'].forEach(k => { if (src[k] !== undefined) data[k] = copy(src[k]); });
+                // Anzeige-Einstellungen des Reiters (Namensformat, Anzeigetafel, Torschützen zeigen …)
+                const spec = TAB_CONTENT[tab];
+                if (spec && what === 'design') {
+                    (spec.keys || []).filter(k => CLEAR_KEEP_KEYS.includes(k) && k !== 'season').forEach(k => { if (src[k] !== undefined) data[k] = copy(src[k]); });
+                    for (const k in (src.inputs || {})) if ((spec.inputs || []).some(re => re.test(k)) && CLEAR_KEEP_INPUT.test(k) && k !== 'in-tf-photo') data.inputs[k] = src.inputs[k];
+                }
+                // Bildausschnitt „ganzes Bild“ und Video-Einstellungen der Vorlagen dieses Reiters
+                const inTabKey = k => k === 'tab:' + tab || !!(view?.querySelector(`[id="${k}"]`));
+                data.imgFit = Object.fromEntries(Object.entries(data.imgFit || {}).filter(([k]) => !inTabKey(k)));
+                Object.entries(src.imgFit || {}).forEach(([k, v]) => { if (inTabKey(k)) data.imgFit[k] = v; });
+                ['vidOrder', 'vidCfg'].forEach(f => {
+                    data[f] = { ...(data[f] || {}) };
+                    tplIds.forEach(id => { if (src[f]?.[id]) data[f][id] = copy(src[f][id]); else delete data[f][id]; });
+                });
             }
             applySlotData(data);
             renderAll();
             await saveSlotNow();
             captionDirty[tab] = false;
             updateCaption(tab);
-            toast(`✅ Reiter aus „${versionLabel(from)}“ übernommen`);
+            toast(`✅ Reiter aus „${versionLabel(from)}“ übernommen${what !== 'content' ? ' (inkl. Vereinsfarben)' : ''}`);
         }
 
         /* =========================================================
@@ -7218,7 +7236,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const list = stammdaten.teamPhotos || [];
             const v = sel.value;
             sel.innerHTML = '<option value="">– kein Foto –</option>' + list.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
-            sel.value = list.some(t => t.id === v) ? v : (list.length ? list[list.length - 1].id : '');
+            sel.value = list.some(t => t.id === v) ? v : '';   // nicht automatisch das zuletzt hochgeladene Foto (gehört evtl. zu einer anderen Mannschaft)
             if ($('tf-delete-btn')) $('tf-delete-btn').hidden = !sel.value;
         }
         async function uploadTeamPhoto(ev) {
@@ -7480,6 +7498,26 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if ($('out-tf-placeholder' + sfx)) $('out-tf-placeholder' + sfx).style.display = ph ? 'none' : '';
                 const box = $('out-tf-names' + sfx);
                 if (box) { box.innerHTML = namesHtml; box.style.display = namesHtml ? '' : 'none'; }
+                if (img && !img.dataset.tfLay) { img.dataset.tfLay = '1'; img.addEventListener('load', () => layoutTeamfoto()); }
+            });
+            layoutTeamfoto();
+        }
+        /* Namen stehen immer direkt unter dem Foto; reicht der Platz nicht, wird das Foto kleiner (nie verzerrt).
+           Vorher stand die Namensbox an fester Stelle – höhere Fotos ragten darunter, je nach Gerät unterschiedlich. */
+        function layoutTeamfoto() {
+            ['', '-feed'].forEach(sfx => {
+                const img = $('out-tf-photo' + sfx), box = $('tf-photo-box' + sfx), names = $('out-tf-names' + sfx);
+                const host = box?.offsetParent;
+                if (!box || !names || !host) return;   // Reiter ausgeblendet → beim Anzeigen erneut
+                const gap = 10, bottom = 14, H = host.clientHeight, top = box.offsetTop;
+                const nh = names.style.display === 'none' ? 0 : names.offsetHeight;
+                if (img && !img.hidden && img.naturalWidth) {
+                    const maxH = Math.max(120, H - top - (nh ? nh + gap : 0) - bottom);
+                    const w = box.clientWidth, h = w * img.naturalHeight / img.naturalWidth;
+                    img.style.width = h > maxH ? Math.round(maxH * img.naturalWidth / img.naturalHeight) + 'px' : '';
+                    img.style.margin = h > maxH ? '0 auto' : '';
+                }
+                names.style.top = Math.round(top + box.offsetHeight + gap) + 'px';
             });
         }
 
@@ -10548,8 +10586,21 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            SPEICHERN / LADEN (Version 1–3 = nur Einstellungen)
            ========================================================= */
+        let savePending = false;   // eigene Eingaben, die noch nicht gespeichert sind
+        /* Mehrere Browser-Tabs (am PC): jeder Tab meldet sein Speichern; ein anderer Tab lädt beim Zurückkommen neu,
+           statt beim Wegklicken seinen alten Stand darüberzuschreiben */
+        let otherTabSaved = false;
+        const SAVE_STAMP = 'matchshot-saved';
+        function markSaved() { try { localStorage.setItem(SAVE_STAMP, Date.now() + ':' + Math.random().toString(36).slice(2)); } catch (e) {} }
+        window.addEventListener('storage', e => { if (e.key === SAVE_STAMP) otherTabSaved = true; });
+        function onAppHidden() { if (savePending || !otherTabSaved) saveSlotNow(); }
+        function onAppVisible() {
+            checkForAppUpdate();   // App kommt aus dem Hintergrund zurück → nach neuer Version schauen
+            if (otherTabSaved && !savePending && appReady) { otherTabSaved = false; refreshPreview(true); }
+        }
         function scheduleSave() {
             if (!appReady) return;
+            savePending = true;
             clearTimeout(saveTimer);
             saveTimer = setTimeout(saveSlotNow, 400);
         }
@@ -10557,10 +10608,13 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function saveSlotNow() {
             clearTimeout(saveTimer);
             if (!appReady) return;
+            savePending = false;
             try {
                 const data = collectSlotData();
                 recordHistory(JSON.stringify(data));
                 await localforage.setItem(STORE.slot(currentVersion), data);
+                otherTabSaved = false;
+                markSaved();
             } catch (e) {
                 console.warn("Speichern fehlgeschlagen:", e);
             }
@@ -10718,6 +10772,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (data.formation) setFormation(data.formation);
             for (const key in map) {
                 if (data[key] !== undefined) setVal(map[key], data[key]);
+                // Fehlt ein Wert (älterer Stand, anderes Gerät), gilt der Ausgangszustand – sonst bliebe der Wert der vorigen Version stehen
+                else if (freshSlot && data !== freshSlot && freshSlot[key] !== undefined && key !== 'torOppMode' && key !== 'postTitleMode') setVal(map[key], freshSlot[key]);
             }
             // Alte Versionen hatten "SVA" als festen Standardnamen
             if (data.teamName === 'SVA' && club) setVal('cfg-team-name', '');
@@ -10729,15 +10785,15 @@ Alle sind herzlich eingeladen!</textarea></div>
             migrateNameFmt(data);
             NAME_FMT_FIELDS.forEach(([id, k]) => setVal(id, data[k]));
             updateNumberInputs();
-            if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
+            if ($('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers ?? true;
             setVal('in-erg-mode', ERG_MODES[data.ergMode] ? data.ergMode : 'ergebnis');
             tfBoard = normTfBoard(data.tfBoard);
-            if (data.torOppMode === undefined && data.torPlayer !== undefined) setVal('in-tor-opp-mode', 'off');
-            if (data.postTitleMode === undefined && data.postTitle !== undefined)
-                setVal('in-post-title-mode', ['', 'HEIMSPIEL', 'AUSWÄRTSSPIEL'].includes(normName(data.postTitle).toUpperCase()) ? 'auto' : 'custom');
+            if (data.torOppMode === undefined) setVal('in-tor-opp-mode', data.torPlayer !== undefined ? 'off' : (freshSlot?.torOppMode || 'logos'));
+            if (data.postTitleMode === undefined)
+                setVal('in-post-title-mode', data.postTitle === undefined ? (freshSlot?.postTitleMode || 'auto') : ['', 'HEIMSPIEL', 'AUSWÄRTSSPIEL'].includes(normName(data.postTitle).toUpperCase()) ? 'auto' : 'custom');
             vidOrder = data.vidOrder && typeof data.vidOrder === 'object' && !Array.isArray(data.vidOrder) ? data.vidOrder : {};
             vidCfg = data.vidCfg && typeof data.vidCfg === 'object' && !Array.isArray(data.vidCfg) ? data.vidCfg : {};
-            if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
+            if ($('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti ?? true;
             if ($('in-kal-own-logo')) $('in-kal-own-logo').checked = data.kalOwnLogo ?? true;
             if ($('in-wk-own-logo')) $('in-wk-own-logo').checked = data.wkOwnLogo ?? true;
             season = Array.isArray(data.season) ? data.season : [];
@@ -10751,6 +10807,8 @@ Alle sind herzlich eingeladen!</textarea></div>
 
             // Vor dem Setzen der Werte: volle Spielerliste in der Aufstellung, sonst gehen Namen verloren
             refreshLineupOptions(true);
+            // Eingaben, die in diesem Stand fehlen → Ausgangszustand (nicht die der vorigen Version stehen lassen)
+            if (freshSlot?.inputs && data !== freshSlot) for (const k in freshSlot.inputs) if (!data.inputs || !(k in data.inputs)) setVal(k, freshSlot.inputs[k]);
             if (data.inputs) {
                 // Ältere Stände kannten nur 10 Torschützen-Zeilen → übrige leeren
                 for (let i = 1; i <= SCORER_MAX; i++) if (!(`erg-scorer-${i}` in data.inputs)) { setVal(`erg-scorer-${i}`, 'Keiner'); setVal(`erg-minute-${i}`, ''); }
@@ -10759,9 +10817,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 Object.entries(SPON_DEFAULTS).forEach(([k, v]) => { if (!(k in data.inputs)) setVal(k, v); });
                 for (const k in data.inputs) setVal(k, data.inputs[k]);
             }
-            if (data.lineupKaderOnly !== undefined && $('in-lineup-kader-only')) $('in-lineup-kader-only').checked = data.lineupKaderOnly;
+            if ($('in-lineup-kader-only')) $('in-lineup-kader-only').checked = !!data.lineupKaderOnly;
             setVal('cfg-feed-format', data.feedFormat === '11' ? '11' : '45');
-            if (data.hashtags !== undefined) setVal('cfg-hashtags', data.hashtags);
+            setVal('cfg-hashtags', data.hashtags ?? freshSlot?.hashtags ?? '');
             refreshLineupOptions();
             // Auswahlfelder mit Namen, die es nicht (mehr) gibt → "Keiner"
             document.querySelectorAll('select.player-select').forEach(sel => { if (!sel.value) sel.value = 'Keiner'; });
@@ -12789,6 +12847,34 @@ Alle sind herzlich eingeladen!</textarea></div>
             $('video-overlay').hidden = true;
         }
         /* Neben jedem „In Fotos / Teilen“ einen Video-Knopf anlegen */
+        /* 🔄 Unter jedem Bild: Vorschau aus dem Speicher neu aufbauen (z.B. nachdem ein Kollege per Sync etwas geändert hat) */
+        function addRefreshButtons() {
+            document.querySelectorAll('.btn-action-group').forEach(g => {
+                if (g.querySelector('.refresh-btn') || !g.querySelector('.download-btn[onclick^="shareImage"]')) return;
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'download-btn refresh-btn'; b.title = 'Vorschau aktualisieren (neu laden)'; b.textContent = '🔄';
+                b.addEventListener('click', () => refreshPreview());
+                g.appendChild(b);
+            });
+        }
+        async function refreshPreview(quiet) {
+            if (savePending) await saveSlotNow();   // nur offene eigene Eingaben sichern – sonst den Speicherstand übernehmen (z.B. vom Sync oder einem 2. Browser-Tab)
+            const sd = await localforage.getItem(STORE.stammdaten);
+            if (sd) { stammdaten = { ...emptyStammdaten(), ...sd }; sortStammdaten(); }
+            templateUrlCache.forEach(url => URL.revokeObjectURL(url)); templateUrlCache.clear();
+            fxCache.clear();
+            registerCustomFonts(); refreshFontSelects();
+            refreshPlayerOptions(); refreshOpponentDropdown(); refreshSponsorChecklists(); renderStammdatenLists();
+            editorTabs.forEach(renderBgThumbs);
+            applySlotData((await localforage.getItem(STORE.slot(currentVersion))) || emptyVersionData());
+            renderAll();
+            editorTabs.forEach(applyPhotoFx);
+            layoutTeamfoto();
+            otherTabSaved = false;
+            if (quiet) return;
+            toast('🔄 Vorschau aktualisiert');
+            syncCheckOnStart();   // gibt es im Vereins-Sync einen neueren Stand? → Hinweis
+        }
         function addVideoButtons() {
             document.querySelectorAll('.btn-action-group .download-btn[onclick^="shareImage"]').forEach(b => {
                 const m = /shareImage\('([^']+)',\s*'([^']+)'/.exec(b.getAttribute('onclick'));
@@ -14097,6 +14183,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 editorTabs.forEach(renderBgThumbs);
                 prepareTemplates();
                 addVideoButtons();
+                addRefreshButtons();
                 assignDraggableIds();
                 makeTextsDraggable();
                 addSafeZoneOverlays();
@@ -14123,12 +14210,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 sidebarEl.addEventListener('input', debouncedUpdate);
                 sidebarEl.addEventListener('change', () => { updateAllViews(); scheduleSave(); });
 
-                document.addEventListener('visibilitychange', () => {
-                    if (document.visibilityState === 'hidden') saveSlotNow();
-                    else checkForAppUpdate();   // App kommt aus dem Hintergrund zurück → nach neuer Version schauen
-                });
-                window.addEventListener('focus', () => checkForAppUpdate());
-                window.addEventListener('pagehide', () => saveSlotNow());
+                document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') onAppHidden(); else onAppVisible(); });
+                window.addEventListener('focus', () => onAppVisible());
+                window.addEventListener('pagehide', () => onAppHidden());
 
                 $('license-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitLicenseCode(); });
 

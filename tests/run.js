@@ -798,7 +798,7 @@ async function makePhotos(browser) {
             setVal('in-tor-opp-mode', 'off'); updateTor(); r.off = !$('out-tor-score').closest('.tor-details').classList.contains('tor-board') && !document.querySelector('#capture-tor .tb-team');
             const d = collectSlotData(); r.saved = d.torOppMode === 'off' && d.torAssistMode === 'line' && d.torKind === 'Kopfball';
             const old = JSON.parse(JSON.stringify(d)); delete old.torOppMode; delete old.torAssistMode; delete old.torKind;
-            setVal('in-tor-opp-mode', 'logos'); applySlotData(old); r.migrated = val('in-tor-opp-mode') === 'off' && val('in-tor-assist-mode') === 'line';
+            setVal('in-tor-opp-mode', 'logos'); applySlotData(old); r.migrated = val('in-tor-opp-mode') === 'off' && val('in-tor-assist-mode') === (freshSlot.torAssistMode || 'photo');
             setVal('in-tor-score', '1 : 0'); addTorToErgebnis(); addTorToErgebnis();
             r.erg = val('erg-scorer-1') === P[0] && val('erg-minute-1') === '67' && val('in-ergebnis-score') === '1 : 0' && val('erg-scorer-2') !== P[0];
             setVal('erg-scorer-1', 'Keiner'); setVal('erg-minute-1', ''); setVal('in-tor-assist', 'Keiner'); setVal('in-tor-kind', ''); setVal('in-tor-opp-mode', 'logos'); setVal('in-tor-assist-mode', 'photo'); updateErgebnis(); updateTor();
@@ -826,6 +826,26 @@ async function makePhotos(browser) {
             setVal('in-tf-namefmt', 'short'); tfSyncText(); const parts = normName(n).split(' ');
             const r = { want: `${parts[0][0]}. ${parts.slice(1).join(' ')}`, text: val('in-tf-row3'), opt: !!document.querySelector('#in-tf-namefmt option[value="short"]') };
             setVal('in-tf-namefmt', 'full'); tfClearBoard(); return r; });
+        const tfl2 = await page.evaluate(async () => {
+            const c = document.createElement('canvas'); c.width = 800; c.height = 700; const g = c.getContext('2d'); g.fillStyle = '#3a6'; g.fillRect(0, 0, 800, 700);
+            stammdaten.teamPhotos = [...(stammdaten.teamPhotos || []), { id: 'tfhigh', name: 'Hoch', img: c.toDataURL('image/jpeg', 0.8) }]; refreshTeamPhotoSelect();
+            setVal('in-tf-photo', 'tfhigh'); setVal('in-tf-row1', 'A B, C D, E F, G H, I J, K L, M N, O P, Q R, S T, U V, W X, Y Z, Aa Bb, Cc Dd, Ee Ff');
+            setVal('in-tf-row2', 'A B, C D, E F, G H, I J, K L, M N, O P, Q R, S T, U V, W X, Y Z, Aa Bb, Cc Dd, Ee Ff'); setVal('in-tf-missing', 'A B, C D, E F, G H, I J, K L, M N, O P, Q R, S T, U V');
+            updateTeamfoto(); await new Promise(r => setTimeout(r, 300)); layoutTeamfoto();
+            const res = {};
+            for (const sfx of ['', '-feed']) {
+                const box = $('tf-photo-box' + sfx), names = $('out-tf-names' + sfx), H = box.offsetParent.clientHeight;
+                res[sfx || 'story'] = { below: names.offsetTop >= box.offsetTop + box.offsetHeight, fits: names.offsetTop + names.offsetHeight <= H, ratio: Math.abs($('out-tf-photo' + sfx).offsetWidth / $('out-tf-photo' + sfx).offsetHeight - 800 / 700) < 0.05 };
+            }
+            // Vorschau = Export: Namensbox im Export an derselben Stelle (unter dem Foto)
+            const { holder, clone } = await prepareExportClone($('capture-teamfoto-feed'));
+            try { const b2 = clone.querySelector('.tf-photo-wrap'), n2 = clone.querySelector('.tf-names'); res.exportBelow = n2.offsetTop >= b2.offsetTop + b2.offsetHeight; } finally { holder.remove(); }
+            // Version ohne Fotoauswahl bekommt nicht automatisch das letzte Foto
+            setVal('in-tf-photo', ''); refreshTeamPhotoSelect(); res.noAuto = val('in-tf-photo') === '';
+            stammdaten.teamPhotos = stammdaten.teamPhotos.filter(t => t.id !== 'tfhigh'); refreshTeamPhotoSelect();
+            ['in-tf-row1', 'in-tf-row2', 'in-tf-missing'].forEach(id => setVal(id, '')); updateTeamfoto();
+            return res; });
+        check('Mannschaftsfoto: Namen immer unter dem Foto, alles passt ins Bild, Export gleich, kein automatisches Foto', tfl2.story.below && tfl2.story.fits && tfl2.story.ratio && tfl2['-feed'].below && tfl2['-feed'].fits && tfl2['-feed'].ratio && tfl2.exportBelow && tfl2.noAuto, JSON.stringify(tfl2));
         check('Teamfoto: Vorname abgekürzt (F. Munz)', tfShort.opt && tfShort.text === tfShort.want, JSON.stringify(tfShort));
         check('Teamfoto: Spieler auf Reihen verteilen (gespeichert, Text befüllt)', board.front === board.n && board.text.length > 0 && board.saved === board.n && board.missing.length > 0 && board.front2 === 0, JSON.stringify(board));
         const tfl = await page.evaluate(() => { tfClearBoard(); const [a, b2] = tfPool();
@@ -976,6 +996,45 @@ async function makePhotos(browser) {
             const st1 = await localforage.getItem(STORE.slot('v1')); out.v1stored = st1?.postTime === '15:00' && st1?.hashtags === '#TestVerein';
             return out; });
         check('Neue (nie benutzte) Version übernimmt keine Inhalte, Design bleibt; Leeren nur in der aktuellen Version', Object.values(r).every(Boolean), JSON.stringify(r));
+        // Stand ohne einzelne Werte (älter / anderes Gerät): fehlende Werte → Ausgangszustand, nicht die der vorigen Version
+        const miss = await page.evaluate(async () => {
+            await switchVersion('v1');
+            setVal('in-tor-score', '3 : 2'); setVal('cfg-hashtags', '#Alt'); setVal('in-tf-title', 'ALTER TITEL'); setVal('in-ergebnis-title', 'Alt'); updateAllViews(); await saveSlotNow();
+            await localforage.setItem(STORE.slot('v2'), { teamName: 'Zweite', inputs: { 'in-frei-title': 'Nur das' } });
+            await switchVersion('v2');
+            return { score: val('in-tor-score') === (freshSlot.torScore || ''), tags: val('cfg-hashtags') === '', tf: val('in-tf-title') === (freshSlot.inputs['in-tf-title'] ?? ''), erg: val('in-ergebnis-title') !== 'Alt', own: val('in-frei-title') === 'Nur das' }; });
+        check('Versionswechsel: fehlende Werte nehmen den Standard (keine alten Daten der vorigen Version)', Object.values(miss).every(Boolean), JSON.stringify(miss));
+        // Design kopieren nimmt die Vereinsfarben mit
+        const dc = await page.evaluate(async () => {
+            await switchVersion('v1'); setVal('cfg-color-primary', '#ff0000'); setVal('cfg-color-jersey', '#00aa00'); updateAllViews(); await saveSlotNow();
+            await switchVersion('v2'); setVal('cfg-color-primary', '#0000ff'); updateAllViews(); await saveSlotNow();
+            refreshTabCopySelects(); setVal('tabcopy-from-post', 'v1'); setVal('tabcopy-what-post', 'design'); await copyTabFromVersion('post');
+            return { p: val('cfg-color-primary'), j: val('cfg-color-jersey'), title: val('in-frei-title') }; });
+        check('Design aus anderer Version übernehmen: inkl. Vereinsfarben, Inhalte bleiben', dc.p === '#ff0000' && dc.j === '#00aa00' && dc.title === 'Nur das', JSON.stringify(dc));
+        // 🔄 Aktualisieren lädt die Version neu (z.B. nach Änderung durch den Sync)
+        const rf = await page.evaluate(async () => {
+            const btns = document.querySelectorAll('.btn-action-group .refresh-btn').length;
+            const st = await localforage.getItem(STORE.slot('v2')); st.inputs['in-frei-title'] = 'Vom Kollegen'; await localforage.setItem(STORE.slot('v2'), st);
+            await saveSlotNow();   // keine offenen eigenen Eingaben
+            await localforage.setItem(STORE.slot('v2'), st);   // z.B. ein zweiter Browser-Tab oder der Sync hat geändert
+            const before = val('in-frei-title');
+            await refreshPreview(); return { btns, before, after: val('in-frei-title') }; });
+        check('🔄 Aktualisieren unter jedem Bild lädt die Vorschau neu', rf.btns >= 20 && rf.after === 'Vom Kollegen', JSON.stringify(rf));
+        // Zwei Browser-Tabs (PC): Tab B überschreibt beim Wegklicken nicht, was Tab A gespeichert hat, und lädt beim Zurückkommen neu
+        const pageB = await page.context().newPage(); pageB.errors = []; pageB.on('pageerror', e => pageB.errors.push(e.message)); pageB.on('dialog', d => d.accept());
+        await pageB.goto(BASE); await waitReady(pageB);
+        await pageB.evaluate(() => switchVersion('v2'));
+        await page.evaluate(async () => { await switchVersion('v2'); setVal('in-frei-title', 'Aus Tab A'); updateAllViews(); await saveSlotNow(); });
+        await pageB.waitForTimeout(300);
+        const tabs = await pageB.evaluate(async () => { const r = { flag: otherTabSaved, stale: val('in-frei-title') !== 'Aus Tab A' };
+            onAppHidden();                                    // Tab B wird verlassen – ohne eigene Änderungen
+            await new Promise(res => setTimeout(res, 200));
+            r.notOverwritten = (await localforage.getItem(STORE.slot('v2')))?.inputs?.['in-frei-title'] === 'Aus Tab A';
+            onAppVisible(); await new Promise(res => setTimeout(res, 600));   // zurück zu Tab B
+            r.reloaded = val('in-frei-title') === 'Aus Tab A';
+            return r; });
+        check('Zwei Browser-Tabs: kein Überschreiben beim Wegklicken, neu laden beim Zurückkommen', Object.values(tabs).every(Boolean), JSON.stringify(tabs));
+        check('Keine JavaScript-Fehler (2. Tab)', pageB.errors.length === 0, pageB.errors.join(' | '));
         check('Keine JavaScript-Fehler', page.errors.length === 0, page.errors.join(' | '));
         await page.context().close();
     });
