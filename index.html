@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 26.1</title>
+    <title>Match-Shot – Grafiken für Vereine 26.2</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3292,7 +3292,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "26.1";
+        const APP_VERSION = "26.2";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -5989,14 +5989,12 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (!CLEAR_TABS.includes(tab)) return '';
             return `<button type="button" class="copy-action-btn clear-tab-btn" onclick="clearTabContent('${tab}')">🧹 Inhalte leeren${['post', 'tor', 'ergebnis'].includes(tab) ? ' (neues Spiel)' : ''}</button>`;
         }
-        function clearTabContent(tab) {
+        /* Inhalte eines Reiters in einem Versions-Datensatz auf den Ausgangszustand setzen (keep = Schlüssel, die bleiben) */
+        function resetTabContent(data, tab, keep) {
             const spec = TAB_CONTENT[tab];
-            if (!spec || !freshSlot) return;
-            const what = { post: 'Gegner, Datum und Uhrzeit', tor: 'Torschütze, Vorlage, Spielstand und Minute', ergebnis: 'Spielstand, Texte und Torschützen', kalender: 'die eingetragenen Termine (der eingefügte Spielplan bleibt)', wochenende: 'alle Spiele und Ergebnisse', teamfoto: 'die Verteilung der Spieler und die Texte (das Foto bleibt)' }[tab] || 'die Inhalte';
-            if (!confirm(`${tabTitle(tab)}: ${what} leeren?\n\nDesign, Positionen und Einstellungen bleiben. Mit ↩️ rückgängig.`)) return;
+            if (!spec || !freshSlot) return data;
             const copy = o => JSON.parse(JSON.stringify(o ?? null));
-            const data = collectSlotData();
-            (spec.keys || []).filter(k => !CLEAR_KEEP_KEYS.includes(k)).forEach(k => { if (freshSlot[k] !== undefined) data[k] = copy(freshSlot[k]); else delete data[k]; });
+            (spec.keys || []).filter(k => !keep.includes(k)).forEach(k => { if (freshSlot[k] !== undefined) data[k] = copy(freshSlot[k]); else delete data[k]; });
             Object.keys(data.inputs || {}).forEach(k => {
                 if (!(spec.inputs || []).some(re => re.test(k)) || CLEAR_KEEP_INPUT.test(k)) return;
                 if (freshSlot.inputs && k in freshSlot.inputs) data.inputs[k] = freshSlot.inputs[k]; else data.inputs[k] = /^erg-scorer-|^player-|^bench-|^kader-player-/.test(k) ? 'Keiner' : '';
@@ -6004,6 +6002,23 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (tab === 'ergebnis') data.ergScore = '0 : 0';
             if (tab === 'tor') { data.torMinute = ''; data.torScore = '1 : 0'; }
             if (tab === 'ergebnis') data.inputs && Object.keys(data.inputs).forEach(k => { if (/^erg-scorer-/.test(k)) data.inputs[k] = 'Keiner'; if (/^erg-minute-/.test(k)) data.inputs[k] = ''; });
+            return data;
+        }
+        /* Neue, auf diesem Gerät noch nie gespeicherte Version: gleiches Aussehen wie die aktuelle, aber ohne Inhalte
+           (vorher blieben die Inhalte der alten Version einfach stehen und wurden mitgespeichert → beide Versionen gleich) */
+        function emptyVersionData() {
+            const data = collectSlotData();
+            const keep = CLEAR_KEEP_KEYS.filter(k => k !== 'season');   // Spielplan gehört zur Mannschaft
+            Object.keys(TAB_CONTENT).forEach(tab => resetTabContent(data, tab, keep));
+            return data;
+        }
+        function clearTabContent(tab) {
+            const spec = TAB_CONTENT[tab];
+            if (!spec || !freshSlot) return;
+            const what = { post: 'Gegner, Datum und Uhrzeit', tor: 'Torschütze, Vorlage, Spielstand und Minute', ergebnis: 'Spielstand, Texte und Torschützen', kalender: 'die eingetragenen Termine (der eingefügte Spielplan bleibt)', wochenende: 'alle Spiele und Ergebnisse', teamfoto: 'die Verteilung der Spieler und die Texte (das Foto bleibt)' }[tab] || 'die Inhalte';
+            if (!confirm(`${tabTitle(tab)}: ${what} leeren?\n\nDesign, Positionen und Einstellungen bleiben. Mit ↩️ rückgängig.`)) return;
+            const data = collectSlotData();
+            resetTabContent(data, tab, CLEAR_KEEP_KEYS);
             applySlotData(data);
             renderAll();
             captionDirty[tab] = false;
@@ -10522,7 +10537,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             $(`btn-${vKey}`)?.classList.add('active');
 
             const data = await localforage.getItem(STORE.slot(currentVersion));
-            if (data) applySlotData(data);
+            applySlotData(data || emptyVersionData());
             renderAll();
             refreshTabCopySelects();
             Object.keys(captionDirty).forEach(k => captionDirty[k] = false);
@@ -11480,7 +11495,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             refreshSponsorChecklists();
             renderStammdatenLists();
             editorTabs.forEach(renderBgThumbs);
-            if (slotsChanged.includes(currentVersion)) { applySlotData(await localforage.getItem(STORE.slot(currentVersion))); resetEckHistory(); }
+            if (slotsChanged.includes(currentVersion)) { applySlotData((await localforage.getItem(STORE.slot(currentVersion))) || emptyVersionData()); resetEckHistory(); }
             renderAll();
             if (typeof renderStyleList === 'function') renderStyleList();
             updateBackupReminder();
