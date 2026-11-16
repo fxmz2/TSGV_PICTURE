@@ -1025,7 +1025,7 @@ async function makePhotos(browser) {
         B.answers.push(true);
         await B.evaluate(() => syncDiagnose());
         const diag = B.dialogs[B.dialogs.length - 1] || '';
-        check('Sync: „Verbindung prüfen“ zeigt Version, Kennung, Server und Stand', /25\.\d/.test(diag) && diag.includes(fps[0]) && /Server: ✅/.test(diag) && /Stand im Sync: ✅/.test(diag), diag);
+        check('Sync: „Verbindung prüfen“ zeigt Version, Kennung, Server und Stand', /App-Version: \d+\.\d/.test(diag) && diag.includes(fps[0]) && /Server: ✅/.test(diag) && /Stand im Sync: ✅/.test(diag), diag);
         check('Sync: zweites Gerät holt alles (ganze Nachricht eingefügt)', b1.n === a1.n && b1.img === a1.img && b1.vn === 'Erste' && b1.slot === aslot && b1.same === 'same' && /Stand von Anna/.test(btxt), JSON.stringify({ b1, aslot, btxt: btxt.slice(0, 120) }));
 
         // B ändert → A sieht den Hinweis und holt
@@ -1057,6 +1057,36 @@ async function makePhotos(browser) {
         const p4 = await pull(B);
         const b4 = await B.evaluate(() => ({ gone: !stammdaten.players.some(p => p.name === 'Neu Spieler'), mine: stammdaten.opponents.some(o => o.name === 'FC Lokal') }));
         check('Sync: Entfernen wird übernommen, eigene neue Einträge bleiben', /entfernt/.test(p4.txt) && b4.gone && b4.mine, JSON.stringify({ txt: p4.txt.slice(0, 160), b4 }));
+
+        // Dieselbe Version, verschiedene Stellen (A: Ankündigung, B: Aufstellung) → ohne Rückfrage beides behalten
+        await A.evaluate(async () => { setVal('in-frei-title', 'Titel von A'); await saveSlotNow(); await syncPush(); });
+        await B.evaluate(async () => { setVal('num-player-1', '77'); await saveSlotNow(); window._sp = syncPush(); });
+        await B.waitForSelector('#sync-overlay:not([hidden])', { timeout: 15000 });
+        const mtxt = await B.textContent('#sync-dlg-body'), mconf = await B.evaluate(() => !!document.querySelector('#sync-dlg-body .sync-conf'));
+        await B.click('#sync-dlg-ok'); const mpush = await B.evaluate(() => window._sp);
+        const p5 = await pull(A).catch(() => null);
+        const mA = await A.evaluate(() => ({ t: val('in-frei-title'), n: val('num-player-1') })), mB = await B.evaluate(() => ({ t: val('in-frei-title'), n: val('num-player-1') }));
+        check('Sync: gleiche Version, verschiedene Stellen → ohne Rückfrage zusammengeführt', !mconf && mpush === true && mA.t === 'Titel von A' && mA.n === '77' && mB.t === 'Titel von A' && mB.n === '77' && /Version 1|Erste/.test(mtxt), JSON.stringify({ mconf, mpush, mA, mB, mtxt: mtxt.slice(0, 200), p5: p5?.r }));
+        // Auswahl: B gleicht Version 2 nicht ab → B's Version 2 bleibt lokal, die der Kollegen bleibt im Sync
+        await B.evaluate(() => { switchTab('start'); $('sect-sync').open = true; });
+        await B.uncheck('[data-sync-scope="v2"]');
+        const scopeSaved = await B.evaluate(() => prefs.sync.scope?.v2 === false && prefs.sync.scope?.v1 === true);
+        const setV2 = (pg, txt) => pg.evaluate(async t => { const s2 = (await localforage.getItem(STORE.slot('v2'))) || { inputs: {} }; s2.inputs = { ...(s2.inputs || {}), 'in-frei-title': t }; await localforage.setItem(STORE.slot('v2'), s2); }, txt);
+        const getV2 = pg => pg.evaluate(async () => (await localforage.getItem(STORE.slot('v2')))?.inputs?.['in-frei-title']);
+        await setV2(A, 'A-Version2'); await A.evaluate(() => syncPush());
+        await setV2(B, 'B-Version2');
+        const bp = await B.evaluate(() => syncPull({ quiet: true }));
+        const afterPullB = await getV2(B);
+        await B.evaluate(async () => { setVal('in-frei-title', 'Titel von B'); await saveSlotNow(); await syncPush(); });
+        const remoteV2 = await B.evaluate(async () => { const st = await syncCrypto(); const r = await syncFetchRemote(st); return { v2: r.entities['slot.v2:inputs#in-frei-title'], v1: r.entities['slot.v1:inputs#in-frei-title'], legacy: !!r.wholeHash.v1 }; });
+        check('Sync: Auswahl „Version 2 nicht abgleichen“ – bleibt lokal, Stand der Kollegen bleibt im Sync', scopeSaved && afterPullB === 'B-Version2' && remoteV2.v2 === 'A-Version2' && remoteV2.v1 === 'Titel von B' && remoteV2.legacy, JSON.stringify({ scopeSaved, bp, afterPullB, remoteV2 }));
+        await B.check('[data-sync-scope="v2"]');
+        // Ältere Stände (Version als Ganzes) werden gelesen; Zerlegen + Zusammensetzen ergibt dieselbe Version
+        const legacy = await B.evaluate(async () => { const slot = await localforage.getItem(STORE.slot('v1'));
+            const back = syncJoinSlot('v1', syncSplitSlot('v1', slot, {}));
+            const n = syncNormalizeRemote({ 'slot.v1': { inputs: { a: '1' }, positions: {}, x: 2 }, vn: {} });
+            return { same: JSON.stringify(back) === JSON.stringify(slot), n: n['slot.v1:inputs#a'] === '1' && n['slot.v1:x'] === 2 && n['slot.v1:positions'] === 1 && !('slot.v1' in n) }; });
+        check('Sync: ältere Stände lesbar, Version zerlegen/zusammensetzen verlustfrei', legacy.same && legacy.n, JSON.stringify(legacy));
 
         // Falsches Passwort: anderer (leerer) Bereich, keine Daten
         const wrong = await B.evaluate(async () => { const keep = prefs.sync; prefs.sync = { ...keep, key: await syncDeriveKey('FALSCHES-PASSWORT-1', club.code) }; syncState = null;
