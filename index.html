@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 25.9</title>
+    <title>Match-Shot – Grafiken für Vereine 26.0</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1089,6 +1089,11 @@
         .sync-info { font-size: 13px; line-height: 1.5; background: #f6f7f9; border: 1px solid #e2e4e8; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
         .sync-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .sync-status { font-size: 13px; font-weight: bold; color: #005f73; min-height: 1.2em; margin: 6px 0; }
+        .sync-scope { margin-top: 10px; background: #f6f7f9; border: 1px solid #e2e4e8; border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+        .sync-scope > b { display: block; margin-bottom: 4px; }
+        .sync-scope label { display: flex; gap: 8px; align-items: flex-start; font-weight: normal; margin: 4px 0; }
+        .sync-scope label input { margin-top: 2px; flex: none; }
+        .sync-scope small { color: #6c757d; }
         .sync-small { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
         .sync-sum { margin: 4px 0 8px 18px; padding: 0; font-size: 13px; line-height: 1.45; }
         .sync-conf { background: #fff7e6; border: 1px solid #f3c776; border-radius: 8px; padding: 8px 10px; margin: 8px 0; font-size: 13px; }
@@ -3287,7 +3292,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "25.9";
+        const APP_VERSION = "26.0";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -11130,7 +11135,70 @@ Alle sind herzlich eingeladen!</textarea></div>
         const SYNC_REF = /^msb:[0-9a-f]{64}$/;
         const syncItemKey = x => (x && x.id != null && x.id !== '') ? 'i:' + x.id : 'n:' + normName(x?.name || '').toLowerCase();
 
-        /* Alles, was abgeglichen wird, als Einträge: sd.<Feld> · sd.<Liste>#<Schlüssel> · slot.v1..v3 · vn (Versionsnamen) */
+        /* Versionen fein abgleichen: jede Eingabe, jede Position, jede Vorlagen-Einstellung ist ein eigener Eintrag
+           (slot.v1:inputs#<id>, slot.v1:positions#<id>, slot.v1:tabSettings#<Reiter> …, sonstige Felder slot.v1:<Feld>).
+           So gehen Änderungen an verschiedenen Stellen derselben Version beim Zusammenführen nicht verloren. */
+        const SLOT_SPLIT = ['inputs', 'positions', 'tabSettings', 'elStyles', 'labels', 'imgFit', 'vidOrder', 'vidCfg'];
+        const SYNC_VERSIONS = ['v1', 'v2', 'v3'];
+        function syncSplitSlot(v, slot, out) {
+            for (const [k, val] of Object.entries(slot || {})) {
+                if (val === undefined || typeof val === 'function') continue;
+                if (SLOT_SPLIT.includes(k) && val && typeof val === 'object' && !Array.isArray(val)) {
+                    out[`slot.${v}:${k}`] = 1;   // Kennzeichen: Bereich vorhanden (auch wenn leer)
+                    for (const [sk, sv] of Object.entries(val)) if (sv !== undefined) out[`slot.${v}:${k}#${sk}`] = sv;
+                } else out[`slot.${v}:${k}`] = val;
+            }
+            return out;
+        }
+        function syncJoinSlot(v, ent) {   // aus den Einträgen wieder eine Version bauen (null = keine Einträge)
+            const pre = `slot.${v}:`;
+            let slot = null;
+            for (const [key, val] of Object.entries(ent)) {
+                if (!key.startsWith(pre)) continue;
+                slot = slot || {};
+                const rest = key.slice(pre.length), h = rest.indexOf('#');
+                if (h < 0) { if (SLOT_SPLIT.includes(rest)) slot[rest] = slot[rest] || {}; else slot[rest] = val; }
+                else { const k = rest.slice(0, h); slot[k] = slot[k] || {}; slot[k][rest.slice(h + 1)] = val; }
+            }
+            return slot;
+        }
+        /* Ältere Stände (bis 25.9) speichern eine Version als Ganzes („slot.v1“) – in Einzel-Einträge umwandeln */
+        function syncNormalizeRemote(ents) {
+            for (const v of SYNC_VERSIONS) {
+                const whole = ents['slot.' + v];
+                if (whole === undefined) continue;
+                delete ents['slot.' + v];
+                if (whole && !Object.keys(ents).some(k => k.startsWith(`slot.${v}:`))) syncSplitSlot(v, whole, ents);
+            }
+            return ents;
+        }
+        /* Auswahl, was abgeglichen wird: Daten (sd.*, vn) und je Version */
+        function syncScopeOf(k) { const m = /^slot\.(v[123])/.exec(k); return m ? m[1] : 'data'; }
+        function syncInScope(k) { const sc = prefs.sync?.scope; return !sc || sc[syncScopeOf(k)] !== false; }
+        function syncScopePartial() { const sc = prefs.sync?.scope; return !!sc && Object.values(sc).some(x => x === false); }
+        /* Alter Gesamt-Prüfwert einer Version im gemeinsamen Stand → Einzel-Prüfwerte (falls der Sync seitdem unverändert ist) */
+        function syncMigrateBase(base, remote) {
+            const b = { ...(base || {}) };
+            for (const v of SYNC_VERSIONS) {
+                if (!(('slot.' + v) in b)) continue;
+                const old = b['slot.' + v];
+                delete b['slot.' + v];
+                if (remote && remote.wholeHash?.[v] === old) for (const k of Object.keys(remote.hashes)) if (k.startsWith(`slot.${v}:`)) b[k] = remote.hashes[k];
+            }
+            return b;
+        }
+        /* Neuer gemeinsamer Stand: für ausgewählte Bereiche = Stand src, sonst bleibt der alte */
+        function syncNextBase(base, srcHashes) {
+            const nb = { ...base };
+            new Set([...Object.keys(base), ...Object.keys(srcHashes)]).forEach(k => {
+                if (/^slot\.v[123]$/.test(k)) { delete nb[k]; return; }
+                if (!syncInScope(k)) return;
+                if (k in srcHashes) nb[k] = srcHashes[k]; else delete nb[k];
+            });
+            return nb;
+        }
+
+        /* Alles, was abgeglichen wird, als Einträge: sd.<Feld> · sd.<Liste>#<Schlüssel> · slot.v1:… (fein, s.o.) · vn (Versionsnamen) */
         async function syncLocalEntities() {
             await saveSlotNow();
             const ent = {};
@@ -11147,9 +11215,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                     });
                 } else ent['sd.' + f] = val;
             }
-            for (const v of ['v1', 'v2', 'v3']) {
+            for (const v of SYNC_VERSIONS) {
                 const s = await localforage.getItem(STORE.slot(v));
-                if (s) ent['slot.' + v] = s;
+                if (s) syncSplitSlot(v, s, ent);
             }
             ent.vn = prefs.versionNames || {};
             return ent;
@@ -11199,6 +11267,9 @@ Alle sind herzlich eingeladen!</textarea></div>
             catch (e) { throw new Error('Der Stand im Sync ließ sich nicht entschlüsseln – stimmt das Vereins-Passwort?'); }
             m.ver = ver;
             m.entities = m.entities || {};
+            m.wholeHash = {};
+            for (const v of SYNC_VERSIONS) if (m.entities['slot.' + v] !== undefined) m.wholeHash[v] = await syncHash(JSON.stringify(m.entities['slot.' + v]));
+            syncNormalizeRemote(m.entities);
             m.hashes = {};
             for (const k of Object.keys(m.entities)) m.hashes[k] = await syncHash(JSON.stringify(m.entities[k]));
             return m;
@@ -11216,14 +11287,29 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
         const SYNC_LABELS = { players: '👥 Spieler & Trainer', opponents: '🛡️ Gegner', sponsors: '🤝 Sponsoren', templates: '🖼️ Hintergründe', designStyles: '✨ Design-Stile', fonts: '🔤 Schriften', teamPhotos: '📸 Mannschaftsfotos' };
         function syncKeyLabel(k) {
-            if (k.startsWith('slot.')) { const v = k.slice(5); return '📋 ' + (prefs.versionNames?.[v] || 'Version ' + v.slice(1)); }
+            if (k.startsWith('slot.')) { const v = k.slice(5, 7); return '📋 ' + (prefs.versionNames?.[v] || 'Version ' + v.slice(1)); }
             if (k === 'vn') return '📋 Namen der Versionen';
             const m = k.match(/^sd\.([^#]+)#?/);
             return SYNC_LABELS[m?.[1]] || '🏷️ Vereins-Einstellungen';
         }
         function syncItemName(k, local, remote) {
+            if (k.startsWith('slot.')) return syncSlotItemName(k);
             const v = remote.entities[k] ?? local.ref[k];
             return k.includes('#') ? normName(v?.name || '') : '';
+        }
+        /* Zu welchem Reiter gehört ein Eintrag einer Version? (für die Vorschau „Aufstellung, Ankündigung …“) */
+        function syncSlotItemName(k) {
+            const m = /^slot\.v[123]:([^#]+)(?:#(.*))?$/.exec(k);
+            if (!m) return '';
+            const [, f, sub] = m;
+            const tabOfEl = id => { try { const el = document.getElementById(id); return ((el?.closest('.editor-section')?.id || '').replace(/^editor-/, '')) || ((el?.closest('.template-container')?.id || '').replace(/^view-/, '')); } catch (e) { return ''; } };
+            let tab = '';
+            if ((f === 'tabSettings' || f === 'labels') && sub) tab = sub;
+            else if (f === 'imgFit' && sub && sub.startsWith('tab:')) tab = sub.slice(4);
+            else if (sub) tab = tabOfEl(sub);
+            else tab = { eck2: 'eckball', tfBoard: 'teamfoto', season: 'kalender', customTexts: '', selectedSponsors: '' }[f] || '';
+            if (tab === 'stammdaten') tab = '';
+            return tab ? (typeof tabTitle === 'function' ? tabTitle(tab) : tab) : 'Einstellungen';
         }
         /* Übersicht: je Bereich neu / geändert / entfernt (mit Namen) */
         function syncSummary(keys, local, remote) {
@@ -11235,6 +11321,10 @@ Alle sind herzlich eingeladen!</textarea></div>
                 e[kind].push(syncItemName(k, local, remote));
             });
             return Object.entries(groups).map(([g, e]) => {
+                if (g.startsWith('📋 ') && g !== '📋 Namen der Versionen') {   // Version: nur die betroffenen Bereiche nennen
+                    const names = [...new Set([...e.neu, ...e['geändert'], ...e.entfernt].filter(Boolean))];
+                    return `<li><b>${esc(g)}:</b> ${esc(names.slice(0, 6).join(', '))}${names.length > 6 ? ' …' : ''}</li>`;
+                }
                 const parts = ['neu', 'geändert', 'entfernt'].filter(t => e[t].length).map(t => {
                     const names = e[t].filter(Boolean);
                     return `${e[t].length} ${t}${names.length ? ` (${esc(names.slice(0, 4).join(', '))}${names.length > 4 ? ' …' : ''})` : ''}`;
@@ -11257,9 +11347,12 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (!remote) { syncSetStatus(''); if (!opts.quiet) alert('Mit diesem Passwort liegt im Sync noch nichts.\n\n• Bist du der Erste im Verein? Dann tippe auf „⬆️ Hochladen“.\n• Hat ein Kollege schon hochgeladen? Dann vergleicht die „Sync-Kennung“ im Bereich 🔄 Vereins-Sync – sie muss auf beiden Geräten gleich sein. Ist sie unterschiedlich, stimmt das Passwort oder der Vereinscode nicht.'); return 'empty'; }
                 syncSetStatus('⏳ Wird verglichen …');
                 const local = await syncRefForm(st, await syncLocalEntities());
-                const plan = syncPlan(local, remote, prefs.sync.base || {});
+                const base = syncMigrateBase(prefs.sync.base, remote);
+                const plan = syncPlan(local, remote, base);
+                ['take', 'conflicts', 'keep'].forEach(x => { plan[x] = plan[x].filter(syncInScope); });   // nur ausgewählte Bereiche
+                const newBase = syncNextBase(base, remote.hashes);
                 if (!plan.take.length && !plan.conflicts.length) {
-                    await syncSaveCfg({ lastVer: remote.ver, base: remote.hashes, lastPull: Date.now(), remoteBy: remote.by || '', remoteAt: remote.stamp || '' });
+                    await syncSaveCfg({ lastVer: remote.ver, base: newBase, lastPull: Date.now(), remoteBy: remote.by || '', remoteAt: remote.stamp || '' });
                     syncSetStatus('');
                     renderSyncSection();
                     if (!opts.quiet) toast('✅ Schon auf dem neuesten Stand');
@@ -11267,7 +11360,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 }
                 // Vorschau zeigen und auf die Entscheidung warten
                 return await new Promise(resolve => {
-                    syncPending = { st, local, remote, plan, resolve };
+                    syncPending = { st, local, remote, plan, resolve, newBase };
                     const when = remote.stamp ? formatDate(new Date(remote.stamp).getTime()) + ', ' + new Date(remote.stamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '';
                     $('sync-dlg-title').textContent = '⬇️ Neuer Stand im Vereins-Sync';
                     $('sync-dlg-body').innerHTML = `
@@ -11276,7 +11369,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                         ${plan.conflicts.length ? `<div class="sync-conf"><b>${prefs.sync.lastVer ? '⚠️ Auf beiden Geräten geändert:' : '⚠️ Auf diesem Gerät gibt es das schon (anders):'}</b><ul class="sync-sum">${syncSummary(plan.conflicts, local, remote)}</ul>
                             <label><input type="radio" name="sync-conf" value="remote" checked> Stand aus dem Sync nehmen</label>
                             <label><input type="radio" name="sync-conf" value="local"> Meine Änderungen behalten (werden beim nächsten Hochladen geteilt)</label></div>` : ''}
-                        ${plan.keep.length ? `<p class="hint">Deine eigenen Änderungen (${plan.keep.length}) bleiben erhalten.</p>` : ''}`;
+                        ${plan.keep.length ? `<p class="hint">Deine eigenen Änderungen bleiben erhalten.</p>` : ''}`;
                     $('sync-dlg-ok').textContent = '✅ Übernehmen';
                     $('sync-dlg-ok').hidden = false;
                     $('sync-dlg-ok').onclick = () => syncApplyPending();
@@ -11296,7 +11389,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function syncApplyPending() {
             const p = syncPending;
             if (!p) return;
-            const { st, local, remote, plan } = p;
+            const { st, local, remote, plan, newBase } = p;
             const useRemote = document.querySelector('input[name="sync-conf"]:checked')?.value !== 'local';
             const keys = [...plan.take, ...(useRemote ? plan.conflicts : [])];
             $('sync-dlg-ok').hidden = true;
@@ -11324,7 +11417,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 await Promise.all([1, 2, 3, 4].map(worker));
                 const resolve = v => syncWalk(v, s => SYNC_REF.test(s) ? files.get(s.slice(4)) : s);
                 await syncApplyEntities(keys, remote, resolve);
-                await syncSaveCfg({ lastVer: remote.ver, base: remote.hashes, lastPull: Date.now(), remoteBy: remote.by || '', remoteAt: remote.stamp || '' });
+                await syncSaveCfg({ lastVer: remote.ver, base: newBase, lastPull: Date.now(), remoteBy: remote.by || '', remoteAt: remote.stamp || '' });
                 $('sync-card').hidden = true;
                 $('sync-overlay').hidden = true;
                 syncPending = null;
@@ -11345,6 +11438,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const sd = { ...stammdaten };
             SYNC_COLLS.forEach(f => { if (Array.isArray(sd[f])) sd[f] = [...sd[f]]; });
             let slotsChanged = [], fontsChanged = false, tplChanged = false;
+            const slotKeys = {};
             for (const k of keys) {
                 const has = k in remote.entities;
                 const val = has ? resolve(remote.entities[k]) : undefined;
@@ -11360,12 +11454,19 @@ Alle sind herzlich eingeladen!</textarea></div>
                     if (f === 'templates') tplChanged = true;
                 } else if ((m = k.match(/^sd\.(.+)$/))) {
                     if (has) sd[m[1]] = val; else delete sd[m[1]];
-                } else if ((m = k.match(/^slot\.(v[123])$/))) {
-                    if (has) await localforage.setItem(STORE.slot(m[1]), val); else await localforage.removeItem(STORE.slot(m[1]));
-                    slotsChanged.push(m[1]);
+                } else if ((m = k.match(/^slot\.(v[123]):/))) {
+                    (slotKeys[m[1]] = slotKeys[m[1]] || []).push(k);
                 } else if (k === 'vn') {
                     prefs.versionNames = has && val && typeof val === 'object' ? val : {};
                 }
+            }
+            // Versionen: nur die geänderten Einträge in die vorhandene Version schreiben
+            for (const [v, vkeys] of Object.entries(slotKeys)) {
+                const ent = syncSplitSlot(v, await localforage.getItem(STORE.slot(v)), {});
+                vkeys.forEach(k => { if (k in remote.entities) ent[k] = resolve(remote.entities[k]); else delete ent[k]; });
+                const slot = syncJoinSlot(v, ent);
+                if (slot) await localforage.setItem(STORE.slot(v), slot); else await localforage.removeItem(STORE.slot(v));
+                slotsChanged.push(v);
             }
             stammdaten = { ...emptyStammdaten(), ...sd };
             sortStammdaten();
@@ -11399,8 +11500,17 @@ Alle sind herzlich eingeladen!</textarea></div>
                         if (r === false) { syncSetStatus(''); return false; }
                     }
                     syncSetStatus('⏳ Wird vorbereitet …');
-                    const local = await syncRefForm(st, await syncLocalEntities());
+                    const all = await syncLocalEntities(), mine = {};
+                    for (const [k, v] of Object.entries(all)) if (syncInScope(k)) mine[k] = v;
+                    const local = await syncRefForm(st, mine);
                     const ids = [...local.files.keys()];
+                    const entities = { ...local.ref }, refs = new Set(ids);
+                    if (syncScopePartial()) {   // nicht ausgewählte Bereiche: Stand der Kollegen im Sync unverändert lassen
+                        const remote = await syncFetchRemote(st);
+                        if (remote) for (const [k, v] of Object.entries(remote.entities)) if (!syncInScope(k)) { entities[k] = v; syncRefsOf(v, refs); }
+                    }
+                    // Für ältere App-Versionen zusätzlich jede Version als Ganzes (wird beim Lesen ignoriert)
+                    for (const v of SYNC_VERSIONS) { const whole = syncJoinSlot(v, entities); if (whole) entities['slot.' + v] = whole; }
                     const hr = await syncApi('POST', '/have', { json: { ids } });
                     if (!hr.ok) throw new Error('Sync-Abfrage fehlgeschlagen (' + hr.status + ').');
                     const have = new Set((await hr.json()).have || []);
@@ -11418,13 +11528,13 @@ Alle sind herzlich eingeladen!</textarea></div>
                     if (total) syncSetStatus(`⏳ Fotos hochladen: 0 / ${total}`);
                     await Promise.all([1, 2, 3, 4].map(worker));
                     syncSetStatus('⏳ Stand wird gespeichert …');
-                    const manifest = { format: 1, app: APP_VERSION, stamp: new Date().toISOString(), by: prefs.sync.name || '', entities: local.ref };
+                    const manifest = { format: 2, app: APP_VERSION, stamp: new Date().toISOString(), by: prefs.sync.name || '', entities };
                     const enc = await syncEncrypt(st, syncTE.encode(JSON.stringify(manifest)));
-                    const cr = await syncApi('POST', '/commit', { json: { base: prefs.sync.lastVer || '', m: syncB64(enc), refs: ids } });
+                    const cr = await syncApi('POST', '/commit', { json: { base: prefs.sync.lastVer || '', m: syncB64(enc), refs: [...refs] } });
                     if (cr.status === 409) continue;   // jemand war schneller – erst holen, dann nochmal
                     if (!cr.ok) throw new Error('Hochladen fehlgeschlagen (' + cr.status + ').');
                     const { ver: newVer } = await cr.json();
-                    await syncSaveCfg({ lastVer: newVer, base: local.hashes, lastPush: Date.now(), remoteBy: prefs.sync.name || '', remoteAt: manifest.stamp });
+                    await syncSaveCfg({ lastVer: newVer, base: syncNextBase(prefs.sync.base || {}, local.hashes), lastPush: Date.now(), remoteBy: prefs.sync.name || '', remoteAt: manifest.stamp });
                     await markBackupDone();   // der Sync ist zugleich ein Backup
                     $('sync-card').hidden = true;
                     syncSetStatus('');
@@ -11501,7 +11611,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (!host) return;
             const cfg = prefs.sync;
             // Nur neu aufbauen, wenn sich etwas geändert hat (sonst gingen Eingaben beim Tippen verloren)
-            const sig = JSON.stringify([syncAvailable(), !!club?.demo, cfg?.key ? [cfg.name, cfg.lastPush, cfg.lastPull, cfg.remoteBy, cfg.remoteAt] : 0]);
+            const sig = JSON.stringify([syncAvailable(), !!club?.demo, cfg?.key ? [cfg.name, cfg.lastPush, cfg.lastPull, cfg.remoteBy, cfg.remoteAt, cfg.scope || null, prefs.versionNames || {}] : 0]);
             if (host.dataset.sig === sig && host.childElementCount) return;
             host.dataset.sig = sig;
             if (!syncAvailable()) {
@@ -11530,7 +11640,12 @@ Alle sind herzlich eingeladen!</textarea></div>
                     <button type="button" class="copy-action-btn" style="background:#2a9d8f; margin:0;" onclick="syncPull()">⬇️ Neueste holen</button>
                 </div>
                 <p class="sync-status" id="sync-status"></p>
-                <span class="hint">Tipp: <b>erst holen, dann ändern, dann hochladen</b>. Es wird zusammengeführt – auch wenn zwei Leute gleichzeitig etwas geändert haben, geht nichts verloren.</span>
+                <span class="hint">Es wird <b>Eintrag für Eintrag zusammengeführt</b>: Was nur ein Kollege geändert hat, kommt dazu – deine eigenen Änderungen bleiben. Nur wenn ihr genau dasselbe geändert habt, fragt die App nach.</span>
+                <div class="sync-scope"><b>Was wird abgeglichen?</b>
+                    ${[['data', '🗃️ Daten <small>(Spieler, Fotos, Gegner, Sponsoren, Hintergründe …)</small>'], ...SYNC_VERSIONS.map(v => [v, '📋 ' + esc(prefs.versionNames?.[v] || 'Version ' + v.slice(1))])]
+                        .map(([k, l]) => `<label><input type="checkbox" data-sync-scope="${k}" ${cfg.scope?.[k] === false ? '' : 'checked'} onchange="syncSetScope('${k}', this.checked)"> <span>${l}</span></label>`).join('')}
+                    <span class="hint">Nicht angehakt = bleibt nur auf diesem Gerät. Im Sync bleibt dafür der Stand der Kollegen erhalten. Tipp: Jede Mannschaft arbeitet in ihrer eigenen Version.</span>
+                </div>
                 <div class="sync-small">
                     <button type="button" class="sd-btn" onclick="syncSharePw()">📤 Passwort an Kollegen</button>
                     <button type="button" class="sd-btn" onclick="syncShowPw()">👁️ Passwort zeigen</button>
@@ -11541,6 +11656,17 @@ Alle sind herzlich eingeladen!</textarea></div>
             syncFillFp();
         }
         function syncShowPw() { alert('🔑 Vereins-Passwort:\n\n' + syncFmtPw(prefs.sync?.pw) + '\n\nSync-Kennung: ' + ($('sync-fp')?.textContent || '–')); }
+        async function syncSetScope(key, on) {
+            const sc = { data: true, v1: true, v2: true, v3: true, ...(prefs.sync?.scope || {}) };
+            sc[key] = !!on;
+            if (!Object.values(sc).some(Boolean)) {
+                alert('Mindestens ein Bereich muss abgeglichen werden.');
+                const cb = document.querySelector(`[data-sync-scope="${key}"]`); if (cb) cb.checked = true;
+                return;
+            }
+            await syncSaveCfg({ scope: Object.values(sc).every(Boolean) ? null : sc });
+            toast(on ? '🔄 Wird wieder abgeglichen' : '📵 Bleibt nur auf diesem Gerät');
+        }
         /* Sync-Kennung: kurzer Prüfwert des Speicherplatzes – gleich auf allen Geräten mit gleichem Code + Passwort */
         const syncFp = st => (st.space.slice(0, 4) + '-' + st.space.slice(4, 8)).toUpperCase();
         function syncFillFp() { syncCrypto().then(st => { const el = $('sync-fp'); if (el) el.textContent = syncFp(st); }).catch(() => {}); }
