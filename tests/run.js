@@ -822,6 +822,11 @@ async function makePhotos(browser) {
         const board = await page.evaluate(() => { tfClearBoard(); const n = tfPool()[0]; tfMove(n, 'front', null);
             const r = { front: tfBoard.front.join(), text: val('in-tf-row3'), saved: (collectSlotData().tfBoard?.front || []).join(), n };
             tfMove(n, 'missing', 0); r.missing = val('in-tf-missing'); r.front2 = tfBoard.front.length; return r; });
+        const tfShort = await page.evaluate(() => { tfClearBoard(); const n = tfPool().find(x => normName(x).includes(' ')); tfMove(n, 'front', null);
+            setVal('in-tf-namefmt', 'short'); tfSyncText(); const parts = normName(n).split(' ');
+            const r = { want: `${parts[0][0]}. ${parts.slice(1).join(' ')}`, text: val('in-tf-row3'), opt: !!document.querySelector('#in-tf-namefmt option[value="short"]') };
+            setVal('in-tf-namefmt', 'full'); tfClearBoard(); return r; });
+        check('Teamfoto: Vorname abgekürzt (F. Munz)', tfShort.opt && tfShort.text === tfShort.want, JSON.stringify(tfShort));
         check('Teamfoto: Spieler auf Reihen verteilen (gespeichert, Text befüllt)', board.front === board.n && board.text.length > 0 && board.saved === board.n && board.missing.length > 0 && board.front2 === 0, JSON.stringify(board));
         const tfl = await page.evaluate(() => { tfClearBoard(); const [a, b2] = tfPool();
             tfToggleRow('middle', false); const zones = [...document.querySelectorAll('#tf-board .tf-zone')].map(z => z.dataset.zone).join();
