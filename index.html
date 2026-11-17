@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 26.5</title>
+    <title>Match-Shot – Grafiken für Vereine 26.6</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3293,7 +3293,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "26.5";
+        const APP_VERSION = "26.6";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -10451,27 +10451,32 @@ Alle sind herzlich eingeladen!</textarea></div>
             updateNumberInputs();
             updateDesignSettings();
             editorTabs.forEach(t => { updateTabDesign(t); renderSelectedSponsors(t); });
-            updatePostFields();
-            updateAllDates();
-            updateStoryTitle();
-            updateTorImageSize();
-            buildFormation();
-            updateMatchup();
-            updatePotm();
-            updateTor();
-            updateErgebnis();
-            updateKader();
-            updateKalender();
-            updateGeburtstag();
-            updateNeuzugang();
-            updateSponsorPost();
-            updateWochenende();
-            updateEckball();
+            // Alle Vorlagen neu aufbauen – dieselbe Liste wie beim Aktualisieren eines einzelnen Reiters,
+            // damit beim Versionswechsel keine Vorlage den Stand der vorigen Version zeigt (fehlten: Mannschaftsfoto, Freie Vorlage)
+            Object.values(TAB_UPDATE).forEach(fn => fn());
+            if (editorTabs.includes(activeTab)) updateCaption(activeTab);
             editorTabs.forEach(applyPhotoFx);
             applyAllElStyles();
             applyLockAll();
         }
 
+        /* Je Reiter: Vorschau aus den aktuellen Eingaben aufbauen. Gilt für „ein Reiter“ (updateAllViews) und „alle“ (renderAll). */
+        const TAB_UPDATE = {
+            post: () => { updatePostFields(); updateAllDates(); updateMatchup(); },
+            story: () => { updateStoryTitle(); buildFormation(); },
+            tor: () => { updateTorImageSize(); updateTor(); },
+            ergebnis: () => updateErgebnis(),
+            kader: () => { updateAllDates(); updateKader(); },
+            kalender: () => updateKalender(),
+            eckball: () => updateEckball(),
+            potm: () => updatePotm(),
+            geburtstag: () => updateGeburtstag(),
+            neuzugang: () => updateNeuzugang(),
+            sponsor: () => updateSponsorPost(),
+            wochenende: () => updateWochenende(),
+            teamfoto: () => { setupTfBoard(); renderTfBoard(); updateTeamfoto(); },
+            frei: () => updateFrei()
+        };
         const scheduleRoleHints = debounce(tab => renderRoleHints(tab), 600);
         function updateAllViews() {
             if ($(`design-controls-${activeTab}`)?.querySelector('details[data-section="colors"][open], details[data-section="boxes"][open]')) scheduleRoleHints(activeTab);
@@ -10481,22 +10486,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 updateTabDesign(activeTab);
                 renderSelectedSponsors(activeTab);
             }
-            switch (activeTab) {
-                case 'post': updatePostFields(); updateAllDates(); updateMatchup(); break;
-                case 'story': updateStoryTitle(); buildFormation(); break;
-                case 'tor': updateTorImageSize(); updateTor(); break;
-                case 'ergebnis': updateErgebnis(); break;
-                case 'kader': updateAllDates(); updateKader(); break;
-                case 'kalender': updateKalender(); break;
-                case 'eckball': updateEckball(); break;
-                case 'potm': updatePotm(); break;
-                case 'geburtstag': updateGeburtstag(); break;
-                case 'neuzugang': updateNeuzugang(); break;
-                case 'sponsor': updateSponsorPost(); break;
-                case 'wochenende': updateWochenende(); break;
-                case 'teamfoto': setupTfBoard(); renderTfBoard(); updateTeamfoto(); break;
-                case 'frei': updateFrei(); break;
-            }
+            TAB_UPDATE[activeTab]?.();
             if (editorTabs.includes(activeTab)) updateCaption(activeTab);
             afterViewsUpdated();
         }
