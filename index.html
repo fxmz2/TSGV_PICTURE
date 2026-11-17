@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 26.2</title>
+    <title>Match-Shot – Grafiken für Vereine 26.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1187,6 +1187,7 @@
         .modal-actions .primary { background: #2a9d8f; color: white; }
         .modal-actions .secondary { background: #e9ecef; color: #333; }
         .btn-action-group .video-btn { background: #5a4fcf; }
+        .btn-action-group .refresh-btn { flex: 0 0 48px; background: #6c757d; font-size: 18px; padding: 8px 0; }
         .pack-results .vid-thumb { display: flex; align-items: center; justify-content: center; aspect-ratio: 9 / 16; background: #222; color: #fff; font-size: 26px; border-radius: 6px; margin-bottom: 3px; }
         .modal-actions button:disabled { opacity: 0.6; cursor: default; }
         .storage-status { display: block; margin-top: 6px; font-weight: bold; }
@@ -3292,7 +3293,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "26.2";
+        const APP_VERSION = "26.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3332,14 +3333,16 @@ Alle sind herzlich eingeladen!</textarea></div>
 
         const PLAYER_FALLBACK = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23c9ced6'/><circle cx='50' cy='38' r='18' fill='%23ffffff'/><path d='M16 100 C18 72 34 62 50 62 C66 62 82 72 84 100 Z' fill='%23ffffff'/></svg>";
 
+        /* Gespeicherte Auflösung: mindestens so groß wie im Export (Beitrag 1200 × 1500, Story 1200 × 2133),
+           damit nichts hochskaliert werden muss (ab 26.4 – vorher Hintergründe nur 1200 × 1200, Fotos 900 × 1100) */
         const IMG_OPTS = {
-            photo:    { maxW: 900,  maxH: 1100, type: 'image/jpeg', quality: 0.9, keepAlpha: true },
-            torPhoto: { maxW: 1000, maxH: 1400, type: 'image/jpeg', quality: 0.9, keepAlpha: true },
-            logo:     { maxW: 800,  maxH: 800,  type: 'image/png' },
-            feed:     { maxW: 1200, maxH: 1200, type: 'image/jpeg', quality: 0.85 },
-            story:    { maxW: 1200, maxH: 2134, type: 'image/jpeg', quality: 0.85 },
+            photo:    { maxW: 1400, maxH: 1800, type: 'image/jpeg', quality: 0.92, keepAlpha: true },
+            torPhoto: { maxW: 1500, maxH: 2000, type: 'image/jpeg', quality: 0.92, keepAlpha: true },
+            logo:     { maxW: 1000, maxH: 1000, type: 'image/png' },
+            feed:     { maxW: 1440, maxH: 1800, type: 'image/jpeg', quality: 0.92 },
+            story:    { maxW: 1350, maxH: 2400, type: 'image/jpeg', quality: 0.92 },
             thumb:    { maxW: 120,  maxH: 214,  type: 'image/jpeg', quality: 0.7 },
-            teamPhoto: { maxW: 1600, maxH: 1600, type: 'image/jpeg', quality: 0.88 }
+            teamPhoto: { maxW: 2400, maxH: 2400, type: 'image/jpeg', quality: 0.92 }
         };
 
         const BUILTIN_BGS = [
@@ -3829,7 +3832,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             }
             return webpOk;
         }
-        const CUT_MAX = { w: 900, h: 1100 };   // gleiche Auflösung wie die Original-Fotos – keine Qualitätseinbuße
+        const CUT_MAX = { w: 1400, h: 1800 };   // gleiche Auflösung wie die Original-Fotos – keine Qualitätseinbuße
         function encodeAlphaCanvas(canvas) {
             let c = canvas;
             const s = Math.min(1, CUT_MAX.w / c.width, CUT_MAX.h / c.height);
@@ -4147,6 +4150,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function saveStammdaten() {
             try {
                 await localforage.setItem(STORE.stammdaten, stammdaten);
+                markSaved();
             } catch (e) {
                 console.warn('Stammdaten speichern fehlgeschlagen:', e);
                 alert('Speichern fehlgeschlagen – evtl. ist der Gerätespeicher voll.');
@@ -6098,13 +6102,29 @@ Alle sind herzlich eingeladen!</textarea></div>
                     if (inView) data.positions[k] = copy(src.positions[k]);
                 }
                 if (TAB_DESIGN_EXTRA[tab]) takeKeys(TAB_DESIGN_EXTRA[tab]);
+                // Vereinsfarben und Format gelten für die ganze Version, prägen aber das Design jedes Reiters
+                ['primary', 'jerseyColor', 'frameColor', 'feedFormat'].forEach(k => { if (src[k] !== undefined) data[k] = copy(src[k]); });
+                // Anzeige-Einstellungen des Reiters (Namensformat, Anzeigetafel, Torschützen zeigen …)
+                const spec = TAB_CONTENT[tab];
+                if (spec && what === 'design') {
+                    (spec.keys || []).filter(k => CLEAR_KEEP_KEYS.includes(k) && k !== 'season').forEach(k => { if (src[k] !== undefined) data[k] = copy(src[k]); });
+                    for (const k in (src.inputs || {})) if ((spec.inputs || []).some(re => re.test(k)) && CLEAR_KEEP_INPUT.test(k) && k !== 'in-tf-photo') data.inputs[k] = src.inputs[k];
+                }
+                // Bildausschnitt „ganzes Bild“ und Video-Einstellungen der Vorlagen dieses Reiters
+                const inTabKey = k => k === 'tab:' + tab || !!(view?.querySelector(`[id="${k}"]`));
+                data.imgFit = Object.fromEntries(Object.entries(data.imgFit || {}).filter(([k]) => !inTabKey(k)));
+                Object.entries(src.imgFit || {}).forEach(([k, v]) => { if (inTabKey(k)) data.imgFit[k] = v; });
+                ['vidOrder', 'vidCfg'].forEach(f => {
+                    data[f] = { ...(data[f] || {}) };
+                    tplIds.forEach(id => { if (src[f]?.[id]) data[f][id] = copy(src[f][id]); else delete data[f][id]; });
+                });
             }
             applySlotData(data);
             renderAll();
             await saveSlotNow();
             captionDirty[tab] = false;
             updateCaption(tab);
-            toast(`✅ Reiter aus „${versionLabel(from)}“ übernommen`);
+            toast(`✅ Reiter aus „${versionLabel(from)}“ übernommen${what !== 'content' ? ' (inkl. Vereinsfarben)' : ''}`);
         }
 
         /* =========================================================
@@ -6702,7 +6722,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             img.src = src;
             await img.decode();
             let W = img.naturalWidth, H = img.naturalHeight;
-            const k = Math.min(1, 900 / Math.max(W, H)); W = Math.round(W * k); H = Math.round(H * k);
+            const k = Math.min(1, 2000 / Math.max(W, H)); W = Math.round(W * k); H = Math.round(H * k);
             const c = document.createElement('canvas'); c.width = W; c.height = H;
             const ctx = c.getContext('2d');
             if (fx === 'outline-w' || fx === 'outline-j' || fx === 'glow') {
@@ -6732,9 +6752,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 ctx.putImageData(d, 0, 0);
             }
             const alpha = fx !== 'bw' && fx !== 'duotone' || canvasHasTransparency(c);
-            const out = alpha ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.92) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.9);
+            const out = alpha ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.95) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.95);
             freeCanvas(c);
-            if (fxCache.size > 150) fxCache.delete(fxCache.keys().next().value);
+            if (fxCache.size > 80) fxCache.delete(fxCache.keys().next().value);
             fxCache.set(key, out);
             return out;
         }
@@ -6778,13 +6798,13 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (fxCache.has(key)) return fxCache.get(key);
             const img = new Image(); img.src = src; await img.decode();
             const W = img.naturalWidth, H = img.naturalHeight, r = cropRect(W, H, a, fc);
-            const k = Math.min(1, 1100 / Math.max(r.w, r.h));
+            const k = Math.min(1, 2400 / Math.max(r.w, r.h));
             const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(r.w * k)); c.height = Math.max(1, Math.round(r.h * k));
             const ctx = c.getContext('2d'); ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, r.l, r.t, r.w, r.h, 0, 0, c.width, c.height);
-            const out = canvasHasTransparency(c) ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.92) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.92);
+            const out = canvasHasTransparency(c) ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.95) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.95);
             freeCanvas(c);
-            if (fxCache.size > 150) fxCache.delete(fxCache.keys().next().value);
+            if (fxCache.size > 80) fxCache.delete(fxCache.keys().next().value);
             fxCache.set(key, out);
             return out;
         }
@@ -7218,7 +7238,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const list = stammdaten.teamPhotos || [];
             const v = sel.value;
             sel.innerHTML = '<option value="">– kein Foto –</option>' + list.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
-            sel.value = list.some(t => t.id === v) ? v : (list.length ? list[list.length - 1].id : '');
+            sel.value = list.some(t => t.id === v) ? v : '';   // nicht automatisch das zuletzt hochgeladene Foto (gehört evtl. zu einer anderen Mannschaft)
             if ($('tf-delete-btn')) $('tf-delete-btn').hidden = !sel.value;
         }
         async function uploadTeamPhoto(ev) {
@@ -7480,6 +7500,26 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if ($('out-tf-placeholder' + sfx)) $('out-tf-placeholder' + sfx).style.display = ph ? 'none' : '';
                 const box = $('out-tf-names' + sfx);
                 if (box) { box.innerHTML = namesHtml; box.style.display = namesHtml ? '' : 'none'; }
+                if (img && !img.dataset.tfLay) { img.dataset.tfLay = '1'; img.addEventListener('load', () => layoutTeamfoto()); }
+            });
+            layoutTeamfoto();
+        }
+        /* Namen stehen immer direkt unter dem Foto; reicht der Platz nicht, wird das Foto kleiner (nie verzerrt).
+           Vorher stand die Namensbox an fester Stelle – höhere Fotos ragten darunter, je nach Gerät unterschiedlich. */
+        function layoutTeamfoto() {
+            ['', '-feed'].forEach(sfx => {
+                const img = $('out-tf-photo' + sfx), box = $('tf-photo-box' + sfx), names = $('out-tf-names' + sfx);
+                const host = box?.offsetParent;
+                if (!box || !names || !host) return;   // Reiter ausgeblendet → beim Anzeigen erneut
+                const gap = 10, bottom = 14, H = host.clientHeight, top = box.offsetTop;
+                const nh = names.style.display === 'none' ? 0 : names.offsetHeight;
+                if (img && !img.hidden && img.naturalWidth) {
+                    const maxH = Math.max(120, H - top - (nh ? nh + gap : 0) - bottom);
+                    const w = box.clientWidth, h = w * img.naturalHeight / img.naturalWidth;
+                    img.style.width = h > maxH ? Math.round(maxH * img.naturalWidth / img.naturalHeight) + 'px' : '';
+                    img.style.margin = h > maxH ? '0 auto' : '';
+                }
+                names.style.top = Math.round(top + box.offsetHeight + gap) + 'px';
             });
         }
 
@@ -10548,8 +10588,21 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            SPEICHERN / LADEN (Version 1–3 = nur Einstellungen)
            ========================================================= */
+        let savePending = false;   // eigene Eingaben, die noch nicht gespeichert sind
+        /* Mehrere Browser-Tabs (am PC): jeder Tab meldet sein Speichern; ein anderer Tab lädt beim Zurückkommen neu,
+           statt beim Wegklicken seinen alten Stand darüberzuschreiben */
+        let otherTabSaved = false;
+        const SAVE_STAMP = 'matchshot-saved';
+        function markSaved() { try { localStorage.setItem(SAVE_STAMP, Date.now() + ':' + Math.random().toString(36).slice(2)); } catch (e) {} }
+        window.addEventListener('storage', e => { if (e.key === SAVE_STAMP) otherTabSaved = true; });
+        function onAppHidden() { if (savePending || !otherTabSaved) saveSlotNow(); }
+        function onAppVisible() {
+            checkForAppUpdate();   // App kommt aus dem Hintergrund zurück → nach neuer Version schauen
+            if (otherTabSaved && !savePending && appReady) { otherTabSaved = false; refreshPreview(true); }
+        }
         function scheduleSave() {
             if (!appReady) return;
+            savePending = true;
             clearTimeout(saveTimer);
             saveTimer = setTimeout(saveSlotNow, 400);
         }
@@ -10557,10 +10610,13 @@ Alle sind herzlich eingeladen!</textarea></div>
         async function saveSlotNow() {
             clearTimeout(saveTimer);
             if (!appReady) return;
+            savePending = false;
             try {
                 const data = collectSlotData();
                 recordHistory(JSON.stringify(data));
                 await localforage.setItem(STORE.slot(currentVersion), data);
+                otherTabSaved = false;
+                markSaved();
             } catch (e) {
                 console.warn("Speichern fehlgeschlagen:", e);
             }
@@ -10718,6 +10774,8 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (data.formation) setFormation(data.formation);
             for (const key in map) {
                 if (data[key] !== undefined) setVal(map[key], data[key]);
+                // Fehlt ein Wert (älterer Stand, anderes Gerät), gilt der Ausgangszustand – sonst bliebe der Wert der vorigen Version stehen
+                else if (freshSlot && data !== freshSlot && freshSlot[key] !== undefined && key !== 'torOppMode' && key !== 'postTitleMode') setVal(map[key], freshSlot[key]);
             }
             // Alte Versionen hatten "SVA" als festen Standardnamen
             if (data.teamName === 'SVA' && club) setVal('cfg-team-name', '');
@@ -10729,15 +10787,15 @@ Alle sind herzlich eingeladen!</textarea></div>
             migrateNameFmt(data);
             NAME_FMT_FIELDS.forEach(([id, k]) => setVal(id, data[k]));
             updateNumberInputs();
-            if (data.ergShowScorers !== undefined && $('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers;
+            if ($('in-erg-show-scorers')) $('in-erg-show-scorers').checked = data.ergShowScorers ?? true;
             setVal('in-erg-mode', ERG_MODES[data.ergMode] ? data.ergMode : 'ergebnis');
             tfBoard = normTfBoard(data.tfBoard);
-            if (data.torOppMode === undefined && data.torPlayer !== undefined) setVal('in-tor-opp-mode', 'off');
-            if (data.postTitleMode === undefined && data.postTitle !== undefined)
-                setVal('in-post-title-mode', ['', 'HEIMSPIEL', 'AUSWÄRTSSPIEL'].includes(normName(data.postTitle).toUpperCase()) ? 'auto' : 'custom');
+            if (data.torOppMode === undefined) setVal('in-tor-opp-mode', data.torPlayer !== undefined ? 'off' : (freshSlot?.torOppMode || 'logos'));
+            if (data.postTitleMode === undefined)
+                setVal('in-post-title-mode', data.postTitle === undefined ? (freshSlot?.postTitleMode || 'auto') : ['', 'HEIMSPIEL', 'AUSWÄRTSSPIEL'].includes(normName(data.postTitle).toUpperCase()) ? 'auto' : 'custom');
             vidOrder = data.vidOrder && typeof data.vidOrder === 'object' && !Array.isArray(data.vidOrder) ? data.vidOrder : {};
             vidCfg = data.vidCfg && typeof data.vidCfg === 'object' && !Array.isArray(data.vidCfg) ? data.vidCfg : {};
-            if (data.bdayConfetti !== undefined && $('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti;
+            if ($('in-bday-confetti')) $('in-bday-confetti').checked = data.bdayConfetti ?? true;
             if ($('in-kal-own-logo')) $('in-kal-own-logo').checked = data.kalOwnLogo ?? true;
             if ($('in-wk-own-logo')) $('in-wk-own-logo').checked = data.wkOwnLogo ?? true;
             season = Array.isArray(data.season) ? data.season : [];
@@ -10751,6 +10809,8 @@ Alle sind herzlich eingeladen!</textarea></div>
 
             // Vor dem Setzen der Werte: volle Spielerliste in der Aufstellung, sonst gehen Namen verloren
             refreshLineupOptions(true);
+            // Eingaben, die in diesem Stand fehlen → Ausgangszustand (nicht die der vorigen Version stehen lassen)
+            if (freshSlot?.inputs && data !== freshSlot) for (const k in freshSlot.inputs) if (!data.inputs || !(k in data.inputs)) setVal(k, freshSlot.inputs[k]);
             if (data.inputs) {
                 // Ältere Stände kannten nur 10 Torschützen-Zeilen → übrige leeren
                 for (let i = 1; i <= SCORER_MAX; i++) if (!(`erg-scorer-${i}` in data.inputs)) { setVal(`erg-scorer-${i}`, 'Keiner'); setVal(`erg-minute-${i}`, ''); }
@@ -10759,9 +10819,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 Object.entries(SPON_DEFAULTS).forEach(([k, v]) => { if (!(k in data.inputs)) setVal(k, v); });
                 for (const k in data.inputs) setVal(k, data.inputs[k]);
             }
-            if (data.lineupKaderOnly !== undefined && $('in-lineup-kader-only')) $('in-lineup-kader-only').checked = data.lineupKaderOnly;
+            if ($('in-lineup-kader-only')) $('in-lineup-kader-only').checked = !!data.lineupKaderOnly;
             setVal('cfg-feed-format', data.feedFormat === '11' ? '11' : '45');
-            if (data.hashtags !== undefined) setVal('cfg-hashtags', data.hashtags);
+            setVal('cfg-hashtags', data.hashtags ?? freshSlot?.hashtags ?? '');
             refreshLineupOptions();
             // Auswahlfelder mit Namen, die es nicht (mehr) gibt → "Keiner"
             document.querySelectorAll('select.player-select').forEach(sel => { if (!sel.value) sel.value = 'Keiner'; });
@@ -12137,6 +12197,16 @@ Alle sind herzlich eingeladen!</textarea></div>
                     }
                 }
                 const fit = cs.objectFit;
+                if (fit === 'fill' && img.naturalWidth && !/^data:image\/svg/.test(img.currentSrc || img.src)) {
+                    // Deutlich größere Bilder (z.B. Wappen, Sponsorenlogos) hochwertig auf die Export-Größe bringen –
+                    // html2canvas verkleinert nur in einfacher Qualität (Treppchen an Kanten)
+                    const sc = exportScaleFor(img);
+                    if (img.naturalWidth > img.offsetWidth * sc * 1.25) {
+                        const data = rasterizeFitImage(img, cs);
+                        if (data) img.src = data;
+                    }
+                    return;
+                }
                 if ((fit !== 'cover' && fit !== 'contain') || !img.naturalWidth) return;
                 // Fertig zugeschnitten in Export-Auflösung vorberechnen – html2canvas würde object-fit ignorieren
                 // bzw. als Hintergrund nur in einfacher Auflösung zeichnen und dann hochskalieren (pixelig)
@@ -12180,11 +12250,22 @@ Alle sind herzlich eingeladen!</textarea></div>
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
             const iw = img.naturalWidth, ih = img.naturalHeight;
+            const fill = cs.objectFit === 'fill';
             const r = cs.objectFit === 'cover' ? Math.max(cw / iw, ch / ih) : Math.min(cw / iw, ch / ih);
-            const dw = iw * r, dh = ih * r;
-            const [ox, oy] = objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
+            const dw = fill ? cw : iw * r, dh = fill ? ch : ih * r;
+            const [ox, oy] = fill ? [0, 0] : objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
+            // Starke Verkleinerung in Stufen (je höchstens halbieren) – deutlich schärfer als in einem Schritt
+            let srcImg = img, sw = iw, sh = ih;
+            const tw = dw * scale, th = dh * scale;
+            while (sw / 2 > tw && sh / 2 > th) {
+                const t = document.createElement('canvas'); t.width = Math.round(sw / 2); t.height = Math.round(sh / 2);
+                const tc = t.getContext('2d'); tc.imageSmoothingQuality = 'high'; tc.drawImage(srcImg, 0, 0, t.width, t.height);
+                if (srcImg !== img) freeCanvas(srcImg);
+                srcImg = t; sw = t.width; sh = t.height;
+            }
             ctx.scale(scale, scale);
-            ctx.drawImage(img, ox, oy, dw, dh);
+            ctx.drawImage(srcImg, ox, oy, dw, dh);
+            if (srcImg !== img) freeCanvas(srcImg);
             let out = null;
             try { out = canvas.toDataURL('image/png'); } catch (e) {}
             freeCanvas(canvas);
@@ -12216,7 +12297,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 ctx.scale(scale, scale);
                 ctx.drawImage(src, ox, oy, dw, dh);
                 let data;
-                try { data = canvas.toDataURL('image/jpeg', 0.95); } catch (e) { freeCanvas(canvas); continue; }
+                try { data = canvas.toDataURL('image/png'); } catch (e) { freeCanvas(canvas); continue; }   // verlustfrei (vorher JPEG)
                 freeCanvas(canvas);
                 const layer = document.createElement('img');
                 layer.src = data;
@@ -12721,7 +12802,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             draw(0);
             const type = pickVideoType();
             const stream = cv.captureStream(30);
-            const rec = new MediaRecorder(stream, type ? { mimeType: type, videoBitsPerSecond: 8000000 } : { videoBitsPerSecond: 8000000 });
+            const rec = new MediaRecorder(stream, type ? { mimeType: type, videoBitsPerSecond: 12000000 } : { videoBitsPerSecond: 12000000 });
             const chunks = [];
             rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
             const stopped = new Promise(res => { rec.onstop = res; });
@@ -12789,6 +12870,34 @@ Alle sind herzlich eingeladen!</textarea></div>
             $('video-overlay').hidden = true;
         }
         /* Neben jedem „In Fotos / Teilen“ einen Video-Knopf anlegen */
+        /* 🔄 Unter jedem Bild: Vorschau aus dem Speicher neu aufbauen (z.B. nachdem ein Kollege per Sync etwas geändert hat) */
+        function addRefreshButtons() {
+            document.querySelectorAll('.btn-action-group').forEach(g => {
+                if (g.querySelector('.refresh-btn') || !g.querySelector('.download-btn[onclick^="shareImage"]')) return;
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'download-btn refresh-btn'; b.title = 'Vorschau aktualisieren (neu laden)'; b.textContent = '🔄';
+                b.addEventListener('click', () => refreshPreview());
+                g.appendChild(b);
+            });
+        }
+        async function refreshPreview(quiet) {
+            if (savePending) await saveSlotNow();   // nur offene eigene Eingaben sichern – sonst den Speicherstand übernehmen (z.B. vom Sync oder einem 2. Browser-Tab)
+            const sd = await localforage.getItem(STORE.stammdaten);
+            if (sd) { stammdaten = { ...emptyStammdaten(), ...sd }; sortStammdaten(); }
+            templateUrlCache.forEach(url => URL.revokeObjectURL(url)); templateUrlCache.clear();
+            fxCache.clear();
+            registerCustomFonts(); refreshFontSelects();
+            refreshPlayerOptions(); refreshOpponentDropdown(); refreshSponsorChecklists(); renderStammdatenLists();
+            editorTabs.forEach(renderBgThumbs);
+            applySlotData((await localforage.getItem(STORE.slot(currentVersion))) || emptyVersionData());
+            renderAll();
+            editorTabs.forEach(applyPhotoFx);
+            layoutTeamfoto();
+            otherTabSaved = false;
+            if (quiet) return;
+            toast('🔄 Vorschau aktualisiert');
+            syncCheckOnStart();   // gibt es im Vereins-Sync einen neueren Stand? → Hinweis
+        }
         function addVideoButtons() {
             document.querySelectorAll('.btn-action-group .download-btn[onclick^="shareImage"]').forEach(b => {
                 const m = /shareImage\('([^']+)',\s*'([^']+)'/.exec(b.getAttribute('onclick'));
@@ -14097,6 +14206,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 editorTabs.forEach(renderBgThumbs);
                 prepareTemplates();
                 addVideoButtons();
+                addRefreshButtons();
                 assignDraggableIds();
                 makeTextsDraggable();
                 addSafeZoneOverlays();
@@ -14123,12 +14233,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 sidebarEl.addEventListener('input', debouncedUpdate);
                 sidebarEl.addEventListener('change', () => { updateAllViews(); scheduleSave(); });
 
-                document.addEventListener('visibilitychange', () => {
-                    if (document.visibilityState === 'hidden') saveSlotNow();
-                    else checkForAppUpdate();   // App kommt aus dem Hintergrund zurück → nach neuer Version schauen
-                });
-                window.addEventListener('focus', () => checkForAppUpdate());
-                window.addEventListener('pagehide', () => saveSlotNow());
+                document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') onAppHidden(); else onAppVisible(); });
+                window.addEventListener('focus', () => onAppVisible());
+                window.addEventListener('pagehide', () => onAppHidden());
 
                 $('license-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitLicenseCode(); });
 
