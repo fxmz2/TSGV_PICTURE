@@ -864,6 +864,26 @@ async function makePhotos(browser) {
             holder.appendChild(img); document.body.appendChild(holder); replaceObjectFitImages(holder); await new Promise(res => setTimeout(res, 50));
             r.logo = img.src.startsWith('data:image/png') ? await dims(img.src) : 'unverändert'; holder.remove();
             return r; });
+        // Mannschaftsfoto im Export: aus voller Auflösung neu entschlüsselt (iPhone-Subsampling) und exakt auf Export-Größe
+        const tfx = await page.evaluate(async () => {
+            const c = document.createElement('canvas'); c.width = 2400; c.height = 1480; const g = c.getContext('2d'); g.fillStyle = '#eef'; g.fillRect(0, 0, 2400, 1480);
+            g.fillStyle = '#000'; for (let x = 0; x < 2400; x += 4) g.fillRect(x, 0, 2, 1480);   // feine Linien → Schärfe messbar
+            stammdaten.teamPhotos = [...(stammdaten.teamPhotos || []), { id: 'tfq', name: 'Q', img: c.toDataURL('image/jpeg', 0.95) }]; refreshTeamPhotoSelect();
+            switchTab('teamfoto'); setVal('in-tf-photo', 'tfq'); updateTeamfoto(); await new Promise(r => setTimeout(r, 300));
+            let used = 0; const orig = window.fullImageSource; window.fullImageSource = async im => { used++; return orig(im); };
+            const { holder, clone } = await prepareExportClone($('capture-teamfoto-feed'));
+            const r = {};
+            try {
+                const im = clone.querySelector('.tf-photo'); await im.decode?.();
+                r.w = im.naturalWidth; r.want = Math.round(im.clientWidth * 3); r.png = im.src.startsWith('data:image/png');
+                // Kontrast der feinen Linien in der Mitte (hoch = scharf)
+                const t = document.createElement('canvas'); t.width = im.naturalWidth; t.height = 4; const tc = t.getContext('2d'); tc.drawImage(im, 0, -Math.round(im.naturalHeight / 2));
+                const d = tc.getImageData(0, 0, t.width, 1).data; let mn = 255, mx = 0; for (let i = 400; i < 800; i += 4) { mn = Math.min(mn, d[i]); mx = Math.max(mx, d[i]); } r.contrast = mx - mn;
+            } finally { holder.remove(); window.fullImageSource = orig; }
+            r.used = used;
+            stammdaten.teamPhotos = stammdaten.teamPhotos.filter(t => t.id !== 'tfq'); setVal('in-tf-photo', ''); refreshTeamPhotoSelect(); updateTeamfoto();
+            return r; });
+        check('Mannschaftsfoto im Export: volle Auflösung, exakt Export-Größe, scharf', tfx.used >= 1 && Math.abs(tfx.w - tfx.want) <= 2 && tfx.png && tfx.contrast > 60, JSON.stringify(tfx));
         check('Maximale Qualität: Fotos/Hintergründe groß genug, Ausschnitt & Effekte in voller Auflösung, Logos sauber verkleinert',
             q.photo[1] === 1800 && q.feed[0] === 1080 && q.feed[1] === 1350 && q.story[1] === 1920 && q.crop[0] === 1400 && q.fx[0] === 1400 && q.logo[0] === 300, JSON.stringify(q));
         check('Teamfoto: Vorname abgekürzt (F. Munz)', tfShort.opt && tfShort.text === tfShort.want, JSON.stringify(tfShort));
