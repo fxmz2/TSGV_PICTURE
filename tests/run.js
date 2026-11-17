@@ -1060,6 +1060,32 @@ async function makePhotos(browser) {
             const before = val('in-frei-title');
             await refreshPreview(); return { btns, before, after: val('in-frei-title') }; });
         check('🔄 Aktualisieren unter jedem Bild lädt die Vorschau neu', rf.btns >= 20 && rf.after === 'Vom Kollegen', JSON.stringify(rf));
+        // Jeder Reiter zeigt nach dem Versionswechsel sofort genau den Stand dieser Version (ohne erst etwas zu ändern)
+        const vsw = await page.evaluate(async () => {
+            const snap = tab => { const v = $(`view-${tab}`); return v.innerText + '|' + [...v.querySelectorAll('img')].map(i => (i.getAttribute('src') || '').length + (i.hidden ? 'h' : '')).join(','); };
+            const set = async (v, txt) => { await switchVersion(v); setVal('in-tf-title', txt); setVal('in-tf-row1', txt + ' Reihe'); setVal('in-frei-title', txt + ' Frei');
+                setVal('in-potm-text', txt + ' POTM'); setVal('in-ergebnis-title', txt + ' Erg'); updateTeamfoto(); updateFrei(); updateAllViews(); await saveSlotNow(); };
+            const c = document.createElement('canvas'); c.width = 600; c.height = 400; c.getContext('2d').fillRect(0, 0, 600, 400);
+            stammdaten.teamPhotos = [{ id: 'p1', name: 'Eins', img: c.toDataURL('image/png') }]; refreshTeamPhotoSelect();
+            await set('v1', 'EINS'); setVal('in-tf-photo', 'p1'); updateTeamfoto(); await saveSlotNow();
+            await set('v2', 'ZWEI'); setVal('in-tf-photo', ''); updateTeamfoto(); await saveSlotNow();
+            const bad = [];
+            for (const tab of editorTabs) {
+                switchTab(tab);
+                for (const v of ['v1', 'v2', 'v1']) {
+                    await switchVersion(v);
+                    const after = snap(tab);
+                    updateAllViews();   // so sähe es nach „etwas ändern“ aus
+                    if (snap(tab) !== after) bad.push(tab + ':' + v);
+                }
+            }
+            switchTab('teamfoto'); await switchVersion('v1');
+            const tf1 = { title: $('out-tf-title-feed').textContent, photo: !$('out-tf-photo-feed').hidden };
+            await switchVersion('v2');
+            const tf2 = { title: $('out-tf-title-feed').textContent, photo: !$('out-tf-photo-feed').hidden };
+            stammdaten.teamPhotos = []; refreshTeamPhotoSelect();
+            return { bad, tf1, tf2 }; });
+        check('Versionswechsel: jeder Reiter zeigt sofort den richtigen Stand (Mannschaftsfoto, Freie Vorlage …)', !vsw.bad.length && vsw.tf1.title === 'EINS' && vsw.tf1.photo && vsw.tf2.title === 'ZWEI' && !vsw.tf2.photo, JSON.stringify(vsw));
         // Zwei Browser-Tabs (PC): Tab B überschreibt beim Wegklicken nicht, was Tab A gespeichert hat, und lädt beim Zurückkommen neu
         const pageB = await page.context().newPage(); pageB.errors = []; pageB.on('pageerror', e => pageB.errors.push(e.message)); pageB.on('dialog', d => d.accept());
         await pageB.goto(BASE); await waitReady(pageB);
