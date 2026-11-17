@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 26.3</title>
+    <title>Match-Shot – Grafiken für Vereine 26.4</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3293,7 +3293,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "26.3";
+        const APP_VERSION = "26.4";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3333,14 +3333,16 @@ Alle sind herzlich eingeladen!</textarea></div>
 
         const PLAYER_FALLBACK = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23c9ced6'/><circle cx='50' cy='38' r='18' fill='%23ffffff'/><path d='M16 100 C18 72 34 62 50 62 C66 62 82 72 84 100 Z' fill='%23ffffff'/></svg>";
 
+        /* Gespeicherte Auflösung: mindestens so groß wie im Export (Beitrag 1200 × 1500, Story 1200 × 2133),
+           damit nichts hochskaliert werden muss (ab 26.4 – vorher Hintergründe nur 1200 × 1200, Fotos 900 × 1100) */
         const IMG_OPTS = {
-            photo:    { maxW: 900,  maxH: 1100, type: 'image/jpeg', quality: 0.9, keepAlpha: true },
-            torPhoto: { maxW: 1000, maxH: 1400, type: 'image/jpeg', quality: 0.9, keepAlpha: true },
-            logo:     { maxW: 800,  maxH: 800,  type: 'image/png' },
-            feed:     { maxW: 1200, maxH: 1200, type: 'image/jpeg', quality: 0.85 },
-            story:    { maxW: 1200, maxH: 2134, type: 'image/jpeg', quality: 0.85 },
+            photo:    { maxW: 1400, maxH: 1800, type: 'image/jpeg', quality: 0.92, keepAlpha: true },
+            torPhoto: { maxW: 1500, maxH: 2000, type: 'image/jpeg', quality: 0.92, keepAlpha: true },
+            logo:     { maxW: 1000, maxH: 1000, type: 'image/png' },
+            feed:     { maxW: 1440, maxH: 1800, type: 'image/jpeg', quality: 0.92 },
+            story:    { maxW: 1350, maxH: 2400, type: 'image/jpeg', quality: 0.92 },
             thumb:    { maxW: 120,  maxH: 214,  type: 'image/jpeg', quality: 0.7 },
-            teamPhoto: { maxW: 1600, maxH: 1600, type: 'image/jpeg', quality: 0.88 }
+            teamPhoto: { maxW: 2400, maxH: 2400, type: 'image/jpeg', quality: 0.92 }
         };
 
         const BUILTIN_BGS = [
@@ -3830,7 +3832,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             }
             return webpOk;
         }
-        const CUT_MAX = { w: 900, h: 1100 };   // gleiche Auflösung wie die Original-Fotos – keine Qualitätseinbuße
+        const CUT_MAX = { w: 1400, h: 1800 };   // gleiche Auflösung wie die Original-Fotos – keine Qualitätseinbuße
         function encodeAlphaCanvas(canvas) {
             let c = canvas;
             const s = Math.min(1, CUT_MAX.w / c.width, CUT_MAX.h / c.height);
@@ -6720,7 +6722,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             img.src = src;
             await img.decode();
             let W = img.naturalWidth, H = img.naturalHeight;
-            const k = Math.min(1, 900 / Math.max(W, H)); W = Math.round(W * k); H = Math.round(H * k);
+            const k = Math.min(1, 2000 / Math.max(W, H)); W = Math.round(W * k); H = Math.round(H * k);
             const c = document.createElement('canvas'); c.width = W; c.height = H;
             const ctx = c.getContext('2d');
             if (fx === 'outline-w' || fx === 'outline-j' || fx === 'glow') {
@@ -6750,9 +6752,9 @@ Alle sind herzlich eingeladen!</textarea></div>
                 ctx.putImageData(d, 0, 0);
             }
             const alpha = fx !== 'bw' && fx !== 'duotone' || canvasHasTransparency(c);
-            const out = alpha ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.92) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.9);
+            const out = alpha ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.95) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.95);
             freeCanvas(c);
-            if (fxCache.size > 150) fxCache.delete(fxCache.keys().next().value);
+            if (fxCache.size > 80) fxCache.delete(fxCache.keys().next().value);
             fxCache.set(key, out);
             return out;
         }
@@ -6796,13 +6798,13 @@ Alle sind herzlich eingeladen!</textarea></div>
             if (fxCache.has(key)) return fxCache.get(key);
             const img = new Image(); img.src = src; await img.decode();
             const W = img.naturalWidth, H = img.naturalHeight, r = cropRect(W, H, a, fc);
-            const k = Math.min(1, 1100 / Math.max(r.w, r.h));
+            const k = Math.min(1, 2400 / Math.max(r.w, r.h));
             const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(r.w * k)); c.height = Math.max(1, Math.round(r.h * k));
             const ctx = c.getContext('2d'); ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, r.l, r.t, r.w, r.h, 0, 0, c.width, c.height);
-            const out = canvasHasTransparency(c) ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.92) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.92);
+            const out = canvasHasTransparency(c) ? (canEncodeWebp() ? c.toDataURL('image/webp', 0.95) : c.toDataURL('image/png')) : c.toDataURL('image/jpeg', 0.95);
             freeCanvas(c);
-            if (fxCache.size > 150) fxCache.delete(fxCache.keys().next().value);
+            if (fxCache.size > 80) fxCache.delete(fxCache.keys().next().value);
             fxCache.set(key, out);
             return out;
         }
@@ -12195,6 +12197,16 @@ Alle sind herzlich eingeladen!</textarea></div>
                     }
                 }
                 const fit = cs.objectFit;
+                if (fit === 'fill' && img.naturalWidth && !/^data:image\/svg/.test(img.currentSrc || img.src)) {
+                    // Deutlich größere Bilder (z.B. Wappen, Sponsorenlogos) hochwertig auf die Export-Größe bringen –
+                    // html2canvas verkleinert nur in einfacher Qualität (Treppchen an Kanten)
+                    const sc = exportScaleFor(img);
+                    if (img.naturalWidth > img.offsetWidth * sc * 1.25) {
+                        const data = rasterizeFitImage(img, cs);
+                        if (data) img.src = data;
+                    }
+                    return;
+                }
                 if ((fit !== 'cover' && fit !== 'contain') || !img.naturalWidth) return;
                 // Fertig zugeschnitten in Export-Auflösung vorberechnen – html2canvas würde object-fit ignorieren
                 // bzw. als Hintergrund nur in einfacher Auflösung zeichnen und dann hochskalieren (pixelig)
@@ -12238,11 +12250,22 @@ Alle sind herzlich eingeladen!</textarea></div>
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
             const iw = img.naturalWidth, ih = img.naturalHeight;
+            const fill = cs.objectFit === 'fill';
             const r = cs.objectFit === 'cover' ? Math.max(cw / iw, ch / ih) : Math.min(cw / iw, ch / ih);
-            const dw = iw * r, dh = ih * r;
-            const [ox, oy] = objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
+            const dw = fill ? cw : iw * r, dh = fill ? ch : ih * r;
+            const [ox, oy] = fill ? [0, 0] : objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
+            // Starke Verkleinerung in Stufen (je höchstens halbieren) – deutlich schärfer als in einem Schritt
+            let srcImg = img, sw = iw, sh = ih;
+            const tw = dw * scale, th = dh * scale;
+            while (sw / 2 > tw && sh / 2 > th) {
+                const t = document.createElement('canvas'); t.width = Math.round(sw / 2); t.height = Math.round(sh / 2);
+                const tc = t.getContext('2d'); tc.imageSmoothingQuality = 'high'; tc.drawImage(srcImg, 0, 0, t.width, t.height);
+                if (srcImg !== img) freeCanvas(srcImg);
+                srcImg = t; sw = t.width; sh = t.height;
+            }
             ctx.scale(scale, scale);
-            ctx.drawImage(img, ox, oy, dw, dh);
+            ctx.drawImage(srcImg, ox, oy, dw, dh);
+            if (srcImg !== img) freeCanvas(srcImg);
             let out = null;
             try { out = canvas.toDataURL('image/png'); } catch (e) {}
             freeCanvas(canvas);
@@ -12274,7 +12297,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 ctx.scale(scale, scale);
                 ctx.drawImage(src, ox, oy, dw, dh);
                 let data;
-                try { data = canvas.toDataURL('image/jpeg', 0.95); } catch (e) { freeCanvas(canvas); continue; }
+                try { data = canvas.toDataURL('image/png'); } catch (e) { freeCanvas(canvas); continue; }   // verlustfrei (vorher JPEG)
                 freeCanvas(canvas);
                 const layer = document.createElement('img');
                 layer.src = data;
@@ -12779,7 +12802,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             draw(0);
             const type = pickVideoType();
             const stream = cv.captureStream(30);
-            const rec = new MediaRecorder(stream, type ? { mimeType: type, videoBitsPerSecond: 8000000 } : { videoBitsPerSecond: 8000000 });
+            const rec = new MediaRecorder(stream, type ? { mimeType: type, videoBitsPerSecond: 12000000 } : { videoBitsPerSecond: 12000000 });
             const chunks = [];
             rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
             const stopped = new Promise(res => { rec.onstop = res; });

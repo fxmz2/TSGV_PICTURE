@@ -846,6 +846,26 @@ async function makePhotos(browser) {
             ['in-tf-row1', 'in-tf-row2', 'in-tf-missing'].forEach(id => setVal(id, '')); updateTeamfoto();
             return res; });
         check('Mannschaftsfoto: Namen immer unter dem Foto, alles passt ins Bild, Export gleich, kein automatisches Foto', tfl2.story.below && tfl2.story.fits && tfl2.story.ratio && tfl2['-feed'].below && tfl2['-feed'].fits && tfl2['-feed'].ratio && tfl2.exportBelow && tfl2.noAuto, JSON.stringify(tfl2));
+        // Maximale Qualität: große Fotos/Hintergründe nicht unnötig verkleinern, Ausschnitt/Effekte in voller Auflösung, Logos sauber verkleinert
+        const q = await page.evaluate(async () => {
+            const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.fillStyle = '#246'; g.fillRect(0, 0, w, h); g.fillStyle = '#fc0'; g.fillRect(w * 0.3, h * 0.2, w * 0.4, h * 0.5); return c; };
+            const dims = async src => { const i = new Image(); i.src = src; await i.decode(); return [i.naturalWidth, i.naturalHeight]; };
+            const blob = c => new Promise(r => c.toBlob(r, 'image/jpeg', 0.95));
+            const r = {};
+            r.photo = await dims(await compressImage(await blob(mk(2400, 3200)), IMG_OPTS.photo));
+            r.feed = await dims(await compressImage(await blob(mk(1080, 1350)), IMG_OPTS.feed));
+            r.story = await dims(await compressImage(await blob(mk(1080, 1920)), IMG_OPTS.story));
+            const big = mk(1400, 1800).toDataURL('image/jpeg', 0.95);
+            r.crop = await dims(await cropImage(big, { x: 50, y: 40, z: 1 }, 1));
+            r.fx = await dims(await fxImage(big, 'bw', '#005f73', '#bb3e03'));
+            // Logo: großes Bild klein angezeigt → im Export hochwertig auf genaue Export-Größe gebracht
+            const holder = document.createElement('div'); holder.style.cssText = 'position:fixed;left:-5000px;top:0;';
+            const img = new Image(); img.src = mk(1000, 1000).toDataURL('image/png'); await img.decode(); img.style.cssText = 'width:100px;height:100px;';
+            holder.appendChild(img); document.body.appendChild(holder); replaceObjectFitImages(holder); await new Promise(res => setTimeout(res, 50));
+            r.logo = img.src.startsWith('data:image/png') ? await dims(img.src) : 'unverändert'; holder.remove();
+            return r; });
+        check('Maximale Qualität: Fotos/Hintergründe groß genug, Ausschnitt & Effekte in voller Auflösung, Logos sauber verkleinert',
+            q.photo[1] === 1800 && q.feed[0] === 1080 && q.feed[1] === 1350 && q.story[1] === 1920 && q.crop[0] === 1400 && q.fx[0] === 1400 && q.logo[0] === 300, JSON.stringify(q));
         check('Teamfoto: Vorname abgekürzt (F. Munz)', tfShort.opt && tfShort.text === tfShort.want, JSON.stringify(tfShort));
         check('Teamfoto: Spieler auf Reihen verteilen (gespeichert, Text befüllt)', board.front === board.n && board.text.length > 0 && board.saved === board.n && board.missing.length > 0 && board.front2 === 0, JSON.stringify(board));
         const tfl = await page.evaluate(() => { tfClearBoard(); const [a, b2] = tfPool();
