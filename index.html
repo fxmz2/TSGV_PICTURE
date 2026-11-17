@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 26.4</title>
+    <title>Match-Shot – Grafiken für Vereine 26.5</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3293,7 +3293,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "26.4";
+        const APP_VERSION = "26.5";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -12079,7 +12079,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             });
         }
 
-        function rasterizeClippedImage(img, cs, scale = 3) {
+        function rasterizeClippedImage(img, cs, scale = 3, full = null) {
             const w = img.offsetWidth, h = img.offsetHeight;
             const pts = parseClipPolygon(cs.clipPath, w, h);
             if (!pts || !w || !h || !img.naturalWidth) return null;
@@ -12100,7 +12100,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const x0 = px(cs.borderLeftWidth) + px(cs.paddingLeft), y0 = px(cs.borderTopWidth) + px(cs.paddingTop);
             const cw = w - x0 - px(cs.borderRightWidth) - px(cs.paddingRight);
             const ch = h - y0 - px(cs.borderBottomWidth) - px(cs.paddingBottom);
-            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const iw = full ? full.width : img.naturalWidth, ih = full ? full.height : img.naturalHeight;
             let dw = cw, dh = ch;
             if (cs.objectFit === 'cover' || cs.objectFit === 'contain') {
                 const r = cs.objectFit === 'cover' ? Math.max(cw / iw, ch / ih) : Math.min(cw / iw, ch / ih);
@@ -12110,7 +12110,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             ctx.rect(x0, y0, cw, ch);
             ctx.clip();
             const [px0, py0] = objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
-            ctx.drawImage(img, x0 + px0, y0 + py0, dw, dh);
+            ctx.drawImage(full || img, x0 + px0, y0 + py0, dw, dh);
             let out = null;
             try { out = canvas.toDataURL('image/png'); } catch (e) {}
             freeCanvas(canvas);
@@ -12123,7 +12123,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             return m ? { color: m[1], x: +m[2], y: +m[3], blur: +m[4] } : null;
         }
 
-        function rasterizeDropShadow(img, cs, shadow, scale = 3) {
+        function rasterizeDropShadow(img, cs, shadow, scale = 3, full = null) {
             const w = img.offsetWidth, h = img.offsetHeight;
             if (!w || !h || !img.naturalWidth) return false;
             const pad = Math.ceil(shadow.blur * 2 + Math.max(Math.abs(shadow.x), Math.abs(shadow.y)) + 2);
@@ -12140,7 +12140,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             const x0 = px(cs.borderLeftWidth) + px(cs.paddingLeft), y0 = px(cs.borderTopWidth) + px(cs.paddingTop);
             const cw = w - x0 - px(cs.borderRightWidth) - px(cs.paddingRight);
             const ch = h - y0 - px(cs.borderBottomWidth) - px(cs.paddingBottom);
-            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const iw = full ? full.width : img.naturalWidth, ih = full ? full.height : img.naturalHeight;
             let dw = cw, dh = ch;
             if (cs.objectFit === 'contain' || cs.objectFit === 'cover') {
                 const r = cs.objectFit === 'cover' ? Math.max(cw / iw, ch / ih) : Math.min(cw / iw, ch / ih);
@@ -12151,7 +12151,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                 ctx.beginPath(); ctx.rect(pad + x0, pad + y0, cw, ch); ctx.clip();
             }
             const [px0, py0] = objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
-            ctx.drawImage(img, pad + x0 + px0, pad + y0 + py0, dw, dh);
+            ctx.drawImage(full || img, pad + x0 + px0, pad + y0 + py0, dw, dh);
             if (cs.objectFit === 'cover') ctx.restore();
             let data;
             try { data = canvas.toDataURL('image/png'); } catch (e) { freeCanvas(canvas); return false; }
@@ -12178,41 +12178,57 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
 
         /* html2canvas kennt kein object-fit → Bilder werden für den Export durch Hintergrund-Divs ersetzt (sonst verzerrt) */
-        function replaceObjectFitImages(root) {
-            root.querySelectorAll('img').forEach(img => {
+        /* iPhone/Safari entschlüsselt große Bilder, die klein angezeigt werden, oft nur in verringerter Auflösung
+           („Subsampling“) – html2canvas würde diese unscharfe Fassung ins Bild zeichnen. Für den Export deshalb das
+           Original selbst vollständig neu entschlüsseln (createImageBitmap aus den Bilddaten). */
+        async function fullImageSource(img) {
+            if (!window.createImageBitmap) return null;
+            try {
+                const blob = await (await fetch(img.currentSrc || img.src)).blob();
+                return await createImageBitmap(blob);
+            } catch (e) { return null; }
+        }
+        async function replaceObjectFitImages(root) {
+            for (const img of Array.from(root.querySelectorAll('img'))) {
+                if (!img.naturalWidth) continue;
                 const cs = getComputedStyle(img);
-                const shadow = (!cs.clipPath || cs.clipPath === 'none') ? parseDropShadow(cs.filter) : null;
-                if (shadow && rasterizeDropShadow(img, cs, shadow, exportScaleFor(img))) return;
-                if (cs.clipPath && cs.clipPath !== 'none') {
-                    const data = rasterizeClippedImage(img, cs, exportScaleFor(img));
-                    if (data) {
-                        // Als echtes Bild (kein Hintergrund), sonst zeichnet html2canvas am Rand eine Linie
-                        const w = img.offsetWidth, h = img.offsetHeight;
-                        img.src = data;
-                        Object.assign(img.style, {
-                            width: w + 'px', height: h + 'px', boxSizing: 'border-box',
-                            backgroundColor: 'transparent', border: 'none', padding: '0', boxShadow: 'none', clipPath: 'none', objectFit: 'fill'
-                        });
-                        return;
-                    }
-                }
-                const fit = cs.objectFit;
-                if (fit === 'fill' && img.naturalWidth && !/^data:image\/svg/.test(img.currentSrc || img.src)) {
-                    // Deutlich größere Bilder (z.B. Wappen, Sponsorenlogos) hochwertig auf die Export-Größe bringen –
-                    // html2canvas verkleinert nur in einfacher Qualität (Treppchen an Kanten)
-                    const sc = exportScaleFor(img);
-                    if (img.naturalWidth > img.offsetWidth * sc * 1.25) {
-                        const data = rasterizeFitImage(img, cs);
-                        if (data) img.src = data;
-                    }
+                const svg = /^data:image\/svg|\.svg(\?|$)/i.test(img.currentSrc || img.src || '');
+                const full = !svg && img.naturalWidth * img.naturalHeight > 400000 ? await fullImageSource(img) : null;
+                try { exportRasterizeImage(img, cs, svg, full); } finally { full?.close?.(); }
+            }
+        }
+        /* Ein Bild für den Export in voller Export-Auflösung vorberechnen (Schatten, Form-Ausschnitt, object-fit, Größe) */
+        function exportRasterizeImage(img, cs, svg, full) {
+            const sc = exportScaleFor(img);
+            const shadow = (!cs.clipPath || cs.clipPath === 'none') ? parseDropShadow(cs.filter) : null;
+            if (shadow && rasterizeDropShadow(img, cs, shadow, sc, full)) return;
+            if (cs.clipPath && cs.clipPath !== 'none') {
+                const data = rasterizeClippedImage(img, cs, sc, full);
+                if (data) {
+                    // Als echtes Bild (kein Hintergrund), sonst zeichnet html2canvas am Rand eine Linie
+                    const w = img.offsetWidth, h = img.offsetHeight;
+                    img.src = data;
+                    Object.assign(img.style, {
+                        width: w + 'px', height: h + 'px', boxSizing: 'border-box',
+                        backgroundColor: 'transparent', border: 'none', padding: '0', boxShadow: 'none', clipPath: 'none', objectFit: 'fill'
+                    });
                     return;
                 }
-                if ((fit !== 'cover' && fit !== 'contain') || !img.naturalWidth) return;
-                // Fertig zugeschnitten in Export-Auflösung vorberechnen – html2canvas würde object-fit ignorieren
-                // bzw. als Hintergrund nur in einfacher Auflösung zeichnen und dann hochskalieren (pixelig)
-                const data = rasterizeFitImage(img, cs);
-                if (data) { img.src = data; img.style.objectFit = 'fill'; }
-            });
+            }
+            const fit = cs.objectFit;
+            if (fit === 'fill') {
+                // Fotos, Wappen und Logos genau auf Export-Größe bringen (hochwertig, aus voller Auflösung) –
+                // html2canvas verkleinert nur einfach und nimmt auf dem iPhone ggf. eine unscharfe Fassung
+                if (svg || Math.abs(img.naturalWidth - img.offsetWidth * sc) <= 2) return;
+                const data = rasterizeFitImage(img, cs, full);
+                if (data) img.src = data;
+                return;
+            }
+            if (fit !== 'cover' && fit !== 'contain') return;
+            // Fertig zugeschnitten in Export-Auflösung vorberechnen – html2canvas würde object-fit ignorieren
+            // bzw. als Hintergrund nur in einfacher Auflösung zeichnen und dann hochskalieren (pixelig)
+            const data = rasterizeFitImage(img, cs, full);
+            if (data) { img.src = data; img.style.objectFit = 'fill'; }
         }
 
         const EXPORT_SCALE = 3;
@@ -12235,7 +12251,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             return [one(parts[0], freeW), one(parts[1] || parts[0], freeH)];
         }
         /* Bild mit object-fit cover/contain in den Inhaltsbereich zuschneiden, in voller Export-Auflösung */
-        function rasterizeFitImage(img, cs) {
+        function rasterizeFitImage(img, cs, fullSrc) {
             const px = v => parseFloat(v) || 0;
             const w = img.offsetWidth, h = img.offsetHeight;
             const cw = w - px(cs.borderLeftWidth) - px(cs.paddingLeft) - px(cs.borderRightWidth) - px(cs.paddingRight);
@@ -12249,23 +12265,24 @@ Alle sind herzlich eingeladen!</textarea></div>
             const ctx = canvas.getContext('2d');
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
-            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const S = fullSrc || img;                       // vollständig entschlüsseltes Original, falls vorhanden
+            const iw = fullSrc ? fullSrc.width : img.naturalWidth, ih = fullSrc ? fullSrc.height : img.naturalHeight;
             const fill = cs.objectFit === 'fill';
             const r = cs.objectFit === 'cover' ? Math.max(cw / iw, ch / ih) : Math.min(cw / iw, ch / ih);
             const dw = fill ? cw : iw * r, dh = fill ? ch : ih * r;
             const [ox, oy] = fill ? [0, 0] : objectPositionOffsets(cs.objectPosition, cw - dw, ch - dh);
             // Starke Verkleinerung in Stufen (je höchstens halbieren) – deutlich schärfer als in einem Schritt
-            let srcImg = img, sw = iw, sh = ih;
+            let srcImg = S, sw = iw, sh = ih;
             const tw = dw * scale, th = dh * scale;
             while (sw / 2 > tw && sh / 2 > th) {
                 const t = document.createElement('canvas'); t.width = Math.round(sw / 2); t.height = Math.round(sh / 2);
                 const tc = t.getContext('2d'); tc.imageSmoothingQuality = 'high'; tc.drawImage(srcImg, 0, 0, t.width, t.height);
-                if (srcImg !== img) freeCanvas(srcImg);
+                if (srcImg !== S) freeCanvas(srcImg);
                 srcImg = t; sw = t.width; sh = t.height;
             }
             ctx.scale(scale, scale);
             ctx.drawImage(srcImg, ox, oy, dw, dh);
-            if (srcImg !== img) freeCanvas(srcImg);
+            if (srcImg !== S) freeCanvas(srcImg);
             let out = null;
             try { out = canvas.toDataURL('image/png'); } catch (e) {}
             freeCanvas(canvas);
@@ -12281,24 +12298,27 @@ Alle sind herzlich eingeladen!</textarea></div>
                 if (!m || !el.offsetWidth || !el.offsetHeight) continue;
                 const size = cs.backgroundSize;
                 if (size !== 'cover' && size !== 'contain') continue;
-                const src = new Image();
-                src.src = m[1];
-                try { if (await withTimeout(src.decode().then(() => true), 6000, false) !== true) continue; } catch (e) { continue; }
+                const img0 = new Image();
+                img0.src = m[1];
+                try { if (await withTimeout(img0.decode().then(() => true), 6000, false) !== true) continue; } catch (e) { continue; }
+                const full = await fullImageSource(img0);   // iPhone: volle Auflösung sicherstellen
+                const src = full || img0;
                 const w = el.clientWidth, h = el.clientHeight;
                 let scale = Math.min(exportScaleFor(el), 3000 / Math.max(w, h));
                 const canvas = document.createElement('canvas');
                 canvas.width = Math.round(w * scale); canvas.height = Math.round(h * scale);
                 const ctx = canvas.getContext('2d');
                 ctx.imageSmoothingQuality = 'high';
-                const iw = src.naturalWidth, ih = src.naturalHeight;
+                const iw = full ? full.width : img0.naturalWidth, ih = full ? full.height : img0.naturalHeight;
                 const r = size === 'cover' ? Math.max(w / iw, h / ih) : Math.min(w / iw, h / ih);
                 const dw = iw * r, dh = ih * r;
                 const [ox, oy] = objectPositionOffsets(cs.backgroundPosition, w - dw, h - dh);
                 ctx.scale(scale, scale);
                 ctx.drawImage(src, ox, oy, dw, dh);
                 let data;
-                try { data = canvas.toDataURL('image/png'); } catch (e) { freeCanvas(canvas); continue; }   // verlustfrei (vorher JPEG)
+                try { data = canvas.toDataURL('image/png'); } catch (e) { freeCanvas(canvas); full?.close?.(); continue; }   // verlustfrei (vorher JPEG)
                 freeCanvas(canvas);
+                full?.close?.();
                 const layer = document.createElement('img');
                 layer.src = data;
                 layer.style.cssText = 'position:absolute; left:0; top:0; width:100%; height:100%; z-index:-1; pointer-events:none; object-fit:fill;';
@@ -12386,7 +12406,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             fitTexts(clone);
             try {
                 await waitForImages(clone);
-                replaceObjectFitImages(clone);
+                await replaceObjectFitImages(clone);
                 await replaceBackgroundImages(clone);
                 await waitForImages(clone);
             } catch (e) { holder.remove(); throw e; }
