@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Match-Shot – Grafiken für Vereine 26.6</title>
+    <title>Match-Shot – Grafiken für Vereine 26.7</title>
     <!-- Sicherheit & Datenschutz: Die App darf nur Dateien vom eigenen Server laden – keine Verbindungen zu Dritten -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https://sync.match-shot.de; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -283,16 +283,16 @@
         .vs-bottom .team-logos > .logos-vs { margin-top: calc(var(--logo-size, 75px) - 1.3em); }
         .logos-stacked .team-logos > .logos-vs { margin-top: 0; align-self: center; }
         .logo {
-            width: var(--logo-size, 75px); height: var(--logo-size, 75px); background-color: var(--avatar-bg, white);
-            border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 3px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
+            width: var(--logo-size, 75px); height: var(--logo-size, 75px); background-color: var(--crest-bg, white);
+            border-radius: var(--crest-radius, 50%); border: var(--crest-border, 3px solid var(--frame-color)); clip-path: var(--crest-clip, none);
             display: flex; justify-content: center; align-items: center; color: black; font-weight: bold; font-size: 12px; padding: 5px; box-sizing: border-box; object-fit: contain;
-            box-shadow: var(--avatar-shadow, 0 2px 5px rgba(0,0,0,0.5));
+            box-shadow: var(--crest-shadow, 0 2px 5px rgba(0,0,0,0.5));
         }
         .logo-sub-name { font-size: 11px; font-weight: bold; text-align: center; color: inherit; max-width: calc(var(--logo-size, 75px) + 25px); text-transform: uppercase; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
 
         .story-wappen-top-right {
-            position: absolute; top: 15px; right: 15px; width: 45px; height: 45px; background-color: var(--avatar-bg, black);
-            border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 3px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
+            position: absolute; top: 15px; right: 15px; width: 45px; height: 45px; background-color: var(--crest-bg, black);
+            border-radius: var(--crest-radius, 50%); border: var(--crest-border, 3px solid var(--frame-color)); clip-path: var(--crest-clip, none);
             padding: 3px; object-fit: contain; z-index: 5; box-sizing: border-box;
         }
 
@@ -365,8 +365,8 @@
 
         .tor-container-story { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; height: 100%; padding-top: 25px; box-sizing: border-box; z-index: 2; }
         .tor-wappen {
-            width: 60px; height: 60px; background-color: var(--avatar-bg, #ffffff);
-            border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 3px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
+            width: 60px; height: 60px; background-color: var(--crest-bg, #ffffff);
+            border-radius: var(--crest-radius, 50%); border: var(--crest-border, 3px solid var(--frame-color)); clip-path: var(--crest-clip, none);
             padding: 4px; object-fit: contain; margin-bottom: 5px; box-sizing: border-box;
         }
         .tor-details { background: var(--box-bg, rgba(0,0,0,0.65)); padding: 6px 14px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; display: flex; gap: 10px; text-shadow: none; color: var(--box-fg, white); margin-top: 5px; }
@@ -380,7 +380,7 @@
         .tor-details.tor-board { flex-direction: column; align-items: center; gap: 4px; padding: 8px 14px; }
         .tor-board .tb-row { display: flex; align-items: center; gap: 12px; }
         .tor-board .tb-team { display: flex; flex-direction: column; align-items: center; gap: 3px; max-width: 90px; }
-        .tor-board .tb-team img { width: 38px; height: 38px; object-fit: contain; background: #fff; border-radius: 50%; padding: 3px; box-sizing: border-box; }
+        .tor-board .tb-team img { width: 38px; height: 38px; object-fit: contain; background: var(--crest-bg-sm, #fff); border-radius: var(--crest-radius, 50%); clip-path: var(--crest-clip, none); padding: 3px; box-sizing: border-box; }
         .tor-board .tb-team span { font-size: 9px; line-height: 1.15; text-align: center; text-transform: uppercase; }
         .tor-board .tb-mid { display: flex; flex-direction: column; align-items: center; }
         .tor-board .tb-score { font-size: 1.7rem; font-weight: 900; white-space: nowrap; line-height: 1.1; }
@@ -435,8 +435,8 @@
         .kal-badge { padding: 1px 6px; border-radius: 4px; background: var(--kal-home, #005f73); color: #fff; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.5); }
         .kal-badge.auswaerts { background: var(--kal-away, #bb3e03); }
         .kal-logo {
-            width: 38px; height: 38px; flex-shrink: 0; background-color: var(--avatar-bg, #fff);
-            border-radius: var(--avatar-radius, 50%); border: var(--avatar-border, 2px solid var(--frame-color)); clip-path: var(--avatar-clip, none);
+            width: 38px; height: 38px; flex-shrink: 0; background-color: var(--crest-bg, #fff);
+            border-radius: var(--crest-radius, 50%); border: var(--crest-border, 2px solid var(--frame-color)); clip-path: var(--crest-clip, none);
             object-fit: contain; padding: 3px; box-sizing: border-box;
         }
         .kal-compact { gap: 5px; }
@@ -860,7 +860,7 @@
         .wk-row { display: flex; align-items: center; gap: 10px; background: var(--box-bg, rgba(0,0,0,0.58)); border-radius: 10px; padding: 7px 10px; color: var(--box-fg, #fff); text-shadow: none; }
         .wk-team { width: 92px; flex-shrink: 0; font-size: 10px; font-weight: bold; text-transform: uppercase; background: rgba(255,255,255,0.16); border-radius: 6px; padding: 5px 6px; text-align: center; line-height: 1.2; box-sizing: border-box; }
         .wk-match { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; text-transform: uppercase; line-height: 1.2; }
-        .wk-match img, .wk-own { width: 28px; height: 28px; object-fit: contain; background: #fff; border-radius: 50%; padding: 2px; box-sizing: border-box; flex-shrink: 0; }
+        .wk-match img, .wk-own { width: 28px; height: 28px; object-fit: contain; background: var(--crest-bg-sm, #fff); border-radius: var(--crest-radius, 50%); clip-path: var(--crest-clip, none); padding: 2px; box-sizing: border-box; flex-shrink: 0; }
         .wk-row .wk-own { margin-right: -4px; }
         .wk-match > div { min-width: 0; }
         .wk-venue { display: block; font-size: 9px; color: rgba(255,255,255,0.75); letter-spacing: 0.5px; }
@@ -914,8 +914,9 @@
         .wz-start-grid button { border: 1px solid #ddd; background: #f7f8fa; border-radius: 10px; padding: 14px 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
 
         /* Freistellen & Schatten */
-        .logo, .kal-logo, .story-wappen-top-right, .tor-wappen, .xp-img, .player-img, .kader-grid-img, .list-item-img, .bday-photo, .transfer-photo, .tor-player-img-feed, .tor-player-img-story { filter: var(--avatar-filter, none); }
-        .shape-free .logo, .shape-free .kal-logo, .shape-free .story-wappen-top-right, .shape-free .tor-wappen { padding: 0; }
+        .template-container .logo, .kal-logo, .story-wappen-top-right, .tor-wappen, .tor-board .tb-team img, .wk-match img, .wk-own, .transfer-chip img { filter: var(--crest-filter, none); }
+        .xp-img, .player-img, .kader-grid-img, .list-item-img, .bday-photo, .transfer-photo, .tor-player-img-feed, .tor-player-img-story { filter: var(--avatar-filter, none); }
+        .crest-free .logo, .crest-free .kal-logo, .crest-free .story-wappen-top-right, .crest-free .tor-wappen, .crest-free .tor-board .tb-team img, .crest-free .wk-match img, .crest-free .wk-own, .crest-free .transfer-chip img { padding: 0; }
         .shape-free .potm-player-img { border-color: transparent; box-shadow: none; filter: drop-shadow(0px 6px 10px rgba(0,0,0,0.6)); }
         .shape-free .xp-img, .shape-free .potm-player-img, .shape-free .bday-photo, .shape-free .transfer-photo, .shape-free .player-img, .shape-free .kader-grid-img, .shape-free .list-item-img { object-fit: contain; object-position: center bottom; }
         .sd-thumb.cut-thumb { background-color: #fff; background-image: linear-gradient(45deg, #e3e6ea 25%, transparent 25%, transparent 75%, #e3e6ea 75%), linear-gradient(45deg, #e3e6ea 25%, transparent 25%, transparent 75%, #e3e6ea 75%); background-size: 10px 10px; background-position: 0 0, 5px 5px; object-fit: contain; }
@@ -1250,7 +1251,7 @@
         /* Neuzugang */
         .transfer-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
         .transfer-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--box-bg, rgba(0,0,0,0.62)); color: var(--box-fg, white); text-shadow: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: bold; }
-        .transfer-chip img { width: 22px; height: 22px; object-fit: contain; background: white; border-radius: 50%; padding: 1px; box-sizing: border-box; }
+        .transfer-chip img { width: 22px; height: 22px; object-fit: contain; background: var(--crest-bg-sm, #fff); border-radius: var(--crest-radius, 50%); clip-path: var(--crest-clip, none); padding: 1px; box-sizing: border-box; }
         .transfer-number { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 22px; background: var(--jersey-color); color: var(--jersey-fg, #fff); border-radius: 4px; padding: 0 4px; }
 
         @media (max-width: 850px) {
@@ -3293,7 +3294,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            KONFIGURATION
            ========================================================= */
-        const APP_VERSION = "26.6";
+        const APP_VERSION = "26.7";
 
         // Liste der freigeschalteten Vereine (liegt zentral neben der index.html).
         // Format pro Zeile:  CODE-HASH = Vereinsname = Wappen-Datei = gültig bis (JJJJ-MM-TT)   (mit code-generator.html erzeugen)
@@ -3376,19 +3377,19 @@ Alle sind herzlich eingeladen!</textarea></div>
         const editorTabs = ['post', 'story', 'tor', 'ergebnis', 'kader', 'potm', 'kalender', 'geburtstag', 'neuzugang', 'sponsor', 'wochenende', 'teamfoto', 'frei'];
 
         const TAB_DESIGN = {
-            post:     { frameLabel: 'Rahmenform Logos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            post:     { frameLabel: 'Rahmenform Spielerfotos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             story:    { frameLabel: 'Rahmenform Spieler', sizes: true, cutout: true, pitch: true, sponsorLabel: 'Sponsoren-Leiste anzeigen (Nur Aufstellungs-Liste)' },
-            tor:      { frameLabel: 'Rahmenform Wappen/Assist', sizes: false, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
-            ergebnis: { frameLabel: 'Rahmenform Logos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            tor:      { frameLabel: 'Rahmenform Assist & Spielerfotos', sizes: false, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            ergebnis: { frameLabel: 'Rahmenform Spielerfotos', sizes: true, teamNames: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             kader:    { frameLabel: 'Rahmenform Spieler', sizes: true, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             potm:     { frameLabel: 'Rahmenform Spieler', sizes: true, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen', logoStory: false },
-            kalender: { frameLabel: 'Rahmenform Gegner-Logos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            kalender: { frameLabel: 'Rahmenform Spielerfotos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             geburtstag: { frameLabel: 'Rahmenform Foto', sizes: true, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             neuzugang: { frameLabel: 'Rahmenform Foto', sizes: true, cutout: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             sponsor: { frameLabel: 'Rahmenform (nicht verwendet)', sizes: true, sponsorLabel: 'Zusätzliche Sponsoren-Leiste anzeigen' },
-            wochenende: { frameLabel: 'Rahmenform Gegner-Logos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
+            wochenende: { frameLabel: 'Rahmenform Spielerfotos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
             teamfoto: { frameLabel: 'Rahmenform (nicht verwendet)', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' },
-            frei:     { frameLabel: 'Rahmenform Wappen', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' }
+            frei:     { frameLabel: 'Rahmenform Spielerfotos', sizes: true, sponsorLabel: 'Sponsoren-Leiste anzeigen' }
         };
 
         /* Feste Beschriftungen in den Vorlagen – je Reiter überschreibbar (leer = Standard, „-“ = ausblenden) */
@@ -3774,9 +3775,10 @@ Alle sind herzlich eingeladen!</textarea></div>
             el._t = setTimeout(() => el.classList.remove('show'), 2600);
         }
 
+        /* Platzhalter-Wappen (Schild mit Initialen) für Gegner/Verein ohne eigenes Wappen */
         function makeBadgeSvg(text) {
             const initials = String(text || '?').trim().split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 3).toUpperCase() || '?';
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="#e5e7eb"/><text x="50" y="62" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#374151" text-anchor="middle">${esc(initials)}</text></svg>`;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 4 L92 15 V47 C92 73 74 89 50 97 C26 89 8 73 8 47 V15 Z" fill="#e5e7eb" stroke="#9ca3af" stroke-width="3"/><text x="50" y="60" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#374151" text-anchor="middle">${esc(initials)}</text></svg>`;
             return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
         }
 
@@ -5487,6 +5489,17 @@ Alle sind herzlich eingeladen!</textarea></div>
                             <div class="control-group"><label>Deckkraft der Kästen</label><input type="range" id="in-box-opacity-${tab}" min="0" max="100" step="5" value="60" oninput="setVal('in-box-mode-${tab}', 'custom'); updateTabDesign('${tab}')"></div>
                             <div class="control-group"><label><input type="checkbox" id="in-accent-line-${tab}" checked onchange="updateTabDesign('${tab}'); scheduleSave();"> Akzent-Linie unter Namen (in Akzent-/Trikotfarbe)</label></div>
                             <div class="design-sub">Rahmen <small>– um Fotos und Wappen</small></div>
+                            <div class="control-group">
+                                <label>Form Wappen</label>
+                                <select id="in-crest-shape-${tab}" onchange="updateTabDesign('${tab}'); scheduleSave();">
+                                    <option value="free" selected>Freigestellt mit Schatten (Standard)</option>
+                                    <option value="none">Ohne Rahmen</option>
+                                    <option value="circle">Kreis</option>
+                                    <option value="rounded">Abgerundet</option>
+                                    <option value="square">Quadrat</option>
+                                    <option value="shield">Schild-Form</option>
+                                </select>
+                            </div>
                             <div class="control-group" data-role-ctl="frame"><label>Rahmenfarbe</label><input type="color" id="in-color-frame-${tab}" value="#ffffff" onchange="updateTabDesign('${tab}')"><div class="role-hint" data-role="frame"></div></div>
                             <div class="control-group"${/nicht verwendet/.test(cfg.frameLabel) ? ' hidden' : ''}>
                                 <label>${cfg.frameLabel.replace('Rahmenform', 'Form')}</label>
@@ -7036,6 +7049,16 @@ Alle sind herzlich eingeladen!</textarea></div>
             });
         }
 
+        /* Form für Fotos und Wappen: Kreis, abgerundet, Quadrat, Schild, ohne Rahmen, freigestellt mit Schatten */
+        function frameShapeStyle(shape, frameCol) {
+            let radius = '50%', border = `3px solid ${frameCol}`, clip = 'none', bg = frameCol, shadow = '0 2px 5px rgba(0,0,0,0.5)', filter = 'none';
+            if (shape === 'rounded') { radius = '20%'; }
+            else if (shape === 'square') { radius = '0%'; }
+            else if (shape === 'shield') { radius = '0%'; border = 'none'; clip = 'polygon(0% 0%, 100% 0%, 100% 75%, 50% 100%, 0% 75%)'; shadow = 'none'; }
+            else if (shape === 'none') { radius = '0%'; border = 'none'; bg = 'transparent'; shadow = 'none'; }
+            else if (shape === 'free') { radius = '0%'; border = 'none'; bg = 'transparent'; shadow = 'none'; filter = 'drop-shadow(0px 4px 7px rgba(0,0,0,0.6))'; }
+            return { radius, border, clip, bg, shadow, filter };
+        }
         function updateTabDesign(tab) {
             if (!editorTabs.includes(tab)) return;
             renderPresentedBy(tab);
@@ -7059,15 +7082,15 @@ Alle sind herzlich eingeladen!</textarea></div>
                 viewContainer.querySelectorAll('.title-dyn').forEach(el => el.style.fontSize = titleSz);
                 viewContainer.querySelectorAll('.info-dyn').forEach(el => el.style.fontSize = infoSz);
 
-                let radius = '50%', border = `3px solid ${frameColVal}`, clip = 'none', bg = frameColVal, shadow = '0 2px 5px rgba(0,0,0,0.5)';
-                if (shapeVal === 'rounded') { radius = '20%'; }
-                else if (shapeVal === 'square') { radius = '0%'; }
-                else if (shapeVal === 'shield') { radius = '0%'; border = 'none'; clip = 'polygon(0% 0%, 100% 0%, 100% 75%, 50% 100%, 0% 75%)'; shadow = 'none'; }
-                else if (shapeVal === 'none') { radius = '0%'; border = 'none'; bg = 'transparent'; shadow = 'none'; }
-                let filter = 'none';
-                if (shapeVal === 'free') { radius = '0%'; border = 'none'; bg = 'transparent'; shadow = 'none'; filter = 'drop-shadow(0px 4px 7px rgba(0,0,0,0.6))'; }
+                const { radius, border, clip, bg, shadow, filter } = frameShapeStyle(shapeVal, frameColVal);
                 viewContainer.style.setProperty('--avatar-filter', filter);
                 viewContainer.classList.toggle('shape-free', shapeVal === 'free');
+                // Wappen: eigene Form (Standard „Freigestellt mit Schatten“) – unabhängig von der Form der Spielerfotos
+                const crestVal = val(`in-crest-shape-${tab}`) || 'free';
+                const cr = frameShapeStyle(crestVal, `var(--crest-frame, ${frameColVal})`);   // --crest-frame: für „Wirkt auf“-Hinweise der Rahmenfarbe
+                [['radius', cr.radius], ['border', cr.border], ['clip', cr.clip], ['bg', cr.bg], ['shadow', cr.shadow], ['filter', cr.filter],
+                 ['bg-sm', cr.bg === 'transparent' ? 'transparent' : '#fff']].forEach(([k, v]) => viewContainer.style.setProperty('--crest-' + k, v));
+                viewContainer.classList.toggle('crest-free', crestVal === 'free');
                 const logoSize = $(`in-logo-size-${tab}`) ? val(`in-logo-size-${tab}`) : '';
                 if (logoSize) viewContainer.style.setProperty('--logo-size', logoSize + 'px');
                 if ($(`in-logo-gap-${tab}`)) viewContainer.style.setProperty('--logos-gap', (parseFloat(val(`in-logo-gap-${tab}`)) || 0) + 'px');
@@ -8047,7 +8070,7 @@ Alle sind herzlich eingeladen!</textarea></div>
             { key: 'text', name: 'Schriftfarbe', probe: { color: '#ff00ff' }, props: ['color'], text: true },
             { key: 'boxbg', name: 'Kasten-Farbe', probe: { '--box-bg': '#ff00ff' }, props: ['backgroundColor'] },
             { key: 'boxfg', name: 'Schrift im Kasten', probe: { '--box-fg': '#ff00ff' }, props: ['color'], text: true },
-            { key: 'frame', name: 'Rahmenfarbe', probe: { '--avatar-border': '3px solid #ff00ff', '--avatar-bg': '#ff00ff' }, props: ['borderTopColor', 'backgroundColor'] },
+            { key: 'frame', name: 'Rahmenfarbe', probe: { '--avatar-border': '3px solid #ff00ff', '--avatar-bg': '#ff00ff', '--crest-frame': '#ff00ff' }, props: ['borderTopColor', 'backgroundColor'] },
             { key: 'primary', name: 'Hauptfarbe', probe: { '--primary': '#ff00ff' }, props: ['color', 'backgroundColor', 'backgroundImage', 'borderTopColor', 'borderBottomColor'] },
             { key: 'jersey', name: 'Akzent-/Trikotfarbe', probe: { '--jersey-color': '#ff00ff' }, props: ['color', 'backgroundColor', 'backgroundImage', 'borderTopColor', 'borderBottomColor', 'boxShadow'] },
             { key: 'font', name: 'Schriftart Texte', probe: { 'font-family': '"Courier New", monospace' }, props: ['fontFamily'], text: true },
@@ -8357,6 +8380,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         }
         function resetTabStyle(tab) {
             setVal(`in-frame-shape-${tab}`, 'circle');
+            setVal(`in-crest-shape-${tab}`, 'free');
             setVal(`in-color-frame-${tab}`, val('cfg-color-frame') || '#ffffff');
             setVal(`in-color-text-${tab}`, '#ffffff');
             setVal(`in-font-${tab}`, 'Arial, sans-serif');
@@ -10733,6 +10757,7 @@ Alle sind herzlich eingeladen!</textarea></div>
                     bgFeed: val(`in-bg-${t}-feed`) || DEFAULT_BG,
                     bgStory: val(`in-bg-${t}-story`) || DEFAULT_BG,
                     frameShape: val(`in-frame-shape-${t}`) || 'circle',
+                    crestShape: val(`in-crest-shape-${t}`) || 'free',
                     colorFrame: val(`in-color-frame-${t}`) || '#ffffff',
                     colorText: val(`in-color-text-${t}`) || '#ffffff',
                     font: val(`in-font-${t}`) || 'Arial, sans-serif',
@@ -10840,6 +10865,8 @@ Alle sind herzlich eingeladen!</textarea></div>
                 setVal(`in-bg-${t}-feed`, s.bgFeed || DEFAULT_BG);
                 setVal(`in-bg-${t}-story`, s.bgStory || DEFAULT_BG);
                 setVal(`in-frame-shape-${t}`, s.frameShape || 'circle');
+                // Ältere Stände ohne eigene Wappen-Form: Wappen sahen bisher aus wie die Fotos – so bleibt es
+                setVal(`in-crest-shape-${t}`, s.crestShape || s.frameShape || 'free');
                 setVal(`in-color-frame-${t}`, s.colorFrame || '#ffffff');
                 setVal(`in-color-text-${t}`, s.colorText || '#ffffff');
                 setVal(`in-font-${t}`, s.font || 'Arial, sans-serif');
@@ -13435,7 +13462,7 @@ Alle sind herzlich eingeladen!</textarea></div>
         /* =========================================================
            DESIGN AUF ALLE REITER ÜBERTRAGEN
            ========================================================= */
-        const DESIGN_COPY_VALUES = ['frame-shape', 'color-frame', 'color-text', 'font', 'font-title', 'title-color-mode', 'color-title', 'text-effect',
+        const DESIGN_COPY_VALUES = ['frame-shape', 'crest-shape', 'color-frame', 'color-text', 'font', 'font-title', 'title-color-mode', 'color-title', 'text-effect',
             'letter-spacing', 'logo-size', 'sponsor-layout', 'sponsor-cols', 'sponsor-size',
             'box-mode', 'box-color', 'box-text', 'box-opacity', 'text-align', 'box-fill', 'box-shape', 'box-edge', 'box-shadow', 'title-style', 'title-rot',
             'ov-grad', 'ov-gradcolor', 'ov-gradstr', 'ov-pattern', 'ov-patop', 'ov-frame', 'photo-fx'];
