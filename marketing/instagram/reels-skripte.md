@@ -126,7 +126,7 @@ Handy 1: Start → 🔄 Vereins-Sync → ⬆️ Hochladen → „📤 Passwort a
 
 ## Schluss-Satz (für jedes Reel einer davon)
 
-**Abschluss-Bild:** `out/Match-Shot_Reel-Abschluss.png` (9:16) als letzte 2–3 Sekunden ans Ende jedes Reels hängen – Logo, „Jetzt 1 Monat kostenlos testen“, Preis und match-shot.de. Neu erzeugen: `node marketing/instagram/render.js` (Vorlage `abschluss.html`).
+**Abschluss-Bild:** `out/Match-Shot_Reel-Abschluss.png` (9:16) als letzte 2–3 Sekunden ans Ende jedes Reels hängen – Logo, Fächer mit 5 Beispielgrafiken, „Jetzt 1 Monat kostenlos testen“, Preis und match-shot.de. Neu erzeugen: `node marketing/instagram/render.js` (Vorlage `abschluss.html`).
 
 - „Probiert's aus – der erste Monat ist kostenlos. Link in meiner Bio.“
 - „Wenn ihr das auch für euren Verein wollt: match-shot.de – erster Monat geht auf mich.“
