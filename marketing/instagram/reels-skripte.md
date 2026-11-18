@@ -22,6 +22,17 @@ Je rund 30 Sekunden. **Nicht Wort für Wort vorlesen** – zweimal laut sagen, d
 
 > Tor! Und ich will, dass das sofort in der Story ist – nicht erst am Abend. Also: Torschütze antippen, Minute rein, Spielstand. Gegner und Wappen sind schon drin, die kommen aus der Ankündigung. Gefällt mir der Aufbau nicht, tipp ich einfach aufs nächste Layout – Plakat, geteilt, hochkant. Vorlagengeber dazu, und mit einem Tipp steht das Tor auch gleich im Endergebnis. Teilen, fertig. Dauert bei mir keine Minute.
 
+**Variante ohne Stimme (Bedienung 1,5–2× schneller, ca. 20 s):**
+| Zeit | Bild | Text |
+|---|---|---|
+| 0–1,5 s | fertiges Torbild | **„Tor in der 20. ⚽“** + kleiner: „30 Sekunden später online 👇“ |
+| 1,5–4 s | Torschütze wählen | „1️⃣ Torschütze antippen“ |
+| 4–6,5 s | Spielstand, Minute | „2️⃣ Spielstand & Minute“ |
+| 6,5–9 s | Art des Tores, Vorlage | „3️⃣ Kopfball? Vorlage? Ein Tipp.“ |
+| 9–10 s | Teilen | „📲 Teilen – fertig ✅“ |
+| 10–17 s | Ergebnis groß (am besten als Video-Reel) | nur kurz: „So sieht's aus 🔥“ |
+| 17–20 s | Abschluss-Bild | – (steht schon drauf) |
+
 ## 2 · 📋 Aufstellung + Reel ⭐
 **Text im Bild:** „Startelf-Grafik in 1 Minute – am Handy“
 **Zeigen:** Formation wählen → Spieler wählen → schräges Spielfeld → Bereich „Video (Reel)“: Einflug-Art „Aufploppen“ → „🔀 Reihenfolge & Gruppen“ → „⚽ Spieler: Einzeln“ → „Als Video (Reel)“ → Reel abspielen
@@ -151,6 +162,16 @@ Handy 1: Start → 🔄 Vereins-Sync → ⬆️ Hochladen → „📤 Passwort a
 3. Handy auf **Nicht stören**, volle Helligkeit.
 4. Erst die **Bildschirmaufnahme** machen, dann den Text darüber sprechen – so passt die Stimme zum Tempo.
 5. Pro Reel 2–3 Versuche, den besten nehmen. Nicht perfekt sein wollen – echt wirkt besser.
+
+## Texte einblenden (Reels ohne Stimme)
+
+- **Kurz:** höchstens 5–6 Wörter pro Einblendung, jede mindestens 1,5 Sekunden sichtbar.
+- **Gut lesbar:** fette Schrift, weiß auf dunklem Kasten (Text-Hintergrund an) – oder weiß auf Orange wie im Abschluss-Bild. Immer derselbe Stil.
+- **Groß:** etwa ein Drittel der Bildbreite hoch genug, dass man es auf dem Handy ohne Zoomen liest.
+- **Ort:** oberes Drittel bis Mitte – nicht unten (Instagram-Text) und nicht rechts (Knöpfe), nicht über dem Feld, das gerade ausgefüllt wird.
+- **Bewegung:** einfaches Einblenden oder „Pop“, bei allen gleich; Wechsel auf den Takt der Musik.
+- **Nummern:** 1️⃣ 2️⃣ 3️⃣ zeigen „das sind nur 3 Schritte“.
+- **Beitragstext** übernimmt die Details: was passiert, „1. Monat kostenlos“, Link in Bio, Hashtags.
 
 ## Aufnahme-Tipps (eigene Stimme)
 
