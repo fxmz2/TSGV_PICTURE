@@ -504,10 +504,12 @@ async function makePhotos(browser) {
         check('Wochenende: Vorschau gespeichert, Umschalten auf Ergebnisse behält Spiele, alte Stände = Ergebnisse', wkp.saved && wkp.results && wkp.old, JSON.stringify(wkp));
         // Farben & Schrift: Hinweise „wirkt auf“, Zeigen, und umgekehrt vom Element zur Einstellung
         const roles = await page.evaluate(async () => { switchTab('post'); const host = $('design-controls-post'), r = {};
-            host.querySelector('details[data-section="colors"]').open = true; renderRoleHints('post');
+            host.querySelector('details[data-section="colors"]').open = true; setVal('in-crest-shape-post', 'circle'); updateTabDesign('post'); renderRoleHints('post');
             r.title = /HEIMSPIEL|AUSWÄRTS|DERBY/i.test(host.querySelector('.role-hint[data-role="title"]').textContent);
             r.unusedBox = host.querySelector('[data-role-ctl="boxbg"]').classList.contains('role-unused');
             r.frame = /Wappen/.test(host.querySelector('.role-hint[data-role="frame"]').textContent);
+            setVal('in-crest-shape-post', 'free'); updateTabDesign('post'); renderRoleHints('post');
+            r.frameFree = !/Wappen/.test(host.querySelector('.role-hint[data-role="frame"]').textContent);   // freigestellte Wappen haben keinen Rahmen
             r.targets = roleTargets('post', DESIGN_ROLES.find(x => x.key === 'title')).some(el => el.id === 'out-post-title');
             r.restored = getComputedStyle($('out-post-title')).color !== 'rgb(255, 0, 255)';
             selectElement($('txt-post-title')); showElementRoles(); r.pop = !$('role-pop').hidden && /Überschriften|Schriftfarbe/.test($('role-pop').textContent);
@@ -1086,6 +1088,25 @@ async function makePhotos(browser) {
             stammdaten.teamPhotos = []; refreshTeamPhotoSelect();
             return { bad, tf1, tf2 }; });
         check('Versionswechsel: jeder Reiter zeigt sofort den richtigen Stand (Mannschaftsfoto, Freie Vorlage …)', !vsw.bad.length && vsw.tf1.title === 'EINS' && vsw.tf1.photo && vsw.tf2.title === 'ZWEI' && !vsw.tf2.photo, JSON.stringify(vsw));
+        // Wappen: eigene Form je Reiter, Standard „Freigestellt mit Schatten“ – auch in der Tor-Anzeigetafel und beim Wochenende
+        const crest = await page.evaluate(async () => {
+            switchTab('tor'); resetTabStyle('tor'); setVal('in-tor-opp-mode', 'logos'); updateTor(); updateTabDesign('tor');
+            const cs = sel => { const e = document.querySelector(sel); if (!e) return null; const c = getComputedStyle(e); return { r: c.borderTopLeftRadius, bg: c.backgroundColor, f: c.filter }; };
+            const def = { board: cs('#view-tor .tor-board .tb-team img'), corner: cs('#view-tor .tor-wappen'), sel: val('in-crest-shape-tor'), photo: val('in-frame-shape-tor') };
+            setVal('in-crest-shape-tor', 'circle'); updateTabDesign('tor');
+            const circ = cs('#view-tor .tor-board .tb-team img');
+            switchTab('wochenende'); resetTabStyle('wochenende'); updateWochenende(); updateTabDesign('wochenende');
+            $('out-wk-list-feed').insertAdjacentHTML('beforeend', '<img class="wk-own" id="wk-probe" alt="">');
+            const wk = cs('#wk-probe'); $('wk-probe').remove();
+            // älterer Stand ohne Wappen-Form: Wappen bleiben so, wie sie waren (Form der Fotos)
+            const d = collectSlotData(); d.tabSettings.post.frameShape = 'rounded'; delete d.tabSettings.post.crestShape; applySlotData(d);
+            const old = val('in-crest-shape-post');
+            const d2 = collectSlotData(); d2.tabSettings.post.frameShape = 'circle'; d2.tabSettings.post.crestShape = 'free'; applySlotData(d2); renderAll();
+            switchTab('tor'); resetTabStyle('tor'); updateTabDesign('tor');
+            return { def, circ, wk, old }; });
+        check('Wappen: Standard „Freigestellt mit Schatten“, auch in der Anzeigetafel; Form einstellbar; alte Stände behalten ihre Form',
+            crest.def.sel === 'free' && crest.def.photo === 'circle' && crest.def.board && /^0(px|%)$/.test(crest.def.board.r) && crest.def.board.bg === 'rgba(0, 0, 0, 0)' && /drop-shadow/.test(crest.def.board.f)
+            && /drop-shadow/.test(crest.def.corner.f) && crest.circ.r === '50%' && crest.wk && /drop-shadow/.test(crest.wk.f) && crest.old === 'rounded', JSON.stringify(crest));
         // Zwei Browser-Tabs (PC): Tab B überschreibt beim Wegklicken nicht, was Tab A gespeichert hat, und lädt beim Zurückkommen neu
         const pageB = await page.context().newPage(); pageB.errors = []; pageB.on('pageerror', e => pageB.errors.push(e.message)); pageB.on('dialog', d => d.accept());
         await pageB.goto(BASE); await waitReady(pageB);
