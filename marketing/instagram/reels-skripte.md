@@ -1,4 +1,4 @@
-# Match-Shot – Reels: Ablauf & Sprechtexte – eigene Stimme (Stand App 25.8)
+# Match-Shot – Reels: Ablauf & Sprechtexte – eigene Stimme (Stand App 26.6)
 
 Gesprochen von Felix selbst: Spieler, Trainer einer 2. Mannschaft und zuständig für Social Media im Verein.
 Je rund 30 Sekunden. **Nicht Wort für Wort vorlesen** – zweimal laut sagen, dann frei erzählen. Versprecher sind erlaubt.
@@ -72,9 +72,9 @@ Je rund 30 Sekunden. **Nicht Wort für Wort vorlesen** – zweimal laut sagen, d
 
 ## 10 · ⭐ Die kleinen Momente
 **Text im Bild:** „Die kleinen Momente machen den Verein aus“
-**Zeigen:** schnelle Schnitte: Player of the Match → Geburtstag → Mannschaftsfoto → freie Vorlage
+**Zeigen:** schnelle Schnitte: Player of the Match → Geburtstag → Mannschaftsfoto (Namen „F. Munz“) → freie Vorlage
 
-> Für mich sind's oft die kleinen Sachen, die einen Verein ausmachen. Spieler des Spiels – Foto, Name, präsentiert von unserem Sponsor. Geburtstag in der Mannschaft – Glückwunsch mit Konfetti, in Sekunden. Das Mannschaftsfoto mit allen Namen, Reihe für Reihe. Und für Vereinsfest, Trainingszeiten oder Hauptversammlung hab ich eine freie Vorlage. Alles in unseren Farben, mit unserem Wappen.
+> Für mich sind's oft die kleinen Sachen, die einen Verein ausmachen. Spieler des Spiels – Foto, Name, präsentiert von unserem Sponsor. Geburtstag in der Mannschaft – Glückwunsch mit Konfetti, in Sekunden. Das Mannschaftsfoto mit allen Namen, Reihe für Reihe – gestochen scharf, so wie ihr's fotografiert habt. Und für Vereinsfest, Trainingszeiten oder Hauptversammlung hab ich eine freie Vorlage. Alles in unseren Farben, mit unserem Wappen.
 
 ## 11 · 🎨 Übersicht: Das alles kann Match-Shot
 **Text im Bild:** „14 Vorlagen. 1 App. Euer Verein.“
@@ -99,9 +99,9 @@ Je rund 30 Sekunden. **Nicht Wort für Wort vorlesen** – zweimal laut sagen, d
 
 ## 14 · 🛠️ Kleine Helfer
 **Text im Bild:** „Kopf abgeschnitten? Verrutscht? So geht's 👇“
-**Zeigen:** Text im Bild antippen → ✏️ → Schrift und Effekt ändern → Foto antippen → 🔍 Ausschnitt mit dem Finger ziehen → „Ganzes Bild zeigen“ → 🔒 Sperre an → 🧹 „Inhalte leeren“
+**Zeigen:** Text im Bild antippen → ✏️ → Schrift und Effekt ändern → 🗃️ Daten → Spieler → 🔍 Rahmen aufs Gesicht ziehen → zurück zur Vorlage, Kopf sitzt → 🔒 Sperre an → 🧹 „Inhalte leeren“
 
-> Ein paar Sachen, die ich selbst ständig nutze. Ich tipp im Bild auf einen Text und änder Schrift, Farbe und Effekt nur für dieses Feld. Kopf abgeschnitten? Foto antippen, Ausschnitt mit dem Finger verschieben – oder einfach das ganze Bild zeigen. Damit beim Scrollen nichts verrutscht, mach ich das Schloss zu. Und nach dem Spiel: „Inhalte leeren“ – und das alte Spiel ist weg.
+> Ein paar Sachen, die ich selbst ständig nutze. Ich tipp im Bild auf einen Text und änder Schrift, Farbe und Effekt nur für dieses Feld. Kopf abgeschnitten? Ich zieh beim Spieler einmal den Rahmen aufs Gesicht – und das passt dann in jeder Vorlage. Damit beim Scrollen nichts verrutscht, mach ich das Schloss zu. Und nach dem Spiel: „Inhalte leeren“ – und das alte Spiel ist weg.
 
 ## 15 · 🔄 Trainer-Kollegen dazuholen (Vereins-Sync) ⭐ *(neu)*
 **Text im Bild:** „Mehrere Helfer im Verein? So habt ihr alle dieselben Daten 👇“
@@ -113,6 +113,14 @@ Handy 1: Start → 🔄 Vereins-Sync → ⬆️ Hochladen → „📤 Passwort a
 > Bei uns machen mehrere Leute Grafiken – ich als Trainer, dazu Social Media und die Jugend. Früher hatte jeder seine eigenen Spieler und Fotos auf dem Handy. Jetzt lad ich einmal hoch und schick meinem Kollegen das Vereins-Passwort per WhatsApp. Er fügt es ein, tippt auf „Neueste holen“ – und hat alle Spieler, Fotos, Gegner und Sponsoren. Legt er einen Neuzugang an, seh ich den beim nächsten Öffnen. Und alles ist verschlüsselt: Den Schlüssel haben nur wir.
 
 **Wichtig beim Aufnehmen:** Das Vereins-Passwort ist im Video zu sehen. Nimm für die Aufnahme ein **Wegwerf-Passwort** und richte den Sync danach neu ein (🗑️ Sync-Daten löschen → 🔌 Trennen → neues Passwort mit 🎲 Vorschlagen) – oder mach das Passwort im Schnitt unkenntlich. Am besten mit den Beispieldaten (SC Lilaheim) statt echten Spielerfotos.
+
+## 16 · 👥 Drei Mannschaften, eine App *(neu)*
+**Text im Bild:** „Erste, Zweite, Jugend – alles in einer App“
+**Zeigen:** Oben auf Version „1. Mannschaft“ → Ankündigung mit Gegner A → auf „2. Mannschaft“ tippen → sofort anderer Gegner, andere Aufstellung → Start → „Zwischen Versionen kopieren“ → „Nur Design“ → Kopieren → zurück: beide Mannschaften im gleichen Look
+
+> Ich mach nicht nur die Grafiken für meine Zweite, sondern auch mal für die Erste oder die Jugend. Dafür hat Match-Shot drei Versionen. Jede hat ihre eigene Aufstellung, ihren eigenen Gegner, ihre eigenen Texte. Ein Tipp oben – und ich bin bei der anderen Mannschaft. Spieler, Gegner und Sponsoren leg ich trotzdem nur einmal an, die gelten überall. Und wenn ich einen Look gebaut hab, der mir gefällt, kopier ich das Design einfach rüber. Dann sieht der ganze Verein gleich aus.
+
+**Tipp:** Vorher die drei Versionen unter 🏠 Start benennen („1. Mannschaft“, „2. Mannschaft“, „A-Jugend“) – das sieht im Video besser aus als „Version 1“.
 
 ---
 
@@ -132,6 +140,15 @@ Handy 1: Start → 🔄 Vereins-Sync → ⬆️ Hochladen → „📤 Passwort a
 | 4 | Nr. 1 Tor live | Zeigt am schnellsten den Nutzen am Spieltag |
 | 5 | Nr. 13 Euer Look | Musik-Reel als Abwechslung zwischendurch |
 | 6 | Nr. 15 Kollegen dazuholen | Größter Vorteil für Vereine mit mehreren Helfern – gut zusammen mit dem Karussell (Folie 6) |
+| 7 | Nr. 16 Drei Mannschaften | Passt direkt nach Nr. 15: ein Verein, mehrere Teams, ein Look |
+
+## Vor der Aufnahme (Checkliste)
+
+1. App auf **26.6** bringen: Hinweis „🔄 Neue Version verfügbar“ → „Jetzt aktualisieren“ (Versionsnummer steht unten auf der Startseite).
+2. Für Bildschirmaufnahmen die **Beispieldaten (SC Lilaheim)** nehmen – keine echten Spielerfotos ohne Einwilligung.
+3. Handy auf **Nicht stören**, volle Helligkeit.
+4. Erst die **Bildschirmaufnahme** machen, dann den Text darüber sprechen – so passt die Stimme zum Tempo.
+5. Pro Reel 2–3 Versuche, den besten nehmen. Nicht perfekt sein wollen – echt wirkt besser.
 
 ## Aufnahme-Tipps (eigene Stimme)
 
